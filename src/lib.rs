@@ -50,8 +50,6 @@ pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
 }
 
-unsafe impl Send for Channel { }
-
 impl Channel {
     pub fn new<F>(callback: F) -> Result<Channel, AresError> 
         where F: FnOnce(io::RawFd, bool, bool) + 'static {
@@ -142,6 +140,8 @@ impl Drop for Channel {
         }
     }
 }
+
+unsafe impl Send for Channel { }
 
 pub fn str_error<'a>(code: AresError) -> &'a str {
     let buf = unsafe {

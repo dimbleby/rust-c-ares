@@ -8,7 +8,6 @@ use std::os::unix::io;
 use std::ptr;
 
 #[derive(Debug)]
-#[repr(C)]
 pub enum AresError {
     ENODATA = 1,
     EFORMERR,

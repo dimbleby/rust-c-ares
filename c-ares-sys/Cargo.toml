@@ -1,0 +1,7 @@
+[package]
+name = "c-ares-sys"
+version = "0.1.0"
+authors = ["David Hotham"]
+
+[dependencies]
+libc = "*"

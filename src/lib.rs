@@ -68,9 +68,7 @@ impl Channel {
         options.timeout = 500;
         options.tries = 3;
         options.sock_state_cb = Some(socket_callback::<F>);
-        options.sock_state_cb_data = unsafe { 
-            mem::transmute(Box::new(callback))
-        };
+        options.sock_state_cb_data = unsafe { mem::transmute(Box::new(callback)) };
         let optmask =
             c_ares_sys::ARES_OPT_FLAGS | 
             c_ares_sys::ARES_OPT_TIMEOUT | 
@@ -126,9 +124,7 @@ impl Channel {
     }
 
     pub fn process_fd(&mut self, read_fd: io::RawFd, write_fd: io::RawFd) {
-        unsafe { 
-            c_ares_sys::ares_process_fd(self.ares_channel, read_fd, write_fd);
-        }
+        unsafe { c_ares_sys::ares_process_fd(self.ares_channel, read_fd, write_fd); }
     }
 }
 
@@ -247,9 +243,13 @@ extern "C" fn query_a_callback<F>(
                     answers.push(ip_addr);
                     ptr = ptr.offset(1);
                 }
-                c_ares_sys::ares_free_hostent(hostent as *mut c_ares_sys::Struct_hostent);
+                c_ares_sys::ares_free_hostent(
+                    hostent as *mut c_ares_sys::Struct_hostent);
             }
-            Ok(AResult { ip_addrs: answers })
+            let result = AResult {
+                ip_addrs: answers,
+            };
+            Ok(result)
         }
     };
 
@@ -296,9 +296,13 @@ extern "C" fn query_aaaa_callback<F>(
                     answers.push(ip_addr);
                     ptr = ptr.offset(1);
                 }
-                c_ares_sys::ares_free_hostent(hostent as *mut c_ares_sys::Struct_hostent);
+                c_ares_sys::ares_free_hostent(
+                    hostent as *mut c_ares_sys::Struct_hostent);
             }
-            Ok(AAAAResult { ip_addrs: answers })
+            let result = AAAAResult {
+                ip_addrs: answers,
+            };
+            Ok(result)
         }
     };
 

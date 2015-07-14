@@ -194,13 +194,13 @@ enum DnsClass {
    IN = 1,
 }
 
-extern "C" fn socket_callback<F>(
+unsafe extern "C" fn socket_callback<F>(
     data: *mut libc::c_void,
     socket_fd: c_ares_sys::ares_socket_t,
     readable: libc::c_int,
     writable: libc::c_int)
     where F: FnOnce(io::RawFd, bool, bool) + 'static {
-    let handler: Box<F> = unsafe { mem::transmute(data) };
+    let handler: Box<F> = mem::transmute(data);
     handler(socket_fd as io::RawFd, readable != 0, writable != 0);
 }
 
@@ -239,7 +239,7 @@ fn parse_a_result(data: &[libc::c_uchar]) -> Result<AResult, AresError> {
     Ok(result)
 }
 
-extern "C" fn query_a_callback<F>(
+unsafe extern "C" fn query_a_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,
     _timeouts: libc::c_int,
@@ -249,10 +249,10 @@ extern "C" fn query_a_callback<F>(
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))
     } else {
-        let data = unsafe { std::slice::from_raw_parts(abuf, alen as usize) };
+        let data = std::slice::from_raw_parts(abuf, alen as usize);
         parse_a_result(data)
     };
-    let handler: Box<F> = unsafe { mem::transmute(arg) };
+    let handler: Box<F> = mem::transmute(arg);
     handler(result);
 }
 
@@ -295,7 +295,7 @@ fn parse_aaaa_result(data: &[libc::c_uchar]) -> Result<AAAAResult, AresError> {
     Ok(result)
 }
 
-extern "C" fn query_aaaa_callback<F>(
+unsafe extern "C" fn query_aaaa_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,
     _timeouts: libc::c_int,
@@ -305,9 +305,9 @@ extern "C" fn query_aaaa_callback<F>(
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))
     } else {
-        let data = unsafe { std::slice::from_raw_parts(abuf, alen as usize) };
+        let data = std::slice::from_raw_parts(abuf, alen as usize);
         parse_aaaa_result(data)
     };
-    let handler: Box<F> = unsafe { mem::transmute(arg) };
+    let handler: Box<F> = mem::transmute(arg);
     handler(result);
 }

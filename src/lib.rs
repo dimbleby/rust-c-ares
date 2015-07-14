@@ -204,19 +204,12 @@ extern "C" fn socket_callback<F>(
     handler(socket_fd as io::RawFd, readable != 0, writable != 0);
 }
 
-fn parse_a_result(
-    status: libc::c_int,
-    abuf: *mut libc::c_uchar,
-    alen: libc::c_int) -> Result<AResult, AresError> {
-    if status != c_ares_sys::ARES_SUCCESS {
-        return Err(ares_error(status))
-    }
-
+fn parse_a_result(data: &[libc::c_uchar]) -> Result<AResult, AresError> {
     let mut hostent: *mut hostent = ptr::null_mut();
     let parse_status = unsafe {
         c_ares_sys::ares_parse_a_reply(
-            abuf,
-            alen,
+            data.as_ptr(),
+            data.len() as libc::c_int,
             &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
             ptr::null_mut(),
             ptr::null_mut())
@@ -253,24 +246,22 @@ extern "C" fn query_a_callback<F>(
     abuf: *mut libc::c_uchar,
     alen: libc::c_int)
     where F: FnOnce(Result<AResult, AresError>) + 'static {
-    let result = parse_a_result(status, abuf, alen);
+    let result = if status != c_ares_sys::ARES_SUCCESS {
+        Err(ares_error(status))
+    } else {
+        let data = unsafe { std::slice::from_raw_parts(abuf, alen as usize) };
+        parse_a_result(data)
+    };
     let handler: Box<F> = unsafe { mem::transmute(arg) };
     handler(result);
 }
 
-fn parse_aaaa_result(
-    status: libc::c_int,
-    abuf: *mut libc::c_uchar,
-    alen: libc::c_int) -> Result<AAAAResult, AresError> {
-    if status != c_ares_sys::ARES_SUCCESS {
-        return Err(ares_error(status))
-    }
-
+fn parse_aaaa_result(data: &[libc::c_uchar]) -> Result<AAAAResult, AresError> {
     let mut hostent: *mut hostent = ptr::null_mut();
     let parse_status = unsafe {
         c_ares_sys::ares_parse_aaaa_reply(
-            abuf,
-            alen,
+            data.as_ptr(),
+            data.len() as libc::c_int,
             &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
             ptr::null_mut(),
             ptr::null_mut())
@@ -311,7 +302,12 @@ extern "C" fn query_aaaa_callback<F>(
     abuf: *mut libc::c_uchar,
     alen: libc::c_int)
     where F: FnOnce(Result<AAAAResult, AresError>) + 'static {
-    let result = parse_aaaa_result(status, abuf, alen);
+    let result = if status != c_ares_sys::ARES_SUCCESS {
+        Err(ares_error(status))
+    } else {
+        let data = unsafe { std::slice::from_raw_parts(abuf, alen as usize) };
+        parse_aaaa_result(data)
+    };
     let handler: Box<F> = unsafe { mem::transmute(arg) };
     handler(result);
 }

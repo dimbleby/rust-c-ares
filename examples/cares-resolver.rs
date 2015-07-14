@@ -7,23 +7,23 @@ use std::os::unix::io;
 use std::sync::mpsc;
 use std::thread;
 
-enum ResolverMessage {
+enum CAresHandlerMessage {
     RegisterInterest(io::RawFd, bool, bool),
     ShutDown,
 }
 
-struct DNSResolver {
+struct CAresEventHandler {
     ares_channel: c_ares::Channel,
     tracked_fds: HashSet<io::RawFd>,
 }
 
-impl mio::Handler for DNSResolver {
+impl mio::Handler for CAresEventHandler {
     type Timeout = usize;
-    type Message = ResolverMessage;
+    type Message = CAresHandlerMessage;
 
     fn readable(
         &mut self, 
-        _event_loop: &mut mio::EventLoop<DNSResolver>,
+        _event_loop: &mut mio::EventLoop<CAresEventHandler>,
         token: mio::Token,
         _read_hint: mio::ReadHint) {
         let fd = token.as_usize() as io::RawFd;
@@ -32,7 +32,7 @@ impl mio::Handler for DNSResolver {
 
     fn writable(
         &mut self,
-        _event_loop: &mut mio::EventLoop<DNSResolver>,
+        _event_loop: &mut mio::EventLoop<CAresEventHandler>,
         token: mio::Token) {
         let fd = token.as_usize() as io::RawFd;
         self.ares_channel.process_fd(c_ares::SOCKET_BAD, fd);
@@ -40,10 +40,10 @@ impl mio::Handler for DNSResolver {
 
     fn notify(
         &mut self,
-        event_loop:&mut mio::EventLoop<DNSResolver>,
+        event_loop:&mut mio::EventLoop<CAresEventHandler>,
         msg: Self::Message) {
         match msg {
-            ResolverMessage::RegisterInterest(fd, readable, writable) => {
+            CAresHandlerMessage::RegisterInterest(fd, readable, writable) => {
                 let io = mio::Io::new(fd);
                 if !readable && !writable {
                     self.tracked_fds.remove(&fd);
@@ -82,31 +82,17 @@ impl mio::Handler for DNSResolver {
                 mem::forget(io);
             },
 
-            ResolverMessage::ShutDown => event_loop.shutdown(),
+            CAresHandlerMessage::ShutDown => event_loop.shutdown(),
         }
     }
 }
 
-impl DNSResolver {
-    fn new<F>(callback: F) -> DNSResolver
-        where F: FnOnce(io::RawFd, bool, bool) + 'static {
-        let ares_channel = c_ares::Channel::new(callback)
-            .ok()
-            .expect("Failed to create channel");
-        DNSResolver {
+impl CAresEventHandler {
+    fn new(ares_channel: c_ares::Channel) -> CAresEventHandler {
+        CAresEventHandler {
             ares_channel: ares_channel,
             tracked_fds: HashSet::new(),
         }
-    }
-
-    fn query_a<F>(&mut self, name: &str, callback: F)
-        where F: FnOnce(Result<c_ares::AResult, c_ares::AresError>) + 'static {
-        self.ares_channel.query_a(name, callback);
-    }
-
-    fn query_aaaa<F>(&mut self, name: &str, callback: F)
-        where F: FnOnce(Result<c_ares::AAAAResult, c_ares::AresError>) + 'static {
-        self.ares_channel.query_aaaa(name, callback);
     }
 }
 
@@ -141,7 +127,7 @@ fn print_aaaa_result(result: Result<c_ares::AAAAResult, c_ares::AresError>) {
 }
 
 fn main() {
-    // Create an event loop and a DNSResolver.
+    // Create an event loop, and a c_ares::Channel.
     let mut event_loop = mio::EventLoop::new()
         .ok()
         .expect("failed to create event loop");
@@ -149,30 +135,33 @@ fn main() {
     let ev_channel_clone = event_loop_channel.clone();
     let sock_callback = move |fd: io::RawFd, readable: bool, writable: bool| {
         ev_channel_clone
-            .send(ResolverMessage::RegisterInterest(fd, readable, writable))
+            .send(CAresHandlerMessage::RegisterInterest(fd, readable, writable))
             .ok()
             .expect("Failed to send RegisterInterest");
     };
-    let mut resolver = DNSResolver::new(sock_callback);
+    let mut ares_channel = c_ares::Channel::new(sock_callback)
+        .ok()
+        .expect("Failed to create channel");
 
     // Set up a couple of queries.
     let (results_tx, results_rx) = mpsc::channel();
     let tx = results_tx.clone();
-    resolver.query_a("apple.com", move |result| {
+    ares_channel.query_a("apple.com", move |result| {
         print_a_result(result);
         tx.send(()).unwrap()
     });
 
     let tx = results_tx.clone();
-    resolver.query_aaaa("google.com", move |result| {
+    ares_channel.query_aaaa("google.com", move |result| {
         print_aaaa_result(result);
         tx.send(()).unwrap()
     });
 
     // Kick off the event loop.
+    let mut event_handler = CAresEventHandler::new(ares_channel);
     thread::spawn(move || {
         event_loop
-            .run(&mut resolver)
+            .run(&mut event_handler)
             .ok()
             .expect("failed to run event loop")
     });
@@ -184,7 +173,7 @@ fn main() {
 
     // Shut down event loop.
     event_loop_channel
-        .send(ResolverMessage::ShutDown)
+        .send(CAresHandlerMessage::ShutDown)
         .ok()
         .expect("failed to shut down event loop");
 }

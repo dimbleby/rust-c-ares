@@ -238,8 +238,7 @@ fn parse_a_result(
             answers.push(ip_addr);
             ptr = ptr.offset(1);
         }
-        c_ares_sys::ares_free_hostent(
-            hostent as *mut c_ares_sys::Struct_hostent);
+        c_ares_sys::ares_free_hostent(hostent as *mut c_ares_sys::Struct_hostent);
     }
     let result = AResult {
         ip_addrs: answers,
@@ -297,8 +296,7 @@ fn parse_aaaa_result(
             answers.push(ip_addr);
             ptr = ptr.offset(1);
         }
-        c_ares_sys::ares_free_hostent(
-            hostent as *mut c_ares_sys::Struct_hostent);
+        c_ares_sys::ares_free_hostent(hostent as *mut c_ares_sys::Struct_hostent);
     }
     let result = AAAAResult {
         ip_addrs: answers,

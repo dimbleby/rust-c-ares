@@ -27,7 +27,7 @@ impl mio::Handler for CAresEventHandler {
         token: mio::Token,
         _read_hint: mio::ReadHint) {
         let fd = token.as_usize() as io::RawFd;
-        self.ares_channel.process_fd(fd, c_ares::SOCKET_BAD);
+        self.ares_channel.process_fd(fd, c_ares::INVALID_FD);
     }
 
     fn writable(
@@ -35,7 +35,7 @@ impl mio::Handler for CAresEventHandler {
         _event_loop: &mut mio::EventLoop<CAresEventHandler>,
         token: mio::Token) {
         let fd = token.as_usize() as io::RawFd;
-        self.ares_channel.process_fd(c_ares::SOCKET_BAD, fd);
+        self.ares_channel.process_fd(c_ares::INVALID_FD, fd);
     }
 
     fn notify(

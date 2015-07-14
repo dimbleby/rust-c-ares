@@ -35,10 +35,12 @@ pub enum AresError {
     UNKNOWN,
 }
 
+#[derive(Debug)]
 pub struct AResult {
         pub ip_addrs: Vec<Ipv4Addr>,
 }
 
+#[derive(Debug)]
 pub struct AAAAResult {
         pub ip_addrs: Vec<Ipv6Addr>,
 }

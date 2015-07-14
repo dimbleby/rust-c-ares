@@ -56,9 +56,8 @@ impl Channel {
         let lib_rc = unsafe {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
         };
-        match lib_rc {
-            c_ares_sys::ARES_SUCCESS => (),
-            _ => return Err(ares_error(lib_rc))
+        if lib_rc != c_ares_sys::ARES_SUCCESS {
+            return Err(ares_error(lib_rc))
         }
 
         // TODO suport user-provided options
@@ -77,14 +76,11 @@ impl Channel {
         let channel_rc = unsafe {
             c_ares_sys::ares_init_options(&mut ares_channel, &mut options, optmask)
         };
-
-        match channel_rc {
-            c_ares_sys::ARES_SUCCESS => (),
-            _ => {
-                unsafe { c_ares_sys::ares_library_cleanup(); }
-                return Err(ares_error(channel_rc))
-            }
+        if channel_rc != c_ares_sys::ARES_SUCCESS {
+            unsafe { c_ares_sys::ares_library_cleanup(); }
+            return Err(ares_error(channel_rc))
         }
+
         let channel = Channel {
             ares_channel: ares_channel,
         };
@@ -208,6 +204,49 @@ extern "C" fn socket_callback<F>(
     handler(socket_fd as io::RawFd, readable != 0, writable != 0);
 }
 
+fn parse_a_result(
+    status: libc::c_int,
+    abuf: *mut libc::c_uchar,
+    alen: libc::c_int) -> Result<AResult, AresError> {
+    if status != c_ares_sys::ARES_SUCCESS {
+        return Err(ares_error(status))
+    }
+
+    let mut hostent: *mut hostent = ptr::null_mut();
+    let parse_status = unsafe {
+        c_ares_sys::ares_parse_a_reply(
+            abuf,
+            alen,
+            &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
+            ptr::null_mut(),
+            ptr::null_mut())
+    };
+    if parse_status != c_ares_sys::ARES_SUCCESS {
+        return Err(ares_error(parse_status))
+    }
+
+    let mut answers = Vec::new();
+    unsafe {
+        let mut ptr = (*hostent).h_addr_list;
+        while !(*ptr).is_null() {
+            let h_addr = *ptr;
+            let ip_addr = Ipv4Addr::new(
+                *h_addr as u8,
+                *h_addr.offset(1) as u8,
+                *h_addr.offset(2) as u8,
+                *h_addr.offset(3) as u8);
+            answers.push(ip_addr);
+            ptr = ptr.offset(1);
+        }
+        c_ares_sys::ares_free_hostent(
+            hostent as *mut c_ares_sys::Struct_hostent);
+    }
+    let result = AResult {
+        ip_addrs: answers,
+    };
+    Ok(result)
+}
+
 extern "C" fn query_a_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,
@@ -215,46 +254,56 @@ extern "C" fn query_a_callback<F>(
     abuf: *mut libc::c_uchar,
     alen: libc::c_int)
     where F: FnOnce(Result<AResult, AresError>) + 'static {
-    let result = if status != c_ares_sys::ARES_SUCCESS {
-        Err(ares_error(status))
-    } else {
-        let mut hostent: *mut hostent = ptr::null_mut();
-        let parse_status = unsafe {
-            c_ares_sys::ares_parse_a_reply(
-                abuf,
-                alen,
-                &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
-                ptr::null_mut(),
-                ptr::null_mut())
-        };
-        if parse_status != c_ares_sys::ARES_SUCCESS {
-            Err(ares_error(parse_status))
-        } else {
-            let mut answers = Vec::new();
-            unsafe {
-                let mut ptr = (*hostent).h_addr_list;
-                while !(*ptr).is_null() {
-                    let h_addr = *ptr;
-                    let ip_addr = Ipv4Addr::new(
-                        *h_addr as u8,
-                        *h_addr.offset(1) as u8,
-                        *h_addr.offset(2) as u8,
-                        *h_addr.offset(3) as u8);
-                    answers.push(ip_addr);
-                    ptr = ptr.offset(1);
-                }
-                c_ares_sys::ares_free_hostent(
-                    hostent as *mut c_ares_sys::Struct_hostent);
-            }
-            let result = AResult {
-                ip_addrs: answers,
-            };
-            Ok(result)
-        }
-    };
-
+    let result = parse_a_result(status, abuf, alen);
     let handler: Box<F> = unsafe { mem::transmute(arg) };
     handler(result);
+}
+
+fn parse_aaaa_result(
+    status: libc::c_int,
+    abuf: *mut libc::c_uchar,
+    alen: libc::c_int) -> Result<AAAAResult, AresError> {
+    if status != c_ares_sys::ARES_SUCCESS {
+        return Err(ares_error(status))
+    }
+
+    let mut hostent: *mut hostent = ptr::null_mut();
+    let parse_status = unsafe {
+        c_ares_sys::ares_parse_aaaa_reply(
+            abuf,
+            alen,
+            &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
+            ptr::null_mut(),
+            ptr::null_mut())
+    };
+    if parse_status != c_ares_sys::ARES_SUCCESS {
+        return Err(ares_error(parse_status))
+    }
+
+    let mut answers = Vec::new();
+    unsafe {
+        let mut ptr = (*hostent).h_addr_list;
+        while !(*ptr).is_null() {
+            let h_addr = *ptr;
+            let ip_addr = Ipv6Addr::new(
+                ((*h_addr as u16) << 8) + *h_addr.offset(1) as u16,
+                ((*h_addr.offset(2) as u16) << 8) + *h_addr.offset(3) as u16,
+                ((*h_addr.offset(4) as u16) << 8) + *h_addr.offset(5) as u16,
+                ((*h_addr.offset(6) as u16) << 8) + *h_addr.offset(7) as u16,
+                ((*h_addr.offset(8) as u16) << 8) + *h_addr.offset(9) as u16,
+                ((*h_addr.offset(10) as u16) << 8) + *h_addr.offset(11) as u16,
+                ((*h_addr.offset(12) as u16) << 8) + *h_addr.offset(13) as u16,
+                ((*h_addr.offset(14) as u16) << 8) + *h_addr.offset(15) as u16);
+            answers.push(ip_addr);
+            ptr = ptr.offset(1);
+        }
+        c_ares_sys::ares_free_hostent(
+            hostent as *mut c_ares_sys::Struct_hostent);
+    }
+    let result = AAAAResult {
+        ip_addrs: answers,
+    };
+    Ok(result)
 }
 
 extern "C" fn query_aaaa_callback<F>(
@@ -264,48 +313,7 @@ extern "C" fn query_aaaa_callback<F>(
     abuf: *mut libc::c_uchar,
     alen: libc::c_int)
     where F: FnOnce(Result<AAAAResult, AresError>) + 'static {
-    let result = if status != c_ares_sys::ARES_SUCCESS {
-        Err(ares_error(status))
-    } else {
-        let mut hostent: *mut hostent = ptr::null_mut();
-        let parse_status = unsafe {
-            c_ares_sys::ares_parse_aaaa_reply(
-                abuf,
-                alen,
-                &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
-                ptr::null_mut(),
-                ptr::null_mut())
-        };
-        if parse_status != c_ares_sys::ARES_SUCCESS {
-            Err(ares_error(parse_status))
-        } else {
-            let mut answers = Vec::new();
-            unsafe {
-                let mut ptr = (*hostent).h_addr_list;
-                while !(*ptr).is_null() {
-                    let h_addr = *ptr;
-                    let ip_addr = Ipv6Addr::new(
-                        ((*h_addr as u16) << 8) + *h_addr.offset(1) as u16,
-                        ((*h_addr.offset(2) as u16) << 8) + *h_addr.offset(3) as u16,
-                        ((*h_addr.offset(4) as u16) << 8) + *h_addr.offset(5) as u16,
-                        ((*h_addr.offset(6) as u16) << 8) + *h_addr.offset(7) as u16,
-                        ((*h_addr.offset(8) as u16) << 8) + *h_addr.offset(9) as u16,
-                        ((*h_addr.offset(10) as u16) << 8) + *h_addr.offset(11) as u16,
-                        ((*h_addr.offset(12) as u16) << 8) + *h_addr.offset(13) as u16,
-                        ((*h_addr.offset(14) as u16) << 8) + *h_addr.offset(15) as u16);
-                    answers.push(ip_addr);
-                    ptr = ptr.offset(1);
-                }
-                c_ares_sys::ares_free_hostent(
-                    hostent as *mut c_ares_sys::Struct_hostent);
-            }
-            let result = AAAAResult {
-                ip_addrs: answers,
-            };
-            Ok(result)
-        }
-    };
-
+    let result = parse_aaaa_result(status, abuf, alen);
     let handler: Box<F> = unsafe { mem::transmute(arg) };
     handler(result);
 }

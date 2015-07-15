@@ -12,7 +12,7 @@ use types::{
 };
 use utils::ares_error;
 
-pub fn parse_a_result(data: &[libc::c_uchar]) -> Result<AResult, AresError> {
+pub fn parse_a_result(data: &[u8]) -> Result<AResult, AresError> {
     let mut hostent: *mut hostent = ptr::null_mut();
     let parse_status = unsafe {
         c_ares_sys::ares_parse_a_reply(
@@ -47,7 +47,7 @@ pub fn parse_a_result(data: &[libc::c_uchar]) -> Result<AResult, AresError> {
     Ok(result)
 }
 
-pub fn parse_aaaa_result(data: &[libc::c_uchar]) -> Result<AAAAResult, AresError> {
+pub fn parse_aaaa_result(data: &[u8]) -> Result<AAAAResult, AresError> {
     let mut hostent: *mut hostent = ptr::null_mut();
     let parse_status = unsafe {
         c_ares_sys::ares_parse_aaaa_reply(

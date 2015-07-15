@@ -18,7 +18,7 @@ struct CAresEventHandler {
 }
 
 impl mio::Handler for CAresEventHandler {
-    type Timeout = usize;
+    type Timeout = ();
     type Message = CAresHandlerMessage;
 
     fn readable(
@@ -84,6 +84,14 @@ impl mio::Handler for CAresEventHandler {
 
             CAresHandlerMessage::ShutDown => event_loop.shutdown(),
         }
+    }
+
+    fn timeout(
+        &mut self,
+        event_loop: &mut mio::EventLoop<CAresEventHandler>,
+        _timeout: Self::Timeout) {
+        self.ares_channel.process_fd(c_ares::INVALID_FD, c_ares::INVALID_FD);
+        event_loop.timeout_ms((), 500).unwrap();
     }
 }
 
@@ -158,6 +166,7 @@ fn main() {
     });
 
     // Kick off the event loop.
+    event_loop.timeout_ms((), 500).unwrap();
     let mut event_handler = CAresEventHandler::new(ares_channel);
     thread::spawn(move || {
         event_loop

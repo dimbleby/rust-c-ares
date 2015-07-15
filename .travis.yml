@@ -1,0 +1,8 @@
+language: rust
+sudo: false
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - libc-ares-dev

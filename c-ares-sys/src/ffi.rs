@@ -6,7 +6,7 @@ pub type __cares_rule_02__ = [::libc::c_char; 1usize];
 pub type __cares_rule_03__ = [::libc::c_char; 1usize];
 pub type ares_socket_t = ::libc::c_int;
 pub type ares_sock_state_cb =
-    ::std::option::Option<extern "C" fn(data: *mut ::libc::c_void,
+    ::std::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void,
                                         socket_fd: ares_socket_t,
                                         readable: ::libc::c_int,
                                         writable: ::libc::c_int) -> ()>;
@@ -43,24 +43,24 @@ pub enum Struct_hostent { }
 pub enum Struct_ares_channeldata { }
 pub type ares_channel = *mut Struct_ares_channeldata;
 pub type ares_callback =
-    ::std::option::Option<extern "C" fn(arg: *mut ::libc::c_void,
+    ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
                                         status: ::libc::c_int,
                                         timeouts: ::libc::c_int,
                                         abuf: *mut ::libc::c_uchar,
                                         alen: ::libc::c_int) -> ()>;
 pub type ares_host_callback =
-    ::std::option::Option<extern "C" fn(arg: *mut ::libc::c_void,
+    ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
                                         status: ::libc::c_int,
                                         timeouts: ::libc::c_int,
                                         hostent: *mut Struct_hostent) -> ()>;
 pub type ares_nameinfo_callback =
-    ::std::option::Option<extern "C" fn(arg: *mut ::libc::c_void,
+    ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
                                         status: ::libc::c_int,
                                         timeouts: ::libc::c_int,
                                         node: *mut ::libc::c_char,
                                         service: *mut ::libc::c_char) -> ()>;
 pub type ares_sock_create_callback =
-    ::std::option::Option<extern "C" fn(socket_fd: ares_socket_t,
+    ::std::option::Option<unsafe extern "C" fn(socket_fd: ares_socket_t,
                                         _type: ::libc::c_int,
                                         data: *mut ::libc::c_void)
                               -> ::libc::c_int>;

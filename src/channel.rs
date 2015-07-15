@@ -44,7 +44,7 @@ impl Channel {
         options.sock_state_cb_data = unsafe { mem::transmute(Box::new(callback)) };
         let optmask =
             c_ares_sys::ARES_OPT_FLAGS | 
-            c_ares_sys::ARES_OPT_TIMEOUT | 
+            c_ares_sys::ARES_OPT_TIMEOUTMS | 
             c_ares_sys::ARES_OPT_TRIES |
             c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         let channel_rc = unsafe {

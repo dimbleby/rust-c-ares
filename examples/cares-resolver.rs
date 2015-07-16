@@ -1,3 +1,4 @@
+// This example drives c-ares using an mio::EventLoop.
 extern crate c_ares;
 extern crate mio;
 
@@ -7,12 +8,22 @@ use std::os::unix::io;
 use std::sync::mpsc;
 use std::thread;
 
+// Messages for the event loop.
 enum CAresHandlerMessage {
+    // 'Notify me when this file descriptor becomes readable, or writable'
+    // The first bool is for 'readable' and the second is for 'writable'.  It's
+    // allowed to set both of these - or neither, meaning 'I am no longer
+    // interested in this file descriptor'.
     RegisterInterest(io::RawFd, bool, bool),
+
+    // 'Shut down'.
     ShutDown,
 }
 
 struct CAresEventHandler {
+    // Since the event handler owns the Channel, it won't be possible to submit
+    // further queries once the event loop is running.  If you want to do that,
+    // use an Arc<Mutex<c_ares::Channel>>.
     ares_channel: c_ares::Channel,
     tracked_fds: HashSet<io::RawFd>,
 }
@@ -21,6 +32,8 @@ impl mio::Handler for CAresEventHandler {
     type Timeout = ();
     type Message = CAresHandlerMessage;
 
+    // mio notifies us that a file descriptor is readable, so we tell the
+    // Channel the same.
     fn readable(
         &mut self, 
         _event_loop: &mut mio::EventLoop<CAresEventHandler>,
@@ -30,6 +43,8 @@ impl mio::Handler for CAresEventHandler {
         self.ares_channel.process_fd(fd, c_ares::INVALID_FD);
     }
 
+    // mio notifies us that a file descriptor is writable, so we tell the
+    // Channel the same.
     fn writable(
         &mut self,
         _event_loop: &mut mio::EventLoop<CAresEventHandler>,
@@ -38,6 +53,10 @@ impl mio::Handler for CAresEventHandler {
         self.ares_channel.process_fd(c_ares::INVALID_FD, fd);
     }
 
+    // Process received messages.  Either:
+    // - we're asked to register interest (or non-interest) in a file
+    // descriptor
+    // - we're asked to shut down the event loop.
     fn notify(
         &mut self,
         event_loop:&mut mio::EventLoop<CAresEventHandler>,
@@ -60,7 +79,7 @@ impl mio::Handler for CAresEventHandler {
                         interest = interest | mio::Interest::writable();
                     }
                     let token = mio::Token(fd as usize);
-                    let insert_result = if !self.tracked_fds.insert(fd) { 
+                    let register_result = if !self.tracked_fds.insert(fd) {
                         event_loop
                             .reregister(
                                 &io,
@@ -75,10 +94,10 @@ impl mio::Handler for CAresEventHandler {
                                 interest,
                                 mio::PollOpt::level())
                     };
-                    insert_result.ok().expect("failed to register interest");
+                    register_result.ok().expect("failed to register interest");
                 }
 
-                // Don't close the file descriptor by dropping io.
+                // Don't accidentally close the file descriptor by dropping io!
                 mem::forget(io);
             },
 
@@ -86,6 +105,11 @@ impl mio::Handler for CAresEventHandler {
         }
     }
 
+    // We run a recurring timer so that we can spot non-responsive servers.
+    //
+    // In that case we won't get a callback saying that anything is happening
+    // on any file descriptor, but nevertheless need to give the Channel an
+    // opportunity to notice that it has timed-out requests pending.
     fn timeout(
         &mut self,
         event_loop: &mut mio::EventLoop<CAresEventHandler>,
@@ -140,9 +164,9 @@ fn main() {
         .ok()
         .expect("failed to create event loop");
     let event_loop_channel = event_loop.channel();
-    let ev_channel_clone = event_loop_channel.clone();
+    let event_loop_channel_clone = event_loop_channel.clone();
     let sock_callback = move |fd: io::RawFd, readable: bool, writable: bool| {
-        ev_channel_clone
+        event_loop_channel_clone
             .send(CAresHandlerMessage::RegisterInterest(fd, readable, writable))
             .ok()
             .expect("Failed to send RegisterInterest");
@@ -165,8 +189,10 @@ fn main() {
         tx.send(()).unwrap()
     });
 
-    // Kick off the event loop.
+    // Set the first instance of the recurring timer on the event loop.
     event_loop.timeout_ms((), 500).unwrap();
+
+    // Kick off the event loop.
     let mut event_handler = CAresEventHandler::new(ares_channel);
     let handle = thread::spawn(move || {
         event_loop
@@ -180,7 +206,7 @@ fn main() {
         results_rx.recv().unwrap();
     }
 
-    // Shut down event loop.
+    // Shut down the event loop and wait for it to finish.
     event_loop_channel
         .send(CAresHandlerMessage::ShutDown)
         .ok()

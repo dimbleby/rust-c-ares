@@ -21,8 +21,8 @@ pub unsafe extern "C" fn socket_callback<F>(
     socket_fd: c_ares_sys::ares_socket_t,
     readable: libc::c_int,
     writable: libc::c_int)
-    where F: FnOnce(io::RawFd, bool, bool) + 'static {
-    let handler: Box<F> = mem::transmute(data);
+    where F: FnMut(io::RawFd, bool, bool) + 'static {
+    let mut handler: Box<F> = mem::transmute(data);
     handler(socket_fd as io::RawFd, readable != 0, writable != 0);
 }
 

@@ -168,7 +168,7 @@ fn main() {
     // Kick off the event loop.
     event_loop.timeout_ms((), 500).unwrap();
     let mut event_handler = CAresEventHandler::new(ares_channel);
-    thread::spawn(move || {
+    let handle = thread::spawn(move || {
         event_loop
             .run(&mut event_handler)
             .ok()
@@ -185,4 +185,5 @@ fn main() {
         .send(CAresHandlerMessage::ShutDown)
         .ok()
         .expect("failed to shut down event loop");
+    handle.join().unwrap();
 }

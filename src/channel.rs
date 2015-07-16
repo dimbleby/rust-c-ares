@@ -26,7 +26,7 @@ pub struct Channel {
 
 impl Channel {
     pub fn new<F>(callback: F) -> Result<Channel, AresError> 
-        where F: FnOnce(io::RawFd, bool, bool) + 'static {
+        where F: FnMut(io::RawFd, bool, bool) + 'static {
         let lib_rc = unsafe {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
         };

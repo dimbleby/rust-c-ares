@@ -18,6 +18,7 @@ before_install:
 - echo "Host github.com" >> ~/.ssh/config
 - echo "  IdentityFile ~/.ssh/publish-key" >> ~/.ssh/config
 - git remote set-url origin git@github.com:dimbleby/rust-c-ares.git
+- git config user.name "Travis CI"
 install:
 - pip install ghp-import --user $USER
 after_success:

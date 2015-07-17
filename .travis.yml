@@ -1,17 +1,12 @@
-env:
-  global:
-    - secure: fXvGeqkY2lFYahlFGuwTpXfzyOoScKZLc3/RJeeqA9Uuh/MBemgfPTZA02H3hbiMJFDvgjN6d1RsXGBy51+Pvg9bSyxebjusL7VmcN7Hbn6twzXpdKIOYQ9ljsI3gKItaa26hdxscnEyaQaeGAz0XVrZWKJjNxBrZUi7dkEexLKpEH4ZHDy0Azio0K2uH56hq3+0CecdEBXcPLdN0/5U+xDE+FfRHume5ad8o7WcewxrV1Wt9Ce0KUuyQrZEoP5G/RenY8vU+UoQZ1YabE0vdNl5KlNltJ5jvZOC1BWotcXSidm9/zdvh7YPtk5WCc0L0c98fMJnb2pJr8gCJfNmGpvnofU6ctNLl6ibwUGPaSY9bUYMOt2tZW3u/OPQmmXpGscjpfvlLghKk+Kcuqz5TBdHrVMl5D6oyoNIfn6y88IAU2sjs3+soPagaGbxuNU4/dCI7yEcUbXROzoecVi77Txihg2nbhWRB7v8c/JjeduP1NPNwGkO00xKySv4/RLpNPZjCk/8N8FqdDz1jM5NgoN0JC5lsvqHviaLhRBaqpb1DeN1uhCgDfoFduhadV0VQ2KH+WX7Ne6eKbEMyfQ3pXbG4Q7sqRbHm1bO0jHCwnjXtt302iCYVl6i6lS8CZBa7SUQjhabxkIquDp6SbZolhKPQjAjQEP77cy5oLcWdUQ=
 language: rust
 sudo: false
 script:
-  - cargo test
-  - cargo doc --no-deps -p c-ares-sys
-  - cargo doc --no-deps -p c-ares
+- cargo test
+- cargo doc --no-deps -p c-ares-sys
+- cargo doc --no-deps -p c-ares
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
     packages:
     - libc-ares-dev
-after_script:
-    - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh

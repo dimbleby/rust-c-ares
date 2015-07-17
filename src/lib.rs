@@ -1,3 +1,4 @@
+//! A safe wrapper for the [`c-ares`](http://c-ares.haxx.se/) library.
 mod callbacks;
 mod channel;
 mod parsers;

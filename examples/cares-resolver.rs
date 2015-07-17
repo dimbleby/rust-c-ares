@@ -32,25 +32,17 @@ impl mio::Handler for CAresEventHandler {
     type Timeout = ();
     type Message = CAresHandlerMessage;
 
-    // mio notifies us that a file descriptor is readable, so we tell the
-    // Channel the same.
-    fn readable(
+    // mio notifies us that a file descriptor is readable or writable, so we 
+    // tell the Channel the same.
+    fn ready(
         &mut self, 
         _event_loop: &mut mio::EventLoop<CAresEventHandler>,
         token: mio::Token,
-        _read_hint: mio::ReadHint) {
+        events: mio::EventSet) {
         let fd = token.as_usize() as io::RawFd;
-        self.ares_channel.process_fd(fd, c_ares::INVALID_FD);
-    }
-
-    // mio notifies us that a file descriptor is writable, so we tell the
-    // Channel the same.
-    fn writable(
-        &mut self,
-        _event_loop: &mut mio::EventLoop<CAresEventHandler>,
-        token: mio::Token) {
-        let fd = token.as_usize() as io::RawFd;
-        self.ares_channel.process_fd(c_ares::INVALID_FD, fd);
+        let read_fd = if events.is_readable() { fd } else { c_ares::INVALID_FD };
+        let write_fd = if events.is_writable() { fd } else { c_ares::INVALID_FD };
+        self.ares_channel.process_fd(read_fd, write_fd);
     }
 
     // Process received messages.  Either:
@@ -63,7 +55,7 @@ impl mio::Handler for CAresEventHandler {
         msg: Self::Message) {
         match msg {
             CAresHandlerMessage::RegisterInterest(fd, readable, writable) => {
-                let io = mio::Io::new(fd);
+                let io = mio::Io::from(fd);
                 if !readable && !writable {
                     self.tracked_fds.remove(&fd);
                     event_loop
@@ -71,12 +63,12 @@ impl mio::Handler for CAresEventHandler {
                         .ok()
                         .expect("failed to deregister interest");
                 } else {
-                    let mut interest = mio::Interest::none();
+                    let mut interest = mio::EventSet::none();
                     if readable {
-                        interest = interest | mio::Interest::readable();
+                        interest = interest | mio::EventSet::readable();
                     }
                     if writable {
-                        interest = interest | mio::Interest::writable();
+                        interest = interest | mio::EventSet::writable();
                     }
                     let token = mio::Token(fd as usize);
                     let register_result = if !self.tracked_fds.insert(fd) {

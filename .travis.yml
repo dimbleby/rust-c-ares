@@ -19,8 +19,8 @@ before_install:
 - echo "  IdentityFile ~/.ssh/publish-key" >> ~/.ssh/config
 - git remote set-url origin git@github.com:dimbleby/rust-c-ares.git
 install:
-- pip install ghp-import 
+- pip install ghp-import --user $USER
 after_success:
 - echo "<meta http-equiv=refresh content=0;url=c_ares/index.html>" > target/doc/index.html
-- ghp-import -n target/doc
+- ~/.local/bin/ghp-import -n target/doc
 - git push origin gh-pages

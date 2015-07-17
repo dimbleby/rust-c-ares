@@ -10,9 +10,7 @@ keywords = ["DNS", "c-ares"]
 
 [dependencies]
 libc = "*"
+c-ares-sys = "*"
 
 [dev-dependencies]
 mio = "*"
-
-[dependencies.c-ares-sys]
-path = "c-ares-sys"

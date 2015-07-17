@@ -86,7 +86,7 @@ impl Channel {
         }
     }
 
-    /// Lookup the A record associated with `name`.
+    /// Look up the A record associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_a<F>(&mut self, name: &str, handler: F)
@@ -104,7 +104,7 @@ impl Channel {
         }
     }
 
-    /// Lookup the AAAA record associated with `name`.
+    /// Look up the AAAA record associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)

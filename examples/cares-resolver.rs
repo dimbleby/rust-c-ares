@@ -21,9 +21,13 @@ enum CAresHandlerMessage {
 }
 
 struct CAresEventHandler {
-    // Since the event handler owns the Channel, it won't be possible to submit
-    // further queries once the event loop is running.  If you want to do that,
-    // use an Arc<Mutex<c_ares::Channel>>.
+    // Since the event handler owns the Channel, it's tricky to submit further
+    // queries once the event loop is running.  If you want to do that,
+    // either:
+    //
+    // -  share the Channel by using an Arc<Mutex<c_ares::Channel>>, OR
+    // -  send requests to the event handler as messages, and have it make the
+    //    queries
     ares_channel: c_ares::Channel,
     tracked_fds: HashSet<io::RawFd>,
 }

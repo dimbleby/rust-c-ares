@@ -5,6 +5,7 @@ version = "0.1.0"
 authors = ["David Hotham"]
 description = "A Rust wrapper for the c-ares library"
 homepage = "https://github.com/dimbleby/rust-c-ares"
+repository = "https://github.com/dimbleby/rust-c-ares"
 readme = "README.md"
 keywords = ["DNS", "c-ares"]
 

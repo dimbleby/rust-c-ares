@@ -12,6 +12,10 @@ use types::{
 };
 use utils::ares_error;
 
+/// Parse the response to an A lookup.
+///
+/// Users typically won't need to call this function - it's an internal utility
+/// that is made public just in case someone finds a use for it.
 pub fn parse_a_result(data: &[u8]) -> Result<AResult, AresError> {
     let mut hostent: *mut hostent = ptr::null_mut();
     let parse_status = unsafe {
@@ -47,6 +51,10 @@ pub fn parse_a_result(data: &[u8]) -> Result<AResult, AresError> {
     Ok(result)
 }
 
+/// Parse the response to an AAAA lookup.
+///
+/// Users typically won't need to call this function - it's an internal utility
+/// that is made public just in case someone finds a use for it.
 pub fn parse_aaaa_result(data: &[u8]) -> Result<AAAAResult, AresError> {
     let mut hostent: *mut hostent = ptr::null_mut();
     let parse_status = unsafe {

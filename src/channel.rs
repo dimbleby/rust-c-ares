@@ -20,11 +20,19 @@ use types::{
 };
 use utils::ares_error;
 
+/// A channel for name service lookups.
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
 }
 
 impl Channel {
+    /// Create a new channel for name service lookups.
+    ///
+    /// `callback(socket, read, write)` will be called when a socket changes
+    /// state:
+    ///
+    /// -  `read` is set to true if the socket should listen for read events
+    /// -  `write` is set to true if the socket should listen to write events.
     pub fn new<F>(callback: F) -> Result<Channel, AresError> 
         where F: FnMut(io::RawFd, bool, bool) + 'static {
         let lib_rc = unsafe {
@@ -63,6 +71,24 @@ impl Channel {
         Ok(channel)
     }
 
+    /// Handle input, output, and timeout events associated with the specified
+    /// file descriptors (sockets).
+    ///
+    /// Providing a value for `read_fd` indicates that the identified socket
+    /// is readable; likewise providing a value for `write_fd` indicates that
+    /// the identified socket is writable.  Use `INVALID_FD` for "no-action".
+    pub fn process_fd(&mut self, read_fd: io::RawFd, write_fd: io::RawFd) {
+        unsafe {
+            c_ares_sys::ares_process_fd(
+                self.ares_channel,
+                read_fd as c_ares_sys::ares_socket_t,
+                write_fd as c_ares_sys::ares_socket_t);
+        }
+    }
+
+    /// Lookup the A record associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
     pub fn query_a<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<AResult, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
@@ -78,6 +104,9 @@ impl Channel {
         }
     }
 
+    /// Lookup the AAAA record associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<AAAAResult, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
@@ -90,15 +119,6 @@ impl Channel {
                 QueryType::AAAA as libc::c_int,
                 Some(query_aaaa_callback::<F>),
                 c_arg);
-        }
-    }
-
-    pub fn process_fd(&mut self, read_fd: io::RawFd, write_fd: io::RawFd) {
-        unsafe {
-            c_ares_sys::ares_process_fd(
-                self.ares_channel,
-                read_fd as c_ares_sys::ares_socket_t,
-                write_fd as c_ares_sys::ares_socket_t);
         }
     }
 }

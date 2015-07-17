@@ -23,4 +23,4 @@ install:
 after_success:
 - echo "<meta http-equiv=refresh content=0;url=c_ares/index.html>" > target/doc/index.html
 - ~/.local/bin/ghp-import -n target/doc
-- git push force origin +gh-pages
+- git push origin +gh-pages

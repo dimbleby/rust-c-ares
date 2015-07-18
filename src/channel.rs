@@ -63,6 +63,32 @@ impl Options {
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TRIES;
         self
     }
+
+    /// Set the number of dots which must be present in a domain name for it to
+    /// be queried for "as is" prior to querying for it with the default domain
+    /// extensions appended. The default value is 1 unless set otherwise by
+    /// resolv.conf or the RES_OPTIONS environment variable.
+    pub fn set_ndots(&mut self, ndots: u32) -> &mut Self {
+        self.ares_options.ndots = ndots as libc::c_int;
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_NDOTS;
+        self
+    }
+
+    /// Set the UDP port to use for queries. The default value is 53, the
+    /// standard name service port.
+    pub fn set_udp_port(&mut self, udp_port: u16) -> &mut Self {
+        self.ares_options.udp_port = udp_port as libc::c_ushort;
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_UDP_PORT;
+        self
+    }
+
+    /// Set the TCP port to use for queries. The default value is 53, the
+    /// standard name service port.
+    pub fn set_tcp_port(&mut self, tcp_port: u16) -> &mut Self {
+        self.ares_options.tcp_port = tcp_port as libc::c_ushort;
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_TCP_PORT;
+        self
+    }
 }
 
 /// A channel for name service lookups.
@@ -117,7 +143,6 @@ impl Channel {
         Ok(channel)
     }
 
-
     /// Handle input, output, and timeout events associated with the specified
     /// file descriptors (sockets).
     ///
@@ -130,6 +155,26 @@ impl Channel {
                 self.ares_channel,
                 read_fd as c_ares_sys::ares_socket_t,
                 write_fd as c_ares_sys::ares_socket_t);
+        }
+    }
+
+    /// Set the list of servers to contact, instead of the servers specified
+    /// in resolv.conf or the local named.
+    ///
+    /// String format is host[:port].  IPv6 addresses with ports require square
+    /// brackets eg [2001:4860:4860::8888]:53
+    pub fn set_servers(&mut self, servers: &[&str]) -> Result<(), AresError> {
+        let servers_csv = servers.connect(",");
+        let c_servers = CString::new(servers_csv).unwrap();
+        let ares_rc = unsafe {
+            c_ares_sys::ares_set_servers_csv(
+                self.ares_channel,
+                c_servers.as_ptr())
+        };
+        if ares_rc != c_ares_sys::ARES_SUCCESS {
+            Err(ares_error(ares_rc))
+        } else {
+            Ok(())
         }
     }
 

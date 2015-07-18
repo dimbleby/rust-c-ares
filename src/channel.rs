@@ -148,7 +148,7 @@ impl Channel {
     ///
     /// Providing a value for `read_fd` indicates that the identified socket
     /// is readable; likewise providing a value for `write_fd` indicates that
-    /// the identified socket is writable.  Use `INVALID_FD` for "no-action".
+    /// the identified socket is writable.  Use `INVALID_FD` for "no action".
     pub fn process_fd(&mut self, read_fd: io::RawFd, write_fd: io::RawFd) {
         unsafe {
             c_ares_sys::ares_process_fd(
@@ -161,8 +161,8 @@ impl Channel {
     /// Set the list of servers to contact, instead of the servers specified
     /// in resolv.conf or the local named.
     ///
-    /// String format is host[:port].  IPv6 addresses with ports require square
-    /// brackets eg [2001:4860:4860::8888]:53
+    /// String format is `host[:port]`.  IPv6 addresses with ports require
+    /// square brackets eg `[2001:4860:4860::8888]:53`.
     pub fn set_servers(&mut self, servers: &[&str]) -> Result<(), AresError> {
         let servers_csv = servers.connect(",");
         let c_servers = CString::new(servers_csv).unwrap();

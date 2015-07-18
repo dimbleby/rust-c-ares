@@ -40,6 +40,8 @@ pub enum Flag {
     /// request. Primarily useful for writing clients which might be used to
     /// test or debug name servers.
     NOCHECKRESP = c_ares_sys::ARES_FLAG_NOCHECKRESP as isize,
+
+    /// Use Extension Mechanisms for DNS.
     EDNS = c_ares_sys::ARES_FLAG_EDNS as isize,
 }
 

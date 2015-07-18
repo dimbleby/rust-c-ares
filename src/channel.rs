@@ -22,6 +22,7 @@ use types::{
 use utils::ares_error;
 
 /// Used to configure the behaviour of the name resolver.
+#[derive(Clone)]
 pub struct Options {
     ares_options: c_ares_sys::Struct_ares_options,
     optmask: libc::c_int,
@@ -144,6 +145,7 @@ impl Options {
 }
 
 /// A channel for name service lookups.
+#[derive(Clone, Debug)]
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
 }

@@ -21,6 +21,7 @@ use types::{
 };
 use utils::ares_error;
 
+/// Used to configure the behaviour of the name resolver.
 pub struct Options {
     ares_options: c_ares_sys::Struct_ares_options,
     optmask: libc::c_int,
@@ -56,7 +57,7 @@ impl Options {
     }
 
     /// Set the number of tries the resolver will try contacting each name
-    /// server before giving up. The default is four tries. 
+    /// server before giving up. The default is four tries.
     pub fn set_tries(&mut self, tries: u32) -> &mut Self {
         self.ares_options.tries = tries as libc::c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TRIES;
@@ -78,7 +79,7 @@ impl Channel {
     ///
     /// -  `read` is set to true if the socket should listen for read events
     /// -  `write` is set to true if the socket should listen to write events.
-    pub fn new_with_cb<F>(
+    pub fn new<F>(
         callback: F,
         mut options: Options) -> Result<Channel, AresError>
         where F: FnMut(io::RawFd, bool, bool) + 'static {

@@ -13,6 +13,7 @@ keywords = ["DNS", "c-ares"]
 [dependencies]
 libc = "*"
 c-ares-sys = "*"
+bitflags = "*"
 
 [dev-dependencies]
 mio = "*"

@@ -11,8 +11,8 @@ use callbacks::{
     query_a_callback,
     query_aaaa_callback,
 };
+use flags::Flags;
 use types::{
-    Flag,
     AresError,
     AResult,
     AAAAResult,
@@ -41,12 +41,10 @@ impl Options {
         }
     }
 
-    /// Set flags controlling the behaviour of the resolver.
-    pub fn set_flags(&mut self, flags: &[Flag]) -> &mut Self {
-        let c_flags: libc::c_int = flags
-            .iter()
-            .fold(0, |acc, &flag| acc | (flag as libc::c_int));
-        self.ares_options.flags = c_flags;
+    /// Set flags controlling the behaviour of the resolver.  The available
+    /// flags are documented [here](flags/index.html).
+    pub fn set_flags(&mut self, flags: Flags) -> &mut Self {
+        self.ares_options.flags = flags.bits();
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_FLAGS;
         self
     }

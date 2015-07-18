@@ -25,6 +25,8 @@ use utils::ares_error;
 pub struct Options {
     ares_options: c_ares_sys::Struct_ares_options,
     optmask: libc::c_int,
+    domains: Vec<CString>,
+    lookups: Option<CString>,
 }
 
 impl Options {
@@ -33,6 +35,8 @@ impl Options {
         Options {
             ares_options: c_ares_sys::Struct_ares_options::default(),
             optmask: 0,
+            domains: Vec::new(),
+            lookups: None,
         }
     }
 
@@ -90,8 +94,26 @@ impl Options {
         self
     }
 
-    // TODO set_domains and set_lookups()
+    /// Set the domains to search, instead of the domains specified in
+    /// resolv.conf or the domain derived from the kernel hostname variable.
+    pub fn set_domains(&mut self, domains: &[&str]) -> &mut Self {
+        self.domains = domains
+            .iter()
+            .map(|&s| CString::new(s).unwrap())
+            .collect();
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_DOMAINS;
+        self
+    }
 
+    /// Set the lookups to perform for host queries. lookups should be set to a
+    /// string of the characters "b" or "f", where "b" indicates a DNS lookup
+    /// and "f" indicates a lookup in the hosts file.
+    pub fn set_lookups(&mut self, lookups: &str) -> &mut Self {
+        let c_lookups = CString::new(lookups).unwrap();
+        self.lookups = Some(c_lookups);
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_LOOKUPS;
+        self
+    }
 
     /// Set the socket send buffer size.
     pub fn set_sock_send_buffer_size(&mut self, size: u32) -> &mut Self {
@@ -104,6 +126,13 @@ impl Options {
     pub fn set_sock_receive_buffer_size(&mut self, size: u32) -> &mut Self {
         self.ares_options.socket_receive_buffer_size = size as libc::c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_RCVBUF;
+        self
+    }
+
+    /// Set the EDNS packet size.
+    pub fn set_ednspsz(&mut self, size: u32) -> &mut Self {
+        self.ares_options.ednspsz = size as libc::c_int;
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_EDNSPSZ;
         self
     }
 }
@@ -135,6 +164,7 @@ impl Channel {
     }
 
     fn create_channel(mut options: Options) -> Result<Channel, AresError> {
+        // Initialize the library.
         let lib_rc = unsafe {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
         };
@@ -142,6 +172,22 @@ impl Channel {
             return Err(ares_error(lib_rc))
         }
 
+        // We deferred setting up domains in the options - do it now.
+        let domains: Vec<_> = options.domains
+            .iter()
+            .map(|s| s.as_ptr())
+            .collect();
+        options.ares_options.domains =
+            domains.as_ptr() as *mut *mut libc::c_char;
+        options.ares_options.ndomains = domains.len() as libc::c_int;
+
+        // Likewise for lookups.
+        for c_lookup in options.lookups.iter() {
+            options.ares_options.lookups =
+                c_lookup.as_ptr() as *mut libc::c_char;
+        }
+
+        // Initialize the channel.
         let mut ares_channel = ptr::null_mut();
         let channel_rc = unsafe {
             c_ares_sys::ares_init_options(

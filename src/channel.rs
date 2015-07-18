@@ -12,6 +12,7 @@ use callbacks::{
     query_aaaa_callback,
 };
 use types::{
+    Flag,
     AresError,
     AResult,
     AAAAResult,
@@ -20,21 +21,76 @@ use types::{
 };
 use utils::ares_error;
 
+pub struct Options {
+    ares_options: c_ares_sys::Struct_ares_options,
+    optmask: libc::c_int,
+}
+
+impl Options {
+    /// Returns a fresh `Options`, on which no values are set.
+    pub fn new() -> Options {
+        Options {
+            ares_options: c_ares_sys::Struct_ares_options::default(),
+            optmask: 0,
+        }
+    }
+
+    /// Set flags controlling the behaviour of the resolver.
+    pub fn set_flags(&mut self, flags: &[Flag]) -> &mut Self {
+        let c_flags: libc::c_int = flags
+            .iter()
+            .fold(0, |acc, &flag| acc | (flag as libc::c_int));
+        self.ares_options.flags = c_flags;
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_FLAGS;
+        self
+    }
+
+    /// Set the number of milliseconds each name server is given to respond to
+    /// a query on the first try.  (After the first try, the timeout algorithm
+    /// becomes more complicated, but scales linearly with the value of
+    /// timeout.) The default is five seconds.
+    pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
+        self.ares_options.timeout = ms as libc::c_int;
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_TIMEOUTMS;
+        self
+    }
+
+    /// Set the number of tries the resolver will try contacting each name
+    /// server before giving up. The default is four tries. 
+    pub fn set_tries(&mut self, tries: u32) -> &mut Self {
+        self.ares_options.tries = tries as libc::c_int;
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_TRIES;
+        self
+    }
+}
+
 /// A channel for name service lookups.
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
 }
 
 impl Channel {
-    /// Create a new channel for name service lookups.
+    /// Create a new channel for name service lookups, providing a callback
+    /// for socket state changes.
     ///
     /// `callback(socket, read, write)` will be called when a socket changes
     /// state:
     ///
     /// -  `read` is set to true if the socket should listen for read events
     /// -  `write` is set to true if the socket should listen to write events.
-    pub fn new<F>(callback: F) -> Result<Channel, AresError> 
+    pub fn new_with_cb<F>(
+        callback: F,
+        mut options: Options) -> Result<Channel, AresError>
         where F: FnMut(io::RawFd, bool, bool) + 'static {
+        options.optmask = options.optmask | c_ares_sys::ARES_OPT_SOCK_STATE_CB;
+        options.ares_options.sock_state_cb = Some(socket_callback::<F>);
+        options.ares_options.sock_state_cb_data = unsafe {
+            mem::transmute(Box::new(callback))
+        };
+        Self::create_channel(options)
+    }
+
+    fn create_channel(mut options: Options) -> Result<Channel, AresError> {
         let lib_rc = unsafe {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
         };
@@ -42,21 +98,12 @@ impl Channel {
             return Err(ares_error(lib_rc))
         }
 
-        // TODO suport user-provided options
         let mut ares_channel = ptr::null_mut();
-        let mut options = c_ares_sys::Struct_ares_options::default();
-        options.flags = c_ares_sys::ARES_FLAG_STAYOPEN;
-        options.timeout = 500;
-        options.tries = 3;
-        options.sock_state_cb = Some(socket_callback::<F>);
-        options.sock_state_cb_data = unsafe { mem::transmute(Box::new(callback)) };
-        let optmask =
-            c_ares_sys::ARES_OPT_FLAGS | 
-            c_ares_sys::ARES_OPT_TIMEOUTMS | 
-            c_ares_sys::ARES_OPT_TRIES |
-            c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         let channel_rc = unsafe {
-            c_ares_sys::ares_init_options(&mut ares_channel, &mut options, optmask)
+            c_ares_sys::ares_init_options(
+                &mut ares_channel,
+                &mut options.ares_options,
+                options.optmask)
         };
         if channel_rc != c_ares_sys::ARES_SUCCESS {
             unsafe { c_ares_sys::ares_library_cleanup(); }
@@ -66,10 +113,9 @@ impl Channel {
         let channel = Channel {
             ares_channel: ares_channel,
         };
-
-        // TODO ares_set_servers() here too?
         Ok(channel)
     }
+
 
     /// Handle input, output, and timeout events associated with the specified
     /// file descriptors (sockets).

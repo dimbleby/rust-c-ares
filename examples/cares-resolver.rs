@@ -167,7 +167,12 @@ fn main() {
             .ok()
             .expect("Failed to send RegisterInterest");
     };
-    let mut ares_channel = c_ares::Channel::new(sock_callback)
+    let mut options = c_ares::Options::new();
+    options
+        .set_flags(&[c_ares::Flag::STAYOPEN])
+        .set_timeout(500)
+        .set_tries(3);
+    let mut ares_channel = c_ares::Channel::new_with_cb(sock_callback, options)
         .ok()
         .expect("Failed to create channel");
 

@@ -89,6 +89,23 @@ impl Options {
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TCP_PORT;
         self
     }
+
+    // TODO set_domains and set_lookups()
+
+
+    /// Set the socket send buffer size.
+    pub fn set_sock_send_buffer_size(&mut self, size: u32) -> &mut Self {
+        self.ares_options.socket_send_buffer_size = size as libc::c_int;
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_SNDBUF;
+        self
+    }
+
+    /// Set the socket receive buffer size.
+    pub fn set_sock_receive_buffer_size(&mut self, size: u32) -> &mut Self {
+        self.ares_options.socket_receive_buffer_size = size as libc::c_int;
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_RCVBUF;
+        self
+    }
 }
 
 /// A channel for name service lookups.

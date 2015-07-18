@@ -44,7 +44,7 @@ pub enum Flag {
 }
 
 /// An invalid file descriptor.  Use this to represent 'no action' when calling
-/// `Channel::process_fd()`.
+/// `process_fd()` on a channel.
 pub const INVALID_FD: io::RawFd = c_ares_sys::ARES_SOCKET_BAD as io::RawFd;
 
 /// Error codes that the library might return.  Use `str_error()` to convert an

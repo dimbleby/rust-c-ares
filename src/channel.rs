@@ -105,8 +105,8 @@ impl Options {
         self
     }
 
-    /// Set the lookups to perform for host queries. lookups should be set to a
-    /// string of the characters "b" or "f", where "b" indicates a DNS lookup
+    /// Set the lookups to perform for host queries. `lookups` should be set to
+    /// a string of the characters "b" or "f", where "b" indicates a DNS lookup
     /// and "f" indicates a lookup in the hosts file.
     pub fn set_lookups(&mut self, lookups: &str) -> &mut Self {
         let c_lookups = CString::new(lookups).unwrap();

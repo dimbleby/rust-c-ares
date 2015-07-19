@@ -10,9 +10,13 @@ use callbacks::{
     socket_callback,
     query_a_callback,
     query_aaaa_callback,
+    query_cname_callback,
 };
+use cname::{
+    CNameResult,
+};
+use flags::Flags;
 use types::{
-    Flag,
     AresError,
     AResult,
     AAAAResult,
@@ -22,6 +26,7 @@ use types::{
 use utils::ares_error;
 
 /// Used to configure the behaviour of the name resolver.
+#[derive(Clone)]
 pub struct Options {
     ares_options: c_ares_sys::Struct_ares_options,
     optmask: libc::c_int,
@@ -40,12 +45,10 @@ impl Options {
         }
     }
 
-    /// Set flags controlling the behaviour of the resolver.
-    pub fn set_flags(&mut self, flags: &[Flag]) -> &mut Self {
-        let c_flags: libc::c_int = flags
-            .iter()
-            .fold(0, |acc, &flag| acc | (flag as libc::c_int));
-        self.ares_options.flags = c_flags;
+    /// Set flags controlling the behaviour of the resolver.  The available
+    /// flags are documented [here](flags/index.html).
+    pub fn set_flags(&mut self, flags: Flags) -> &mut Self {
+        self.ares_options.flags = flags.bits();
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_FLAGS;
         self
     }
@@ -144,6 +147,7 @@ impl Options {
 }
 
 /// A channel for name service lookups.
+#[derive(Debug)]
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
 }
@@ -279,6 +283,24 @@ impl Channel {
                 DnsClass::IN as libc::c_int,
                 QueryType::AAAA as libc::c_int,
                 Some(query_aaaa_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Look up the CNAME record associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn query_cname<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<CNameResult, AresError>) + 'static {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as libc::c_int,
+                QueryType::CNAME as libc::c_int,
+                Some(query_cname_callback::<F>),
                 c_arg);
         }
     }

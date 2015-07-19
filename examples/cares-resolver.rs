@@ -128,10 +128,10 @@ fn print_a_result(result: Result<c_ares::AResult, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("Lookup failed with error '{:}'", err_string);
+            println!("A lookup failed with error '{:}'", err_string);
         }
         Ok(result) => {
-            println!("Successful lookup...");
+            println!("Successful A lookup...");
             for addr in &result.ip_addrs {
                 println!("{:}", addr);
             }
@@ -143,13 +143,26 @@ fn print_aaaa_result(result: Result<c_ares::AAAAResult, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("Lookup failed with error '{:}'", err_string);
+            println!("AAAA lookup failed with error '{:}'", err_string);
         }
         Ok(result) => {
-            println!("Successful lookup...");
+            println!("Successful AAAA lookup...");
             for addr in &result.ip_addrs {
                 println!("{:}", addr);
             }
+        }
+    }
+}
+
+fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("CNAME lookup failed with error '{:}'", err_string);
+        }
+        Ok(result) => {
+            println!("Successful CNAME lookup...");
+            println!("{}", result.cname);
         }
     }
 }
@@ -169,7 +182,7 @@ fn main() {
     };
     let mut options = c_ares::Options::new();
     options
-        .set_flags(&[c_ares::Flag::STAYOPEN])
+        .set_flags(c_ares::flags::STAYOPEN | c_ares::flags::EDNS)
         .set_timeout(500)
         .set_tries(3);
     let mut ares_channel = c_ares::Channel::new(sock_callback, options)
@@ -190,6 +203,12 @@ fn main() {
         tx.send(()).unwrap()
     });
 
+    let tx = results_tx.clone();
+    ares_channel.query_cname("dimbleby.github.io", move |result| {
+        print_cname_result(result);
+        tx.send(()).unwrap()
+    });
+
     // Set the first instance of the recurring timer on the event loop.
     event_loop.timeout_ms((), 500).unwrap();
 
@@ -203,7 +222,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..2 {
+    for _ in 0..3 {
         results_rx.recv().unwrap();
     }
 

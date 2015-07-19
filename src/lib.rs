@@ -24,8 +24,11 @@
 //!
 //! Complete examples showing how to use the library can be found
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
+#[macro_use] extern crate bitflags;
 mod callbacks;
 mod channel;
+mod cname;
+pub mod flags;
 mod parsers;
 mod types;
 mod utils;
@@ -35,6 +38,10 @@ pub use channel::{
     Channel,
     Options
 };
+pub use cname::{
+    CNameResult,
+    parse_cname_result,
+};
 pub use parsers::{
     parse_a_result,
     parse_aaaa_result,
@@ -43,7 +50,6 @@ pub use types::{
     AresError,
     AResult,
     AAAAResult,
-    Flag,
     INVALID_FD,
 };
 pub use utils::str_error;

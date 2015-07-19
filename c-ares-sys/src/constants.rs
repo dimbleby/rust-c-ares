@@ -1,3 +1,7 @@
+extern crate libc;
+
+use ffi::ares_socket_t;
+
 // Library initialization flags
 pub const ARES_LIB_INIT_NONE: libc::c_int = 0;
 pub const ARES_LIB_INIT_WIN32: libc::c_int = 1;

@@ -112,6 +112,6 @@ pub fn parse_cname_result(data: &[u8]) -> Result<CNameResult, AresError> {
     if parse_status != c_ares_sys::ARES_SUCCESS {
         return Err(ares_error(parse_status))
     }
-    let result = CNameResult::new(hostent);
+    let result = unsafe { CNameResult::new(hostent) };
     Ok(result)
 }

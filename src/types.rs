@@ -67,8 +67,8 @@ pub struct CNameResult<'a> {
 }
 
 impl<'a> CNameResult<'a> {
-    pub fn new(hostent: *mut hostent) -> CNameResult<'a> {
-        let c_str = unsafe { CStr::from_ptr((*hostent).h_name) };
+    pub unsafe fn new(hostent: *mut hostent) -> CNameResult<'a> {
+        let c_str = CStr::from_ptr((*hostent).h_name);
         let slice = str::from_utf8(c_str.to_bytes()).unwrap();
         CNameResult {
             cname: slice,

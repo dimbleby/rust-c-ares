@@ -219,6 +219,12 @@ fn main() {
     });
 
     let tx = results_tx.clone();
+    ares_channel.query_srv("_sip._tcp.example.com.", move |result| {
+        print_srv_result(result);
+        tx.send(()).unwrap()
+    });
+
+    let tx = results_tx.clone();
     ares_channel.query_cname("dimbleby.github.io", move |result| {
         print_cname_result(result);
         tx.send(()).unwrap()
@@ -237,7 +243,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..3 {
+    for _ in 0..4 {
         results_rx.recv().unwrap();
     }
 

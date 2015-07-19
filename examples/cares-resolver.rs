@@ -154,6 +154,21 @@ fn print_aaaa_result(result: Result<c_ares::AAAAResult, c_ares::AresError>) {
     }
 }
 
+fn print_srv_result(result: Result<Vec<c_ares::SRVResult>, c_ares::AresError>) {
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("SRV lookup failed with error '{:}'", err_string);
+        }
+        Ok(result) => {
+            println!("Successful SRV lookup...");
+            for entry in result {
+                println!("{:}", entry.host);
+            }
+        }
+    }
+}
+
 fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
     match result {
         Err(e) => {

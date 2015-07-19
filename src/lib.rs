@@ -46,6 +46,7 @@ pub use types::{
     AresError,
     AResult,
     AAAAResult,
+    SRVResult,
     CNameResult,
     INVALID_FD,
 };

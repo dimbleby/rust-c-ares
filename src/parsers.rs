@@ -10,6 +10,7 @@ use types::{
     AresError,
     AResult,
     AAAAResult,
+    SRVResult,
     CNameResult,
     hostent,
 };
@@ -105,6 +106,40 @@ pub fn parse_aaaa_result(data: &[u8]) -> Result<AAAAResult, AresError> {
         ip_addrs: answers,
     };
     Ok(result)
+}
+
+/// Parse the response to an SRV lookup.
+///
+/// Users typically won't need to call this function - it's an internal utility
+/// that is made public just in case someone finds a use for it.
+pub fn parse_srv_result(data: &[u8]) -> Result<Vec<SRVResult>, AresError> {
+    let mut srv_reply: *mut c_ares_sys::Struct_ares_srv_reply = ptr::null_mut();
+    let parse_status = unsafe {
+        c_ares_sys::ares_parse_srv_reply(
+            data.as_ptr(),
+            data.len() as libc::c_int,
+            &mut srv_reply as *mut *mut _ as *mut *mut c_ares_sys::Struct_ares_srv_reply)
+    };
+    if parse_status != c_ares_sys::ARES_SUCCESS {
+        return Err(ares_error(parse_status))
+    }
+
+    let mut answers = Vec::new();
+    unsafe {
+        let mut next = srv_reply;
+        while !next.is_null() {
+            //answers.push(ip_addr);
+            next = (*next).next;
+        }
+        c_ares_sys::ares_free_data(srv_reply as *mut libc::c_void);
+    }
+    let result = SRVResult {
+        host: String::new(),
+        weight: 2,
+        priority: 3,
+        port: 4,
+    };
+    Ok(answers)
 }
 
 /// Parse the response to a CNAME lookup.

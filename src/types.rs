@@ -59,6 +59,22 @@ pub struct AAAAResult {
     pub ip_addrs: Vec<Ipv6Addr>,
 }
 
+/// The result of a successful lookup for an SRV record.
+#[derive(Debug, Clone)]
+pub struct SRVResult {
+    /// Host
+    pub host: String,
+
+    /// Weight
+    pub weight: u32,
+
+    /// Priority
+    pub priority: u32,
+
+    /// Port
+    pub port: u32,
+}
+
 /// The result of a successful lookup for a CNAME record.
 #[derive(Debug, Clone)]
 pub struct CNameResult {
@@ -80,6 +96,7 @@ pub enum QueryType {
     A = 1,
     CNAME = 5,
     AAAA = 28,
+    SRV = 33,
 }
 
 // See arpa/nameser.h

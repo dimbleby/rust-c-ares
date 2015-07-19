@@ -53,6 +53,13 @@ pub struct AAAAResult {
     pub ip_addrs: Vec<Ipv6Addr>,
 }
 
+/// The result of a successful lookup for a CNAME record.
+#[derive(Debug, Clone)]
+pub struct CNameResult {
+    /// The canonical name record.
+    pub cname: String,
+}
+
 #[repr(C)]
 pub struct hostent {
     pub h_name: *mut libc::c_char,
@@ -65,6 +72,7 @@ pub struct hostent {
 // See arpa/nameser.h
 pub enum QueryType {
     A = 1,
+    CNAME = 5,
     AAAA = 28,
 }
 

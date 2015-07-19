@@ -145,7 +145,7 @@ impl Options {
 }
 
 /// A channel for name service lookups.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
 }

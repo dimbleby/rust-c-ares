@@ -10,6 +10,7 @@ use callbacks::{
     socket_callback,
     query_a_callback,
     query_aaaa_callback,
+    query_srv_callback,
     query_cname_callback,
 };
 use flags::Flags;
@@ -17,6 +18,7 @@ use types::{
     AresError,
     AResult,
     AAAAResult,
+    SRVResult,
     CNameResult,
     DnsClass,
     QueryType,
@@ -281,6 +283,24 @@ impl Channel {
                 DnsClass::IN as libc::c_int,
                 QueryType::AAAA as libc::c_int,
                 Some(query_aaaa_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Look up the SRV record associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn query_srv<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<Vec<SRVResult>, AresError>) + 'static {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as libc::c_int,
+                QueryType::SRV as libc::c_int,
+                Some(query_srv_callback::<F>),
                 c_arg);
         }
     }

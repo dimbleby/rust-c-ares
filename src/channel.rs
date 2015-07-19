@@ -12,12 +12,14 @@ use callbacks::{
     query_aaaa_callback,
     query_cname_callback,
 };
+use cname::{
+    CNameResult,
+};
 use flags::Flags;
 use types::{
     AresError,
     AResult,
     AAAAResult,
-    CNameResult,
     DnsClass,
     QueryType,
 };

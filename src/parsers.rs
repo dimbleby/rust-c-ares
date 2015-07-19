@@ -8,7 +8,6 @@ use types::{
     AresError,
     AResult,
     AAAAResult,
-    CNameResult,
     hostent,
 };
 use utils::ares_error;
@@ -92,26 +91,5 @@ pub fn parse_aaaa_result(data: &[u8]) -> Result<AAAAResult, AresError> {
     let result = AAAAResult {
         ip_addrs: answers,
     };
-    Ok(result)
-}
-
-/// Parse the response to a CNAME lookup.
-///
-/// Users typically won't need to call this function - it's an internal utility
-/// that is made public just in case someone finds a use for it.
-pub fn parse_cname_result(data: &[u8]) -> Result<CNameResult, AresError> {
-    let mut hostent: *mut hostent = ptr::null_mut();
-    let parse_status = unsafe {
-        c_ares_sys::ares_parse_a_reply(
-            data.as_ptr(),
-            data.len() as libc::c_int,
-            &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
-            ptr::null_mut(),
-            ptr::null_mut())
-    };
-    if parse_status != c_ares_sys::ARES_SUCCESS {
-        return Err(ares_error(parse_status))
-    }
-    let result = unsafe { CNameResult::new(hostent) };
     Ok(result)
 }

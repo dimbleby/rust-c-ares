@@ -1,10 +1,8 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use std::ffi::CStr;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::os::unix::io;
-use std::str;
 
 /// An invalid file descriptor.  Use this to represent 'no action' when calling
 /// `process_fd()` on a channel.
@@ -53,37 +51,6 @@ pub struct AResult {
 pub struct AAAAResult {
     /// The IP addresses returned by the lookup.
     pub ip_addrs: Vec<Ipv6Addr>,
-}
-
-/// The result of a successful lookup for a CNAME record.
-#[allow(raw_pointer_derive)]
-#[derive(Debug)]
-pub struct CNameResult<'a> {
-    /// The canonical name record.
-    pub cname: &'a str,
-
-    /// The underlying hostent into which the cname string points.
-    hostent: *mut hostent,
-}
-
-impl<'a> CNameResult<'a> {
-    pub unsafe fn new(hostent: *mut hostent) -> CNameResult<'a> {
-        let c_str = CStr::from_ptr((*hostent).h_name);
-        let slice = str::from_utf8(c_str.to_bytes()).unwrap();
-        CNameResult {
-            cname: slice,
-            hostent: hostent,
-        }
-    }
-}
-
-impl<'a> Drop for CNameResult<'a> {
-    fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_free_hostent(
-                self.hostent as *mut c_ares_sys::Struct_hostent);
-        }
-    }
 }
 
 #[repr(C)]

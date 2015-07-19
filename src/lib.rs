@@ -27,6 +27,7 @@
 #[macro_use] extern crate bitflags;
 mod callbacks;
 mod channel;
+mod cname;
 pub mod flags;
 mod parsers;
 mod types;
@@ -37,16 +38,18 @@ pub use channel::{
     Channel,
     Options
 };
+pub use cname::{
+    CNameResult,
+    parse_cname_result,
+};
 pub use parsers::{
     parse_a_result,
     parse_aaaa_result,
-    parse_cname_result,
 };
 pub use types::{
     AresError,
     AResult,
     AAAAResult,
-    CNameResult,
     INVALID_FD,
 };
 pub use utils::str_error;

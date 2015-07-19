@@ -5,16 +5,18 @@ use std::mem;
 use std::os::unix::io;
 use std::slice;
 
+use cname::{
+    CNameResult,
+    parse_cname_result,
+};
 use parsers::{
     parse_a_result,
     parse_aaaa_result,
-    parse_cname_result,
 };
 use types::{
     AresError,
     AResult,
     AAAAResult,
-    CNameResult,
 };
 use utils::ares_error;
 

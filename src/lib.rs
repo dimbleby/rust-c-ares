@@ -40,6 +40,7 @@ pub use channel::{
 pub use parsers::{
     parse_a_result,
     parse_aaaa_result,
+    parse_srv_result,
     parse_cname_result,
 };
 pub use types::{

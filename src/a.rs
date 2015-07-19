@@ -1,6 +1,7 @@
 extern crate c_ares_sys;
 extern crate libc;
 
+use std::marker::PhantomData;
 use std::net::Ipv4Addr;
 use std::ptr;
 
@@ -11,10 +12,114 @@ use types::{
 use utils::ares_error;
 
 /// The result of a successful lookup for an A record.
-#[derive(Debug, Clone)]
 pub struct AResult {
-    /// The IP addresses returned by the lookup.
-    pub ip_addrs: Vec<Ipv4Addr>,
+    hostent: *mut hostent,
+}
+
+impl AResult {
+    fn new(hostent: *mut hostent) -> AResult {
+        AResult {
+            hostent: hostent,
+        }
+    }
+
+    /// Returns an iterator over the `Ipv4Address` values in this `AResult`.
+    pub fn iter(&self) -> AResultIterator {
+        AResultIterator {
+            next: unsafe { (*self.hostent).h_addr_list },
+            phantom: PhantomData,
+        }
+    }
+}
+
+pub struct AResultIntoIterator {
+    next: *mut *mut libc::c_char,
+
+    // Access to the IP addresses is all through the `next` pointer, but we
+    // need to keep the AResult around so that this points to valid memory.
+    #[allow(dead_code)]
+    a_result: AResult,
+}
+
+pub struct AResultIterator<'a> {
+    next: *mut *mut libc::c_char,
+
+    // We need the phantom data to make sure that the `next` pointer remains
+    // valid through the lifetime of this structure.
+    phantom: PhantomData<&'a AResult>,
+}
+
+impl IntoIterator for AResult {
+    type Item = Ipv4Addr;
+    type IntoIter = AResultIntoIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        AResultIntoIterator {
+            next: unsafe { (*self.hostent).h_addr_list },
+            a_result: self,
+        }
+    }
+}
+
+impl<'a> IntoIterator for &'a AResult {
+    type Item = Ipv4Addr;
+    type IntoIter = AResultIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        AResultIterator {
+            next: unsafe { (*self.hostent).h_addr_list },
+            phantom: PhantomData,
+        }
+    }
+}
+
+unsafe fn ipv4_addr_from_ptr(h_addr: *mut libc::c_char) -> Ipv4Addr {
+    Ipv4Addr::new(
+        *h_addr as u8,
+        *h_addr.offset(1) as u8,
+        *h_addr.offset(2) as u8,
+        *h_addr.offset(3) as u8)
+}
+
+impl Iterator for AResultIntoIterator {
+    type Item = Ipv4Addr;
+    fn next(&mut self) -> Option<Ipv4Addr> {
+        unsafe {
+            let h_addr = *(self.next);
+            if h_addr.is_null() {
+                None
+            } else {
+                self.next = self.next.offset(1);
+                let ip_addr = ipv4_addr_from_ptr(h_addr);
+                Some(ip_addr)
+            }
+        }
+    }
+}
+
+impl<'a> Iterator for AResultIterator<'a> {
+    type Item = Ipv4Addr;
+    fn next(&mut self) -> Option<Ipv4Addr> {
+        unsafe {
+            let h_addr = *(self.next);
+            if h_addr.is_null() {
+                None
+            } else {
+                self.next = self.next.offset(1);
+                let ip_addr = ipv4_addr_from_ptr(h_addr);
+                Some(ip_addr)
+            }
+        }
+    }
+}
+
+impl Drop for AResult {
+    fn drop(&mut self) {
+        unsafe {
+            c_ares_sys::ares_free_hostent(
+                self.hostent as *mut c_ares_sys::Struct_hostent);
+        }
+    }
 }
 
 /// Parse the response to an A lookup.
@@ -32,26 +137,9 @@ pub fn parse_a_result(data: &[u8]) -> Result<AResult, AresError> {
             ptr::null_mut())
     };
     if parse_status != c_ares_sys::ARES_SUCCESS {
-        return Err(ares_error(parse_status))
+        Err(ares_error(parse_status))
+    } else {
+        let result = AResult::new(hostent);
+        Ok(result)
     }
-
-    let mut answers = Vec::new();
-    unsafe {
-        let mut ptr = (*hostent).h_addr_list;
-        while !(*ptr).is_null() {
-            let h_addr = *ptr;
-            let ip_addr = Ipv4Addr::new(
-                *h_addr as u8,
-                *h_addr.offset(1) as u8,
-                *h_addr.offset(2) as u8,
-                *h_addr.offset(3) as u8);
-            answers.push(ip_addr);
-            ptr = ptr.offset(1);
-        }
-        c_ares_sys::ares_free_hostent(hostent as *mut c_ares_sys::Struct_hostent);
-    }
-    let result = AResult {
-        ip_addrs: answers,
-    };
-    Ok(result)
 }

@@ -37,8 +37,7 @@ pub fn parse_a_result(data: &[u8]) -> Result<AResult, AresError> {
     let mut h_name;
     unsafe {
         let c_str: &CStr = CStr::from_ptr((*hostent).h_name);
-        let buf: &[u8] = c_str.to_bytes();
-        h_name = str::from_utf8(buf).unwrap().to_owned();
+        h_name = str::from_utf8(c_str.to_bytes()).unwrap().to_owned();
 
         let mut ptr = (*hostent).h_addr_list;
         while !(*ptr).is_null() {
@@ -54,7 +53,7 @@ pub fn parse_a_result(data: &[u8]) -> Result<AResult, AresError> {
         c_ares_sys::ares_free_hostent(hostent as *mut c_ares_sys::Struct_hostent);
     }
     let result = AResult {
-        query: h_name,
+        domain: h_name,
         ip_addrs: answers,
     };
     Ok(result)
@@ -79,7 +78,11 @@ pub fn parse_aaaa_result(data: &[u8]) -> Result<AAAAResult, AresError> {
     }
 
     let mut answers = Vec::new();
+    let mut h_name;
     unsafe {
+        let c_str: &CStr = CStr::from_ptr((*hostent).h_name);
+        h_name = str::from_utf8(c_str.to_bytes()).unwrap().to_owned();
+
         let mut ptr = (*hostent).h_addr_list;
         while !(*ptr).is_null() {
             let h_addr = *ptr;
@@ -98,6 +101,7 @@ pub fn parse_aaaa_result(data: &[u8]) -> Result<AAAAResult, AresError> {
         c_ares_sys::ares_free_hostent(hostent as *mut c_ares_sys::Struct_hostent);
     }
     let result = AAAAResult {
+        domain: h_name,
         ip_addrs: answers,
     };
     Ok(result)

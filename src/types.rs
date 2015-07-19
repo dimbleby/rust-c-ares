@@ -42,8 +42,8 @@ pub enum AresError {
 /// The result of a successful lookup for an A record.
 #[derive(Debug, Clone)]
 pub struct AResult {
-    /// The query
-    pub query: String,
+    /// Official domain name
+    pub domain: String,
 
     /// The IP addresses returned by the lookup.
     pub ip_addrs: Vec<Ipv4Addr>,
@@ -52,6 +52,9 @@ pub struct AResult {
 /// The result of a successful lookup for an AAAA record.
 #[derive(Debug, Clone)]
 pub struct AAAAResult {
+    /// Official domain name
+    pub domain: String,
+
     /// The IP addresses returned by the lookup.
     pub ip_addrs: Vec<Ipv6Addr>,
 }

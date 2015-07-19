@@ -131,7 +131,7 @@ fn print_a_result(result: Result<c_ares::AResult, c_ares::AresError>) {
             println!("A lookup failed with error '{:}'", err_string);
         }
         Ok(result) => {
-            println!("Successful A lookup for {}:", result.query);
+            println!("Successful A lookup for {}:", result.domain);
             for addr in &result.ip_addrs {
                 println!("{:}", addr);
             }
@@ -146,7 +146,7 @@ fn print_aaaa_result(result: Result<c_ares::AAAAResult, c_ares::AresError>) {
             println!("AAAA lookup failed with error '{:}'", err_string);
         }
         Ok(result) => {
-            println!("Successful AAAA lookup...");
+            println!("Successful AAAA lookup for {}:", result.domain);
             for addr in &result.ip_addrs {
                 println!("{:}", addr);
             }

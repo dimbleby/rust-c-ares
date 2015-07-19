@@ -10,4 +10,4 @@ readme = "README.md"
 keywords = ["DNS", "c-ares"]
 
 [dependencies]
-libc = "*"
+libc = "0.1.0"

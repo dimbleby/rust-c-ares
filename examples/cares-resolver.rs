@@ -219,7 +219,7 @@ fn main() {
     });
 
     let tx = results_tx.clone();
-    ares_channel.query_srv("_sip._tcp.example.com.", move |result| {
+    ares_channel.query_srv("_sip._tcp.google.com.", move |result| {
         print_srv_result(result);
         tx.send(()).unwrap()
     });

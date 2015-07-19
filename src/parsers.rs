@@ -1,10 +1,8 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use std::ffi::CStr;
 use std::net::{Ipv4Addr, Ipv6Addr};
 use std::ptr;
-use std::str;
 
 use types::{
     AresError,
@@ -114,15 +112,6 @@ pub fn parse_cname_result(data: &[u8]) -> Result<CNameResult, AresError> {
     if parse_status != c_ares_sys::ARES_SUCCESS {
         return Err(ares_error(parse_status))
     }
-
-    let hostname = unsafe {
-        let slice = CStr::from_ptr((*hostent).h_name);
-        let hostname = str::from_utf8(slice.to_bytes()).unwrap().to_owned();
-        c_ares_sys::ares_free_hostent(hostent as *mut c_ares_sys::Struct_hostent);
-        hostname
-    };
-    let result = CNameResult {
-        cname: hostname,
-    };
+    let result = CNameResult::new(hostent);
     Ok(result)
 }

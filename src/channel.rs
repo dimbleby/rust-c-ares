@@ -6,20 +6,18 @@ use std::mem;
 use std::os::unix::io;
 use std::ptr;
 
+use a:: AResult;
+use aaaa:: AAAAResult;
 use callbacks::{
     socket_callback,
     query_a_callback,
     query_aaaa_callback,
     query_cname_callback,
 };
-use cname::{
-    CNameResult,
-};
+use cname:: CNameResult;
 use flags::Flags;
 use types::{
     AresError,
-    AResult,
-    AAAAResult,
     DnsClass,
     QueryType,
 };

@@ -5,19 +5,19 @@ use std::mem;
 use std::os::unix::io;
 use std::slice;
 
+use a::{
+    AResult,
+    parse_a_result,
+};
+use aaaa::{
+    AAAAResult,
+    parse_aaaa_result,
+};
 use cname::{
     CNameResult,
     parse_cname_result,
 };
-use parsers::{
-    parse_a_result,
-    parse_aaaa_result,
-};
-use types::{
-    AresError,
-    AResult,
-    AAAAResult,
-};
+use types::AresError;
 use utils::ares_error;
 
 pub unsafe extern "C" fn socket_callback<F>(

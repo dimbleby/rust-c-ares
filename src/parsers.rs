@@ -128,17 +128,18 @@ pub fn parse_srv_result(data: &[u8]) -> Result<Vec<SRVResult>, AresError> {
     unsafe {
         let mut next = srv_reply;
         while !next.is_null() {
-            //answers.push(ip_addr);
+            let slice = CStr::from_ptr((*next).host);
+            let result = SRVResult {
+                host: str::from_utf8(slice.to_bytes()).unwrap().to_owned(),
+                weight: (*next).weight,
+                priority: (*next).priority,
+                port: (*next).port,
+            };
+            answers.push(result);
             next = (*next).next;
         }
         c_ares_sys::ares_free_data(srv_reply as *mut libc::c_void);
     }
-    let result = SRVResult {
-        host: String::new(),
-        weight: 2,
-        priority: 3,
-        port: 4,
-    };
     Ok(answers)
 }
 

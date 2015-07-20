@@ -66,13 +66,13 @@ pub struct SRVResult {
     pub host: String,
 
     /// Weight
-    pub weight: u32,
+    pub weight: u16,
 
     /// Priority
-    pub priority: u32,
+    pub priority: u16,
 
     /// Port
-    pub port: u32,
+    pub port: u16,
 }
 
 /// The result of a successful lookup for a CNAME record.

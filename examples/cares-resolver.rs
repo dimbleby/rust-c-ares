@@ -130,9 +130,9 @@ fn print_a_result(result: Result<c_ares::AResult, c_ares::AresError>) {
             let err_string = c_ares::str_error(e);
             println!("A lookup failed with error '{:}'", err_string);
         }
-        Ok(result) => {
-            println!("Successful A lookup for {}:", result.domain);
-            for addr in &result.ip_addrs {
+        Ok(a_result) => {
+            println!("Successful A lookup...");
+            for addr in &a_result {
                 println!("{:}", addr);
             }
         }
@@ -145,9 +145,9 @@ fn print_aaaa_result(result: Result<c_ares::AAAAResult, c_ares::AresError>) {
             let err_string = c_ares::str_error(e);
             println!("AAAA lookup failed with error '{:}'", err_string);
         }
-        Ok(result) => {
-            println!("Successful AAAA lookup for {}:", result.domain);
-            for addr in &result.ip_addrs {
+        Ok(aaaa_result) => {
+            println!("Successful AAAA lookup...");
+            for addr in &aaaa_result {
                 println!("{:}", addr);
             }
         }
@@ -179,9 +179,9 @@ fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
             let err_string = c_ares::str_error(e);
             println!("CNAME lookup failed with error '{:}'", err_string);
         }
-        Ok(result) => {
+        Ok(cname_result) => {
             println!("Successful CNAME lookup...");
-            println!("{}", result.cname);
+            println!("{}", cname_result.cname());
         }
     }
 }

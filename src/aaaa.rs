@@ -19,7 +19,7 @@ pub struct AAAAResult {
 }
 
 impl AAAAResult {
-    /// Obtain an AAAAResult from the response to an AAAA lookup.
+    /// Obtain an `AAAAResult` from the response to an AAAA lookup.
     pub fn parse_from(data: &[u8]) -> Result<AAAAResult, AresError> {
         let mut hostent: *mut hostent = ptr::null_mut();
         let parse_status = unsafe {

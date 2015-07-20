@@ -19,7 +19,7 @@ pub struct CNameResult {
 }
 
 impl CNameResult {
-    /// Obtain a CNameResult from the response to a CNAME lookup.
+    /// Obtain a `CNameResult` from the response to a CNAME lookup.
     pub fn parse_from(data: &[u8]) -> Result<CNameResult, AresError> {
         let mut hostent: *mut hostent = ptr::null_mut();
         let parse_status = unsafe {

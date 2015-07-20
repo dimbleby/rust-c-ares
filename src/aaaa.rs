@@ -1,11 +1,13 @@
 extern crate c_ares_sys;
 extern crate libc;
 
+use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::mem;
 use std::net::Ipv6Addr;
 use std::ptr;
 use std::slice;
+use std::str;
 
 use types::{
     AresError,
@@ -40,6 +42,14 @@ impl AAAAResults {
     fn new(hostent: *mut hostent) -> AAAAResults {
         AAAAResults {
             hostent: hostent,
+        }
+    }
+
+    /// Get the hostname from this `AAAAResults`.
+    pub fn hostname(&self) -> &str {
+        unsafe {
+            let c_str = CStr::from_ptr((*self.hostent).h_name);
+            str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 

@@ -2,7 +2,9 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::mem;
 use std::ptr;
+use std::slice;
 use std::str;
 
 use types::{
@@ -59,4 +61,21 @@ impl<'a> Drop for CNameResult<'a> {
                 self.hostent as *mut c_ares_sys::Struct_hostent);
         }
     }
+}
+
+pub unsafe extern "C" fn query_cname_callback<F>(
+    arg: *mut libc::c_void,
+    status: libc::c_int,
+    _timeouts: libc::c_int,
+    abuf: *mut libc::c_uchar,
+    alen: libc::c_int)
+    where F: FnOnce(Result<CNameResult, AresError>) + 'static {
+    let result = if status != c_ares_sys::ARES_SUCCESS {
+        Err(ares_error(status))
+    } else {
+        let data = slice::from_raw_parts(abuf, alen as usize);
+        CNameResult::parse_from(data)
+    };
+    let handler: Box<F> = mem::transmute(arg);
+    handler(result);
 }

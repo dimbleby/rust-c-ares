@@ -6,15 +6,18 @@ use std::mem;
 use std::os::unix::io;
 use std::ptr;
 
-use a:: AResult;
-use aaaa:: AAAAResult;
-use callbacks::{
-    socket_callback,
+use a::{
+    AResult,
     query_a_callback,
+};
+use aaaa::{
+    AAAAResult,
     query_aaaa_callback,
+};
+use cname::{
+    CNameResult,
     query_cname_callback,
 };
-use cname:: CNameResult;
 use flags::Flags;
 use types::{
     AresError,
@@ -314,3 +317,13 @@ impl Drop for Channel {
 }
 
 unsafe impl Send for Channel { }
+
+pub unsafe extern "C" fn socket_callback<F>(
+    data: *mut libc::c_void,
+    socket_fd: c_ares_sys::ares_socket_t,
+    readable: libc::c_int,
+    writable: libc::c_int)
+    where F: FnMut(io::RawFd, bool, bool) + 'static {
+    let mut handler: Box<F> = mem::transmute(data);
+    handler(socket_fd as io::RawFd, readable != 0, writable != 0);
+}

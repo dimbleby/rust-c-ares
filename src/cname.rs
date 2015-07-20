@@ -44,6 +44,7 @@ impl CNameResult {
         }
     }
 
+    /// Get the canonical name record from this `CNameResult`.
     pub fn cname(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr((*self.hostent).h_name);

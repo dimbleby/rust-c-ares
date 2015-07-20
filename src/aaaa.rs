@@ -43,7 +43,8 @@ impl AAAAResults {
         }
     }
 
-    /// Returns an iterator over the `Ipv6Address` values in this `AResult`.
+    /// Returns an iterator over the `Ipv6Address` values in this
+    /// `AAAAResults`.
     pub fn iter(&self) -> AAAAResultsIterator {
         AAAAResultsIterator {
             next: unsafe { (*self.hostent).h_addr_list },

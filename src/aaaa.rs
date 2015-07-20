@@ -14,13 +14,13 @@ use types::{
 use utils::ares_error;
 
 /// The result of a successful lookup for an AAAA record.
-pub struct AAAAResult {
+pub struct AAAAResults {
     hostent: *mut hostent,
 }
 
-impl AAAAResult {
-    /// Obtain an `AAAAResult` from the response to an AAAA lookup.
-    pub fn parse_from(data: &[u8]) -> Result<AAAAResult, AresError> {
+impl AAAAResults {
+    /// Obtain an `AAAAResults` from the response to an AAAA lookup.
+    pub fn parse_from(data: &[u8]) -> Result<AAAAResults, AresError> {
         let mut hostent: *mut hostent = ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_aaaa_reply(
@@ -33,60 +33,60 @@ impl AAAAResult {
         if parse_status != c_ares_sys::ARES_SUCCESS {
             Err(ares_error(parse_status))
         } else {
-            let result = AAAAResult::new(hostent);
+            let result = AAAAResults::new(hostent);
             Ok(result)
         }
     }
-    fn new(hostent: *mut hostent) -> AAAAResult {
-        AAAAResult {
+    fn new(hostent: *mut hostent) -> AAAAResults {
+        AAAAResults {
             hostent: hostent,
         }
     }
 
     /// Returns an iterator over the `Ipv6Address` values in this `AResult`.
-    pub fn iter(&self) -> AAAAResultIterator {
-        AAAAResultIterator {
+    pub fn iter(&self) -> AAAAResultsIterator {
+        AAAAResultsIterator {
             next: unsafe { (*self.hostent).h_addr_list },
             phantom: PhantomData,
         }
     }
 }
 
-pub struct AAAAResultIntoIterator {
+pub struct AAAAResultsIntoIterator {
     next: *mut *mut libc::c_char,
 
     // Access to the IP addresses is all through the `next` pointer, but we
-    // need to keep the AAAAResult around so that this points to valid memory.
+    // need to keep the AAAAResults around so that this points to valid memory.
     #[allow(dead_code)]
-    a_result: AAAAResult,
+    a_result: AAAAResults,
 }
 
-pub struct AAAAResultIterator<'a> {
+pub struct AAAAResultsIterator<'a> {
     next: *mut *mut libc::c_char,
 
     // We need the phantom data to make sure that the `next` pointer remains
     // valid through the lifetime of this structure.
-    phantom: PhantomData<&'a AAAAResult>,
+    phantom: PhantomData<&'a AAAAResults>,
 }
 
-impl IntoIterator for AAAAResult {
+impl IntoIterator for AAAAResults {
     type Item = Ipv6Addr;
-    type IntoIter = AAAAResultIntoIterator;
+    type IntoIter = AAAAResultsIntoIterator;
 
     fn into_iter(self) -> Self::IntoIter {
-        AAAAResultIntoIterator {
+        AAAAResultsIntoIterator {
             next: unsafe { (*self.hostent).h_addr_list },
             a_result: self,
         }
     }
 }
 
-impl<'a> IntoIterator for &'a AAAAResult {
+impl<'a> IntoIterator for &'a AAAAResults {
     type Item = Ipv6Addr;
-    type IntoIter = AAAAResultIterator<'a>;
+    type IntoIter = AAAAResultsIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        AAAAResultIterator {
+        AAAAResultsIterator {
             next: unsafe { (*self.hostent).h_addr_list },
             phantom: PhantomData,
         }
@@ -105,7 +105,7 @@ unsafe fn ipv6_addr_from_ptr(h_addr: *mut libc::c_char) -> Ipv6Addr {
         ((*h_addr.offset(14) as u16) << 8) + *h_addr.offset(15) as u16)
 }
 
-impl Iterator for AAAAResultIntoIterator {
+impl Iterator for AAAAResultsIntoIterator {
     type Item = Ipv6Addr;
     fn next(&mut self) -> Option<Ipv6Addr> {
         unsafe {
@@ -121,7 +121,7 @@ impl Iterator for AAAAResultIntoIterator {
     }
 }
 
-impl<'a> Iterator for AAAAResultIterator<'a> {
+impl<'a> Iterator for AAAAResultsIterator<'a> {
     type Item = Ipv6Addr;
     fn next(&mut self) -> Option<Ipv6Addr> {
         unsafe {
@@ -137,7 +137,7 @@ impl<'a> Iterator for AAAAResultIterator<'a> {
     }
 }
 
-impl Drop for AAAAResult {
+impl Drop for AAAAResults {
     fn drop(&mut self) {
         unsafe {
             c_ares_sys::ares_free_hostent(
@@ -152,12 +152,12 @@ pub unsafe extern "C" fn query_aaaa_callback<F>(
     _timeouts: libc::c_int,
     abuf: *mut libc::c_uchar,
     alen: libc::c_int)
-    where F: FnOnce(Result<AAAAResult, AresError>) + 'static {
+    where F: FnOnce(Result<AAAAResults, AresError>) + 'static {
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))
     } else {
         let data = slice::from_raw_parts(abuf, alen as usize);
-        AAAAResult::parse_from(data)
+        AAAAResults::parse_from(data)
     };
     let handler: Box<F> = mem::transmute(arg);
     handler(result);

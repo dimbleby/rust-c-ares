@@ -7,11 +7,11 @@ use std::os::unix::io;
 use std::ptr;
 
 use a::{
-    AResult,
+    AResults,
     query_a_callback,
 };
 use aaaa::{
-    AAAAResult,
+    AAAAResults,
     query_aaaa_callback,
 };
 use cname::{
@@ -256,7 +256,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_a<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AResult, AresError>) + 'static {
+        where F: FnOnce(Result<AResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
         unsafe {
             let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
@@ -274,7 +274,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AAAAResult, AresError>) + 'static {
+        where F: FnOnce(Result<AAAAResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
         unsafe {
             let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));

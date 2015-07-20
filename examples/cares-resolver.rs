@@ -124,30 +124,30 @@ impl CAresEventHandler {
     }
 }
 
-fn print_a_result(result: Result<c_ares::AResult, c_ares::AresError>) {
+fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
             println!("A lookup failed with error '{:}'", err_string);
         }
-        Ok(a_result) => {
+        Ok(a_results) => {
             println!("Successful A lookup...");
-            for addr in &a_result {
+            for addr in &a_results {
                 println!("{:}", addr);
             }
         }
     }
 }
 
-fn print_aaaa_result(result: Result<c_ares::AAAAResult, c_ares::AresError>) {
+fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
             println!("AAAA lookup failed with error '{:}'", err_string);
         }
-        Ok(aaaa_result) => {
+        Ok(aaaa_results) => {
             println!("Successful AAAA lookup...");
-            for addr in &aaaa_result {
+            for addr in &aaaa_results {
                 println!("{:}", addr);
             }
         }
@@ -192,14 +192,14 @@ fn main() {
     // Set up a couple of queries.
     let (results_tx, results_rx) = mpsc::channel();
     let tx = results_tx.clone();
-    ares_channel.query_a("apple.com", move |result| {
-        print_a_result(result);
+    ares_channel.query_a("apple.com", move |results| {
+        print_a_results(results);
         tx.send(()).unwrap()
     });
 
     let tx = results_tx.clone();
-    ares_channel.query_aaaa("google.com", move |result| {
-        print_aaaa_result(result);
+    ares_channel.query_aaaa("google.com", move |results| {
+        print_aaaa_results(results);
         tx.send(()).unwrap()
     });
 

@@ -35,10 +35,10 @@ mod utils;
 
 // Re-export public interfaces.
 pub use a::{
-    AResult,
+    AResults,
 };
 pub use aaaa::{
-    AAAAResult,
+    AAAAResults,
 };
 pub use channel::{
     Channel,

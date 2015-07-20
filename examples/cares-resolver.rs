@@ -125,6 +125,7 @@ impl CAresEventHandler {
 }
 
 fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
+    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -133,7 +134,7 @@ fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
         Ok(a_results) => {
             println!("Successful A lookup...");
             println!("Hostname: {}", a_results.hostname());
-            for addr in &a_results {
+            for addr in a_results.iter() {
                 println!("{:}", addr);
             }
         }
@@ -141,6 +142,7 @@ fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
 }
 
 fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
+    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -149,7 +151,7 @@ fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
         Ok(aaaa_results) => {
             println!("Successful AAAA lookup...");
             println!("Hostname: {}", aaaa_results.hostname());
-            for addr in &aaaa_results {
+            for addr in aaaa_results.iter() {
                 println!("{:}", addr);
             }
         }
@@ -157,6 +159,7 @@ fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
 }
 
 fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
+    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -165,6 +168,25 @@ fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
         Ok(cname_result) => {
             println!("Successful CNAME lookup...");
             println!("{}", cname_result.cname());
+        }
+    }
+}
+
+fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("AAAA lookup failed with error '{:}'", err_string);
+        }
+        Ok(mx_results) => {
+            println!("Successful MX lookup...");
+            for mx_result in mx_results.iter() {
+                println!(
+                    "host {}, priority {}",
+                    mx_result.host(),
+                    mx_result.priority());
+            }
         }
     }
 }
@@ -211,6 +233,12 @@ fn main() {
         tx.send(()).unwrap()
     });
 
+    let tx = results_tx.clone();
+    ares_channel.query_mx("gmail.com", move |results| {
+        print_mx_results(results);
+        tx.send(()).unwrap()
+    });
+
     // Set the first instance of the recurring timer on the event loop.
     event_loop.timeout_ms((), 500).unwrap();
 
@@ -224,7 +252,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..3 {
+    for _ in 0..4 {
         results_rx.recv().unwrap();
     }
 

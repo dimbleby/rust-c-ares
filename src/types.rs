@@ -51,6 +51,7 @@ pub struct hostent {
 pub enum QueryType {
     A = 1,
     CNAME = 5,
+    MX = 15,
     AAAA = 28,
 }
 

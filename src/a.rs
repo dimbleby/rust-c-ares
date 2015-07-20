@@ -63,81 +63,25 @@ impl AResults {
     }
 }
 
-pub struct AResultsIntoIterator {
-    next: *mut *mut libc::c_char,
-
-    // Access to the IP addresses is all through the `next` pointer, but we
-    // need to keep the AResults around so that this points to valid memory.
-    #[allow(dead_code)]
-    a_results: AResults,
-}
-
 pub struct AResultsIterator<'a> {
     next: *mut *mut libc::c_char,
-
-    // We need the phantom data to make sure that the `next` pointer remains
-    // valid through the lifetime of this structure.
     phantom: PhantomData<&'a AResults>,
-}
-
-impl IntoIterator for AResults {
-    type Item = Ipv4Addr;
-    type IntoIter = AResultsIntoIterator;
-
-    fn into_iter(self) -> Self::IntoIter {
-        AResultsIntoIterator {
-            next: unsafe { (*self.hostent).h_addr_list },
-            a_results: self,
-        }
-    }
-}
-
-impl<'a> IntoIterator for &'a AResults {
-    type Item = Ipv4Addr;
-    type IntoIter = AResultsIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        AResultsIterator {
-            next: unsafe { (*self.hostent).h_addr_list },
-            phantom: PhantomData,
-        }
-    }
-}
-
-unsafe fn ipv4_addr_from_ptr(h_addr: *mut libc::c_char) -> Ipv4Addr {
-    Ipv4Addr::new(
-        *h_addr as u8,
-        *h_addr.offset(1) as u8,
-        *h_addr.offset(2) as u8,
-        *h_addr.offset(3) as u8)
-}
-
-impl Iterator for AResultsIntoIterator {
-    type Item = Ipv4Addr;
-    fn next(&mut self) -> Option<Ipv4Addr> {
-        unsafe {
-            let h_addr = *self.next;
-            if h_addr.is_null() {
-                None
-            } else {
-                self.next = self.next.offset(1);
-                let ip_addr = ipv4_addr_from_ptr(h_addr);
-                Some(ip_addr)
-            }
-        }
-    }
 }
 
 impl<'a> Iterator for AResultsIterator<'a> {
     type Item = Ipv4Addr;
-    fn next(&mut self) -> Option<Ipv4Addr> {
+    fn next(&mut self) -> Option<Self::Item> {
         unsafe {
             let h_addr = *self.next;
             if h_addr.is_null() {
                 None
             } else {
                 self.next = self.next.offset(1);
-                let ip_addr = ipv4_addr_from_ptr(h_addr);
+                let ip_addr = Ipv4Addr::new(
+                    *h_addr as u8,
+                    *h_addr.offset(1) as u8,
+                    *h_addr.offset(2) as u8,
+                    *h_addr.offset(3) as u8);
                 Some(ip_addr)
             }
         }

@@ -1,0 +1,119 @@
+extern crate c_ares_sys;
+extern crate libc;
+
+use std::ffi::CStr;
+use std::marker::PhantomData;
+use std::mem;
+use std::ptr;
+use std::slice;
+use std::str;
+
+use types::AresError;
+use utils::ares_error;
+
+/// The result of a successful lookup for an MX record.
+pub struct MXResults {
+    // A list of replies.
+    mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
+}
+
+/// The contents of a single MX record.
+pub struct MXResult<'a> {
+    // A single reply.
+    mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
+    phantom: PhantomData<&'a MXResults>,
+}
+
+impl MXResults {
+    /// Obtain an `MXResults` from the response to an MX lookup.
+    pub fn parse_from(data: &[u8]) -> Result<MXResults, AresError> {
+        let mut mx_reply: *mut c_ares_sys::Struct_ares_mx_reply = ptr::null_mut();
+        let parse_status = unsafe {
+            c_ares_sys::ares_parse_mx_reply(
+                data.as_ptr(),
+                data.len() as libc::c_int,
+                &mut mx_reply)
+        };
+        if parse_status != c_ares_sys::ARES_SUCCESS {
+            Err(ares_error(parse_status))
+        } else {
+            let result = MXResults::new(mx_reply);
+            Ok(result)
+        }
+    }
+    fn new(mx_reply: *mut c_ares_sys::Struct_ares_mx_reply) -> MXResults {
+        MXResults {
+            mx_reply: mx_reply,
+        }
+    }
+
+    /// Returns an iterator over the `MXResult` values in this `MXResults`.
+    pub fn iter(&self) -> MXResultsIterator {
+        MXResultsIterator {
+            next: self.mx_reply,
+            phantom: PhantomData,
+        }
+    }
+}
+
+pub struct MXResultsIterator<'a> {
+    next: *mut c_ares_sys::Struct_ares_mx_reply,
+    phantom: PhantomData<&'a MXResults>,
+}
+
+impl<'a> Iterator for MXResultsIterator<'a> {
+    type Item = MXResult<'a>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let mx_reply = self.next;
+        if mx_reply.is_null() {
+            None
+        } else {
+            unsafe {
+                self.next = (*mx_reply).next;
+                let mx_result = MXResult {
+                    mx_reply: mx_reply,
+                    phantom: PhantomData,
+                };
+                Some(mx_result)
+            }
+        }
+    }
+}
+
+impl Drop for MXResults {
+    fn drop(&mut self) {
+        unsafe {
+            c_ares_sys::ares_free_data(self.mx_reply as *mut libc::c_void);
+        }
+    }
+}
+
+impl<'a> MXResult<'a> {
+    pub fn host(&self) -> &str {
+        unsafe {
+            let c_str = CStr::from_ptr((*self.mx_reply).host);
+            str::from_utf8_unchecked(c_str.to_bytes())
+        }
+    }
+
+    pub fn priority(&self) -> u16 {
+        unsafe { (*self.mx_reply).priority }
+    }
+}
+
+pub unsafe extern "C" fn query_mx_callback<F>(
+    arg: *mut libc::c_void,
+    status: libc::c_int,
+    _timeouts: libc::c_int,
+    abuf: *mut libc::c_uchar,
+    alen: libc::c_int)
+    where F: FnOnce(Result<MXResults, AresError>) + 'static {
+    let result = if status != c_ares_sys::ARES_SUCCESS {
+        Err(ares_error(status))
+    } else {
+        let data = slice::from_raw_parts(abuf, alen as usize);
+        MXResults::parse_from(data)
+    };
+    let handler: Box<F> = mem::transmute(arg);
+    handler(result);
+}

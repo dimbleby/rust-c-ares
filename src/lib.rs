@@ -30,22 +30,21 @@ mod aaaa;
 mod channel;
 mod cname;
 pub mod flags;
+mod mx;
 mod types;
 mod utils;
 
 // Re-export public interfaces.
-pub use a::{
-    AResults,
-};
-pub use aaaa::{
-    AAAAResults,
-};
+pub use a::AResults;
+pub use aaaa::AAAAResults;
 pub use channel::{
     Channel,
-    Options
+    Options,
 };
-pub use cname::{
-    CNameResult,
+pub use cname::CNameResult;
+pub use mx::{
+    MXResults,
+    MXResult,
 };
 pub use types::{
     AresError,

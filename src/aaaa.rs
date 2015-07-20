@@ -63,85 +63,29 @@ impl AAAAResults {
     }
 }
 
-pub struct AAAAResultsIntoIterator {
-    next: *mut *mut libc::c_char,
-
-    // Access to the IP addresses is all through the `next` pointer, but we
-    // need to keep the AAAAResults around so that this points to valid memory.
-    #[allow(dead_code)]
-    aaaa_results: AAAAResults,
-}
-
 pub struct AAAAResultsIterator<'a> {
     next: *mut *mut libc::c_char,
-
-    // We need the phantom data to make sure that the `next` pointer remains
-    // valid through the lifetime of this structure.
     phantom: PhantomData<&'a AAAAResults>,
-}
-
-impl IntoIterator for AAAAResults {
-    type Item = Ipv6Addr;
-    type IntoIter = AAAAResultsIntoIterator;
-
-    fn into_iter(self) -> Self::IntoIter {
-        AAAAResultsIntoIterator {
-            next: unsafe { (*self.hostent).h_addr_list },
-            aaaa_results: self,
-        }
-    }
-}
-
-impl<'a> IntoIterator for &'a AAAAResults {
-    type Item = Ipv6Addr;
-    type IntoIter = AAAAResultsIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        AAAAResultsIterator {
-            next: unsafe { (*self.hostent).h_addr_list },
-            phantom: PhantomData,
-        }
-    }
-}
-
-unsafe fn ipv6_addr_from_ptr(h_addr: *mut libc::c_char) -> Ipv6Addr {
-    Ipv6Addr::new(
-        ((*h_addr as u16) << 8) + *h_addr.offset(1) as u16,
-        ((*h_addr.offset(2) as u16) << 8) + *h_addr.offset(3) as u16,
-        ((*h_addr.offset(4) as u16) << 8) + *h_addr.offset(5) as u16,
-        ((*h_addr.offset(6) as u16) << 8) + *h_addr.offset(7) as u16,
-        ((*h_addr.offset(8) as u16) << 8) + *h_addr.offset(9) as u16,
-        ((*h_addr.offset(10) as u16) << 8) + *h_addr.offset(11) as u16,
-        ((*h_addr.offset(12) as u16) << 8) + *h_addr.offset(13) as u16,
-        ((*h_addr.offset(14) as u16) << 8) + *h_addr.offset(15) as u16)
-}
-
-impl Iterator for AAAAResultsIntoIterator {
-    type Item = Ipv6Addr;
-    fn next(&mut self) -> Option<Ipv6Addr> {
-        unsafe {
-            let h_addr = *self.next;
-            if h_addr.is_null() {
-                None
-            } else {
-                self.next = self.next.offset(1);
-                let ip_addr = ipv6_addr_from_ptr(h_addr);
-                Some(ip_addr)
-            }
-        }
-    }
 }
 
 impl<'a> Iterator for AAAAResultsIterator<'a> {
     type Item = Ipv6Addr;
-    fn next(&mut self) -> Option<Ipv6Addr> {
+    fn next(&mut self) -> Option<Self::Item> {
         unsafe {
             let h_addr = *self.next;
             if h_addr.is_null() {
                 None
             } else {
                 self.next = self.next.offset(1);
-                let ip_addr = ipv6_addr_from_ptr(h_addr);
+                let ip_addr = Ipv6Addr::new(
+                    ((*h_addr as u16) << 8) + *h_addr.offset(1) as u16,
+                    ((*h_addr.offset(2) as u16) << 8) + *h_addr.offset(3) as u16,
+                    ((*h_addr.offset(4) as u16) << 8) + *h_addr.offset(5) as u16,
+                    ((*h_addr.offset(6) as u16) << 8) + *h_addr.offset(7) as u16,
+                    ((*h_addr.offset(8) as u16) << 8) + *h_addr.offset(9) as u16,
+                    ((*h_addr.offset(10) as u16) << 8) + *h_addr.offset(11) as u16,
+                    ((*h_addr.offset(12) as u16) << 8) + *h_addr.offset(13) as u16,
+                    ((*h_addr.offset(14) as u16) << 8) + *h_addr.offset(15) as u16);
                 Some(ip_addr)
             }
         }

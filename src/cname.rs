@@ -14,17 +14,11 @@ use types::{
 use utils::ares_error;
 
 /// The result of a successful lookup for a CNAME record.
-#[allow(raw_pointer_derive)]
-#[derive(Debug)]
-pub struct CNameResult<'a> {
-    /// The canonical name record.
-    pub cname: &'a str,
-
-    /// The underlying hostent into which the cname string points.
+pub struct CNameResult {
     hostent: *mut hostent,
 }
 
-impl<'a> CNameResult<'a> {
+impl CNameResult {
     /// Obtain a CNameResult from the response to a CNAME lookup.
     pub fn parse_from(data: &[u8]) -> Result<CNameResult, AresError> {
         let mut hostent: *mut hostent = ptr::null_mut();
@@ -39,22 +33,26 @@ impl<'a> CNameResult<'a> {
         if parse_status != c_ares_sys::ARES_SUCCESS {
             Err(ares_error(parse_status))
         } else {
-            let result = unsafe { CNameResult::new(hostent) };
+            let result = CNameResult::new(hostent);
             Ok(result)
         }
     }
 
-    unsafe fn new(hostent: *mut hostent) -> CNameResult<'a> {
-        let c_str = CStr::from_ptr((*hostent).h_name);
-        let slice = str::from_utf8_unchecked(c_str.to_bytes());
+    fn new(hostent: *mut hostent) -> CNameResult {
         CNameResult {
-            cname: slice,
             hostent: hostent,
+        }
+    }
+
+    pub fn cname(&self) -> &str {
+        unsafe {
+            let c_str = CStr::from_ptr((*self.hostent).h_name);
+            str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 }
 
-impl<'a> Drop for CNameResult<'a> {
+impl Drop for CNameResult {
     fn drop(&mut self) {
         unsafe {
             c_ares_sys::ares_free_hostent(

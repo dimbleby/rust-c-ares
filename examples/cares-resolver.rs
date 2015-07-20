@@ -162,7 +162,7 @@ fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
         }
         Ok(cname_result) => {
             println!("Successful CNAME lookup...");
-            println!("{}", cname_result.cname);
+            println!("{}", cname_result.cname());
         }
     }
 }

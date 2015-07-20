@@ -69,7 +69,7 @@ pub struct AAAAResultsIntoIterator {
     // Access to the IP addresses is all through the `next` pointer, but we
     // need to keep the AAAAResults around so that this points to valid memory.
     #[allow(dead_code)]
-    a_result: AAAAResults,
+    aaaa_results: AAAAResults,
 }
 
 pub struct AAAAResultsIterator<'a> {
@@ -87,7 +87,7 @@ impl IntoIterator for AAAAResults {
     fn into_iter(self) -> Self::IntoIter {
         AAAAResultsIntoIterator {
             next: unsafe { (*self.hostent).h_addr_list },
-            a_result: self,
+            aaaa_results: self,
         }
     }
 }

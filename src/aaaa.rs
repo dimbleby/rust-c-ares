@@ -120,7 +120,7 @@ impl Iterator for AAAAResultsIntoIterator {
     type Item = Ipv6Addr;
     fn next(&mut self) -> Option<Ipv6Addr> {
         unsafe {
-            let h_addr = *(self.next);
+            let h_addr = *self.next;
             if h_addr.is_null() {
                 None
             } else {
@@ -136,7 +136,7 @@ impl<'a> Iterator for AAAAResultsIterator<'a> {
     type Item = Ipv6Addr;
     fn next(&mut self) -> Option<Ipv6Addr> {
         unsafe {
-            let h_addr = *(self.next);
+            let h_addr = *self.next;
             if h_addr.is_null() {
                 None
             } else {

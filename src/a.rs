@@ -116,7 +116,7 @@ impl Iterator for AResultsIntoIterator {
     type Item = Ipv4Addr;
     fn next(&mut self) -> Option<Ipv4Addr> {
         unsafe {
-            let h_addr = *(self.next);
+            let h_addr = *self.next;
             if h_addr.is_null() {
                 None
             } else {
@@ -132,7 +132,7 @@ impl<'a> Iterator for AResultsIterator<'a> {
     type Item = Ipv4Addr;
     fn next(&mut self) -> Option<Ipv4Addr> {
         unsafe {
-            let h_addr = *(self.next);
+            let h_addr = *self.next;
             if h_addr.is_null() {
                 None
             } else {

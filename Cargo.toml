@@ -12,8 +12,10 @@ keywords = ["DNS", "c-ares"]
 
 [dependencies]
 libc = "*"
-c-ares-sys = "*"
 bitflags = "*"
+
+[dependencies.c-ares-sys]
+path = "c-ares-sys"
 
 [dev-dependencies]
 mio = "*"

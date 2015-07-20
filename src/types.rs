@@ -1,7 +1,6 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use std::net::{Ipv4Addr, Ipv6Addr};
 use std::os::unix::io;
 
 /// An invalid file descriptor.  Use this to represent 'no action' when calling
@@ -37,33 +36,6 @@ pub enum AresError {
     EADDRGETNETWORKPARAMS = c_ares_sys::ARES_EADDRGETNETWORKPARAMS as isize,
     ECANCELLED = c_ares_sys::ARES_ECANCELLED as isize,
     UNKNOWN,
-}
-
-/// The result of a successful lookup for an A record.
-#[derive(Debug, Clone)]
-pub struct AResult {
-    /// Official domain name
-    pub domain: String,
-
-    /// The IP addresses returned by the lookup.
-    pub ip_addrs: Vec<Ipv4Addr>,
-}
-
-/// The result of a successful lookup for an AAAA record.
-#[derive(Debug, Clone)]
-pub struct AAAAResult {
-    /// Official domain name
-    pub domain: String,
-
-    /// The IP addresses returned by the lookup.
-    pub ip_addrs: Vec<Ipv6Addr>,
-}
-
-/// The result of a successful lookup for a CNAME record.
-#[derive(Debug, Clone)]
-pub struct CNameResult {
-    /// The canonical name record.
-    pub cname: String,
 }
 
 #[repr(C)]

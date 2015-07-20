@@ -37,11 +37,9 @@ mod utils;
 // Re-export public interfaces.
 pub use a::{
     AResult,
-    parse_a_result,
 };
 pub use aaaa::{
     AAAAResult,
-    parse_aaaa_result,
 };
 pub use channel::{
     Channel,
@@ -49,7 +47,6 @@ pub use channel::{
 };
 pub use cname::{
     CNameResult,
-    parse_cname_result,
 };
 pub use types::{
     AresError,

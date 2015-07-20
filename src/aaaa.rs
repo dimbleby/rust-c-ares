@@ -17,6 +17,24 @@ pub struct AAAAResult {
 }
 
 impl AAAAResult {
+    /// Obtain an AAAAResult from the response to an AAAA lookup.
+    pub fn parse_from(data: &[u8]) -> Result<AAAAResult, AresError> {
+        let mut hostent: *mut hostent = ptr::null_mut();
+        let parse_status = unsafe {
+            c_ares_sys::ares_parse_aaaa_reply(
+                data.as_ptr(),
+                data.len() as libc::c_int,
+                &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
+                ptr::null_mut(),
+                ptr::null_mut())
+        };
+        if parse_status != c_ares_sys::ARES_SUCCESS {
+            Err(ares_error(parse_status))
+        } else {
+            let result = AAAAResult::new(hostent);
+            Ok(result)
+        }
+    }
     fn new(hostent: *mut hostent) -> AAAAResult {
         AAAAResult {
             hostent: hostent,
@@ -123,27 +141,5 @@ impl Drop for AAAAResult {
             c_ares_sys::ares_free_hostent(
                 self.hostent as *mut c_ares_sys::Struct_hostent);
         }
-    }
-}
-
-/// Parse the response to an AAAA lookup.
-///
-/// Users typically won't need to call this function - it's an internal utility
-/// that is made public just in case someone finds a use for it.
-pub fn parse_aaaa_result(data: &[u8]) -> Result<AAAAResult, AresError> {
-    let mut hostent: *mut hostent = ptr::null_mut();
-    let parse_status = unsafe {
-        c_ares_sys::ares_parse_aaaa_reply(
-            data.as_ptr(),
-            data.len() as libc::c_int,
-            &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
-            ptr::null_mut(),
-            ptr::null_mut())
-    };
-    if parse_status != c_ares_sys::ARES_SUCCESS {
-        Err(ares_error(parse_status))
-    } else {
-        let result = AAAAResult::new(hostent);
-        Ok(result)
     }
 }

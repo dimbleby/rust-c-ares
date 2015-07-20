@@ -7,15 +7,12 @@ use std::slice;
 
 use a::{
     AResult,
-    parse_a_result,
 };
 use aaaa::{
     AAAAResult,
-    parse_aaaa_result,
 };
 use cname::{
     CNameResult,
-    parse_cname_result,
 };
 use types::AresError;
 use utils::ares_error;
@@ -41,7 +38,7 @@ pub unsafe extern "C" fn query_a_callback<F>(
         Err(ares_error(status))
     } else {
         let data = slice::from_raw_parts(abuf, alen as usize);
-        parse_a_result(data)
+        AResult::parse_from(data)
     };
     let handler: Box<F> = mem::transmute(arg);
     handler(result);
@@ -58,7 +55,7 @@ pub unsafe extern "C" fn query_aaaa_callback<F>(
         Err(ares_error(status))
     } else {
         let data = slice::from_raw_parts(abuf, alen as usize);
-        parse_aaaa_result(data)
+        AAAAResult::parse_from(data)
     };
     let handler: Box<F> = mem::transmute(arg);
     handler(result);
@@ -75,7 +72,7 @@ pub unsafe extern "C" fn query_cname_callback<F>(
         Err(ares_error(status))
     } else {
         let data = slice::from_raw_parts(abuf, alen as usize);
-        parse_cname_result(data)
+        CNameResult::parse_from(data)
     };
     let handler: Box<F> = mem::transmute(arg);
     handler(result);

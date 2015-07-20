@@ -27,6 +27,7 @@
 #[macro_use] extern crate bitflags;
 mod a;
 mod aaaa;
+mod srv;
 mod channel;
 mod cname;
 pub mod flags;

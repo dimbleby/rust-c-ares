@@ -13,7 +13,7 @@ use utils::ares_error;
 
 /// The result of a successful lookup for an SRV record.
 pub struct SRVResult {
-    pub host: Struct_ares_srv_result,
+    pub host: c_ares_sys::Struct_ares_srv_reply,
 }
 
 impl SRVResult {
@@ -23,7 +23,7 @@ impl SRVResult {
         Err(ares_error(0))
     }
 
-    fn new(hostent: *mut host) -> SRVResult {
+    fn new(host: *mut c_ares_sys::Struct_ares_srv_reply) -> SRVResult {
         SRVResult {
             host: host,
         }

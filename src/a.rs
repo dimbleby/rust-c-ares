@@ -79,18 +79,16 @@ pub struct AResultsIterator<'a> {
 impl<'a> Iterator for AResultsIterator<'a> {
     type Item = AResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        unsafe {
-            let h_addr = *self.next;
-            if h_addr.is_null() {
-                None
-            } else {
-                self.next = self.next.offset(1);
-                let a_result = AResult {
-                    h_addr: h_addr,
-                    phantom: PhantomData,
-                };
-                Some(a_result)
-            }
+        let h_addr = unsafe { *self.next };
+        if h_addr.is_null() {
+            None
+        } else {
+            self.next = unsafe { self.next.offset(1) };
+            let a_result = AResult {
+                h_addr: h_addr,
+                phantom: PhantomData,
+            };
+            Some(a_result)
         }
     }
 }

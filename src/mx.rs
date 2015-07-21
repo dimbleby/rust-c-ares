@@ -70,12 +70,12 @@ impl<'a> Iterator for MXResultsIterator<'a> {
         } else {
             unsafe {
                 self.next = (*mx_reply).next;
-                let mx_result = MXResult {
-                    mx_reply: mx_reply,
-                    phantom: PhantomData,
-                };
-                Some(mx_result)
             }
+            let mx_result = MXResult {
+                mx_reply: mx_reply,
+                phantom: PhantomData,
+            };
+            Some(mx_result)
         }
     }
 }

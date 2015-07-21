@@ -50,7 +50,9 @@ pub struct hostent {
 // See arpa/nameser.h
 pub enum QueryType {
     A = 1,
+    NS = 2,
     CNAME = 5,
+    PTR = 12,
     MX = 15,
     AAAA = 28,
     SRV = 33,

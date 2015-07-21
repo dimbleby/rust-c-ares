@@ -13,7 +13,7 @@ use types::{
 };
 use utils::ares_error;
 
-/// The result of a successful lookup for a CNAME record.
+/// The result of a successful CNAME lookup.
 pub struct CNameResult {
     hostent: *mut hostent,
 }

@@ -11,7 +11,7 @@ use std::str;
 use types::AresError;
 use utils::ares_error;
 
-/// The result of a successful lookup for an MX record.
+/// The result of a successful MX lookup.
 pub struct MXResults {
     // A list of replies.  Owned by the `MXResults`.
     mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,

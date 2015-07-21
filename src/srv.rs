@@ -2,7 +2,6 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
-use std::marker::PhantomData;
 use std::mem;
 use std::str;
 use std::ptr;

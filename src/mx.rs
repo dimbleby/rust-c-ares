@@ -79,6 +79,17 @@ impl<'a> Iterator for MXResultsIterator<'a> {
         }
     }
 }
+impl<'a> IntoIterator for &'a MXResults {
+    type Item = MXResult<'a>;
+    type IntoIter = MXResultsIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        MXResultsIterator {
+            next: self.mx_reply,
+            phantom: PhantomData,
+        }
+    }
+}
 
 impl Drop for MXResults {
     fn drop(&mut self) {

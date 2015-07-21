@@ -94,6 +94,18 @@ impl<'a> Iterator for AResultsIterator<'a> {
     }
 }
 
+impl<'a> IntoIterator for &'a AResults {
+    type Item = AResult<'a>;
+    type IntoIter = AResultsIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        AResultsIterator {
+            next: unsafe { (*self.hostent).h_addr_list },
+            phantom: PhantomData,
+        }
+    }
+}
+
 impl Drop for AResults {
     fn drop(&mut self) {
         unsafe {

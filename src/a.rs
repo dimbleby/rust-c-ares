@@ -15,7 +15,7 @@ use types::{
 };
 use utils::ares_error;
 
-/// The result of a successful lookup for an A record.
+/// The result of a successful A lookup.
 pub struct AResults {
     // This pointer is owned by the `AResults`.
     hostent: *mut hostent,

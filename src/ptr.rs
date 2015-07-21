@@ -14,7 +14,7 @@ use types::{
 };
 use utils::ares_error;
 
-/// The result of a successful lookup for an PTR record.
+/// The result of a successful PTR lookup.
 pub struct PTRResults {
     // This pointer is owned by the `PTRResults`.
     hostent: *mut hostent,

@@ -14,7 +14,7 @@ use types::{
 };
 use utils::ares_error;
 
-/// The result of a successful lookup for an NS record.
+/// The result of a successful NS lookup.
 pub struct NSResults {
     // This pointer is owned by the `NSResults`.
     hostent: *mut hostent,

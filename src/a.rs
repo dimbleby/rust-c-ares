@@ -21,6 +21,7 @@ pub struct AResults {
     hostent: *mut hostent,
 }
 
+/// The contents of a single A record.
 pub struct AResult<'a> {
     // This pointer is a reference to a value in an `AResults`
     h_addr: *mut libc::c_char,
@@ -61,7 +62,7 @@ impl AResults {
         }
     }
 
-    /// Returns an iterator over the `Ipv4Addr` values in this `AResults`.
+    /// Returns an iterator over the `AResult` values in this `AResults`.
     pub fn iter(&self) -> AResultsIterator {
         AResultsIterator {
             next: unsafe { (*self.hostent).h_addr_list },

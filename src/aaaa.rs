@@ -21,6 +21,7 @@ pub struct AAAAResults {
     hostent: *mut hostent,
 }
 
+/// The contents of a single AAAA record.
 pub struct AAAAResult<'a> {
     // This pointer is a reference to a value in an `AAAAResults`.
     h_addr: *mut libc::c_char,
@@ -60,7 +61,7 @@ impl AAAAResults {
         }
     }
 
-    /// Returns an iterator over the `Ipv6Addr` values in this
+    /// Returns an iterator over the `AAAAResult` values in this
     /// `AAAAResults`.
     pub fn iter(&self) -> AAAAResultsIterator {
         AAAAResultsIterator {

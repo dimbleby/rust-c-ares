@@ -23,6 +23,14 @@ use mx::{
     MXResults,
     query_mx_callback,
 };
+use ns::{
+    NSResults,
+    query_ns_callback,
+};
+use ptr::{
+    PTRResults,
+    query_ptr_callback,
+};
 use types::{
     AresError,
     DnsClass,
@@ -61,7 +69,7 @@ impl Options {
     /// Set the number of milliseconds each name server is given to respond to
     /// a query on the first try.  (After the first try, the timeout algorithm
     /// becomes more complicated, but scales linearly with the value of
-    /// timeout.) The default is five seconds.
+    /// timeout.) The default is 5000ms.
     pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
         self.ares_options.timeout = ms as libc::c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TIMEOUTMS;
@@ -256,7 +264,7 @@ impl Channel {
         }
     }
 
-    /// Look up the A record associated with `name`.
+    /// Look up the A records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_a<F>(&mut self, name: &str, handler: F)
@@ -274,7 +282,7 @@ impl Channel {
         }
     }
 
-    /// Look up the AAAA record associated with `name`.
+    /// Look up the AAAA records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)
@@ -310,7 +318,7 @@ impl Channel {
         }
     }
 
-    /// Look up the MX record associated with `name`.
+    /// Look up the MX records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_mx<F>(&mut self, name: &str, handler: F)
@@ -324,6 +332,42 @@ impl Channel {
                 DnsClass::IN as libc::c_int,
                 QueryType::MX as libc::c_int,
                 Some(query_mx_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Look up the NS records associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn query_ns<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<NSResults, AresError>) + 'static {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as libc::c_int,
+                QueryType::NS as libc::c_int,
+                Some(query_ns_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Look up the PTR records associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn query_ptr<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<PTRResults, AresError>) + 'static {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as libc::c_int,
+                QueryType::PTR as libc::c_int,
+                Some(query_ptr_callback::<F>),
                 c_arg);
         }
     }

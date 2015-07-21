@@ -191,6 +191,38 @@ fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
     }
 }
 
+fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("NS lookup failed with error '{}'", err_string);
+        }
+        Ok(ns_results) => {
+            println!("Successful NS lookup...");
+            for ns_result in &ns_results {
+                println!("{:}", ns_result.name_server());
+            }
+        }
+    }
+}
+
+fn print_ptr_results(result: Result<c_ares::PTRResults, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("PTR lookup failed with error '{}'", err_string);
+        }
+        Ok(ptr_results) => {
+            println!("Successful PTR lookup...");
+            for ptr_result in &ptr_results {
+                println!("{:}", ptr_result.cname());
+            }
+        }
+    }
+}
+
 fn main() {
     // Create an event loop, and a c_ares::Channel.
     let mut event_loop = mio::EventLoop::new()
@@ -239,6 +271,18 @@ fn main() {
         tx.send(()).unwrap()
     });
 
+    let tx = results_tx.clone();
+    ares_channel.query_ns("google.com", move |results| {
+        print_ns_results(results);
+        tx.send(()).unwrap()
+    });
+
+    let tx = results_tx.clone();
+    ares_channel.query_ptr("14.210.58.216.in-addr.arpa", move |results| {
+        print_ptr_results(results);
+        tx.send(()).unwrap()
+    });
+
     // Set the first instance of the recurring timer on the event loop.
     event_loop.timeout_ms((), 500).unwrap();
 
@@ -252,7 +296,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..4 {
+    for _ in 0..6 {
         results_rx.recv().unwrap();
     }
 

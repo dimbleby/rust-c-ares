@@ -213,7 +213,7 @@ fn main() {
         .ok()
         .expect("Failed to create channel");
 
-    // Set up a couple of queries.
+    // Set up some queries.
     let (results_tx, results_rx) = mpsc::channel();
     let tx = results_tx.clone();
     ares_channel.query_a("apple.com", move |results| {

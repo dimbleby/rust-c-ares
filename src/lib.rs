@@ -31,25 +31,30 @@ mod srv;
 mod channel;
 mod cname;
 pub mod flags;
+mod mx;
 mod types;
 mod utils;
 
 // Re-export public interfaces.
 pub use a::{
     AResult,
+    AResults,
 };
 pub use aaaa::{
     AAAAResult,
+    AAAAResults,
 };
 pub use srv::{
     SRVResult,
 };
 pub use channel::{
     Channel,
-    Options
+    Options,
 };
-pub use cname::{
-    CNameResult,
+pub use cname::CNameResult;
+pub use mx::{
+    MXResult,
+    MXResults,
 };
 pub use types::{
     AresError,

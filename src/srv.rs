@@ -4,6 +4,7 @@ extern crate libc;
 use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::mem;
+use std::str;
 use std::ptr;
 use std::slice;
 
@@ -25,7 +26,7 @@ pub struct SRVResult {
 
 impl SRVResults {
     /// Obtain an SRVResult from the response to an SRV lookup.
-    pub fn parse_from(data: &[u8]) -> Result<SRVResult, AresError> {
+    pub fn parse_from(data: &[u8]) -> Result<SRVResults, AresError> {
         let mut srv_reply: *mut c_ares_sys::Struct_ares_srv_reply = ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_srv_reply(
@@ -36,8 +37,8 @@ impl SRVResults {
         if parse_status != c_ares_sys::ARES_SUCCESS {
             Err(ares_error(parse_status))
         } else {
-            let result = SRVResults::new(srv_reply);
-            Ok(srv_reply)
+            let srv_result = SRVResults::new(srv_reply);
+            Ok(srv_result)
         }
     }
 
@@ -62,7 +63,7 @@ pub struct SRVResultsIterator {
 impl Iterator for SRVResultsIterator {
     type Item = SRVResult;
     fn next(&mut self) -> Option<Self::Item> {
-        let srv_reply = unsafe { *self.next };
+        let srv_reply = self.next;
         if srv_reply.is_null() {
             None
         } else {
@@ -98,8 +99,8 @@ impl SRVResult {
     /// Returns the hostname in this `SRVResult`.
     pub fn host(&self) -> &str {
         unsafe {
-            let slice = CStr::from_ptr((*self).srv_reply.host);
-            str::from_utf8(slice.to_bytes()).unwrap()
+            let c_str = CStr::from_ptr((*self.srv_reply).host);
+            str::from_utf8(c_str.to_bytes()).unwrap()
         }
     }
 }
@@ -110,7 +111,7 @@ pub unsafe extern "C" fn query_srv_callback<F>(
     _timeouts: libc::c_int,
     abuf: *mut libc::c_uchar,
     alen: libc::c_int)
-    where F: FnOnce(Result<SRVResult, AresError>) + 'static {
+    where F: FnOnce(Result<SRVResults, AresError>) + 'static {
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))
     } else {

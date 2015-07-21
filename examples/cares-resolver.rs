@@ -223,6 +223,41 @@ fn print_ptr_results(result: Result<c_ares::PTRResults, c_ares::AresError>) {
     }
 }
 
+fn print_txt_results(result: Result<c_ares::TXTResults, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("TXT lookup failed with error '{}'", err_string);
+        }
+        Ok(txt_results) => {
+            println!("Successful TXT lookup...");
+            for txt_result in &txt_results {
+                println!("{:}", txt_result.text());
+            }
+        }
+    }
+}
+
+fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("SOA lookup failed with error '{}'", err_string);
+        }
+        Ok(soa_result) => {
+            println!("Successful SOA lookup...");
+            println!("Name server: {}", soa_result.name_server());
+            println!("Hostmaster: {}", soa_result.hostmaster());
+            println!("Serial: {}", soa_result.serial());
+            println!("Retry: {}", soa_result.retry());
+            println!("Expire: {}", soa_result.expire());
+            println!("Min TTL: {}", soa_result.min_ttl());
+        }
+    }
+}
+
 fn main() {
     // Create an event loop, and a c_ares::Channel.
     let mut event_loop = mio::EventLoop::new()
@@ -283,6 +318,18 @@ fn main() {
         tx.send(()).unwrap()
     });
 
+    let tx = results_tx.clone();
+    ares_channel.query_txt("google.com", move |results| {
+        print_txt_results(results);
+        tx.send(()).unwrap()
+    });
+
+    let tx = results_tx.clone();
+    ares_channel.query_soa("google.com", move |results| {
+        print_soa_result(results);
+        tx.send(()).unwrap()
+    });
+
     // Set the first instance of the recurring timer on the event loop.
     event_loop.timeout_ms((), 500).unwrap();
 
@@ -296,7 +343,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..6 {
+    for _ in 0..8 {
         results_rx.recv().unwrap();
     }
 

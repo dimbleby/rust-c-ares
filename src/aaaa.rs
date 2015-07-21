@@ -118,8 +118,8 @@ impl Drop for AAAAResults {
 impl<'a> AAAAResult<'a> {
     /// Returns the IPv6 address in this `AAAAResult`.
     pub fn ipv6_addr(&self) -> Ipv6Addr {
+        let h_addr = self.h_addr;
         unsafe {
-            let h_addr = self.h_addr;
             Ipv6Addr::new(
                 ((*h_addr as u16) << 8) + *h_addr.offset(1) as u16,
                 ((*h_addr.offset(2) as u16) << 8) + *h_addr.offset(3) as u16,

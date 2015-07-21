@@ -1,6 +1,7 @@
 extern crate c_ares_sys;
 extern crate libc;
 
+use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::mem;
 use std::ptr;
@@ -18,10 +19,8 @@ pub struct SRVResults {
 
 /// The contents of a single SRV record.
 pub struct SRVResult {
-    host: *mut libc::c_char,
-    weight: u16,
-    priority: u16,
-    port: u16,
+    // A single result - reference into an `SRVResults`.
+    srv_reply: *mut c_ares_sys::Struct_ares_srv_reply,
 }
 
 impl SRVResults {
@@ -60,6 +59,22 @@ pub struct SRVResultsIterator {
     next: *mut c_ares_sys::Struct_ares_srv_reply,
 }
 
+impl Iterator for SRVResultsIterator {
+    type Item = SRVResult;
+    fn next(&mut self) -> Option<Self::Item> {
+        let srv_reply = unsafe { *self.next };
+        if srv_reply.is_null() {
+            None
+        } else {
+            self.next = unsafe { (*srv_reply).next };
+            let srv_result = SRVResult {
+                srv_reply: srv_reply,
+            };
+            Some(srv_result)
+        }
+    }
+}
+
 impl IntoIterator for SRVResults {
     type Item = SRVResult;
     type IntoIter = SRVResultsIterator;
@@ -75,6 +90,16 @@ impl Drop for SRVResults {
     fn drop(&mut self) {
         unsafe {
             c_ares_sys::ares_free_data(self.srv_reply as *mut libc::c_void);
+        }
+    }
+}
+
+impl SRVResult {
+    /// Returns the hostname in this `SRVResult`.
+    pub fn host(&self) -> &str {
+        unsafe {
+            let slice = CStr::from_ptr((*self).srv_reply.host);
+            str::from_utf8(slice.to_bytes()).unwrap()
         }
     }
 }

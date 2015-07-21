@@ -124,45 +124,69 @@ impl CAresEventHandler {
     }
 }
 
-fn print_a_result(result: Result<c_ares::AResult, c_ares::AresError>) {
+fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
+    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("A lookup failed with error '{:}'", err_string);
+            println!("A lookup failed with error '{}'", err_string);
         }
-        Ok(a_result) => {
+        Ok(a_results) => {
             println!("Successful A lookup...");
-            for addr in &a_result {
-                println!("{:}", addr);
+            println!("Hostname: {}", a_results.hostname());
+            for a_result in &a_results {
+                println!("{:}", a_result.ipv4_addr());
             }
         }
     }
 }
 
-fn print_aaaa_result(result: Result<c_ares::AAAAResult, c_ares::AresError>) {
+fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
+    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("AAAA lookup failed with error '{:}'", err_string);
+            println!("AAAA lookup failed with error '{}'", err_string);
         }
-        Ok(aaaa_result) => {
+        Ok(aaaa_results) => {
             println!("Successful AAAA lookup...");
-            for addr in &aaaa_result {
-                println!("{:}", addr);
+            println!("Hostname: {}", aaaa_results.hostname());
+            for aaaa_result in &aaaa_results {
+                println!("{:}", aaaa_result.ipv6_addr());
             }
         }
     }
 }
 
 fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
+    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("CNAME lookup failed with error '{:}'", err_string);
+            println!("CNAME lookup failed with error '{}'", err_string);
         }
         Ok(cname_result) => {
             println!("Successful CNAME lookup...");
             println!("{}", cname_result.cname());
+        }
+    }
+}
+
+fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("MX lookup failed with error '{}'", err_string);
+        }
+        Ok(mx_results) => {
+            println!("Successful MX lookup...");
+            for mx_result in &mx_results {
+                println!(
+                    "host {}, priority {}",
+                    mx_result.host(),
+                    mx_result.priority());
+            }
         }
     }
 }
@@ -189,23 +213,29 @@ fn main() {
         .ok()
         .expect("Failed to create channel");
 
-    // Set up a couple of queries.
+    // Set up some queries.
     let (results_tx, results_rx) = mpsc::channel();
     let tx = results_tx.clone();
-    ares_channel.query_a("apple.com", move |result| {
-        print_a_result(result);
+    ares_channel.query_a("apple.com", move |results| {
+        print_a_results(results);
         tx.send(()).unwrap()
     });
 
     let tx = results_tx.clone();
-    ares_channel.query_aaaa("google.com", move |result| {
-        print_aaaa_result(result);
+    ares_channel.query_aaaa("google.com", move |results| {
+        print_aaaa_results(results);
         tx.send(()).unwrap()
     });
 
     let tx = results_tx.clone();
     ares_channel.query_cname("dimbleby.github.io", move |result| {
         print_cname_result(result);
+        tx.send(()).unwrap()
+    });
+
+    let tx = results_tx.clone();
+    ares_channel.query_mx("gmail.com", move |results| {
+        print_mx_results(results);
         tx.send(()).unwrap()
     });
 
@@ -222,7 +252,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..3 {
+    for _ in 0..4 {
         results_rx.recv().unwrap();
     }
 

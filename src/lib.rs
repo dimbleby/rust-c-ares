@@ -35,6 +35,8 @@ mod mx;
 mod ns;
 mod ptr;
 mod types;
+mod txt;
+mod soa;
 mod utils;
 
 // Re-export public interfaces.
@@ -71,4 +73,9 @@ pub use types::{
     AresError,
     INVALID_FD,
 };
+pub use txt::{
+    TXTResult,
+    TXTResults,
+};
+pub use soa::SOAResult;
 pub use utils::str_error;

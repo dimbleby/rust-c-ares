@@ -40,6 +40,14 @@ use types::{
     DnsClass,
     QueryType,
 };
+use txt::{
+    TXTResults,
+    query_txt_callback,
+};
+use soa::{
+    SOAResult,
+    query_soa_callback,
+};
 use utils::ares_error;
 
 /// Used to configure the behaviour of the name resolver.
@@ -390,6 +398,42 @@ impl Channel {
                 DnsClass::IN as libc::c_int,
                 QueryType::PTR as libc::c_int,
                 Some(query_ptr_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Look up the TXT records associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn query_txt<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<TXTResults, AresError>) + 'static {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as libc::c_int,
+                QueryType::TXT as libc::c_int,
+                Some(query_txt_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Look up the SOA records associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn query_soa<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<SOAResult, AresError>) + 'static {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as libc::c_int,
+                QueryType::SOA as libc::c_int,
+                Some(query_soa_callback::<F>),
                 c_arg);
         }
     }

@@ -13,13 +13,13 @@ use utils::ares_error;
 
 /// The result of a successful lookup for an MX record.
 pub struct MXResults {
-    // A list of replies.
+    // A list of replies.  Owned by the `MXResults`.
     mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
 }
 
 /// The contents of a single MX record.
 pub struct MXResult<'a> {
-    // A single reply.
+    // A single reply.  Just a reference to a value in an `MXResults`.
     mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<&'a MXResults>,
 }
@@ -89,6 +89,7 @@ impl Drop for MXResults {
 }
 
 impl<'a> MXResult<'a> {
+    /// Returns the hostname in this `MXResult`.
     pub fn host(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr((*self.mx_reply).host);
@@ -96,6 +97,7 @@ impl<'a> MXResult<'a> {
         }
     }
 
+    /// Returns the priority from this `MXResult`.
     pub fn priority(&self) -> u16 {
         unsafe { (*self.mx_reply).priority }
     }

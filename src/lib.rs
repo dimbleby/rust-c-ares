@@ -35,16 +35,22 @@ mod types;
 mod utils;
 
 // Re-export public interfaces.
-pub use a::AResults;
-pub use aaaa::AAAAResults;
+pub use a::{
+    AResult,
+    AResults,
+};
+pub use aaaa::{
+    AAAAResult,
+    AAAAResults,
+};
 pub use channel::{
     Channel,
     Options,
 };
 pub use cname::CNameResult;
 pub use mx::{
-    MXResults,
     MXResult,
+    MXResults,
 };
 pub use types::{
     AresError,

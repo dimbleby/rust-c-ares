@@ -134,8 +134,8 @@ fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
         Ok(a_results) => {
             println!("Successful A lookup...");
             println!("Hostname: {}", a_results.hostname());
-            for addr in a_results.iter() {
-                println!("{:}", addr);
+            for a_result in a_results.iter() {
+                println!("{:}", a_result.ipv4_addr());
             }
         }
     }
@@ -151,8 +151,8 @@ fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
         Ok(aaaa_results) => {
             println!("Successful AAAA lookup...");
             println!("Hostname: {}", aaaa_results.hostname());
-            for addr in aaaa_results.iter() {
-                println!("{:}", addr);
+            for aaaa_result in aaaa_results.iter() {
+                println!("{:}", aaaa_result.ipv6_addr());
             }
         }
     }

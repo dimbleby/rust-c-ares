@@ -17,7 +17,14 @@ use utils::ares_error;
 
 /// The result of a successful lookup for an AAAA record.
 pub struct AAAAResults {
+    // This pointer is owned by the `AAAAResults`.
     hostent: *mut hostent,
+}
+
+pub struct AAAAResult<'a> {
+    // This pointer is a reference to a value in an `AAAAResults`.
+    h_addr: *mut libc::c_char,
+    phantom: PhantomData<&'a AAAAResults>,
 }
 
 impl AAAAResults {
@@ -69,7 +76,7 @@ pub struct AAAAResultsIterator<'a> {
 }
 
 impl<'a> Iterator for AAAAResultsIterator<'a> {
-    type Item = Ipv6Addr;
+    type Item = AAAAResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         unsafe {
             let h_addr = *self.next;
@@ -77,16 +84,11 @@ impl<'a> Iterator for AAAAResultsIterator<'a> {
                 None
             } else {
                 self.next = self.next.offset(1);
-                let ip_addr = Ipv6Addr::new(
-                    ((*h_addr as u16) << 8) + *h_addr.offset(1) as u16,
-                    ((*h_addr.offset(2) as u16) << 8) + *h_addr.offset(3) as u16,
-                    ((*h_addr.offset(4) as u16) << 8) + *h_addr.offset(5) as u16,
-                    ((*h_addr.offset(6) as u16) << 8) + *h_addr.offset(7) as u16,
-                    ((*h_addr.offset(8) as u16) << 8) + *h_addr.offset(9) as u16,
-                    ((*h_addr.offset(10) as u16) << 8) + *h_addr.offset(11) as u16,
-                    ((*h_addr.offset(12) as u16) << 8) + *h_addr.offset(13) as u16,
-                    ((*h_addr.offset(14) as u16) << 8) + *h_addr.offset(15) as u16);
-                Some(ip_addr)
+                let aaaa_result = AAAAResult {
+                    h_addr: h_addr,
+                    phantom: PhantomData,
+                };
+                Some(aaaa_result)
             }
         }
     }
@@ -97,6 +99,24 @@ impl Drop for AAAAResults {
         unsafe {
             c_ares_sys::ares_free_hostent(
                 self.hostent as *mut c_ares_sys::Struct_hostent);
+        }
+    }
+}
+
+impl<'a> AAAAResult<'a> {
+    /// Returns the IPv6 address in this `AAAAResult`.
+    pub fn ipv6_addr(&self) -> Ipv6Addr {
+        unsafe {
+            let h_addr = self.h_addr;
+            Ipv6Addr::new(
+                ((*h_addr as u16) << 8) + *h_addr.offset(1) as u16,
+                ((*h_addr.offset(2) as u16) << 8) + *h_addr.offset(3) as u16,
+                ((*h_addr.offset(4) as u16) << 8) + *h_addr.offset(5) as u16,
+                ((*h_addr.offset(6) as u16) << 8) + *h_addr.offset(7) as u16,
+                ((*h_addr.offset(8) as u16) << 8) + *h_addr.offset(9) as u16,
+                ((*h_addr.offset(10) as u16) << 8) + *h_addr.offset(11) as u16,
+                ((*h_addr.offset(12) as u16) << 8) + *h_addr.offset(13) as u16,
+                ((*h_addr.offset(14) as u16) << 8) + *h_addr.offset(15) as u16)
         }
     }
 }

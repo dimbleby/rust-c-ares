@@ -17,7 +17,14 @@ use utils::ares_error;
 
 /// The result of a successful lookup for an A record.
 pub struct AResults {
+    // This pointer is owned by the `AResults`.
     hostent: *mut hostent,
+}
+
+pub struct AResult<'a> {
+    // This pointer is a reference to a value in an `AResults`
+    h_addr: *mut libc::c_char,
+    phantom: PhantomData<&'a AResults>,
 }
 
 impl AResults {
@@ -69,7 +76,7 @@ pub struct AResultsIterator<'a> {
 }
 
 impl<'a> Iterator for AResultsIterator<'a> {
-    type Item = Ipv4Addr;
+    type Item = AResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         unsafe {
             let h_addr = *self.next;
@@ -77,12 +84,11 @@ impl<'a> Iterator for AResultsIterator<'a> {
                 None
             } else {
                 self.next = self.next.offset(1);
-                let ip_addr = Ipv4Addr::new(
-                    *h_addr as u8,
-                    *h_addr.offset(1) as u8,
-                    *h_addr.offset(2) as u8,
-                    *h_addr.offset(3) as u8);
-                Some(ip_addr)
+                let a_result = AResult {
+                    h_addr: h_addr,
+                    phantom: PhantomData,
+                };
+                Some(a_result)
             }
         }
     }
@@ -93,6 +99,19 @@ impl Drop for AResults {
         unsafe {
             c_ares_sys::ares_free_hostent(
                 self.hostent as *mut c_ares_sys::Struct_hostent);
+        }
+    }
+}
+
+impl<'a> AResult<'a> {
+    /// Returns the IPv4 address in this `AResult`.
+    pub fn ipv4_addr(&self) -> Ipv4Addr {
+        unsafe {
+            Ipv4Addr::new(
+                *self.h_addr as u8,
+                *self.h_addr.offset(1) as u8,
+                *self.h_addr.offset(2) as u8,
+                *self.h_addr.offset(3) as u8)
         }
     }
 }

@@ -69,7 +69,7 @@ impl Options {
     /// Set the number of milliseconds each name server is given to respond to
     /// a query on the first try.  (After the first try, the timeout algorithm
     /// becomes more complicated, but scales linearly with the value of
-    /// timeout.) The default is five seconds.
+    /// timeout.) The default is 5000ms.
     pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
         self.ares_options.timeout = ms as libc::c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TIMEOUTMS;

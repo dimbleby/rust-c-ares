@@ -36,7 +36,7 @@ pub fn ares_error(code: libc::c_int) -> AresError {
     }
 }
 
-/// Get the description of an AresError. 
+/// Returns the description of an AresError. 
 pub fn str_error<'a>(code: AresError) -> &'a str {
     unsafe {
         let ptr = c_ares_sys::ares_strerror(code as libc::c_int);

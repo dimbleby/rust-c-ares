@@ -45,7 +45,7 @@ impl AAAAResults {
         }
     }
 
-    /// Get the hostname from this `AAAAResults`.
+    /// Returns the hostname from this `AAAAResults`.
     pub fn hostname(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr((*self.hostent).h_name);

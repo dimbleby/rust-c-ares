@@ -31,6 +31,8 @@ mod channel;
 mod cname;
 pub mod flags;
 mod mx;
+mod ns;
+mod ptr;
 mod types;
 mod utils;
 
@@ -51,6 +53,14 @@ pub use cname::CNameResult;
 pub use mx::{
     MXResult,
     MXResults,
+};
+pub use ns::{
+    NSResult,
+    NSResults,
+};
+pub use ptr::{
+    PTRResult,
+    PTRResults,
 };
 pub use types::{
     AresError,

@@ -12,100 +12,73 @@ use types::{
 use utils::ares_error;
 
 /// The result of a successful lookup for an SRV record.
-pub struct SRVResult {
-    pub host: c_ares_sys::Struct_ares_srv_reply,
+pub struct SRVResults {
+    srv_reply: *mut c_ares_sys::Struct_ares_srv_reply,
 }
 
-impl SRVResult {
+/// The contents of a single SRV record.
+pub struct SRVResult {
+    host: *mut libc::c_char,
+    weight: u16,
+    priority: u16,
+    port: u16,
+}
+
+impl SRVResults {
     /// Obtain an SRVResult from the response to an SRV lookup.
     pub fn parse_from(data: &[u8]) -> Result<SRVResult, AresError> {
-        // TODO
-        Err(ares_error(0))
-    }
-
-    fn new(host: *mut c_ares_sys::Struct_ares_srv_reply) -> SRVResult {
-        SRVResult {
-            host: host,
+        let mut srv_reply: *mut c_ares_sys::Struct_ares_srv_reply = ptr::null_mut();
+        let parse_status = unsafe {
+            c_ares_sys::ares_parse_srv_reply(
+                data.as_ptr(),
+                data.len() as libc::c_int,
+                &mut srv_reply as *mut *mut _ as *mut *mut c_ares_sys::Struct_ares_srv_reply)
+        };
+        if parse_status != c_ares_sys::ARES_SUCCESS {
+            Err(ares_error(parse_status))
+        } else {
+            let result = SRVResults::new(srv_reply);
+            Ok(srv_reply)
         }
     }
 
-    /// Returns an iterator over the `host: TODO` values in this `SRVResult`.
-    pub fn iter(&self) -> SRVResultIterator {
-        SRVResultIterator {
-            next: unsafe { (*self.host).next },
-            phantom: PhantomData,
+    fn new(srv_reply: *mut c_ares_sys::Struct_ares_srv_reply) -> SRVResults {
+        SRVResults {
+            srv_reply: srv_reply,
+        }
+    }
+
+    /// Returns an iterator over the `SRVResult` values in this `SRVResults`.
+    pub fn iter(&self) -> SRVResultsIterator {
+        SRVResultsIterator {
+            next: unsafe { (*self.srv_reply).next },
         }
     }
 }
 
-pub struct SRVResultIntoIterator {
-    next: *mut *mut libc::c_char,
-
-    // Access to the SRV responses is all through the `next` pointer, but we
-    // need to keep the SRVResult around so that this points to valid memory.
-    #[allow(dead_code)]
-    srv_result: SRVResult,
+pub struct SRVResultsIterator {
+    next: *mut c_ares_sys::Struct_ares_srv_reply,
 }
 
-pub struct SRVResultIterator<'a> {
-    next: *mut *mut libc::c_char,
-
-    // We need the phantom data to make sure that the `next` pointer remains
-    // valid through the lifetime of this structure.
-    phantom: PhantomData<&'a SRVResult>,
-}
-
-impl IntoIterator for SRVResult {
-    type Item = TODO;
-    type IntoIter = SRVResultIntoIterator;
+impl IntoIterator for SRVResults {
+    type Item = SRVResult;
+    type IntoIter = SRVResultsIterator;
 
     fn into_iter(self) -> Self::IntoIter {
-        SRVResultIntoIterator {
-            next: unsafe { (*self.host).next },
-            srv_result: self,
+        SRVResultsIterator {
+            next: unsafe { (*self.srv_reply).next },
         }
     }
 }
 
-impl<'a> IntoIterator for &'a SRVResult {
-    type Item = TODO;
-    type IntoIter = SRVResultIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        SRVResultIterator {
-            next: unsafe { (*self.host).next },
-            phantom: PhantomData,
-        }
-    }
-}
-
-impl Iterator for SRVResultIntoIterator {
-    type Item = TODO;
-    fn next(&mut self) -> Option<TODO> {
-        unsafe {
-            None //TODO
-        }
-    }
-}
-
-impl<'a> Iterator for SRVResultIterator<'a> {
-    type Item = TODO;
-    fn next(&mut self) -> Option<TODO> {
-        unsafe {
-            None //TODO
-        }
-    }
-}
-
-impl Drop for SRVResult {
+impl Drop for SRVResults {
     fn drop(&mut self) {
         unsafe {
-            // free_mem?
-            // c_ares_sys::ares_free_hostent(
-            //    self.hostent as *mut c_ares_sys::Struct_hostent);
+            c_ares_sys::ares_free_data(self.srv_reply as *mut libc::c_void);
         }
     }
 }
+
 pub unsafe extern "C" fn query_srv_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,
@@ -117,7 +90,7 @@ pub unsafe extern "C" fn query_srv_callback<F>(
         Err(ares_error(status))
     } else {
         let data = slice::from_raw_parts(abuf, alen as usize);
-        parse_srv_result(data)
+        SRVResults::parse_from(data)
     };
     let handler: Box<F> = mem::transmute(arg);
     handler(result);

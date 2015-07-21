@@ -177,7 +177,7 @@ fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("AAAA lookup failed with error '{:}'", err_string);
+            println!("MX lookup failed with error '{:}'", err_string);
         }
         Ok(mx_results) => {
             println!("Successful MX lookup...");

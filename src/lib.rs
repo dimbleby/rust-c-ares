@@ -46,6 +46,7 @@ pub use aaaa::{
 };
 pub use srv::{
     SRVResult,
+    SRVResults,
 };
 pub use channel::{
     Channel,

@@ -129,7 +129,7 @@ fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("A lookup failed with error '{:}'", err_string);
+            println!("A lookup failed with error '{}'", err_string);
         }
         Ok(a_results) => {
             println!("Successful A lookup...");
@@ -146,7 +146,7 @@ fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("AAAA lookup failed with error '{:}'", err_string);
+            println!("AAAA lookup failed with error '{}'", err_string);
         }
         Ok(aaaa_results) => {
             println!("Successful AAAA lookup...");
@@ -163,7 +163,7 @@ fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("CNAME lookup failed with error '{:}'", err_string);
+            println!("CNAME lookup failed with error '{}'", err_string);
         }
         Ok(cname_result) => {
             println!("Successful CNAME lookup...");
@@ -177,7 +177,7 @@ fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("MX lookup failed with error '{:}'", err_string);
+            println!("MX lookup failed with error '{}'", err_string);
         }
         Ok(mx_results) => {
             println!("Successful MX lookup...");

@@ -21,7 +21,7 @@ impl SOAResult {
         panic!("SOA parsing not supported");
     }
 
-    /// Obtain a `SOAResult` from the response to a CNAME lookup.
+    /// Obtain an `SOAResult` from the response to a CNAME lookup.
     #[cfg(not(feature = "old-cares"))]
     pub fn parse_from(data: &[u8]) -> Result<SOAResult, AresError> {
         let mut soa_reply: *mut c_ares_sys::Struct_ares_soa_reply = ptr::null_mut();

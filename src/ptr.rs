@@ -22,13 +22,13 @@ pub struct PTRResults {
 
 /// The contents of a single PTR record.
 pub struct PTRResult<'a> {
-    // This pointer is a reference to a value in an `PTRResults`.
+    // This pointer is a reference to a value in a `PTRResults`.
     h_alias: *mut libc::c_char,
     phantom: PhantomData<&'a PTRResults>,
 }
 
 impl PTRResults {
-    /// Obtain an `PTRResults` from the respoptre to an PTR lookup.
+    /// Obtain a `PTRResults` from the response to a PTR lookup.
     pub fn parse_from(data: &[u8]) -> Result<PTRResults, AresError> {
         let mut hostent: *mut hostent = ptr::null_mut();
         let dummy_ip = "0.0.0.0";

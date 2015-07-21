@@ -19,13 +19,13 @@ pub struct TXTResults {
 
 /// The contents of a single TXT record.
 pub struct TXTResult<'a> {
-    // A single reply.  Just a reference to a value in an `TXTResults`.
+    // A single reply.  Just a reference to a value in a `TXTResults`.
     txt_reply: *mut c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<&'a TXTResults>,
 }
 
 impl TXTResults {
-    /// Obtain an `TXTResults` from the response to an TXT lookup.
+    /// Obtain a `TXTResults` from the response to a TXT lookup.
     pub fn parse_from(data: &[u8]) -> Result<TXTResults, AresError> {
         let mut txt_reply: *mut c_ares_sys::Struct_ares_txt_reply = ptr::null_mut();
         let parse_status = unsafe {

@@ -103,6 +103,18 @@ impl SRVResult {
             str::from_utf8(c_str.to_bytes()).unwrap()
         }
     }
+
+    pub fn weight(&self) -> u16 {
+        unsafe { (*self.srv_reply).weight }
+    }
+
+    pub fn priority(&self) -> u16 {
+        unsafe { (*self.srv_reply).priority }
+    }
+
+    pub fn port(&self) -> u16 {
+        unsafe { (*self.srv_reply).port }
+    }
 }
 
 pub unsafe extern "C" fn query_srv_callback<F>(

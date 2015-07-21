@@ -53,7 +53,7 @@ impl AAAAResults {
         }
     }
 
-    /// Returns an iterator over the `Ipv6Address` values in this
+    /// Returns an iterator over the `Ipv6Addr` values in this
     /// `AAAAResults`.
     pub fn iter(&self) -> AAAAResultsIterator {
         AAAAResultsIterator {

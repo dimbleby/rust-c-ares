@@ -54,7 +54,7 @@ impl AResults {
         }
     }
 
-    /// Returns an iterator over the `Ipv4Address` values in this `AResults`.
+    /// Returns an iterator over the `Ipv4Addr` values in this `AResults`.
     pub fn iter(&self) -> AResultsIterator {
         AResultsIterator {
             next: unsafe { (*self.hostent).h_addr_list },

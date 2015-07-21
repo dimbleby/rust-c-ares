@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::marker::PhantomData;
 use std::mem;
 use std::str;
 use std::ptr;
@@ -18,13 +19,14 @@ pub struct SRVResults {
 }
 
 /// The contents of a single SRV record.
-pub struct SRVResult {
+pub struct SRVResult<'a> {
     // A single result - reference into an `SRVResults`.
     srv_reply: *mut c_ares_sys::Struct_ares_srv_reply,
+    phantom: PhantomData<&'a SRVResults>,
 }
 
 impl SRVResults {
-    /// Obtain an SRVResult from the response to an SRV lookup.
+    /// Obtain an `SRVResult` from the response to an SRV lookup.
     pub fn parse_from(data: &[u8]) -> Result<SRVResults, AresError> {
         let mut srv_reply: *mut c_ares_sys::Struct_ares_srv_reply = ptr::null_mut();
         let parse_status = unsafe {
@@ -51,16 +53,18 @@ impl SRVResults {
     pub fn iter(&self) -> SRVResultsIterator {
         SRVResultsIterator {
             next: unsafe { (*self.srv_reply).next },
+            phantom: PhantomData,
         }
     }
 }
 
-pub struct SRVResultsIterator {
+pub struct SRVResultsIterator<'a> {
     next: *mut c_ares_sys::Struct_ares_srv_reply,
+    phantom: PhantomData<&'a SRVResults>,
 }
 
-impl Iterator for SRVResultsIterator {
-    type Item = SRVResult;
+impl<'a> Iterator for SRVResultsIterator<'a> {
+    type Item = SRVResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let srv_reply = self.next;
         if srv_reply.is_null() {
@@ -69,19 +73,21 @@ impl Iterator for SRVResultsIterator {
             self.next = unsafe { (*srv_reply).next };
             let srv_result = SRVResult {
                 srv_reply: srv_reply,
+                phantom: PhantomData,
             };
             Some(srv_result)
         }
     }
 }
 
-impl IntoIterator for SRVResults {
-    type Item = SRVResult;
-    type IntoIter = SRVResultsIterator;
+impl<'a> IntoIterator for &'a SRVResults {
+    type Item = SRVResult<'a>;
+    type IntoIter = SRVResultsIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         SRVResultsIterator {
             next: unsafe { (*self.srv_reply).next },
+            phantom: PhantomData,
         }
     }
 }
@@ -94,7 +100,7 @@ impl Drop for SRVResults {
     }
 }
 
-impl SRVResult {
+impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
     pub fn host(&self) -> &str {
         unsafe {

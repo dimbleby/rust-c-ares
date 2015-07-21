@@ -167,7 +167,7 @@ fn print_srv_result(result: Result<c_ares::SRVResults, c_ares::AresError>) {
         }
         Ok(srv_results) => {
             println!("Successful SRV lookup...");
-            for srv_result in srv_results {
+            for srv_result in &srv_results {
                 println!("host: {} (port: {}), priority: {} weight: {}",
                          srv_result.host(),
                          srv_result.port(),

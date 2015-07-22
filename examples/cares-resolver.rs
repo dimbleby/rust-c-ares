@@ -315,7 +315,7 @@ fn main() {
     });
 
     let tx = results_tx.clone();
-    ares_channel.query_srv("_xmpp-server._tcp.gmail.com.", move |result| {
+    ares_channel.query_srv("_xmpp-server._tcp.gmail.com", move |result| {
         print_srv_results(result);
         tx.send(()).unwrap()
     });

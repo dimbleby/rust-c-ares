@@ -13,7 +13,7 @@ use types::{
 };
 use utils::ares_error;
 
-/// The result of a successful lookup for an SRV record.
+/// The result of a successful SRV lookup.
 pub struct SRVResults {
     srv_reply: *mut c_ares_sys::Struct_ares_srv_reply,
 }

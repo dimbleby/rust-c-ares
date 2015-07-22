@@ -58,6 +58,7 @@ pub enum QueryType {
     TXT = 16,
     AAAA = 28,
     SRV = 33,
+    NAPTR = 35,
 }
 
 // See arpa/nameser.h

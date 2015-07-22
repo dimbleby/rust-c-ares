@@ -8,9 +8,7 @@ use std::str;
 use std::ptr;
 use std::slice;
 
-use types::{
-    AresError,
-};
+use types::AresError;
 use utils::ares_error;
 
 /// The result of a successful SRV lookup.
@@ -26,7 +24,7 @@ pub struct SRVResult<'a> {
 }
 
 impl SRVResults {
-    /// Obtain an `SRVResult` from the response to an SRV lookup.
+    /// Obtain an `SRVResults` from the response to an SRV lookup.
     pub fn parse_from(data: &[u8]) -> Result<SRVResults, AresError> {
         let mut srv_reply: *mut c_ares_sys::Struct_ares_srv_reply = ptr::null_mut();
         let parse_status = unsafe {

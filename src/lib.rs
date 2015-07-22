@@ -32,6 +32,7 @@ mod channel;
 mod cname;
 pub mod flags;
 mod mx;
+mod naptr;
 mod ns;
 mod ptr;
 mod types;
@@ -60,6 +61,10 @@ pub use cname::CNameResult;
 pub use mx::{
     MXResult,
     MXResults,
+};
+pub use naptr::{
+    NAPTRResult,
+    NAPTRResults,
 };
 pub use ns::{
     NSResult,

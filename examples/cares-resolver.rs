@@ -163,7 +163,7 @@ fn print_srv_results(result: Result<c_ares::SRVResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
-            println!("SRV lookup failed with error '{:}'", err_string);
+            println!("SRV lookup failed with error '{}'", err_string);
         }
         Ok(srv_results) => {
             println!("Successful SRV lookup...");
@@ -211,6 +211,30 @@ fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
     }
 }
 
+fn print_naptr_results(
+    result: Result<c_ares::NAPTRResults, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("NAPTR lookup failed with error '{}'", err_string);
+        }
+        Ok(naptr_results) => {
+            println!("Successful NAPTR lookup...");
+            for naptr_result in &naptr_results {
+                println!("flags: {}", naptr_result.flags());
+                println!("service name: {}", naptr_result.service_name());
+                println!("regular expression: {}", naptr_result.reg_exp());
+                println!(
+                    "replacement pattern: {}",
+                    naptr_result.replacement_pattern());
+                println!("order: {}", naptr_result.order());
+                println!("preference: {}", naptr_result.preference());
+            }
+        }
+    }
+}
+
 fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
     println!("");
     match result {
@@ -221,7 +245,7 @@ fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
         Ok(ns_results) => {
             println!("Successful NS lookup...");
             for ns_result in &ns_results {
-                println!("{:}", ns_result.name_server());
+                println!("{}", ns_result.name_server());
             }
         }
     }
@@ -237,7 +261,7 @@ fn print_ptr_results(result: Result<c_ares::PTRResults, c_ares::AresError>) {
         Ok(ptr_results) => {
             println!("Successful PTR lookup...");
             for ptr_result in &ptr_results {
-                println!("{:}", ptr_result.cname());
+                println!("{}", ptr_result.cname());
             }
         }
     }
@@ -253,7 +277,7 @@ fn print_txt_results(result: Result<c_ares::TXTResults, c_ares::AresError>) {
         Ok(txt_results) => {
             println!("Successful TXT lookup...");
             for txt_result in &txt_results {
-                println!("{:}", txt_result.text());
+                println!("{}", txt_result.text());
             }
         }
     }
@@ -333,6 +357,15 @@ fn main() {
     });
 
     let tx = results_tx.clone();
+    ares_channel.query_naptr(
+        "4.3.2.1.5.5.5.0.0.8.1.e164.arpa.",
+        move |results| {
+            print_naptr_results(results);
+            tx.send(()).unwrap()
+        }
+    );
+
+    let tx = results_tx.clone();
     ares_channel.query_ns("google.com", move |results| {
         print_ns_results(results);
         tx.send(()).unwrap()
@@ -369,7 +402,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..9 {
+    for _ in 0..10 {
         results_rx.recv().unwrap();
     }
 

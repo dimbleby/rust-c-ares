@@ -36,10 +36,10 @@ impl mio::Handler for CAresEventHandler {
     type Timeout = ();
     type Message = CAresHandlerMessage;
 
-    // mio notifies us that a file descriptor is readable or writable, so we 
+    // mio notifies us that a file descriptor is readable or writable, so we
     // tell the Channel the same.
     fn ready(
-        &mut self, 
+        &mut self,
         _event_loop: &mut mio::EventLoop<CAresEventHandler>,
         token: mio::Token,
         events: mio::EventSet) {

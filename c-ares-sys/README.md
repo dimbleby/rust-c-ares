@@ -11,7 +11,7 @@ To create `ffi.rs`, do this:
 - add `unsafe` to the function type declarations for `ares_sock_state_cb`, `ares_callback`, `ares_host_callback`, `ares_nameinfo_callback`, `ares_sock_create_callback`
     - Any non-trivial implementations of these callbacks will involve de-referencing raw pointer parameters
 - remove `ares_fds` and `ares_process`
-    - These both use `fd_set`.  
+    - These both use `fd_set`.
     - Cursory search didn't find an existing Rust representation of this structure
     - Since the high-level API doesn't use either of these functions, it's simplest just to pretend they're not there
 - add a few type definitions for OS types at the top of the file.

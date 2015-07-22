@@ -7,7 +7,7 @@ use std::ptr;
 use std::slice;
 use std::str;
 
-use types:: AresError ;
+use types::AresError ;
 use utils::ares_error;
 
 /// The result of a successful SOA lookup.

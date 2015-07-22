@@ -27,6 +27,7 @@
 #[macro_use] extern crate bitflags;
 mod a;
 mod aaaa;
+mod srv;
 mod channel;
 mod cname;
 pub mod flags;
@@ -46,6 +47,10 @@ pub use a::{
 pub use aaaa::{
     AAAAResult,
     AAAAResults,
+};
+pub use srv::{
+    SRVResult,
+    SRVResults,
 };
 pub use channel::{
     Channel,

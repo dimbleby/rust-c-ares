@@ -158,6 +158,26 @@ fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
     }
 }
 
+fn print_srv_results(result: Result<c_ares::SRVResults, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("SRV lookup failed with error '{:}'", err_string);
+        }
+        Ok(srv_results) => {
+            println!("Successful SRV lookup...");
+            for srv_result in &srv_results {
+                println!("host: {} (port: {}), priority: {} weight: {}",
+                         srv_result.host(),
+                         srv_result.port(),
+                         srv_result.weight(),
+                         srv_result.priority());
+            }
+        }
+    }
+}
+
 fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
     println!("");
     match result {
@@ -295,6 +315,12 @@ fn main() {
     });
 
     let tx = results_tx.clone();
+    ares_channel.query_srv("_xmpp-server._tcp.gmail.com.", move |result| {
+        print_srv_results(result);
+        tx.send(()).unwrap()
+    });
+
+    let tx = results_tx.clone();
     ares_channel.query_cname("dimbleby.github.io", move |result| {
         print_cname_result(result);
         tx.send(()).unwrap()
@@ -343,7 +369,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..8 {
+    for _ in 0..9 {
         results_rx.recv().unwrap();
     }
 

@@ -33,7 +33,7 @@ impl SRVResults {
             c_ares_sys::ares_parse_srv_reply(
                 data.as_ptr(),
                 data.len() as libc::c_int,
-                &mut srv_reply as *mut *mut _ as *mut *mut c_ares_sys::Struct_ares_srv_reply)
+                &mut srv_reply)
         };
         if parse_status != c_ares_sys::ARES_SUCCESS {
             Err(ares_error(parse_status))
@@ -52,7 +52,7 @@ impl SRVResults {
     /// Returns an iterator over the `SRVResult` values in this `SRVResults`.
     pub fn iter(&self) -> SRVResultsIterator {
         SRVResultsIterator {
-            next: unsafe { (*self.srv_reply).next },
+            next: self.srv_reply,
             phantom: PhantomData,
         }
     }
@@ -86,7 +86,7 @@ impl<'a> IntoIterator for &'a SRVResults {
 
     fn into_iter(self) -> Self::IntoIter {
         SRVResultsIterator {
-            next: unsafe { (*self.srv_reply).next },
+            next: self.srv_reply,
             phantom: PhantomData,
         }
     }
@@ -109,14 +109,17 @@ impl<'a> SRVResult<'a> {
         }
     }
 
+    /// Returns the weight in this `SRVResult`.
     pub fn weight(&self) -> u16 {
         unsafe { (*self.srv_reply).weight }
     }
 
+    /// Returns the priority in this `SRVResult`.
     pub fn priority(&self) -> u16 {
         unsafe { (*self.srv_reply).priority }
     }
 
+    /// Returns the port in this `SRVResult`.
     pub fn port(&self) -> u16 {
         unsafe { (*self.srv_reply).port }
     }

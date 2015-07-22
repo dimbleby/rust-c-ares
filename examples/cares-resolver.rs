@@ -158,7 +158,7 @@ fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
     }
 }
 
-fn print_srv_result(result: Result<c_ares::SRVResults, c_ares::AresError>) {
+fn print_srv_results(result: Result<c_ares::SRVResults, c_ares::AresError>) {
     println!("");
     match result {
         Err(e) => {
@@ -294,7 +294,7 @@ fn main() {
     let mut options = c_ares::Options::new();
     options
         .set_flags(c_ares::flags::STAYOPEN | c_ares::flags::EDNS)
-        .set_timeout(1000)
+        .set_timeout(500)
         .set_tries(3);
     let mut ares_channel = c_ares::Channel::new(sock_callback, options)
         .ok()
@@ -316,7 +316,7 @@ fn main() {
 
     let tx = results_tx.clone();
     ares_channel.query_srv("_xmpp-server._tcp.gmail.com.", move |result| {
-        print_srv_result(result);
+        print_srv_results(result);
         tx.send(()).unwrap()
     });
 
@@ -357,7 +357,7 @@ fn main() {
     });
 
     // Set the first instance of the recurring timer on the event loop.
-    event_loop.timeout_ms((), 1000).unwrap();
+    event_loop.timeout_ms((), 500).unwrap();
 
     // Kick off the event loop.
     let mut event_handler = CAresEventHandler::new(ares_channel);

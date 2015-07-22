@@ -312,7 +312,7 @@ impl Channel {
         }
     }
 
-    /// Look up the SRV record associated with `name`.
+    /// Look up the SRV records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_srv<F>(&mut self, name: &str, handler: F)

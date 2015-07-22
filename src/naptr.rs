@@ -24,7 +24,13 @@ pub struct NAPTRResult<'a> {
 }
 
 impl NAPTRResults {
+    #[cfg(feature = "old-cares")]
+    pub fn parse_from(_data: &[u8]) -> Result<NAPTRResult, AresError> {
+        panic!("NAPTR parsing not supported");
+    }
+
     /// Obtain a `NAPTRResults` from the response to an NAPTR lookup.
+    #[cfg(not(feature = "old-cares"))]
     pub fn parse_from(data: &[u8]) -> Result<NAPTRResults, AresError> {
         let mut naptr_reply: *mut c_ares_sys::Struct_ares_naptr_reply = 
             ptr::null_mut();

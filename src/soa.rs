@@ -17,7 +17,7 @@ pub struct SOAResult {
 
 impl SOAResult {
     #[cfg(feature = "old-cares")]
-    pub fn parse_from(data: &[u8]) -> Result<SOAResult, AresError> {
+    pub fn parse_from(_data: &[u8]) -> Result<SOAResult, AresError> {
         panic!("SOA parsing not supported");
     }
 

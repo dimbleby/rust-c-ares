@@ -62,6 +62,9 @@ impl Drop for CNameResult {
     }
 }
 
+unsafe impl Send for CNameResult { }
+unsafe impl Sync for CNameResult { }
+
 pub unsafe extern "C" fn query_cname_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,

@@ -449,6 +449,9 @@ impl Drop for Channel {
 }
 
 unsafe impl Send for Channel { }
+unsafe impl Sync for Channel { }
+unsafe impl Send for Options { }
+unsafe impl Sync for Options { }
 
 pub unsafe extern "C" fn socket_callback<F>(
     data: *mut libc::c_void,

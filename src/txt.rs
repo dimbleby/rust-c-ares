@@ -99,6 +99,13 @@ impl Drop for TXTResults {
     }
 }
 
+unsafe impl Send for TXTResults { }
+unsafe impl Sync for TXTResults { }
+unsafe impl<'a> Send for TXTResult<'a> { }
+unsafe impl<'a> Sync for TXTResult<'a> { }
+unsafe impl<'a> Send for TXTResultsIterator<'a> { }
+unsafe impl<'a> Sync for TXTResultsIterator<'a> { }
+
 impl<'a> TXTResult<'a> {
     /// Returns the text in this `TXTResult`.
     pub fn text(&self) -> &str {

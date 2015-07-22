@@ -99,6 +99,13 @@ impl Drop for MXResults {
     }
 }
 
+unsafe impl Send for MXResults { }
+unsafe impl Sync for MXResults { }
+unsafe impl<'a> Send for MXResult<'a> { }
+unsafe impl<'a> Sync for MXResult<'a> { }
+unsafe impl<'a> Send for MXResultsIterator<'a> { }
+unsafe impl<'a> Sync for MXResultsIterator<'a> { }
+
 impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.
     pub fn host(&self) -> &str {

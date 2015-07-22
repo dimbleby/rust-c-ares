@@ -114,6 +114,13 @@ impl Drop for AAAAResults {
     }
 }
 
+unsafe impl Send for AAAAResults { }
+unsafe impl Sync for AAAAResults { }
+unsafe impl<'a> Send for AAAAResult<'a> { }
+unsafe impl<'a> Sync for AAAAResult<'a> { }
+unsafe impl<'a> Send for AAAAResultsIterator<'a> { }
+unsafe impl<'a> Sync for AAAAResultsIterator<'a> { }
+
 impl<'a> AAAAResult<'a> {
     /// Returns the IPv6 address in this `AAAAResult`.
     pub fn ipv6_addr(&self) -> Ipv6Addr {

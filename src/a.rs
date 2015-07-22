@@ -114,6 +114,13 @@ impl Drop for AResults {
     }
 }
 
+unsafe impl Send for AResults { }
+unsafe impl Sync for AResults { }
+unsafe impl<'a> Send for AResult<'a> { }
+unsafe impl<'a> Sync for AResult<'a> { }
+unsafe impl<'a> Send for AResultsIterator<'a> { }
+unsafe impl<'a> Sync for AResultsIterator<'a> { }
+
 impl<'a> AResult<'a> {
     /// Returns the IPv4 address in this `AResult`.
     pub fn ipv4_addr(&self) -> Ipv4Addr {

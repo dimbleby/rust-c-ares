@@ -108,6 +108,13 @@ impl Drop for PTRResults {
     }
 }
 
+unsafe impl Send for PTRResults { }
+unsafe impl Sync for PTRResults { }
+unsafe impl<'a> Send for PTRResult<'a> { }
+unsafe impl<'a> Sync for PTRResult<'a> { }
+unsafe impl<'a> Send for PTRResultsIterator<'a> { }
+unsafe impl<'a> Sync for PTRResultsIterator<'a> { }
+
 impl<'a> PTRResult<'a> {
     /// Returns the canonical name in this `PTRResult`.
     pub fn cname(&self) -> &str {

@@ -100,6 +100,13 @@ impl Drop for SRVResults {
     }
 }
 
+unsafe impl Send for SRVResults { }
+unsafe impl Sync for SRVResults { }
+unsafe impl<'a> Send for SRVResult<'a> { }
+unsafe impl<'a> Sync for SRVResult<'a> { }
+unsafe impl<'a> Send for SRVResultsIterator<'a> { }
+unsafe impl<'a> Sync for SRVResultsIterator<'a> { }
+
 impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
     pub fn host(&self) -> &str {

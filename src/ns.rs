@@ -103,6 +103,13 @@ impl Drop for NSResults {
     }
 }
 
+unsafe impl Send for NSResults { }
+unsafe impl Sync for NSResults { }
+unsafe impl<'a> Send for NSResult<'a> { }
+unsafe impl<'a> Sync for NSResult<'a> { }
+unsafe impl<'a> Send for NSResultsIterator<'a> { }
+unsafe impl<'a> Sync for NSResultsIterator<'a> { }
+
 impl<'a> NSResult<'a> {
     /// Returns the name server in this `NSResult`.
     pub fn name_server(&self) -> &str {

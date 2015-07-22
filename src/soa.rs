@@ -95,6 +95,9 @@ impl Drop for SOAResult {
     }
 }
 
+unsafe impl Send for SOAResult { }
+unsafe impl Sync for SOAResult { }
+
 pub unsafe extern "C" fn query_soa_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,

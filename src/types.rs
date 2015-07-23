@@ -42,7 +42,7 @@ pub enum AresError {
     UNKNOWN,
 }
 
-/// Address families.  `INET` is IPv4, `INET6` is IPv6.
+/// Address families.
 #[derive(Debug, Clone, Copy)]
 pub enum AddressFamily {
     /// IPv4.

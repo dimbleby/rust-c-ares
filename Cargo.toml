@@ -3,7 +3,9 @@ name = "c-ares"
 license = "MIT"
 version = "0.6.0"
 authors = ["David Hotham"]
-description = "A Rust wrapper for the c-ares library"
+description = """
+A Rust wrapper for the c-ares library, for asynchronous DNS requests.
+"""
 homepage = "https://github.com/dimbleby/rust-c-ares"
 repository = "https://github.com/dimbleby/rust-c-ares"
 documentation = "http://dimbleby.github.io/rust-c-ares"

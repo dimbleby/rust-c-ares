@@ -13,13 +13,12 @@ use utils::ares_error;
 
 /// The result of a successful TXT lookup.
 pub struct TXTResults {
-    // A list of replies.  Owned by the `TXTResults`.
     txt_reply: *mut c_ares_sys::Struct_ares_txt_reply,
+    phantom: PhantomData<c_ares_sys::Struct_ares_txt_reply>,
 }
 
 /// The contents of a single TXT record.
 pub struct TXTResult<'a> {
-    // A single reply.  Just a reference to a value in a `TXTResults`.
     txt_reply: *mut c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<&'a TXTResults>,
 }
@@ -44,6 +43,7 @@ impl TXTResults {
     fn new(txt_reply: *mut c_ares_sys::Struct_ares_txt_reply) -> TXTResults {
         TXTResults {
             txt_reply: txt_reply,
+            phantom: PhantomData,
         }
     }
 

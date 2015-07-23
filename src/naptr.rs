@@ -14,11 +14,11 @@ use utils::ares_error;
 /// The result of a successful NAPTR lookup.
 pub struct NAPTRResults {
     naptr_reply: *mut c_ares_sys::Struct_ares_naptr_reply,
+    phantom: PhantomData<c_ares_sys::Struct_ares_naptr_reply>,
 }
 
 /// The contents of a single NAPTR record.
 pub struct NAPTRResult<'a> {
-    // A single result - reference into a `NAPTRResults`.
     naptr_reply: *mut c_ares_sys::Struct_ares_naptr_reply,
     phantom: PhantomData<&'a NAPTRResults>,
 }
@@ -52,6 +52,7 @@ impl NAPTRResults {
         reply: *mut c_ares_sys::Struct_ares_naptr_reply) -> NAPTRResults {
         NAPTRResults {
             naptr_reply: reply,
+            phantom: PhantomData,
         }
     }
 

@@ -17,13 +17,12 @@ use utils::ares_error;
 
 /// The result of a successful AAAA lookup.
 pub struct AAAAResults {
-    // This pointer is owned by the `AAAAResults`.
     hostent: *mut hostent,
+    phantom: PhantomData<hostent>,
 }
 
 /// The contents of a single AAAA record.
 pub struct AAAAResult<'a> {
-    // This pointer is a reference to a value in an `AAAAResults`.
     h_addr: *mut libc::c_char,
     phantom: PhantomData<&'a AAAAResults>,
 }
@@ -50,6 +49,7 @@ impl AAAAResults {
     fn new(hostent: *mut hostent) -> AAAAResults {
         AAAAResults {
             hostent: hostent,
+            phantom: PhantomData,
         }
     }
 

@@ -20,7 +20,7 @@ pub struct TXTResults {
 /// The contents of a single TXT record.
 pub struct TXTResult<'a> {
     txt_reply: *mut c_ares_sys::Struct_ares_txt_reply,
-    phantom: PhantomData<&'a TXTResults>,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
 }
 
 impl TXTResults {
@@ -58,7 +58,7 @@ impl TXTResults {
 
 pub struct TXTResultsIterator<'a> {
     next: *mut c_ares_sys::Struct_ares_txt_reply,
-    phantom: PhantomData<&'a TXTResults>,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
 }
 
 impl<'a> Iterator for TXTResultsIterator<'a> {

@@ -302,6 +302,29 @@ fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
     }
 }
 
+fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("Host lookup failed with error '{}'", err_string);
+        }
+        Ok(host_results) => {
+            println!("Successful host lookup...");
+            println!("Hostname: {}", host_results.hostname());
+            for alias in host_results.aliases() {
+                println!("Alias: {}", alias.alias());
+            }
+            for address in host_results.addresses() {
+                match address.ip_address() {
+                    c_ares::IpAddr::V4(v4) => println!("IPv4: {:}", v4),
+                    c_ares::IpAddr::V6(v6) => println!("IPv6: {:}", v6),
+                }
+            }
+        }
+    }
+}
+
 fn main() {
     // Create an event loop, and a c_ares::Channel.
     let mut event_loop = mio::EventLoop::new()
@@ -389,6 +412,16 @@ fn main() {
         tx.send(()).unwrap()
     });
 
+    let tx = results_tx.clone();
+    ares_channel.get_host_by_name(
+        "google.com",
+        c_ares::AddressFamily::INET,
+        move |results| {
+            print_host_results(results);
+            tx.send(()).unwrap()
+        }
+    );
+
     // Set the first instance of the recurring timer on the event loop.
     event_loop.timeout_ms((), 500).unwrap();
 
@@ -402,7 +435,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..10 {
+    for _ in 0..11 {
         results_rx.recv().unwrap();
     }
 

@@ -21,7 +21,7 @@ pub struct SRVResults {
 pub struct SRVResult<'a> {
     // A single result - reference into an `SRVResults`.
     srv_reply: *mut c_ares_sys::Struct_ares_srv_reply,
-    phantom: PhantomData<&'a SRVResults>,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_srv_reply>,
 }
 
 impl SRVResults {
@@ -60,7 +60,7 @@ impl SRVResults {
 
 pub struct SRVResultsIterator<'a> {
     next: *mut c_ares_sys::Struct_ares_srv_reply,
-    phantom: PhantomData<&'a SRVResults>,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_srv_reply>,
 }
 
 impl<'a> Iterator for SRVResultsIterator<'a> {

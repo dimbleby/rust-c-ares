@@ -20,7 +20,7 @@ pub struct NAPTRResults {
 /// The contents of a single NAPTR record.
 pub struct NAPTRResult<'a> {
     naptr_reply: *mut c_ares_sys::Struct_ares_naptr_reply,
-    phantom: PhantomData<&'a NAPTRResults>,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_naptr_reply>,
 }
 
 impl NAPTRResults {
@@ -68,7 +68,7 @@ impl NAPTRResults {
 
 pub struct NAPTRResultsIterator<'a> {
     next: *mut c_ares_sys::Struct_ares_naptr_reply,
-    phantom: PhantomData<&'a NAPTRResults>,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_naptr_reply>,
 }
 
 impl<'a> Iterator for NAPTRResultsIterator<'a> {

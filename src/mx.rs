@@ -20,7 +20,7 @@ pub struct MXResults {
 /// The contents of a single MX record.
 pub struct MXResult<'a> {
     mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
-    phantom: PhantomData<&'a MXResults>,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
 }
 
 impl MXResults {
@@ -58,7 +58,7 @@ impl MXResults {
 
 pub struct MXResultsIterator<'a> {
     next: *mut c_ares_sys::Struct_ares_mx_reply,
-    phantom: PhantomData<&'a MXResults>,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
 }
 
 impl<'a> Iterator for MXResultsIterator<'a> {

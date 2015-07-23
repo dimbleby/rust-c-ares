@@ -24,7 +24,7 @@ pub struct AResults {
 /// The contents of a single A record.
 pub struct AResult<'a> {
     h_addr: *mut libc::c_char,
-    phantom: PhantomData<&'a AResults>,
+    phantom: PhantomData<&'a hostent>,
 }
 
 impl AResults {
@@ -73,7 +73,7 @@ impl AResults {
 
 pub struct AResultsIterator<'a> {
     next: *mut *mut libc::c_char,
-    phantom: PhantomData<&'a AResults>,
+    phantom: PhantomData<&'a hostent>,
 }
 
 impl<'a> Iterator for AResultsIterator<'a> {

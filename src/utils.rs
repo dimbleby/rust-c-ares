@@ -1,7 +1,10 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use types::AresError;
+use types::{
+    AddressFamily,
+    AresError,
+};
 use std::ffi::CStr;
 use std::str;
 
@@ -33,6 +36,15 @@ pub fn ares_error(code: libc::c_int) -> AresError {
         c_ares_sys::ARES_EADDRGETNETWORKPARAMS => AresError::EADDRGETNETWORKPARAMS,
         c_ares_sys::ARES_ECANCELLED => AresError::ECANCELLED,
         _ => AresError::UNKNOWN,
+    }
+}
+
+// Converts an address family into a more strongly typed AddressFamily.
+pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
+    match family {
+        libc::consts::os::bsd44::AF_INET => Some(AddressFamily::INET),
+        libc::consts::os::bsd44::AF_INET6 => Some(AddressFamily::INET6),
+        _ => None,
     }
 }
 

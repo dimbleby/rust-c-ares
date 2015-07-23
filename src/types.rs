@@ -1,6 +1,10 @@
 extern crate c_ares_sys;
 extern crate libc;
 
+use std::net::{
+    Ipv4Addr,
+    Ipv6Addr,
+};
 use std::os::unix::io;
 
 /// An invalid file descriptor.  Use this to represent 'no action' when calling
@@ -36,6 +40,19 @@ pub enum AresError {
     EADDRGETNETWORKPARAMS = c_ares_sys::ARES_EADDRGETNETWORKPARAMS as isize,
     ECANCELLED = c_ares_sys::ARES_ECANCELLED as isize,
     UNKNOWN,
+}
+
+/// Address families.  `INET` is IPv4, `INET6` is IPv6.
+#[derive(Debug, Clone, Copy)]
+pub enum AddressFamily {
+    INET = 2,
+    INET6 = 10,
+}
+
+/// An IP address, either an IPv4 or an IPv6 address.
+pub enum IpAddr {
+    V4(Ipv4Addr),
+    V6(Ipv6Addr),
 }
 
 #[repr(C)]

@@ -23,7 +23,7 @@ pub struct NSResults {
 /// The contents of a single NS record.
 pub struct NSResult<'a> {
     h_alias: *mut libc::c_char,
-    phantom: PhantomData<&'a NSResults>,
+    phantom: PhantomData<&'a hostent>,
 }
 
 impl NSResults {
@@ -62,7 +62,7 @@ impl NSResults {
 
 pub struct NSResultsIterator<'a> {
     next: *mut *mut libc::c_char,
-    phantom: PhantomData<&'a NSResults>,
+    phantom: PhantomData<&'a hostent>,
 }
 
 impl<'a> Iterator for NSResultsIterator<'a> {

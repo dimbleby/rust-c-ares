@@ -23,7 +23,7 @@ pub struct PTRResults {
 /// The contents of a single PTR record.
 pub struct PTRResult<'a> {
     h_alias: *mut libc::c_char,
-    phantom: PhantomData<&'a PTRResults>,
+    phantom: PhantomData<&'a hostent>,
 }
 
 impl PTRResults {
@@ -67,7 +67,7 @@ impl PTRResults {
 
 pub struct PTRResultsIterator<'a> {
     next: *mut *mut libc::c_char,
-    phantom: PhantomData<&'a PTRResults>,
+    phantom: PhantomData<&'a hostent>,
 }
 
 impl<'a> Iterator for PTRResultsIterator<'a> {

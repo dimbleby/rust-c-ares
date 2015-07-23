@@ -20,6 +20,10 @@ use cname::{
     query_cname_callback,
 };
 use flags::Flags;
+use host::{
+    HostResults,
+    query_host_callback,
+};
 use mx::{
     MXResults,
     query_mx_callback,
@@ -41,6 +45,7 @@ use srv::{
     query_srv_callback,
 };
 use types::{
+    AddressFamily,
     AresError,
     DnsClass,
     QueryType,
@@ -459,6 +464,26 @@ impl Channel {
                 DnsClass::IN as libc::c_int,
                 QueryType::SOA as libc::c_int,
                 Some(query_soa_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Perform a host query by name.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn get_host_by_name<F>(
+        &mut self,
+        name: &str,
+        family: AddressFamily,
+        handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_gethostbyname(
+                self.ares_channel,
+                c_name.as_ptr(),
+                family as libc::c_int,
+                Some(query_host_callback::<F>),
                 c_arg);
         }
     }

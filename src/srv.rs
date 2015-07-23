@@ -14,6 +14,7 @@ use utils::ares_error;
 /// The result of a successful SRV lookup.
 pub struct SRVResults {
     srv_reply: *mut c_ares_sys::Struct_ares_srv_reply,
+    phantom: PhantomData<c_ares_sys::Struct_ares_srv_reply>,
 }
 
 /// The contents of a single SRV record.
@@ -44,6 +45,7 @@ impl SRVResults {
     fn new(srv_reply: *mut c_ares_sys::Struct_ares_srv_reply) -> SRVResults {
         SRVResults {
             srv_reply: srv_reply,
+            phantom: PhantomData,
         }
     }
 

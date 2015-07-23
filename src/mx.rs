@@ -13,13 +13,12 @@ use utils::ares_error;
 
 /// The result of a successful MX lookup.
 pub struct MXResults {
-    // A list of replies.  Owned by the `MXResults`.
     mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
+    phantom: PhantomData<c_ares_sys::Struct_ares_mx_reply>,
 }
 
 /// The contents of a single MX record.
 pub struct MXResult<'a> {
-    // A single reply.  Just a reference to a value in an `MXResults`.
     mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<&'a MXResults>,
 }
@@ -44,6 +43,7 @@ impl MXResults {
     fn new(mx_reply: *mut c_ares_sys::Struct_ares_mx_reply) -> MXResults {
         MXResults {
             mx_reply: mx_reply,
+            phantom: PhantomData,
         }
     }
 

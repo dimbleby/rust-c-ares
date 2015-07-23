@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::marker::PhantomData;
 use std::mem;
 use std::ptr;
 use std::slice;
@@ -13,6 +14,7 @@ use utils::ares_error;
 /// The result of a successful SOA lookup.
 pub struct SOAResult {
     soa_reply: *mut c_ares_sys::Struct_ares_soa_reply,
+    phantom: PhantomData<c_ares_sys::Struct_ares_soa_reply>,
 }
 
 impl SOAResult {
@@ -42,6 +44,7 @@ impl SOAResult {
     fn new(soa_reply: *mut c_ares_sys::Struct_ares_soa_reply) -> SOAResult {
         SOAResult {
             soa_reply: soa_reply,
+            phantom: PhantomData,
         }
     }
 

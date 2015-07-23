@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CString;
+use std::marker::PhantomData;
 use std::mem;
 use std::os::unix::io;
 use std::ptr;
@@ -179,6 +180,7 @@ impl Options {
 #[derive(Debug)]
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
+    phantom: PhantomData<c_ares_sys::Struct_ares_channeldata>,
 }
 
 impl Channel {
@@ -241,6 +243,7 @@ impl Channel {
 
         let channel = Channel {
             ares_channel: ares_channel,
+            phantom: PhantomData,
         };
         Ok(channel)
     }

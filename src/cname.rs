@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::marker::PhantomData;
 use std::mem;
 use std::ptr;
 use std::slice;
@@ -16,6 +17,7 @@ use utils::ares_error;
 /// The result of a successful CNAME lookup.
 pub struct CNameResult {
     hostent: *mut hostent,
+    phantom: PhantomData<hostent>,
 }
 
 impl CNameResult {
@@ -41,6 +43,7 @@ impl CNameResult {
     fn new(hostent: *mut hostent) -> CNameResult {
         CNameResult {
             hostent: hostent,
+            phantom: PhantomData,
         }
     }
 

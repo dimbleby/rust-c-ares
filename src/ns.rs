@@ -16,13 +16,12 @@ use utils::ares_error;
 
 /// The result of a successful NS lookup.
 pub struct NSResults {
-    // This pointer is owned by the `NSResults`.
     hostent: *mut hostent,
+    phantom: PhantomData<hostent>,
 }
 
 /// The contents of a single NS record.
 pub struct NSResult<'a> {
-    // This pointer is a reference to a value in an `NSResults`.
     h_alias: *mut libc::c_char,
     phantom: PhantomData<&'a NSResults>,
 }
@@ -47,6 +46,7 @@ impl NSResults {
     fn new(hostent: *mut hostent) -> NSResults {
         NSResults {
             hostent: hostent,
+            phantom: PhantomData,
         }
     }
 

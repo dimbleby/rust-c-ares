@@ -45,13 +45,19 @@ pub enum AresError {
 /// Address families.  `INET` is IPv4, `INET6` is IPv6.
 #[derive(Debug, Clone, Copy)]
 pub enum AddressFamily {
+    /// IPv4.
     INET = 2,
+
+    /// IPv6.
     INET6 = 10,
 }
 
 /// An IP address, either an IPv4 or an IPv6 address.
 pub enum IpAddr {
+    /// An IPv4 address.
     V4(Ipv4Addr),
+
+    /// An IPv6 address.
     V6(Ipv6Addr),
 }
 

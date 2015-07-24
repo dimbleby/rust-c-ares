@@ -4,6 +4,10 @@ extern crate mio;
 
 use std::collections::HashSet;
 use std::mem;
+use std::net::{
+    Ipv4Addr,
+    Ipv6Addr,
+};
 use std::os::unix::io;
 use std::sync::mpsc;
 use std::thread;
@@ -422,6 +426,26 @@ fn main() {
         }
     );
 
+    let tx = results_tx.clone();
+    let ipv4 = Ipv4Addr::new(216, 58, 208, 78);
+    ares_channel.get_host_by_address(
+        c_ares::IpAddr::V4(ipv4),
+        move |results| {
+            print_host_results(results);
+            tx.send(()).unwrap()
+        }
+    );
+
+    let tx = results_tx.clone();
+    let ipv6 = Ipv6Addr::new(0x2a00, 0x1450, 0x4009, 0x80a, 0, 0, 0, 0x200e);
+    ares_channel.get_host_by_address(
+        c_ares::IpAddr::V6(ipv6),
+        move |results| {
+            print_host_results(results);
+            tx.send(()).unwrap()
+        }
+    );
+
     // Set the first instance of the recurring timer on the event loop.
     event_loop.timeout_ms((), 500).unwrap();
 
@@ -435,7 +459,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..11 {
+    for _ in 0..13 {
         results_rx.recv().unwrap();
     }
 

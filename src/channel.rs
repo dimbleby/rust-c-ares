@@ -48,6 +48,7 @@ use types::{
     AddressFamily,
     AresError,
     DnsClass,
+    IpAddr,
     QueryType,
 };
 use txt::{
@@ -464,6 +465,43 @@ impl Channel {
                 DnsClass::IN as libc::c_int,
                 QueryType::SOA as libc::c_int,
                 Some(query_soa_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Perform a host query by address.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn get_host_by_address<F>(
+        &mut self,
+        address: IpAddr,
+        handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
+        let c_addr = match address {
+            IpAddr::V4(v4) => v4.octets().as_ptr() as *const libc::c_void,
+            IpAddr::V6(v6) => {
+                let mut segments = v6.segments();
+                for segment in segments.iter_mut() {
+                    *segment = segment.to_be();
+                }
+                segments.as_ptr() as *const libc::c_void
+            },
+        };
+        let length = match address {
+            IpAddr::V4(_) => 4,
+            IpAddr::V6(_) => 16,
+        };
+        let family = match address {
+            IpAddr::V4(_) => AddressFamily::INET,
+            IpAddr::V6(_) => AddressFamily::INET6,
+        };
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_gethostbyaddr(
+                self.ares_channel,
+                c_addr,
+                length as libc::c_int,
+                family as libc::c_int,
+                Some(query_host_callback::<F>),
                 c_arg);
         }
     }

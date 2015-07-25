@@ -4,6 +4,10 @@ extern crate libc;
 use std::ffi::CString;
 use std::marker::PhantomData;
 use std::mem;
+use std::net::{
+    Ipv4Addr,
+    Ipv6Addr,
+};
 use std::os::unix::io;
 use std::ptr;
 
@@ -274,7 +278,7 @@ impl Channel {
     ///
     /// String format is `host[:port]`.  IPv6 addresses with ports require
     /// square brackets eg `[2001:4860:4860::8888]:53`.
-    pub fn set_servers(&mut self, servers: &[&str]) -> Result<(), AresError> {
+    pub fn set_servers(&mut self, servers: &[&str]) -> Result<&mut Self, AresError> {
         let servers_csv = servers.connect(",");
         let c_servers = CString::new(servers_csv).unwrap();
         let ares_rc = unsafe {
@@ -285,9 +289,43 @@ impl Channel {
         if ares_rc != c_ares_sys::ARES_SUCCESS {
             Err(ares_error(ares_rc))
         } else {
-            Ok(())
+            Ok(self)
         }
     }
+
+    /// Set the local IPv4 address from which to make queries.
+    pub fn set_local_ipv4(&mut self, ipv4: &Ipv4Addr) -> &mut Self {
+        let value = ipv4
+            .octets()
+            .iter()
+            .fold(0, |v, &o| (v << 8) | o as u32);
+        unsafe { c_ares_sys::ares_set_local_ip4(self.ares_channel, value); }
+        self
+    }
+
+    /// Set the local IPv6 address from which to make queries.
+    pub fn set_local_ipv6(&mut self, ipv6: &Ipv6Addr) -> &mut Self {
+        let mut segments = ipv6.segments();
+        for segment in segments.iter_mut() {
+            *segment = segment.to_be();
+        }
+        unsafe {
+            c_ares_sys::ares_set_local_ip6(
+                self.ares_channel,
+                segments.as_ptr() as *const libc::c_uchar);
+        }
+        self
+    }
+
+    /// Set the local device from which to make queries.
+    pub fn set_local_device(&mut self, device: &str) -> &mut Self {
+        let c_dev = CString::new(device).unwrap();
+        unsafe {
+            c_ares_sys::ares_set_local_dev(self.ares_channel, c_dev.as_ptr());
+        }
+        self
+    }
+
 
     /// Look up the A records associated with `name`.
     ///
@@ -474,11 +512,11 @@ impl Channel {
     /// On completion, `handler` is called with the result.
     pub fn get_host_by_address<F>(
         &mut self,
-        address: IpAddr,
+        address: &IpAddr,
         handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
-        let c_addr = match address {
-            IpAddr::V4(v4) => v4.octets().as_ptr() as *const libc::c_void,
-            IpAddr::V6(v6) => {
+        let c_addr = match *address {
+            IpAddr::V4(ref v4) => v4.octets().as_ptr() as *const libc::c_void,
+            IpAddr::V6(ref v6) => {
                 let mut segments = v6.segments();
                 for segment in segments.iter_mut() {
                     *segment = segment.to_be();
@@ -486,7 +524,7 @@ impl Channel {
                 segments.as_ptr() as *const libc::c_void
             },
         };
-        let (family, length) = match address {
+        let (family, length) = match *address {
             IpAddr::V4(_) => (AddressFamily::INET, 4),
             IpAddr::V6(_) => (AddressFamily::INET6, 16),
         };

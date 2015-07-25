@@ -1,6 +1,10 @@
-use libc::types::os::arch::c95::size_t;
-use libc::types::os::common::bsd44::{in_addr, sockaddr, socklen_t};
-use libc::types::os::common::posix01::timeval;
+use libc::{
+    in_addr,
+    size_t,
+    sockaddr,
+    socklen_t,
+    timeval,
+};
 
 pub type Struct_in_addr = in_addr;
 pub type Struct_sockaddr = sockaddr;

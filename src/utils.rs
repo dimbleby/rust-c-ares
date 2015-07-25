@@ -49,8 +49,8 @@ pub fn ares_error(code: libc::c_int) -> AresError {
 // Converts an address family into a more strongly typed AddressFamily.
 pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
     match family {
-        libc::consts::os::bsd44::AF_INET => Some(AddressFamily::INET),
-        libc::consts::os::bsd44::AF_INET6 => Some(AddressFamily::INET6),
+        libc::AF_INET => Some(AddressFamily::INET),
+        libc::AF_INET6 => Some(AddressFamily::INET6),
         _ => None,
     }
 }

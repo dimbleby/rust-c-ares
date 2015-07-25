@@ -19,7 +19,7 @@ pub struct TXTResults {
 
 /// The contents of a single TXT record.
 pub struct TXTResult<'a> {
-    txt_reply: *mut c_ares_sys::Struct_ares_txt_reply,
+    txt_reply: *const c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
 }
 
@@ -57,7 +57,7 @@ impl TXTResults {
 }
 
 pub struct TXTResultsIterator<'a> {
-    next: *mut c_ares_sys::Struct_ares_txt_reply,
+    next: *const c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
 }
 
@@ -84,10 +84,7 @@ impl<'a> IntoIterator for &'a TXTResults {
     type IntoIter = TXTResultsIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        TXTResultsIterator {
-            next: self.txt_reply,
-            phantom: PhantomData,
-        }
+        self.iter()
     }
 }
 

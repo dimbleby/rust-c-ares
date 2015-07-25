@@ -19,7 +19,7 @@ pub struct MXResults {
 
 /// The contents of a single MX record.
 pub struct MXResult<'a> {
-    mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
+    mx_reply: *const c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
 }
 
@@ -57,7 +57,7 @@ impl MXResults {
 }
 
 pub struct MXResultsIterator<'a> {
-    next: *mut c_ares_sys::Struct_ares_mx_reply,
+    next: *const c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
 }
 
@@ -84,10 +84,7 @@ impl<'a> IntoIterator for &'a MXResults {
     type IntoIter = MXResultsIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        MXResultsIterator {
-            next: self.mx_reply,
-            phantom: PhantomData,
-        }
+        self.iter()
     }
 }
 

@@ -19,7 +19,7 @@ pub struct NAPTRResults {
 
 /// The contents of a single NAPTR record.
 pub struct NAPTRResult<'a> {
-    naptr_reply: *mut c_ares_sys::Struct_ares_naptr_reply,
+    naptr_reply: *const c_ares_sys::Struct_ares_naptr_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_naptr_reply>,
 }
 
@@ -67,7 +67,7 @@ impl NAPTRResults {
 }
 
 pub struct NAPTRResultsIterator<'a> {
-    next: *mut c_ares_sys::Struct_ares_naptr_reply,
+    next: *const c_ares_sys::Struct_ares_naptr_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_naptr_reply>,
 }
 
@@ -93,10 +93,7 @@ impl<'a> IntoIterator for &'a NAPTRResults {
     type IntoIter = NAPTRResultsIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        NAPTRResultsIterator {
-            next: self.naptr_reply,
-            phantom: PhantomData,
-        }
+        self.iter()
     }
 }
 

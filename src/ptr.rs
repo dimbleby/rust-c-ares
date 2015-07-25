@@ -22,7 +22,7 @@ pub struct PTRResults {
 
 /// The contents of a single PTR record.
 pub struct PTRResult<'a> {
-    h_alias: *mut libc::c_char,
+    h_alias: *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
 
@@ -59,14 +59,14 @@ impl PTRResults {
     /// `PTRResults`.
     pub fn iter(&self) -> PTRResultsIterator {
         PTRResultsIterator {
-            next: unsafe { (*self.hostent).h_aliases },
+            next: unsafe { (*self.hostent).h_aliases as *const *const _ },
             phantom: PhantomData,
         }
     }
 }
 
 pub struct PTRResultsIterator<'a> {
-    next: *mut *mut libc::c_char,
+    next: *const *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
 
@@ -92,10 +92,7 @@ impl<'a> IntoIterator for &'a PTRResults {
     type IntoIter = PTRResultsIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        PTRResultsIterator {
-            next: unsafe { (*self.hostent).h_aliases },
-            phantom: PhantomData,
-        }
+        self.iter()
     }
 }
 

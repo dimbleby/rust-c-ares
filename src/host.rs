@@ -29,14 +29,14 @@ pub struct HostResults<'a> {
 
 /// An alias, as retrieved from a host lookup.
 pub struct HostAliasResult<'a> {
-    h_alias: *mut libc::c_char,
+    h_alias: *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
 
 /// An address, as retrieved from a host lookup.
 pub struct HostAddressResult<'a> {
     family: AddressFamily,
-    h_addr: *mut libc::c_char,
+    h_addr: *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
 
@@ -61,7 +61,7 @@ impl<'a> HostResults<'a> {
         match address_family(self.hostent.h_addrtype) {
             Some(family) => HostAddressResultsIterator {
                 family: family,
-                next: self.hostent.h_addr_list,
+                next: self.hostent.h_addr_list as *const *const _,
                 phantom: PhantomData,
             },
             None => HostAddressResultsIterator {
@@ -76,7 +76,7 @@ impl<'a> HostResults<'a> {
     /// `HostResults`.
     pub fn aliases(&self) -> HostAliasResultsIterator {
         HostAliasResultsIterator {
-            next: self.hostent.h_aliases,
+            next: self.hostent.h_aliases as *const *const _,
             phantom: PhantomData,
         }
     }
@@ -84,7 +84,7 @@ impl<'a> HostResults<'a> {
 
 pub struct HostAddressResultsIterator<'a> {
     family: AddressFamily,
-    next: *mut *mut libc::c_char,
+    next: *const *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
 
@@ -107,7 +107,7 @@ impl<'a> Iterator for HostAddressResultsIterator<'a> {
 }
 
 pub struct HostAliasResultsIterator<'a> {
-    next: *mut *mut libc::c_char,
+    next: *const *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
 

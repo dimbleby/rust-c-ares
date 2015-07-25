@@ -23,7 +23,7 @@ pub struct AAAAResults {
 
 /// The contents of a single AAAA record.
 pub struct AAAAResult<'a> {
-    h_addr: *mut libc::c_char,
+    h_addr: *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
 
@@ -65,14 +65,14 @@ impl AAAAResults {
     /// `AAAAResults`.
     pub fn iter(&self) -> AAAAResultsIterator {
         AAAAResultsIterator {
-            next: unsafe { (*self.hostent).h_addr_list },
+            next: unsafe { (*self.hostent).h_addr_list as *const *const _ },
             phantom: PhantomData,
         }
     }
 }
 
 pub struct AAAAResultsIterator<'a> {
-    next: *mut *mut libc::c_char,
+    next: *const *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
 
@@ -98,10 +98,7 @@ impl<'a> IntoIterator for &'a AAAAResults {
     type IntoIter = AAAAResultsIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        AAAAResultsIterator {
-            next: unsafe { (*self.hostent).h_addr_list },
-            phantom: PhantomData,
-        }
+        self.iter()
     }
 }
 

@@ -187,7 +187,6 @@ impl Options {
 }
 
 /// A channel for name service lookups.
-#[derive(Debug)]
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
     phantom: PhantomData<c_ares_sys::Struct_ares_channeldata>,

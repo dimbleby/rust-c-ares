@@ -74,7 +74,7 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> libc::in6_addr {
     libc::in6_addr { s6_addr: segments }
 }
 
-// Gets sock_addr_in from a SocketAddr4.
+// Gets a sockaddr_in from a SocketAddr4.
 pub fn socket_addrv4_as_sockaddr_in(
     sock_v4: &SocketAddrV4) -> libc::sockaddr_in {
     let in_addr = ipv4_as_in_addr(sock_v4.ip());
@@ -86,7 +86,7 @@ pub fn socket_addrv4_as_sockaddr_in(
     }
 }
 
-// Gets sock_addr_in6 from a SocketAddr6.
+// Gets a sockaddr_in6 from a SocketAddr6.
 pub fn socket_addrv6_as_sockaddr_in6(
     sock_v6: &SocketAddrV6) -> libc::sockaddr_in6 {
     let in6_addr = ipv6_as_in6_addr(sock_v6.ip());

@@ -24,10 +24,7 @@ use cname::{
     CNameResult,
     query_cname_callback,
 };
-use flags::{
-    Flags,
-    NIFlags,
-};
+use flags::Flags;
 use host::{
     HostResults,
     get_host_callback,
@@ -44,6 +41,7 @@ use naptr::{
     NAPTRResults,
     query_naptr_callback,
 };
+use ni_flags::NIFlags;
 use ns::{
     NSResults,
     query_ns_callback,
@@ -568,6 +566,9 @@ impl Channel {
     }
 
     /// Address-to-nodename translation in protocol-independent manner.
+    ///
+    /// The valid values for `flags` are documented
+    /// [here](ni_flags/index.html).
     ///
     /// On completion, `handler` is called with the result.
     pub fn get_name_info<F>(

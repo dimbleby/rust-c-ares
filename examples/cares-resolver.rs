@@ -465,7 +465,7 @@ fn main() {
     let sock = SocketAddr::V4(SocketAddrV4::new(ipv4, 80));
     ares_channel.get_name_info(
         &sock,
-        c_ares::flags::LOOKUPHOST | c_ares::flags::LOOKUPSERVICE,
+        c_ares::ni_flags::LOOKUPHOST | c_ares::ni_flags::LOOKUPSERVICE,
         move |result| {
             print_name_info_result(result);
             tx.send(()).unwrap()

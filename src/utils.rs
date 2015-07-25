@@ -6,6 +6,13 @@ use types::{
     AresError,
 };
 use std::ffi::CStr;
+use std::mem;
+use std::net::{
+    Ipv4Addr,
+    Ipv6Addr,
+    SocketAddrV4,
+    SocketAddrV6,
+};
 use std::str;
 
 // Convert an error code from the library into a more strongly typed AresError.
@@ -45,6 +52,49 @@ pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
         libc::consts::os::bsd44::AF_INET => Some(AddressFamily::INET),
         libc::consts::os::bsd44::AF_INET6 => Some(AddressFamily::INET6),
         _ => None,
+    }
+}
+
+// Gets an in_addr from an IPv4Addr.
+pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> libc::in_addr {
+    let value = ipv4
+        .octets()
+        .iter()
+        .fold(0, |v, &o| (v << 8) | o as u32)
+        .to_be() as libc::in_addr_t;
+    libc::in_addr { s_addr: value }
+}
+
+// Gets an in6_addr from an IP64Addr.
+pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> libc::in6_addr {
+    let mut segments = ipv6.segments();
+    for segment in segments.iter_mut() {
+        *segment = segment.to_be();
+    }
+    libc::in6_addr { s6_addr: segments }
+}
+
+pub fn socket_addrv4_as_sockaddr_in(
+    sock_v4: &SocketAddrV4) -> libc::sockaddr_in {
+    let in_addr = ipv4_as_in_addr(sock_v4.ip());
+    libc::sockaddr_in {
+        sin_family: libc::AF_INET as libc::sa_family_t,
+        sin_port: sock_v4.port().to_be(),
+        sin_addr: in_addr,
+        .. unsafe { mem::zeroed() }
+    }
+}
+
+pub fn socket_addrv6_as_sockaddr_in6(
+    sock_v6: &SocketAddrV6) -> libc::sockaddr_in6 {
+    let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
+    libc::sockaddr_in6 {
+        sin6_family: libc::AF_INET6 as libc::sa_family_t,
+        sin6_port: sock_v6.port().to_be(),
+        sin6_addr: in6_addr,
+        sin6_flowinfo: sock_v6.flowinfo().to_be(),
+        sin6_scope_id: sock_v6.scope_id().to_be(),
+        .. unsafe { mem::zeroed() }
     }
 }
 

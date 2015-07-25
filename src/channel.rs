@@ -7,6 +7,7 @@ use std::mem;
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
+    SocketAddr,
 };
 use std::os::unix::io;
 use std::ptr;
@@ -23,14 +24,21 @@ use cname::{
     CNameResult,
     query_cname_callback,
 };
-use flags::Flags;
+use flags::{
+    Flags,
+    NIFlags,
+};
 use host::{
     HostResults,
-    query_host_callback,
+    get_host_callback,
 };
 use mx::{
     MXResults,
     query_mx_callback,
+};
+use nameinfo::{
+    NameInfoResult,
+    get_name_info_callback,
 };
 use naptr::{
     NAPTRResults,
@@ -63,7 +71,13 @@ use soa::{
     SOAResult,
     query_soa_callback,
 };
-use utils::ares_error;
+use utils::{
+  ares_error,
+  ipv4_as_in_addr,
+  ipv6_as_in6_addr,
+  socket_addrv4_as_sockaddr_in,
+  socket_addrv6_as_sockaddr_in6,
+};
 
 /// Used to configure the behaviour of the name resolver.
 #[derive(Clone)]
@@ -294,24 +308,18 @@ impl Channel {
 
     /// Set the local IPv4 address from which to make queries.
     pub fn set_local_ipv4(&mut self, ipv4: &Ipv4Addr) -> &mut Self {
-        let value = ipv4
-            .octets()
-            .iter()
-            .fold(0, |v, &o| (v << 8) | o as u32);
+        let value = ipv4.octets().iter().fold(0, |v, &o| (v << 8) | o as u32);
         unsafe { c_ares_sys::ares_set_local_ip4(self.ares_channel, value); }
         self
     }
 
     /// Set the local IPv6 address from which to make queries.
     pub fn set_local_ipv6(&mut self, ipv6: &Ipv6Addr) -> &mut Self {
-        let mut segments = ipv6.segments();
-        for segment in segments.iter_mut() {
-            *segment = segment.to_be();
-        }
+        let in6_addr = ipv6_as_in6_addr(ipv6);
         unsafe {
             c_ares_sys::ares_set_local_ip6(
                 self.ares_channel,
-                segments.as_ptr() as *const libc::c_uchar);
+                &in6_addr as *const _ as *const libc::c_uchar);
         }
         self
     }
@@ -514,13 +522,13 @@ impl Channel {
         address: &IpAddr,
         handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
         let c_addr = match *address {
-            IpAddr::V4(ref v4) => v4.octets().as_ptr() as *const libc::c_void,
+            IpAddr::V4(ref v4) => {
+                let in_addr = ipv4_as_in_addr(v4);
+                &in_addr as *const _ as *const libc::c_void
+            },
             IpAddr::V6(ref v6) => {
-                let mut segments = v6.segments();
-                for segment in segments.iter_mut() {
-                    *segment = segment.to_be();
-                }
-                segments.as_ptr() as *const libc::c_void
+                let in6_addr = ipv6_as_in6_addr(v6);
+                &in6_addr as *const _ as *const libc::c_void
             },
         };
         let (family, length) = match *address {
@@ -534,7 +542,7 @@ impl Channel {
                 c_addr,
                 length as libc::c_int,
                 family as libc::c_int,
-                Some(query_host_callback::<F>),
+                Some(get_host_callback::<F>),
                 c_arg);
         }
     }
@@ -554,7 +562,37 @@ impl Channel {
                 self.ares_channel,
                 c_name.as_ptr(),
                 family as libc::c_int,
-                Some(query_host_callback::<F>),
+                Some(get_host_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Address-to-nodename translation in protocol-independent manner.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn get_name_info<F>(
+        &mut self,
+        address: &SocketAddr,
+        flags: NIFlags,
+        handler: F) where F: FnOnce(Result<NameInfoResult, AresError>) + 'static {
+        let c_addr = match *address {
+            SocketAddr::V4(ref v4) => {
+                let sockaddr = socket_addrv4_as_sockaddr_in(v4);
+                &sockaddr as *const _ as *const libc::sockaddr
+            },
+            SocketAddr::V6(ref v6) => {
+                let sockaddr = socket_addrv6_as_sockaddr_in6(v6);
+                &sockaddr as *const _ as *const libc::sockaddr
+            },
+        };
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_getnameinfo(
+                self.ares_channel,
+                c_addr,
+                16,
+                flags.bits(),
+                Some(get_name_info_callback::<F>),
                 c_arg);
         }
     }

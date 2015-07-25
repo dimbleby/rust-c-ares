@@ -63,5 +63,19 @@ pub const ARES_OPT_TIMEOUTMS: libc::c_int = 1 << 13;
 pub const ARES_OPT_ROTATE: libc::c_int = 1 << 14;
 pub const ARES_OPT_EDNSPSZ: libc::c_int = 1 << 15;
 
+// Flags for nameinfo queries.
+pub const ARES_NI_NOFQDN: libc::c_int = 1 << 0;
+pub const ARES_NI_NUMERICHOST: libc::c_int = 1 << 1;
+pub const ARES_NI_NAMEREQD: libc::c_int = 1 << 2;
+pub const ARES_NI_NUMERICSERV: libc::c_int = 1 << 3;
+pub const ARES_NI_DGRAM: libc::c_int = 1 << 4;
+pub const ARES_NI_TCP: libc::c_int = 0;
+pub const ARES_NI_UDP: libc::c_int = ARES_NI_DGRAM;
+pub const ARES_NI_SCTP: libc::c_int = 1 << 5;
+pub const ARES_NI_DCCP: libc::c_int = 1 << 6;
+pub const ARES_NI_NUMERICSCOPE: libc::c_int = 1 << 7;
+pub const ARES_NI_LOOKUPHOST: libc::c_int = 1 << 8;
+pub const ARES_NI_LOOKUPSERVICE: libc::c_int = 1 << 9;
+
 // A non-existent file descriptor.
 pub const ARES_SOCKET_BAD: ares_socket_t = -1;

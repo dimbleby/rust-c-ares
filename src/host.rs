@@ -191,7 +191,7 @@ impl<'a> HostAliasResult<'a> {
     }
 }
 
-pub unsafe extern "C" fn query_host_callback<F>(
+pub unsafe extern "C" fn get_host_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,
     _timeouts: libc::c_int,

@@ -7,6 +7,8 @@ use std::mem;
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
+    SocketAddr,
+    SocketAddrV4,
 };
 use std::os::unix::io;
 use std::sync::mpsc;
@@ -329,6 +331,23 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
     }
 }
 
+fn print_name_info_result(result: Result<c_ares::NameInfoResult, c_ares::AresError>) {
+    println!("");
+    match result {
+        Err(e) => {
+            let err_string = c_ares::str_error(e);
+            println!("Name info lookup failed with error '{}'", err_string);
+        }
+        Ok(name_info_result) => {
+            println!("Successful name info lookup...");
+            println!("Node: {}", name_info_result.node().unwrap_or("<None>"));
+            println!(
+                "Service: {}",
+                name_info_result.service().unwrap_or("<None>"));
+        }
+    }
+}
+
 fn main() {
     // Create an event loop, and a c_ares::Channel.
     let mut event_loop = mio::EventLoop::new()
@@ -441,6 +460,18 @@ fn main() {
         tx.send(()).unwrap()
     });
 
+    let tx = results_tx.clone();
+    let ipv4 = Ipv4Addr::new(216, 58, 210, 14);
+    let sock = SocketAddr::V4(SocketAddrV4::new(ipv4, 80));
+    ares_channel.get_name_info(
+        &sock,
+        c_ares::flags::LOOKUPHOST | c_ares::flags::LOOKUPSERVICE,
+        move |result| {
+            print_name_info_result(result);
+            tx.send(()).unwrap()
+        }
+    );
+
     // Set the first instance of the recurring timer on the event loop.
     event_loop.timeout_ms((), 500).unwrap();
 
@@ -454,7 +485,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..13 {
+    for _ in 0..14 {
         results_rx.recv().unwrap();
     }
 

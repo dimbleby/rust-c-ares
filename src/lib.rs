@@ -33,6 +33,7 @@ mod cname;
 pub mod flags;
 mod host;
 mod mx;
+mod nameinfo;
 mod naptr;
 mod ns;
 mod ptr;
@@ -67,6 +68,9 @@ pub use host::{
 pub use mx::{
     MXResult,
     MXResults,
+};
+pub use nameinfo::{
+    NameInfoResult,
 };
 pub use naptr::{
     NAPTRResult,

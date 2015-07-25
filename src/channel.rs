@@ -521,6 +521,14 @@ impl Channel {
                 c_arg);
         }
     }
+
+    /// Cancel all requests made on this `Channel`.
+    ///
+    /// Callbacks will be invoked for each pending query, passing a result
+    /// `Err(AresError::ECANCELLED)`.
+    pub fn cancel(&mut self) {
+        unsafe { c_ares_sys::ares_cancel(self.ares_channel); }
+    }
 }
 
 impl Drop for Channel {

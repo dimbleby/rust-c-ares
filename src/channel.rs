@@ -486,13 +486,9 @@ impl Channel {
                 segments.as_ptr() as *const libc::c_void
             },
         };
-        let length = match address {
-            IpAddr::V4(_) => 4,
-            IpAddr::V6(_) => 16,
-        };
-        let family = match address {
-            IpAddr::V4(_) => AddressFamily::INET,
-            IpAddr::V6(_) => AddressFamily::INET6,
+        let (family, length) = match address {
+            IpAddr::V4(_) => (AddressFamily::INET, 4),
+            IpAddr::V6(_) => (AddressFamily::INET6, 16),
         };
         unsafe {
             let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));

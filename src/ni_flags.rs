@@ -1,7 +1,6 @@
 #[allow(dead_code)]
 extern crate c_ares_sys;
 
-/// Flags that may be provided on a call to `get_name_info()`.
 bitflags!(
     #[doc = "Flags that may be provided on a call to `get_name_info()`."]
     flags NIFlags: i32 {

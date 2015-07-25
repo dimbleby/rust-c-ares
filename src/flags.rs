@@ -1,7 +1,6 @@
 #[allow(dead_code)]
 extern crate c_ares_sys;
 
-/// Flags that may be passed when initializing a channel.
 bitflags!(
     #[doc = "Flags that may be passed when initializing a channel."]
     flags Flags: i32 {

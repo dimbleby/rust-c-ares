@@ -530,8 +530,12 @@ impl Channel {
             },
         };
         let (family, length) = match *address {
-            IpAddr::V4(_) => (AddressFamily::INET, 4),
-            IpAddr::V6(_) => (AddressFamily::INET6, 16),
+            IpAddr::V4(_) => {
+                (AddressFamily::INET, mem::size_of::<libc::in_addr>())
+            },
+            IpAddr::V6(_) => {
+                (AddressFamily::INET6, mem::size_of::<libc::in6_addr>())
+            },
         };
         unsafe {
             let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
@@ -591,7 +595,7 @@ impl Channel {
             c_ares_sys::ares_getnameinfo(
                 self.ares_channel,
                 c_addr,
-                16,
+                mem::size_of::<libc::sockaddr>() as c_ares_sys::ares_socklen_t,
                 flags.bits(),
                 Some(get_name_info_callback::<F>),
                 c_arg);

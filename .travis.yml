@@ -14,5 +14,5 @@ branches:
     master
 install:
 - pip install ghp-import --user $USER
-after_success:
-- [ $TRAVIS_PULL_REQUEST = false ] && bash ./publish-docs.sh
+after_success: |
+  [ $TRAVIS_PULL_REQUEST = false ] && bash ./publish-docs.sh

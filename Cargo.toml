@@ -13,14 +13,12 @@ readme = "README.md"
 keywords = ["DNS", "c-ares"]
 
 [dependencies]
-libc = "*"
-bitflags = "*"
-
-[dependencies.c-ares-sys]
-path = "c-ares-sys"
+libc = "0.1.0"
+bitflags = "0.3.0"
+c-ares-sys = "0.2.0"
 
 [dev-dependencies]
-mio = "*"
+mio = "0.4.0"
 
 [features]
 old-cares = []

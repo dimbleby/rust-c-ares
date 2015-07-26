@@ -202,6 +202,10 @@ impl Options {
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
     phantom: PhantomData<c_ares_sys::Struct_ares_channeldata>,
+
+    // For ownership only.
+    #[allow(dead_code)]
+    socket_state_callback: Box<FnMut(io::RawFd, bool, bool) + 'static>,
 }
 
 impl Channel {
@@ -217,15 +221,12 @@ impl Channel {
         callback: F,
         mut options: Options) -> Result<Channel, AresError>
         where F: FnMut(io::RawFd, bool, bool) + 'static {
+        let mut boxed_callback = Box::new(callback);
         options.optmask = options.optmask | c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         options.ares_options.sock_state_cb = Some(socket_callback::<F>);
-        options.ares_options.sock_state_cb_data = unsafe {
-            mem::transmute(Box::new(callback))
-        };
-        Self::create_channel(options)
-    }
+        options.ares_options.sock_state_cb_data =
+            &mut *boxed_callback as *mut _ as *mut libc::c_void;
 
-    fn create_channel(mut options: Options) -> Result<Channel, AresError> {
         // Initialize the library.
         let lib_rc = unsafe {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
@@ -265,6 +266,7 @@ impl Channel {
         let channel = Channel {
             ares_channel: ares_channel,
             phantom: PhantomData,
+            socket_state_callback: boxed_callback,
         };
         Ok(channel)
     }
@@ -633,4 +635,5 @@ pub unsafe extern "C" fn socket_callback<F>(
     where F: FnMut(io::RawFd, bool, bool) + 'static {
     let mut handler: Box<F> = mem::transmute(data);
     handler(socket_fd as io::RawFd, readable != 0, writable != 0);
+    mem::forget(handler);
 }

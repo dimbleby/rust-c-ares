@@ -109,7 +109,7 @@ impl Options {
     /// Set the number of milliseconds each name server is given to respond to
     /// a query on the first try.  (After the first try, the timeout algorithm
     /// becomes more complicated, but scales linearly with the value of
-    /// timeout.) The default is 5000ms.
+    /// timeout).  The default is 5000ms.
     pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
         self.ares_options.timeout = ms as libc::c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TIMEOUTMS;
@@ -117,7 +117,7 @@ impl Options {
     }
 
     /// Set the number of tries the resolver will try contacting each name
-    /// server before giving up. The default is four tries.
+    /// server before giving up.  The default is four tries.
     pub fn set_tries(&mut self, tries: u32) -> &mut Self {
         self.ares_options.tries = tries as libc::c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TRIES;
@@ -126,7 +126,7 @@ impl Options {
 
     /// Set the number of dots which must be present in a domain name for it to
     /// be queried for "as is" prior to querying for it with the default domain
-    /// extensions appended. The default value is 1 unless set otherwise by
+    /// extensions appended.  The default value is 1 unless set otherwise by
     /// resolv.conf or the RES_OPTIONS environment variable.
     pub fn set_ndots(&mut self, ndots: u32) -> &mut Self {
         self.ares_options.ndots = ndots as libc::c_int;
@@ -134,7 +134,7 @@ impl Options {
         self
     }
 
-    /// Set the UDP port to use for queries. The default value is 53, the
+    /// Set the UDP port to use for queries.  The default value is 53, the
     /// standard name service port.
     pub fn set_udp_port(&mut self, udp_port: u16) -> &mut Self {
         self.ares_options.udp_port = udp_port as libc::c_ushort;
@@ -142,7 +142,7 @@ impl Options {
         self
     }
 
-    /// Set the TCP port to use for queries. The default value is 53, the
+    /// Set the TCP port to use for queries.  The default value is 53, the
     /// standard name service port.
     pub fn set_tcp_port(&mut self, tcp_port: u16) -> &mut Self {
         self.ares_options.tcp_port = tcp_port as libc::c_ushort;
@@ -228,8 +228,7 @@ pub struct Channel {
 }
 
 impl Channel {
-    /// Create a new channel for name service lookups, providing a callback
-    /// for socket state changes.
+    /// Create a new channel for name service lookups.
     pub fn new(mut options: Options) -> Result<Channel, AresError> {
         // Initialize the library.
         let lib_rc = unsafe {
@@ -336,7 +335,6 @@ impl Channel {
         }
         self
     }
-
 
     /// Look up the A records associated with `name`.
     ///

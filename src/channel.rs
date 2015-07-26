@@ -177,11 +177,11 @@ impl Options {
     /// state:
     ///
     /// -  `read` is set to true if the socket should listen for read events
-    /// -  `write` is set to true if the socket should listen to write events.
+    /// -  `write` is set to true if the socket should listen for write events.
     pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
         where F: FnMut(io::RawFd, bool, bool) + 'static {
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_STATE_CB;
-        self.ares_options.sock_state_cb = Some(socket_callback::<F>);
+        self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
         let mut boxed_callback = Box::new(callback);
         self.ares_options.sock_state_cb_data =
             &mut *boxed_callback as *mut _ as *mut libc::c_void;
@@ -631,7 +631,7 @@ unsafe impl Sync for Channel { }
 unsafe impl Send for Options { }
 unsafe impl Sync for Options { }
 
-pub unsafe extern "C" fn socket_callback<F>(
+pub unsafe extern "C" fn socket_state_callback<F>(
     data: *mut libc::c_void,
     socket_fd: c_ares_sys::ares_socket_t,
     readable: libc::c_int,

@@ -284,6 +284,28 @@ impl Channel {
         }
     }
 
+    /// Wait for results by kicking open file descriptors...
+    pub fn wait_channel(&mut self) {
+        let socks: [c_ares_sys::ares_socket_t; 16] = [0; 16]; //c_ares_sys::ARES_GETSOCK_MAXNUM
+        let mut bitmask = unsafe {
+            c_ares_sys::ares_getsock(
+                self.ares_channel,
+                mem::transmute(&socks),
+                16) //c_ares_sys::ARES_GETSOCK_MAXNUM
+        };
+
+        for s in socks.into_iter() {
+            if bitmask & 1 != 0 {
+                self.process_fd(*s, c_ares_sys::ARES_SOCKET_BAD);
+            }
+            //1 << c_ares_sys::ARES_GETSOCK_MAXNUM
+            if bitmask & 0x10000 != 0 {
+                self.process_fd(c_ares_sys::ARES_SOCKET_BAD, *s);
+            }
+            bitmask <<= 1;
+        }
+    }
+
     /// Set the list of servers to contact, instead of the servers specified
     /// in resolv.conf or the local named.
     ///

@@ -363,10 +363,11 @@ fn main() {
     };
     let mut options = c_ares::Options::new();
     options
+        .set_socket_state_callback(sock_callback)
         .set_flags(c_ares::flags::STAYOPEN | c_ares::flags::EDNS)
         .set_timeout(500)
         .set_tries(3);
-    let mut ares_channel = c_ares::Channel::new(sock_callback, options)
+    let mut ares_channel = c_ares::Channel::new(options)
         .ok()
         .expect("Failed to create channel");
 

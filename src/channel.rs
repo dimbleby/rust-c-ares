@@ -78,12 +78,12 @@ use utils::{
 };
 
 /// Used to configure the behaviour of the name resolver.
-#[derive(Clone)]
 pub struct Options {
     ares_options: c_ares_sys::Struct_ares_options,
     optmask: libc::c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
+    socket_state_callback: Option<Box<FnMut(io::RawFd, bool, bool) + 'static>>,
 }
 
 impl Options {
@@ -94,6 +94,7 @@ impl Options {
             optmask: 0,
             domains: Vec::new(),
             lookups: None,
+            socket_state_callback: None,
         }
     }
 
@@ -170,6 +171,24 @@ impl Options {
         self
     }
 
+    /// Set the callback function to be invoked when a socket changes state.
+    ///
+    /// `callback(socket, read, write)` will be called when a socket changes
+    /// state:
+    ///
+    /// -  `read` is set to true if the socket should listen for read events
+    /// -  `write` is set to true if the socket should listen to write events.
+    pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
+        where F: FnMut(io::RawFd, bool, bool) + 'static {
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_STATE_CB;
+        self.ares_options.sock_state_cb = Some(socket_callback::<F>);
+        let mut boxed_callback = Box::new(callback);
+        self.ares_options.sock_state_cb_data =
+            &mut *boxed_callback as *mut _ as *mut libc::c_void;
+        self.socket_state_callback = Some(boxed_callback);
+        self
+    }
+
     /// Set the socket send buffer size.
     pub fn set_sock_send_buffer_size(&mut self, size: u32) -> &mut Self {
         self.ares_options.socket_send_buffer_size = size as libc::c_int;
@@ -205,28 +224,13 @@ pub struct Channel {
 
     // For ownership only.
     #[allow(dead_code)]
-    socket_state_callback: Box<FnMut(io::RawFd, bool, bool) + 'static>,
+    socket_state_callback: Option<Box<FnMut(io::RawFd, bool, bool) + 'static>>,
 }
 
 impl Channel {
     /// Create a new channel for name service lookups, providing a callback
     /// for socket state changes.
-    ///
-    /// `callback(socket, read, write)` will be called when a socket changes
-    /// state:
-    ///
-    /// -  `read` is set to true if the socket should listen for read events
-    /// -  `write` is set to true if the socket should listen to write events.
-    pub fn new<F>(
-        callback: F,
-        mut options: Options) -> Result<Channel, AresError>
-        where F: FnMut(io::RawFd, bool, bool) + 'static {
-        let mut boxed_callback = Box::new(callback);
-        options.optmask = options.optmask | c_ares_sys::ARES_OPT_SOCK_STATE_CB;
-        options.ares_options.sock_state_cb = Some(socket_callback::<F>);
-        options.ares_options.sock_state_cb_data =
-            &mut *boxed_callback as *mut _ as *mut libc::c_void;
-
+    pub fn new(mut options: Options) -> Result<Channel, AresError> {
         // Initialize the library.
         let lib_rc = unsafe {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
@@ -266,7 +270,7 @@ impl Channel {
         let channel = Channel {
             ares_channel: ares_channel,
             phantom: PhantomData,
-            socket_state_callback: boxed_callback,
+            socket_state_callback: options.socket_state_callback,
         };
         Ok(channel)
     }

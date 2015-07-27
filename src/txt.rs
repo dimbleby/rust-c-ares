@@ -26,7 +26,8 @@ pub struct TXTResult<'a> {
 impl TXTResults {
     /// Obtain a `TXTResults` from the response to a TXT lookup.
     pub fn parse_from(data: &[u8]) -> Result<TXTResults, AresError> {
-        let mut txt_reply: *mut c_ares_sys::Struct_ares_txt_reply = ptr::null_mut();
+        let mut txt_reply: *mut c_ares_sys::Struct_ares_txt_reply =
+            ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_txt_reply(
                 data.as_ptr(),

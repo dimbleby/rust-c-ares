@@ -34,7 +34,8 @@ impl NSResults {
             c_ares_sys::ares_parse_ns_reply(
                 data.as_ptr(),
                 data.len() as libc::c_int,
-                &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent)
+                &mut hostent
+                    as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent)
         };
         if parse_status != c_ares_sys::ARES_SUCCESS {
             Err(ares_error(parse_status))

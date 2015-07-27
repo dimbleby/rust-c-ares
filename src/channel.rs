@@ -294,7 +294,9 @@ impl Channel {
     ///
     /// String format is `host[:port]`.  IPv6 addresses with ports require
     /// square brackets eg `[2001:4860:4860::8888]:53`.
-    pub fn set_servers(&mut self, servers: &[&str]) -> Result<&mut Self, AresError> {
+    pub fn set_servers(
+        &mut self,
+        servers: &[&str]) -> Result<&mut Self, AresError> {
         let servers_csv = servers.connect(",");
         let c_servers = CString::new(servers_csv).unwrap();
         let ares_rc = unsafe {
@@ -583,7 +585,8 @@ impl Channel {
         &mut self,
         address: &SocketAddr,
         flags: NIFlags,
-        handler: F) where F: FnOnce(Result<NameInfoResult, AresError>) + 'static {
+        handler: F)
+        where F: FnOnce(Result<NameInfoResult, AresError>) + 'static {
         let c_addr = match *address {
             SocketAddr::V4(ref v4) => {
                 let sockaddr = socket_addrv4_as_sockaddr_in(v4);

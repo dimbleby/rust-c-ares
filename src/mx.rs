@@ -26,7 +26,8 @@ pub struct MXResult<'a> {
 impl MXResults {
     /// Obtain an `MXResults` from the response to an MX lookup.
     pub fn parse_from(data: &[u8]) -> Result<MXResults, AresError> {
-        let mut mx_reply: *mut c_ares_sys::Struct_ares_mx_reply = ptr::null_mut();
+        let mut mx_reply: *mut c_ares_sys::Struct_ares_mx_reply =
+            ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_mx_reply(
                 data.as_ptr(),

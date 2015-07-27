@@ -40,7 +40,8 @@ pub fn ares_error(code: libc::c_int) -> AresError {
         c_ares_sys::ARES_EBADHINTS => AresError::EBADHINTS,
         c_ares_sys::ARES_ENOTINITIALIZED => AresError::ENOTINITIALIZED,
         c_ares_sys::ARES_ELOADIPHLPAPI => AresError::ELOADIPHLPAPI,
-        c_ares_sys::ARES_EADDRGETNETWORKPARAMS => AresError::EADDRGETNETWORKPARAMS,
+        c_ares_sys::ARES_EADDRGETNETWORKPARAMS =>
+            AresError::EADDRGETNETWORKPARAMS,
         c_ares_sys::ARES_ECANCELLED => AresError::ECANCELLED,
         _ => AresError::UNKNOWN,
     }

@@ -50,8 +50,16 @@ impl mio::Handler for CAresEventHandler {
         token: mio::Token,
         events: mio::EventSet) {
         let fd = token.as_usize() as io::RawFd;
-        let read_fd = if events.is_readable() { fd } else { c_ares::INVALID_FD };
-        let write_fd = if events.is_writable() { fd } else { c_ares::INVALID_FD };
+        let read_fd = if events.is_readable() {
+            fd
+        } else {
+            c_ares::INVALID_FD
+        };
+        let write_fd = if events.is_writable() {
+            fd
+        } else {
+            c_ares::INVALID_FD
+        };
         self.ares_channel.process_fd(read_fd, write_fd);
     }
 
@@ -331,7 +339,9 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
     }
 }
 
-fn print_name_info_result(result: Result<c_ares::NameInfoResult, c_ares::AresError>) {
+fn print_name_info_result(
+    result: Result<c_ares::NameInfoResult,
+    c_ares::AresError>) {
     println!("");
     match result {
         Err(e) => {
@@ -357,7 +367,8 @@ fn main() {
     let event_loop_channel_clone = event_loop_channel.clone();
     let sock_callback = move |fd: io::RawFd, readable: bool, writable: bool| {
         event_loop_channel_clone
-            .send(CAresHandlerMessage::RegisterInterest(fd, readable, writable))
+            .send(
+                CAresHandlerMessage::RegisterInterest(fd, readable, writable))
             .ok()
             .expect("Failed to send RegisterInterest");
     };

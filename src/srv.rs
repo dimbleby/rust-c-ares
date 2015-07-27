@@ -27,7 +27,8 @@ pub struct SRVResult<'a> {
 impl SRVResults {
     /// Obtain an `SRVResults` from the response to an SRV lookup.
     pub fn parse_from(data: &[u8]) -> Result<SRVResults, AresError> {
-        let mut srv_reply: *mut c_ares_sys::Struct_ares_srv_reply = ptr::null_mut();
+        let mut srv_reply: *mut c_ares_sys::Struct_ares_srv_reply =
+            ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_srv_reply(
                 data.as_ptr(),

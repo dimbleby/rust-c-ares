@@ -39,7 +39,8 @@ impl PTRResults {
                 c_dummy_ip.as_ptr() as *const libc::c_void,
                 dummy_ip.len() as libc::c_int,
                 libc::AF_INET,
-                &mut hostent as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent)
+                &mut hostent
+                    as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent)
         };
         if parse_status != c_ares_sys::ARES_SUCCESS {
             Err(ares_error(parse_status))

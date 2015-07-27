@@ -635,7 +635,6 @@ pub unsafe extern "C" fn socket_state_callback<F>(
     readable: libc::c_int,
     writable: libc::c_int)
     where F: FnMut(io::RawFd, bool, bool) + 'static {
-    let mut handler: Box<F> = mem::transmute(data);
-    handler(socket_fd as io::RawFd, readable != 0, writable != 0);
-    mem::forget(handler);
+    let handler = data as *mut F;
+    (*handler)(socket_fd as io::RawFd, readable != 0, writable != 0);
 }

@@ -78,12 +78,12 @@ use utils::{
 };
 
 /// Used to configure the behaviour of the name resolver.
-#[derive(Clone)]
 pub struct Options {
     ares_options: c_ares_sys::Struct_ares_options,
     optmask: libc::c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
+    socket_state_callback: Option<Box<FnMut(io::RawFd, bool, bool) + 'static>>,
 }
 
 impl Options {
@@ -94,6 +94,7 @@ impl Options {
             optmask: 0,
             domains: Vec::new(),
             lookups: None,
+            socket_state_callback: None,
         }
     }
 
@@ -108,7 +109,7 @@ impl Options {
     /// Set the number of milliseconds each name server is given to respond to
     /// a query on the first try.  (After the first try, the timeout algorithm
     /// becomes more complicated, but scales linearly with the value of
-    /// timeout.) The default is 5000ms.
+    /// timeout).  The default is 5000ms.
     pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
         self.ares_options.timeout = ms as libc::c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TIMEOUTMS;
@@ -116,7 +117,7 @@ impl Options {
     }
 
     /// Set the number of tries the resolver will try contacting each name
-    /// server before giving up. The default is four tries.
+    /// server before giving up.  The default is four tries.
     pub fn set_tries(&mut self, tries: u32) -> &mut Self {
         self.ares_options.tries = tries as libc::c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TRIES;
@@ -125,7 +126,7 @@ impl Options {
 
     /// Set the number of dots which must be present in a domain name for it to
     /// be queried for "as is" prior to querying for it with the default domain
-    /// extensions appended. The default value is 1 unless set otherwise by
+    /// extensions appended.  The default value is 1 unless set otherwise by
     /// resolv.conf or the RES_OPTIONS environment variable.
     pub fn set_ndots(&mut self, ndots: u32) -> &mut Self {
         self.ares_options.ndots = ndots as libc::c_int;
@@ -133,7 +134,7 @@ impl Options {
         self
     }
 
-    /// Set the UDP port to use for queries. The default value is 53, the
+    /// Set the UDP port to use for queries.  The default value is 53, the
     /// standard name service port.
     pub fn set_udp_port(&mut self, udp_port: u16) -> &mut Self {
         self.ares_options.udp_port = udp_port as libc::c_ushort;
@@ -141,7 +142,7 @@ impl Options {
         self
     }
 
-    /// Set the TCP port to use for queries. The default value is 53, the
+    /// Set the TCP port to use for queries.  The default value is 53, the
     /// standard name service port.
     pub fn set_tcp_port(&mut self, tcp_port: u16) -> &mut Self {
         self.ares_options.tcp_port = tcp_port as libc::c_ushort;
@@ -167,6 +168,24 @@ impl Options {
         let c_lookups = CString::new(lookups).unwrap();
         self.lookups = Some(c_lookups);
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_LOOKUPS;
+        self
+    }
+
+    /// Set the callback function to be invoked when a socket changes state.
+    ///
+    /// `callback(socket, read, write)` will be called when a socket changes
+    /// state:
+    ///
+    /// -  `read` is set to true if the socket should listen for read events
+    /// -  `write` is set to true if the socket should listen for write events.
+    pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
+        where F: FnMut(io::RawFd, bool, bool) + 'static {
+        let mut boxed_callback = Box::new(callback);
+        self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
+        self.ares_options.sock_state_cb_data =
+            &mut *boxed_callback as *mut _ as *mut libc::c_void;
+        self.socket_state_callback = Some(boxed_callback);
+        self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         self
     }
 
@@ -202,30 +221,15 @@ impl Options {
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
     phantom: PhantomData<c_ares_sys::Struct_ares_channeldata>,
+
+    // For ownership only.
+    #[allow(dead_code)]
+    socket_state_callback: Option<Box<FnMut(io::RawFd, bool, bool) + 'static>>,
 }
 
 impl Channel {
-    /// Create a new channel for name service lookups, providing a callback
-    /// for socket state changes.
-    ///
-    /// `callback(socket, read, write)` will be called when a socket changes
-    /// state:
-    ///
-    /// -  `read` is set to true if the socket should listen for read events
-    /// -  `write` is set to true if the socket should listen to write events.
-    pub fn new<F>(
-        callback: F,
-        mut options: Options) -> Result<Channel, AresError>
-        where F: FnMut(io::RawFd, bool, bool) + 'static {
-        options.optmask = options.optmask | c_ares_sys::ARES_OPT_SOCK_STATE_CB;
-        options.ares_options.sock_state_cb = Some(socket_callback::<F>);
-        options.ares_options.sock_state_cb_data = unsafe {
-            mem::transmute(Box::new(callback))
-        };
-        Self::create_channel(options)
-    }
-
-    fn create_channel(mut options: Options) -> Result<Channel, AresError> {
+    /// Create a new channel for name service lookups.
+    pub fn new(mut options: Options) -> Result<Channel, AresError> {
         // Initialize the library.
         let lib_rc = unsafe {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
@@ -265,6 +269,7 @@ impl Channel {
         let channel = Channel {
             ares_channel: ares_channel,
             phantom: PhantomData,
+            socket_state_callback: options.socket_state_callback,
         };
         Ok(channel)
     }
@@ -352,7 +357,6 @@ impl Channel {
         }
         self
     }
-
 
     /// Look up the A records associated with `name`.
     ///
@@ -647,12 +651,12 @@ unsafe impl Sync for Channel { }
 unsafe impl Send for Options { }
 unsafe impl Sync for Options { }
 
-pub unsafe extern "C" fn socket_callback<F>(
+pub unsafe extern "C" fn socket_state_callback<F>(
     data: *mut libc::c_void,
     socket_fd: c_ares_sys::ares_socket_t,
     readable: libc::c_int,
     writable: libc::c_int)
     where F: FnMut(io::RawFd, bool, bool) + 'static {
-    let mut handler: Box<F> = mem::transmute(data);
-    handler(socket_fd as io::RawFd, readable != 0, writable != 0);
+    let handler = data as *mut F;
+    (*handler)(socket_fd as io::RawFd, readable != 0, writable != 0);
 }

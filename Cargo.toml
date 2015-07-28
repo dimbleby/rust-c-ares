@@ -19,6 +19,9 @@ bitflags = "*"
 [dependencies.c-ares-sys]
 path = "c-ares-sys"
 
+[dependencies.eventual]
+git = "https://github.com/carllerche/eventual"
+
 [dev-dependencies]
 mio = "*"
 

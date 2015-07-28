@@ -78,10 +78,10 @@ pub enum AresError {
     /// c-ares library initialization not yet performed.
     ENOTINITIALIZED = c_ares_sys::ARES_ENOTINITIALIZED as isize,
 
-    /// rror loading iphlpapi.dll.
+    /// Error loading iphlpapi.dll.
     ELOADIPHLPAPI = c_ares_sys::ARES_ELOADIPHLPAPI as isize,
 
-    /// ould not find GetNetworkParams function.
+    /// Could not find GetNetworkParams function.
     EADDRGETNETWORKPARAMS = c_ares_sys::ARES_EADDRGETNETWORKPARAMS as isize,
 
     /// DNS query cancelled.

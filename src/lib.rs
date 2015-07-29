@@ -2,11 +2,18 @@
 //!
 //! Usage is as follows:
 //!
-//! -  Create a `Channel`, providing a callback which will be used to notify
-//!    you when `c-ares` wants you to listen for read or write events on its
-//!    behalf.
+//! -  Create a `Channel`.
 //!
-//! -  When this callback is invoked, do what it asks!
+//! -  Make queries on the channel.  Queries all take callbacks, which will be
+//!    called when the query completes.
+//!
+//! -  Have `c-ares` tell you what file descriptors to listen on for read and /
+//!    or write events.  You can do this either by providing a callback, which
+//!    is called whenever the set of interesting file descriptors changes, or
+//!    by querying the `Channel` directly with `get_sock()`.
+//!
+//! -  Do as `c-ares` asks!  That it, listen for the events that it requests,
+//!    on the file descriptors that it cares about.
 //!
 //! -  When a file descriptor becomes readable or writable, call `process_fd()`
 //!    on the channel to tell `c-ares` what has happened.
@@ -15,12 +22,6 @@
 //!    pending and don't see events happening, you still need to call
 //!    `process_fd()` at some point anyway - to give `c-ares` an opportunity to
 //!    process any requests that have timed out.
-//!
-//! -  Make queries on the channel.  Queries all take callbacks, which will be
-//!    called when the query completes.
-//!
-//! This model is a good fit for an event loop - as provided by
-//! [`mio`](https://github.com/carllerche/mio), for example.
 //!
 //! Complete examples showing how to use the library can be found
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
@@ -31,6 +32,7 @@ mod srv;
 mod channel;
 mod cname;
 pub mod flags;
+mod getsock;
 mod host;
 mod mx;
 mod nameinfo;
@@ -61,6 +63,10 @@ pub use channel::{
     Options,
 };
 pub use cname::CNameResult;
+pub use getsock::{
+    GetSock,
+    SocketInfoIterator,
+};
 pub use host::{
     HostAddressResult,
     HostAliasResult,

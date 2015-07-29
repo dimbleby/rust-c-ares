@@ -79,3 +79,6 @@ pub const ARES_NI_LOOKUPSERVICE: libc::c_int = 1 << 9;
 
 // A non-existent file descriptor.
 pub const ARES_SOCKET_BAD: ares_socket_t = -1;
+
+// ares_getsock() can return info about this many sockets.
+pub const ARES_GETSOCK_MAXNUM: usize = 16;

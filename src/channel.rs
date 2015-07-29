@@ -25,6 +25,7 @@ use cname::{
     query_cname_callback,
 };
 use flags::Flags;
+use getsock::GetSock;
 use host::{
     HostResults,
     get_host_callback,
@@ -287,6 +288,19 @@ impl Channel {
                 read_fd as c_ares_sys::ares_socket_t,
                 write_fd as c_ares_sys::ares_socket_t);
         }
+    }
+
+    /// Retrieve the set of socket descriptors which the calling application
+    /// should wait on for reading and / or writing.
+    pub fn get_sock(&mut self) -> GetSock {
+        let mut socks = [0; c_ares_sys::ARES_GETSOCK_MAXNUM];
+        let bitmask = unsafe {
+            c_ares_sys::ares_getsock(
+                self.ares_channel,
+                socks.as_mut_ptr(),
+                c_ares_sys::ARES_GETSOCK_MAXNUM as libc::c_int)
+        };
+        GetSock::new(socks, bitmask as u32)
     }
 
     /// Set the list of servers to contact, instead of the servers specified

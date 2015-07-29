@@ -1,4 +1,5 @@
-// This example drives c-ares using an mio::EventLoop.
+// This example uses the callback mechanism to find out which file descriptors
+// c-ares cares about.  This is a good fit for an event loop.
 extern crate c_ares;
 extern crate mio;
 

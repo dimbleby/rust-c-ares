@@ -1,5 +1,5 @@
 // This example uses the callback mechanism to find out which file descriptors
-// c-ares cares about.  This is a good fit for an event loop.
+// c-ares cares about.  This is a good fit for an event loop; here we use mio.
 extern crate c_ares;
 extern crate mio;
 

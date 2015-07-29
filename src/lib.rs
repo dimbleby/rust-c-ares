@@ -32,7 +32,6 @@ mod srv;
 mod channel;
 mod cname;
 pub mod flags;
-mod getsock;
 mod host;
 mod mx;
 mod nameinfo;
@@ -60,13 +59,11 @@ pub use srv::{
 };
 pub use channel::{
     Channel,
+    GetSock,
+    GetSockIterator,
     Options,
 };
 pub use cname::CNameResult;
-pub use getsock::{
-    GetSock,
-    SocketInfoIterator,
-};
 pub use host::{
     HostAddressResult,
     HostAliasResult,

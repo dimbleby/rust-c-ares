@@ -60,7 +60,6 @@ pub use srv::{
 pub use channel::{
     Channel,
     GetSock,
-    GetSockIterator,
     Options,
 };
 pub use cname::CNameResult;

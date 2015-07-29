@@ -4,8 +4,8 @@
 //!
 //! -  Create a `Channel`.
 //!
-//! -  Make queries on the channel.  Queries all take callbacks, which will be
-//!    called when the query completes.
+//! -  Make queries on the `Channel`.  Queries all take callbacks, which will
+//!    be called when the query completes.
 //!
 //! -  Have `c-ares` tell you what file descriptors to listen on for read and /
 //!    or write events.  You can do this either by providing a callback, which
@@ -16,7 +16,7 @@
 //!    on the file descriptors that it cares about.
 //!
 //! -  When a file descriptor becomes readable or writable, call `process_fd()`
-//!    on the channel to tell `c-ares` what has happened.
+//!    on the `Channel` to tell `c-ares` what has happened.
 //!
 //! -  `c-ares` doesn't create any threads of its own.  So if you have queries
 //!    pending and don't see events happening, you still need to call

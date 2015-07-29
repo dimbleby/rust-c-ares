@@ -101,7 +101,7 @@ fn main() {
         // Ask c-ares what file descriptors we should be listening on, and map
         // those requests onto the epoll file descriptor.
         let mut active = false;
-        for (fd, readable, writable) in ares_channel.get_sock().sockets() {
+        for (fd, readable, writable) in &ares_channel.get_sock() {
             let mut interest = EpollEventKind::empty();
             if readable { interest = interest | EPOLLIN; }
             if writable { interest = interest | EPOLLOUT; }

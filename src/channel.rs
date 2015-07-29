@@ -675,7 +675,7 @@ impl GetSock {
     /// Returns an iterator over the sockets that `c-ares` is interested in.
     ///
     /// Iterator items are `(fd, readable, writable)`.
-    pub fn sockets(&self) -> GetSockIterator {
+    pub fn iter(&self) -> GetSockIterator {
         GetSockIterator {
             next: 0,
             getsock: self,
@@ -708,5 +708,14 @@ impl<'a> Iterator for GetSockIterator<'a> {
                 None
             }
         }
+    }
+}
+
+impl<'a> IntoIterator for &'a GetSock {
+    type Item = (io::RawFd, bool, bool);
+    type IntoIter = GetSockIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }

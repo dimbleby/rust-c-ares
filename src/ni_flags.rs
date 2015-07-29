@@ -8,7 +8,7 @@ bitflags!(
         #[doc = "hosts."]
         const NOFQDN = c_ares_sys::ARES_NI_NOFQDN,
 
-        #[doc = "he numeric form of the hostname is returned rather than the"]
+        #[doc = "The numeric form of the hostname is returned rather than the"]
         #[doc = "name."]
         const NUMERICHOST = c_ares_sys::ARES_NI_NUMERICHOST,
 

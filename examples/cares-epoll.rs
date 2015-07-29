@@ -105,7 +105,10 @@ fn main() {
             let mut interest = EpollEventKind::empty();
             if readable { interest = interest | EPOLLIN; }
             if writable { interest = interest | EPOLLOUT; }
-            let event = EpollEvent { events: interest, data: fd as u64 };
+            let event = EpollEvent {
+                events: interest,
+                data: fd as u64,
+            };
             let op = if tracked_fds.insert(fd) {
                 EpollOp::EpollCtlAdd
             } else {
@@ -119,7 +122,7 @@ fn main() {
         // Wait for something to happen.
         let empty_event = EpollEvent {
             events: EpollEventKind::empty(),
-            data: 0
+            data: 0,
         };
         let mut events = [empty_event; 2];
         let results = epoll_wait(epoll, &mut events, 500)

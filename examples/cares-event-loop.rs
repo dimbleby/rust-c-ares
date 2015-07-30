@@ -139,60 +139,6 @@ impl CAresEventHandler {
     }
 }
 
-fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
-    println!("");
-    match result {
-        Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("A lookup failed with error '{}'", err_string);
-        }
-        Ok(a_results) => {
-            println!("Successful A lookup...");
-            println!("Hostname: {}", a_results.hostname());
-            for a_result in &a_results {
-                println!("{:}", a_result.ipv4_addr());
-            }
-        }
-    }
-}
-
-fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
-    println!("");
-    match result {
-        Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("AAAA lookup failed with error '{}'", err_string);
-        }
-        Ok(aaaa_results) => {
-            println!("Successful AAAA lookup...");
-            println!("Hostname: {}", aaaa_results.hostname());
-            for aaaa_result in &aaaa_results {
-                println!("{:}", aaaa_result.ipv6_addr());
-            }
-        }
-    }
-}
-
-fn print_srv_results(result: Result<c_ares::SRVResults, c_ares::AresError>) {
-    println!("");
-    match result {
-        Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("SRV lookup failed with error '{}'", err_string);
-        }
-        Ok(srv_results) => {
-            println!("Successful SRV lookup...");
-            for srv_result in &srv_results {
-                println!("host: {} (port: {}), priority: {} weight: {}",
-                         srv_result.host(),
-                         srv_result.port(),
-                         srv_result.weight(),
-                         srv_result.priority());
-            }
-        }
-    }
-}
-
 fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
     println!("");
     match result {
@@ -386,24 +332,6 @@ fn main() {
     // Set up some queries.
     let (results_tx, results_rx) = mpsc::channel();
     let tx = results_tx.clone();
-    ares_channel.query_a("apple.com", move |results| {
-        print_a_results(results);
-        tx.send(()).unwrap()
-    });
-
-    let tx = results_tx.clone();
-    ares_channel.query_aaaa("google.com", move |results| {
-        print_aaaa_results(results);
-        tx.send(()).unwrap()
-    });
-
-    let tx = results_tx.clone();
-    ares_channel.query_srv("_xmpp-server._tcp.gmail.com", move |result| {
-        print_srv_results(result);
-        tx.send(()).unwrap()
-    });
-
-    let tx = results_tx.clone();
     ares_channel.query_cname("dimbleby.github.io", move |result| {
         print_cname_result(result);
         tx.send(()).unwrap()
@@ -498,7 +426,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..14 {
+    for _ in 0..11 {
         results_rx.recv().unwrap();
     }
 

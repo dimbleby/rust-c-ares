@@ -18,10 +18,9 @@
 //! -  When a file descriptor becomes readable or writable, call `process_fd()`
 //!    on the `Channel` to tell `c-ares` what has happened.
 //!
-//! -  `c-ares` doesn't create any threads of its own.  So if you have queries
-//!    pending and don't see events happening, you still need to call
-//!    `process_fd()` at some point anyway - to give `c-ares` an opportunity to
-//!    process any requests that have timed out.
+//! -  If you have queries pending and don't see events happening, you still
+//!    need to call `process_fd()` at some point anyway - to give `c-ares` an
+//!    opportunity to process any requests that have timed out.
 //!
 //! Complete examples showing how to use the library can be found
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).

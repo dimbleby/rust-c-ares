@@ -6,7 +6,7 @@ A Rust wrapper for the [`c-ares`](http://c-ares.haxx.se/) library, for asynchron
 
 ## Documentation ##
 
-- API documentation is [here](https://github.com/dimbleby/rust-c-ares).
+- API documentation is [here](http://dimbleby.github.io/rust-c-ares).
 - There are some example programs [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 
 ## Installation ##

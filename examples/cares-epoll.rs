@@ -17,7 +17,6 @@ use std::collections::HashSet;
 use std::os::unix::io;
 
 fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -34,7 +33,6 @@ fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
 }
 
 fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -51,7 +49,6 @@ fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
 }
 
 fn print_srv_results(result: Result<c_ares::SRVResults, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -82,15 +79,18 @@ fn main() {
         .expect("Failed to create channel");
 
     // Set up some queries.
-    ares_channel.query_a("apple.com", move |results| {
-        print_a_results(results);
+    ares_channel.query_a("apple.com", move |result| {
+        println!("");
+        print_a_results(result);
     });
 
-    ares_channel.query_aaaa("google.com", move |results| {
-        print_aaaa_results(results);
+    ares_channel.query_aaaa("google.com", move |result| {
+        println!("");
+        print_aaaa_results(result);
     });
 
     ares_channel.query_srv("_xmpp-server._tcp.gmail.com", move |result| {
+        println!("");
         print_srv_results(result);
     });
 

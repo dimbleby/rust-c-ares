@@ -140,7 +140,6 @@ impl CAresEventHandler {
 }
 
 fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -154,7 +153,6 @@ fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
 }
 
 fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -174,7 +172,6 @@ fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
 
 fn print_naptr_results(
     result: Result<c_ares::NAPTRResults, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -197,7 +194,6 @@ fn print_naptr_results(
 }
 
 fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -213,7 +209,6 @@ fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
 }
 
 fn print_ptr_results(result: Result<c_ares::PTRResults, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -229,7 +224,6 @@ fn print_ptr_results(result: Result<c_ares::PTRResults, c_ares::AresError>) {
 }
 
 fn print_txt_results(result: Result<c_ares::TXTResults, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -245,7 +239,6 @@ fn print_txt_results(result: Result<c_ares::TXTResults, c_ares::AresError>) {
 }
 
 fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -264,7 +257,6 @@ fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
 }
 
 fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
-    println!("");
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -287,9 +279,7 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
 }
 
 fn print_name_info_result(
-    result: Result<c_ares::NameInfoResult,
-    c_ares::AresError>) {
-    println!("");
+    result: Result<c_ares::NameInfoResult, c_ares::AresError>) {
     match result {
         Err(e) => {
             let err_string = c_ares::str_error(e);
@@ -333,13 +323,15 @@ fn main() {
     let (results_tx, results_rx) = mpsc::channel();
     let tx = results_tx.clone();
     ares_channel.query_cname("dimbleby.github.io", move |result| {
+        println!("");
         print_cname_result(result);
         tx.send(()).unwrap()
     });
 
     let tx = results_tx.clone();
-    ares_channel.query_mx("gmail.com", move |results| {
-        print_mx_results(results);
+    ares_channel.query_mx("gmail.com", move |result| {
+        println!("");
+        print_mx_results(result);
         tx.send(()).unwrap()
     });
 
@@ -347,32 +339,37 @@ fn main() {
     ares_channel.query_naptr(
         "4.3.2.1.5.5.5.0.0.8.1.e164.arpa.",
         move |results| {
+            println!("");
             print_naptr_results(results);
             tx.send(()).unwrap()
         }
     );
 
     let tx = results_tx.clone();
-    ares_channel.query_ns("google.com", move |results| {
-        print_ns_results(results);
+    ares_channel.query_ns("google.com", move |result| {
+        println!("");
+        print_ns_results(result);
         tx.send(()).unwrap()
     });
 
     let tx = results_tx.clone();
-    ares_channel.query_ptr("14.210.58.216.in-addr.arpa", move |results| {
-        print_ptr_results(results);
+    ares_channel.query_ptr("14.210.58.216.in-addr.arpa", move |result| {
+        println!("");
+        print_ptr_results(result);
         tx.send(()).unwrap()
     });
 
     let tx = results_tx.clone();
-    ares_channel.query_txt("google.com", move |results| {
-        print_txt_results(results);
+    ares_channel.query_txt("google.com", move |result| {
+        println!("");
+        print_txt_results(result);
         tx.send(()).unwrap()
     });
 
     let tx = results_tx.clone();
-    ares_channel.query_soa("google.com", move |results| {
-        print_soa_result(results);
+    ares_channel.query_soa("google.com", move |result| {
+        println!("");
+        print_soa_result(result);
         tx.send(()).unwrap()
     });
 
@@ -380,8 +377,9 @@ fn main() {
     ares_channel.get_host_by_name(
         "google.com",
         c_ares::AddressFamily::INET,
-        move |results| {
-            print_host_results(results);
+        move |result| {
+            println!("");
+            print_host_results(result);
             tx.send(()).unwrap()
         }
     );
@@ -389,6 +387,7 @@ fn main() {
     let tx = results_tx.clone();
     let ipv4 = c_ares::IpAddr::V4(Ipv4Addr::new(216, 58, 208, 78));
     ares_channel.get_host_by_address(&ipv4, move |results| {
+        println!("");
         print_host_results(results);
         tx.send(()).unwrap()
     });
@@ -397,6 +396,7 @@ fn main() {
     let ipv6 = c_ares::IpAddr::V6(
         Ipv6Addr::new(0x2a00, 0x1450, 0x4009, 0x80a, 0, 0, 0, 0x200e));
     ares_channel.get_host_by_address(&ipv6, move |results| {
+        println!("");
         print_host_results(results);
         tx.send(()).unwrap()
     });
@@ -408,6 +408,7 @@ fn main() {
         &sock,
         c_ares::ni_flags::LOOKUPHOST | c_ares::ni_flags::LOOKUPSERVICE,
         move |result| {
+            println!("");
             print_name_info_result(result);
             tx.send(()).unwrap()
         }

@@ -5,7 +5,6 @@ use types::{
     AddressFamily,
     AresError,
 };
-use std::ffi::CStr;
 use std::mem;
 use std::net::{
     Ipv4Addr,
@@ -13,7 +12,6 @@ use std::net::{
     SocketAddrV4,
     SocketAddrV6,
 };
-use std::str;
 
 // Convert an error code from the library into a more strongly typed AresError.
 pub fn ares_error(code: libc::c_int) -> AresError {
@@ -98,14 +96,5 @@ pub fn socket_addrv6_as_sockaddr_in6(
         sin6_flowinfo: sock_v6.flowinfo().to_be(),
         sin6_scope_id: sock_v6.scope_id().to_be(),
         .. unsafe { mem::zeroed() }
-    }
-}
-
-/// Returns the description of an AresError.
-pub fn str_error<'a>(code: AresError) -> &'a str {
-    unsafe {
-        let ptr = c_ares_sys::ares_strerror(code as libc::c_int);
-        let buf = CStr::from_ptr(ptr).to_bytes();
-        str::from_utf8_unchecked(buf)
     }
 }

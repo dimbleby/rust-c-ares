@@ -95,4 +95,3 @@ pub use txt::{
     TXTResults,
 };
 pub use soa::SOAResult;
-pub use utils::str_error;

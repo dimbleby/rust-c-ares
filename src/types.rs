@@ -1,11 +1,19 @@
 extern crate c_ares_sys;
 extern crate libc;
 
+use std::error;
+use std::ffi::CStr;
+use std::fmt::{
+    Display,
+    Error,
+    Formatter,
+};
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
 };
 use std::os::unix::io;
+use std::str;
 
 /// An invalid file descriptor.  Use this to represent 'no action' when calling
 /// `process_fd()` on a channel.
@@ -89,6 +97,49 @@ pub enum AresError {
 
     /// Unknown error.
     UNKNOWN,
+}
+
+impl Display for AresError {
+    fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {
+        let text = match *self {
+            AresError::ENODATA => "ENODATA",
+            AresError::EFORMERR => "EFORMERR",
+            AresError::ESERVFAIL => "ESERVFAIL",
+            AresError::ENOTFOUND => "ENOTFOUND",
+            AresError::ENOTIMP => "ENOTIMP",
+            AresError::EREFUSED => "EREFUSED",
+            AresError::EBADQUERY => "EBADQUERY",
+            AresError::EBADNAME => "EBADNAME",
+            AresError::EBADFAMILY => "EBADFAMILY",
+            AresError::EBADRESP => "EBADRESP",
+            AresError::ECONNREFUSED => "ECONNREFUSED",
+            AresError::ETIMEOUT => "ETIMEOUT",
+            AresError::EOF => "EOF",
+            AresError::EFILE => "EFILE",
+            AresError::ENOMEM => "ENOMEM",
+            AresError::EDESTRUCTION => "EDESTRUCTION",
+            AresError::EBADSTR => "EBADSTR",
+            AresError::EBADFLAGS => "EBADFLAGS",
+            AresError::ENONAME => "ENONAME",
+            AresError::EBADHINTS => "EBADHINTS",
+            AresError::ENOTINITIALIZED => "ENOTINITIALIZED",
+            AresError::ELOADIPHLPAPI => "ELOADIPHLPAPI",
+            AresError::EADDRGETNETWORKPARAMS => "EADDRGETNETWORKPARAMS",
+            AresError::ECANCELLED => "ECANCELLED",
+            AresError::UNKNOWN => "UNKNOWN",
+        };
+        formatter.write_str(text)
+    }
+}
+
+impl error::Error for AresError {
+    fn description(&self) -> &str {
+        unsafe {
+            let ptr = c_ares_sys::ares_strerror(*self as libc::c_int);
+            let buf = CStr::from_ptr(ptr).to_bytes();
+            str::from_utf8_unchecked(buf)
+        }
+    }
 }
 
 /// Address families.

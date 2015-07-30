@@ -4,6 +4,7 @@ extern crate c_ares;
 extern crate mio;
 
 use std::collections::HashSet;
+use std::error::Error;
 use std::mem;
 use std::net::{
     Ipv4Addr,
@@ -142,8 +143,7 @@ impl CAresEventHandler {
 fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
     match result {
         Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("CNAME lookup failed with error '{}'", err_string);
+            println!("CNAME lookup failed with error '{}'", e.description());
         }
         Ok(cname_result) => {
             println!("Successful CNAME lookup...");
@@ -155,8 +155,7 @@ fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
 fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
     match result {
         Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("MX lookup failed with error '{}'", err_string);
+            println!("MX lookup failed with error '{}'", e.description());
         }
         Ok(mx_results) => {
             println!("Successful MX lookup...");
@@ -174,8 +173,7 @@ fn print_naptr_results(
     result: Result<c_ares::NAPTRResults, c_ares::AresError>) {
     match result {
         Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("NAPTR lookup failed with error '{}'", err_string);
+            println!("NAPTR lookup failed with error '{}'", e.description());
         }
         Ok(naptr_results) => {
             println!("Successful NAPTR lookup...");
@@ -196,8 +194,7 @@ fn print_naptr_results(
 fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
     match result {
         Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("NS lookup failed with error '{}'", err_string);
+            println!("NS lookup failed with error '{}'", e.description());
         }
         Ok(ns_results) => {
             println!("Successful NS lookup...");
@@ -211,8 +208,7 @@ fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
 fn print_ptr_results(result: Result<c_ares::PTRResults, c_ares::AresError>) {
     match result {
         Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("PTR lookup failed with error '{}'", err_string);
+            println!("PTR lookup failed with error '{}'", e.description());
         }
         Ok(ptr_results) => {
             println!("Successful PTR lookup...");
@@ -226,8 +222,7 @@ fn print_ptr_results(result: Result<c_ares::PTRResults, c_ares::AresError>) {
 fn print_txt_results(result: Result<c_ares::TXTResults, c_ares::AresError>) {
     match result {
         Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("TXT lookup failed with error '{}'", err_string);
+            println!("TXT lookup failed with error '{}'", e.description());
         }
         Ok(txt_results) => {
             println!("Successful TXT lookup...");
@@ -241,8 +236,7 @@ fn print_txt_results(result: Result<c_ares::TXTResults, c_ares::AresError>) {
 fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
     match result {
         Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("SOA lookup failed with error '{}'", err_string);
+            println!("SOA lookup failed with error '{}'", e.description());
         }
         Ok(soa_result) => {
             println!("Successful SOA lookup...");
@@ -259,8 +253,7 @@ fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
 fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
     match result {
         Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("Host lookup failed with error '{}'", err_string);
+            println!("Host lookup failed with error '{}'", e.description());
         }
         Ok(host_results) => {
             println!("Successful host lookup...");
@@ -282,8 +275,7 @@ fn print_name_info_result(
     result: Result<c_ares::NameInfoResult, c_ares::AresError>) {
     match result {
         Err(e) => {
-            let err_string = c_ares::str_error(e);
-            println!("Name info lookup failed with error '{}'", err_string);
+            println!("Name info lookup failed with error '{}'", e.description());
         }
         Ok(name_info_result) => {
             println!("Successful name info lookup...");

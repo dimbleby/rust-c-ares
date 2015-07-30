@@ -291,7 +291,7 @@ impl Channel {
 
     /// Retrieve the set of socket descriptors which the calling application
     /// should wait on for reading and / or writing.
-    pub fn get_sock(&mut self) -> GetSock {
+    pub fn get_sock(&self) -> GetSock {
         let mut socks = [0; c_ares_sys::ARES_GETSOCK_MAXNUM];
         let bitmask = unsafe {
             c_ares_sys::ares_getsock(

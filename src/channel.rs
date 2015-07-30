@@ -24,6 +24,7 @@ use cname::{
     CNameResult,
     query_cname_callback,
 };
+use error::AresError;
 use flags::Flags;
 use host::{
     HostResults,
@@ -56,7 +57,6 @@ use srv::{
 };
 use types::{
     AddressFamily,
-    AresError,
     DnsClass,
     IpAddr,
     QueryType,

@@ -8,7 +8,7 @@ use std::str;
 use std::ptr;
 use std::slice;
 
-use types::AresError;
+use error::AresError;
 use utils::ares_error;
 
 /// The result of a successful NAPTR lookup.

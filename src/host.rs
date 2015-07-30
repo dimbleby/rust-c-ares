@@ -11,9 +11,9 @@ use std::net::{
 use std::ptr;
 use std::str;
 
+use error::AresError;
 use types::{
     AddressFamily,
-    AresError,
     hostent,
     IpAddr,
 };

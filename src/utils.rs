@@ -1,10 +1,8 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use types::{
-    AddressFamily,
-    AresError,
-};
+use error::AresError;
+use types::AddressFamily;
 use std::mem;
 use std::net::{
     Ipv4Addr,

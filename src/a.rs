@@ -9,10 +9,8 @@ use std::ptr;
 use std::slice;
 use std::str;
 
-use types::{
-    AresError,
-    hostent,
-};
+use error::AresError;
+use types::hostent;
 use utils::ares_error;
 
 /// The result of a successful A lookup.

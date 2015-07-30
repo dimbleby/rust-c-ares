@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use std::mem;
 use std::str;
 
-use types::AresError;
+use error::AresError;
 use utils::ares_error;
 
 /// The result of a successful name-info lookup.

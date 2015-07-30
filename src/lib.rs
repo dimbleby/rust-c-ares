@@ -30,6 +30,7 @@ mod aaaa;
 mod srv;
 mod channel;
 mod cname;
+mod error;
 pub mod flags;
 mod host;
 mod mx;
@@ -62,6 +63,7 @@ pub use channel::{
     Options,
 };
 pub use cname::CNameResult;
+pub use error::AresError;
 pub use host::{
     HostAddressResult,
     HostAliasResult,
@@ -86,7 +88,6 @@ pub use ptr::{
 };
 pub use types::{
     AddressFamily,
-    AresError,
     INVALID_FD,
     IpAddr,
 };

@@ -720,6 +720,3 @@ impl<'a> IntoIterator for &'a GetSock {
         self.iter()
     }
 }
-
-unsafe impl Send for GetSock { }
-unsafe impl Sync for GetSock { }

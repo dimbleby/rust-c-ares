@@ -19,8 +19,7 @@ use std::str;
 /// `process_fd()` on a channel.
 pub const INVALID_FD: io::RawFd = c_ares_sys::ARES_SOCKET_BAD as io::RawFd;
 
-/// Error codes that the library might return.  Use `str_error()` to convert an
-/// error code into a description.
+/// Error codes that the library might return.
 #[derive(Debug, Clone, Copy)]
 pub enum AresError {
     /// DNS server returned answer with no data.

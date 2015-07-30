@@ -71,9 +71,7 @@ pub use mx::{
     MXResult,
     MXResults,
 };
-pub use nameinfo::{
-    NameInfoResult,
-};
+pub use nameinfo::NameInfoResult;
 pub use naptr::{
     NAPTRResult,
     NAPTRResults,

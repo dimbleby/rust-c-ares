@@ -275,7 +275,9 @@ fn print_name_info_result(
     result: Result<c_ares::NameInfoResult, c_ares::AresError>) {
     match result {
         Err(e) => {
-            println!("Name info lookup failed with error '{}'", e.description());
+            println!(
+                "Name info lookup failed with error '{}'",
+                e.description());
         }
         Ok(name_info_result) => {
             println!("Successful name info lookup...");

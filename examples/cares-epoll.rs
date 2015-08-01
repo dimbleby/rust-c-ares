@@ -131,7 +131,9 @@ fn main() {
         match results {
             0 => {
                 // No events - must be a timeout.  Tell c-ares about it.
-                ares_channel.process_fd(c_ares::INVALID_FD, c_ares::INVALID_FD);
+                ares_channel.process_fd(
+                    c_ares::INVALID_FD,
+                    c_ares::INVALID_FD);
             },
             n => {
                 // Sockets became readable or writable.  Tell c-ares about it.

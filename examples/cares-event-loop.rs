@@ -97,14 +97,14 @@ impl mio::Handler for CAresEventHandler {
                                 &io,
                                 token,
                                 interest,
-                                mio::PollOpt::level())
+                                mio::PollOpt::edge())
                     } else {
                         event_loop
                             .register_opt(
                                 &io,
                                 token,
                                 interest,
-                                mio::PollOpt::level())
+                                mio::PollOpt::edge())
                     };
                     register_result.ok().expect("failed to register interest");
                 }

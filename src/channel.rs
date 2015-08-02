@@ -693,17 +693,16 @@ impl<'a> Iterator for GetSockIterator<'a> {
     type Item = (io::RawFd, bool, bool);
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.next;
-        if self.next == c_ares_sys::ARES_GETSOCK_MAXNUM {
+        self.next = self.next + 1;
+        if index >= c_ares_sys::ARES_GETSOCK_MAXNUM {
             None
         } else {
-            let fd = self.getsock.socks[index] as io::RawFd;
             let bit = 1 << index;
             let readable = (self.getsock.bitmask & bit) != 0;
             let bit = bit << c_ares_sys::ARES_GETSOCK_MAXNUM;
             let writable = (self.getsock.bitmask & bit) != 0;
-            self.next = self.next + 1;
-
             if readable || writable {
+                let fd = self.getsock.socks[index] as io::RawFd;
                 Some((fd, readable, writable))
             } else {
                 None

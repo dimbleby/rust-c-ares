@@ -7,7 +7,7 @@ To create `ffi.rs`, do this:
 ... and then:
 
 - add a few type definitions for OS types at the top of the file
-    - Compare wth the current version to see what's needed
+    - Compare with the current version to see what's needed
 - add `unsafe` to the function type declarations for `ares_sock_state_cb`, `ares_callback`, `ares_host_callback`, `ares_nameinfo_callback`, `ares_sock_create_callback`
     - Any non-trivial implementations of these callbacks will involve dereferencing raw pointer parameters
 - remove `ares_fds` and `ares_process`

@@ -197,7 +197,6 @@ pub unsafe extern "C" fn get_host_callback<F>(
     _timeouts: libc::c_int,
     hostent: *mut c_ares_sys::Struct_hostent)
     where F: FnOnce(Result<HostResults, AresError>) + 'static {
-    let handler: Box<F> = mem::transmute(arg);
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))
     } else {
@@ -205,5 +204,6 @@ pub unsafe extern "C" fn get_host_callback<F>(
         let host_results = HostResults::new(hostent_ref);
         Ok(host_results)
     };
+    let handler: Box<F> = mem::transmute(arg);
     handler(result);
 }

@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 extern crate c_ares_sys;
 
 bitflags!(

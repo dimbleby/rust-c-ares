@@ -58,8 +58,8 @@ fn print_srv_results(result: Result<c_ares::SRVResults, c_ares::AresError>) {
                 println!("host: {} (port: {}), priority: {} weight: {}",
                          srv_result.host(),
                          srv_result.port(),
-                         srv_result.weight(),
-                         srv_result.priority());
+                         srv_result.priority(),
+                         srv_result.weight());
             }
         }
     }

@@ -137,8 +137,7 @@ fn main() {
             },
             n => {
                 // Sockets became readable or writable.  Tell c-ares about it.
-                for i in 0..n {
-                    let event = events[i];
+                for event in &events[0..n] {
                     let active_fd = event.data as io::RawFd;
                     let readable_fd = if (event.events & EPOLLIN).is_empty() {
                         c_ares::INVALID_FD

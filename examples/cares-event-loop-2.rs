@@ -72,8 +72,7 @@ impl mio::Handler for CAresEventHandler {
         } else {
             c_ares::INVALID_FD
         };
-        let mut ares_channel = self.ares_channel.lock().unwrap();
-        ares_channel.process_fd(read_fd, write_fd);
+        self.ares_channel.lock().unwrap().process_fd(read_fd, write_fd);
     }
 
     // Process received messages.  Either:
@@ -138,8 +137,10 @@ impl mio::Handler for CAresEventHandler {
         event_loop: &mut mio::EventLoop<CAresEventHandler>,
         _timeout: Self::Timeout) {
         event_loop.timeout_ms((), 500).unwrap();
-        let mut ares_channel = self.ares_channel.lock().unwrap();
-        ares_channel.process_fd(c_ares::INVALID_FD, c_ares::INVALID_FD);
+        self.ares_channel
+            .lock()
+            .unwrap()
+            .process_fd(c_ares::INVALID_FD, c_ares::INVALID_FD);
     }
 }
 
@@ -207,12 +208,9 @@ impl Resolver {
     pub fn query_cname(&self, name: &str)
         -> Result<c_ares::CNameResult, c_ares::AresError> {
         let (tx, rx) = mpsc::channel();
-        {
-            let mut ares_channel = self.ares_channel.lock().unwrap();
-            ares_channel.query_cname(name, move |result| {
-                tx.send(result).unwrap();
-            });
-        }
+        self.ares_channel.lock().unwrap().query_cname(name, move |result| {
+            tx.send(result).unwrap();
+        });
         rx.recv().unwrap()
     }
 
@@ -220,12 +218,9 @@ impl Resolver {
     pub fn query_mx(&self, name: &str)
         -> Result<c_ares::MXResults, c_ares::AresError> {
         let (tx, rx) = mpsc::channel();
-        {
-            let mut ares_channel = self.ares_channel.lock().unwrap();
-            ares_channel.query_mx(name, move |result| {
-                tx.send(result).unwrap();
-            });
-        }
+        self.ares_channel.lock().unwrap().query_mx(name, move |result| {
+            tx.send(result).unwrap();
+        });
         rx.recv().unwrap()
     }
 
@@ -233,12 +228,9 @@ impl Resolver {
     pub fn query_naptr(&self, name: &str)
         -> Result<c_ares::NAPTRResults, c_ares::AresError> {
         let (tx, rx) = mpsc::channel();
-        {
-            let mut ares_channel = self.ares_channel.lock().unwrap();
-            ares_channel.query_naptr(name, move |result| {
-                tx.send(result).unwrap();
-            });
-        }
+        self.ares_channel.lock().unwrap().query_naptr(name, move |result| {
+            tx.send(result).unwrap();
+        });
         rx.recv().unwrap()
     }
 }

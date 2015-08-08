@@ -140,48 +140,6 @@ impl CAresEventHandler {
     }
 }
 
-fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
-    match result {
-        Err(e) => {
-            println!("NS lookup failed with error '{}'", e.description());
-        }
-        Ok(ns_results) => {
-            println!("Successful NS lookup...");
-            for ns_result in &ns_results {
-                println!("{}", ns_result.name_server());
-            }
-        }
-    }
-}
-
-fn print_ptr_results(result: Result<c_ares::PTRResults, c_ares::AresError>) {
-    match result {
-        Err(e) => {
-            println!("PTR lookup failed with error '{}'", e.description());
-        }
-        Ok(ptr_results) => {
-            println!("Successful PTR lookup...");
-            for ptr_result in &ptr_results {
-                println!("{}", ptr_result.cname());
-            }
-        }
-    }
-}
-
-fn print_txt_results(result: Result<c_ares::TXTResults, c_ares::AresError>) {
-    match result {
-        Err(e) => {
-            println!("TXT lookup failed with error '{}'", e.description());
-        }
-        Ok(txt_results) => {
-            println!("Successful TXT lookup...");
-            for txt_result in &txt_results {
-                println!("{}", txt_result.text());
-            }
-        }
-    }
-}
-
 fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
     match result {
         Err(e) => {
@@ -268,27 +226,6 @@ fn main() {
     // Set up some queries.
     let (results_tx, results_rx) = mpsc::channel();
     let tx = results_tx.clone();
-    ares_channel.query_ns("google.com", move |result| {
-        println!("");
-        print_ns_results(result);
-        tx.send(()).unwrap()
-    });
-
-    let tx = results_tx.clone();
-    ares_channel.query_ptr("14.210.58.216.in-addr.arpa", move |result| {
-        println!("");
-        print_ptr_results(result);
-        tx.send(()).unwrap()
-    });
-
-    let tx = results_tx.clone();
-    ares_channel.query_txt("google.com", move |result| {
-        println!("");
-        print_txt_results(result);
-        tx.send(()).unwrap()
-    });
-
-    let tx = results_tx.clone();
     ares_channel.query_soa("google.com", move |result| {
         println!("");
         print_soa_result(result);
@@ -349,7 +286,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..8 {
+    for _ in 0..5 {
         results_rx.recv().unwrap();
     }
 

@@ -140,57 +140,6 @@ impl CAresEventHandler {
     }
 }
 
-fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
-    match result {
-        Err(e) => {
-            println!("CNAME lookup failed with error '{}'", e.description());
-        }
-        Ok(cname_result) => {
-            println!("Successful CNAME lookup...");
-            println!("{}", cname_result.cname());
-        }
-    }
-}
-
-fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
-    match result {
-        Err(e) => {
-            println!("MX lookup failed with error '{}'", e.description());
-        }
-        Ok(mx_results) => {
-            println!("Successful MX lookup...");
-            for mx_result in &mx_results {
-                println!(
-                    "host {}, priority {}",
-                    mx_result.host(),
-                    mx_result.priority());
-            }
-        }
-    }
-}
-
-fn print_naptr_results(
-    result: Result<c_ares::NAPTRResults, c_ares::AresError>) {
-    match result {
-        Err(e) => {
-            println!("NAPTR lookup failed with error '{}'", e.description());
-        }
-        Ok(naptr_results) => {
-            println!("Successful NAPTR lookup...");
-            for naptr_result in &naptr_results {
-                println!("flags: {}", naptr_result.flags());
-                println!("service name: {}", naptr_result.service_name());
-                println!("regular expression: {}", naptr_result.reg_exp());
-                println!(
-                    "replacement pattern: {}",
-                    naptr_result.replacement_pattern());
-                println!("order: {}", naptr_result.order());
-                println!("preference: {}", naptr_result.preference());
-            }
-        }
-    }
-}
-
 fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
     match result {
         Err(e) => {
@@ -290,19 +239,22 @@ fn print_name_info_result(
 }
 
 fn main() {
-    // Create an event loop, and a c_ares::Channel.
+    // Create an event loop.
     let mut event_loop = mio::EventLoop::new()
         .ok()
         .expect("failed to create event loop");
     let event_loop_channel = event_loop.channel();
+
+    // Socket state callback for the c_ares::Channel will be to kick the event
+    // loop.
     let event_loop_channel_clone = event_loop_channel.clone();
     let sock_callback = move |fd: io::RawFd, readable: bool, writable: bool| {
-        event_loop_channel_clone
+        let _ = event_loop_channel_clone
             .send(
-                CAresHandlerMessage::RegisterInterest(fd, readable, writable))
-            .ok()
-            .expect("Failed to send RegisterInterest");
+                CAresHandlerMessage::RegisterInterest(fd, readable, writable));
     };
+
+    // Create a c_ares::Channel.
     let mut options = c_ares::Options::new();
     options
         .set_socket_state_callback(sock_callback)
@@ -315,30 +267,6 @@ fn main() {
 
     // Set up some queries.
     let (results_tx, results_rx) = mpsc::channel();
-    let tx = results_tx.clone();
-    ares_channel.query_cname("dimbleby.github.io", move |result| {
-        println!("");
-        print_cname_result(result);
-        tx.send(()).unwrap()
-    });
-
-    let tx = results_tx.clone();
-    ares_channel.query_mx("gmail.com", move |result| {
-        println!("");
-        print_mx_results(result);
-        tx.send(()).unwrap()
-    });
-
-    let tx = results_tx.clone();
-    ares_channel.query_naptr(
-        "4.3.2.1.5.5.5.0.0.8.1.e164.arpa.",
-        move |results| {
-            println!("");
-            print_naptr_results(results);
-            tx.send(()).unwrap()
-        }
-    );
-
     let tx = results_tx.clone();
     ares_channel.query_ns("google.com", move |result| {
         println!("");
@@ -421,7 +349,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..11 {
+    for _ in 0..8 {
         results_rx.recv().unwrap();
     }
 

@@ -122,6 +122,7 @@ impl Resolver {
         // Create a c_ares::Channel.
         let mut options = c_ares::Options::new();
         options
+            .set_flags(c_ares::flags::STAYOPEN)
             .set_timeout(500)
             .set_tries(3);
         let ares_channel = c_ares::Channel::new(options)

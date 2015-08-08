@@ -2,10 +2,13 @@
 //
 // Here we:
 //
-// - pass around an Arc<Mutex<c_ares::Channel>>, allowing us to make queries
-// after setting the event loop running.
+// - Have the event loop take an `Arc<Mutex<Channel>>`, so that even after it
+// is running we still have the ability to submit new queries
 //
-// - show one way of transforming the asynchronous c-ares interface into
+// - Have the event loop be run by a `Resolver`, hiding away the event loop
+// details from the writer of `main()`.
+//
+// - Show one way of transforming the asynchronous c-ares interface into
 // a synchronous, blocking interface by using a std::sync::mpsc::channel.
 extern crate c_ares;
 extern crate mio;
@@ -142,13 +145,60 @@ impl mio::Handler for CAresEventHandler {
 
 struct Resolver {
     ares_channel: Arc<Mutex<c_ares::Channel>>,
+    event_loop_channel: mio::Sender<CAresHandlerMessage>,
+    event_loop_handle: Option<thread::JoinHandle<()>>,
 }
 
 impl Resolver {
     // Create a new Resolver.
-    pub fn new(ares_channel: Arc<Mutex<c_ares::Channel>>) -> Resolver {
+    pub fn new() -> Resolver {
+        // Create an event loop.
+        let mut event_loop = mio::EventLoop::new()
+            .ok()
+            .expect("failed to create event loop");
+        let event_loop_channel = event_loop.channel();
+
+        // Socket state callback for the c_ares::Channel will be to kick the
+        // event loop.
+        let event_loop_channel_clone = event_loop_channel.clone();
+        let sock_callback =
+            move |fd: io::RawFd, readable: bool, writable: bool| {
+                let _ = event_loop_channel_clone
+                    .send(
+                        CAresHandlerMessage::RegisterInterest(
+                            fd,
+                            readable,
+                            writable));
+            };
+
+        // Create a c_ares::Channel.
+        let mut options = c_ares::Options::new();
+        options
+            .set_socket_state_callback(sock_callback)
+            .set_flags(c_ares::flags::STAYOPEN | c_ares::flags::EDNS)
+            .set_timeout(500)
+            .set_tries(3);
+        let ares_channel = c_ares::Channel::new(options)
+            .ok()
+            .expect("Failed to create channel");
+        let locked_channel = Arc::new(Mutex::new(ares_channel));
+
+        // Set the first instance of the recurring timer on the event loop.
+        event_loop.timeout_ms((), 500).unwrap();
+
+        // Kick off the event loop.
+        let mut event_handler = CAresEventHandler::new(locked_channel.clone());
+        let event_loop_handle = thread::spawn(move || {
+            event_loop
+                .run(&mut event_handler)
+                .ok()
+                .expect("failed to run event loop")
+        });
+
         Resolver {
-            ares_channel: ares_channel,
+            ares_channel: locked_channel,
+            event_loop_channel: event_loop_channel,
+            event_loop_handle: Some(event_loop_handle),
         }
     }
 
@@ -190,6 +240,19 @@ impl Resolver {
             });
         }
         rx.recv().unwrap()
+    }
+}
+
+impl Drop for Resolver {
+    fn drop(&mut self) {
+        // Shut down the event loop and wait for it to finish.
+        self.event_loop_channel
+            .send(CAresHandlerMessage::ShutDown)
+            .ok()
+            .expect("failed to shut down event loop");
+       for handle in self.event_loop_handle.take() {
+           handle.join().unwrap();
+       }
     }
 }
 
@@ -245,48 +308,8 @@ fn print_naptr_results(
 }
 
 fn main() {
-    // Create an event loop.
-    let mut event_loop = mio::EventLoop::new()
-        .ok()
-        .expect("failed to create event loop");
-    let event_loop_channel = event_loop.channel();
-
-    // Socket state callback for the c_ares::Channel will be to kick the event
-    // loop.
-    let event_loop_channel_clone = event_loop_channel.clone();
-    let sock_callback = move |fd: io::RawFd, readable: bool, writable: bool| {
-        let _ = event_loop_channel_clone
-            .send(
-                CAresHandlerMessage::RegisterInterest(fd, readable, writable));
-    };
-
-    // Create a c_ares::Channel.
-    let mut options = c_ares::Options::new();
-    options
-        .set_socket_state_callback(sock_callback)
-        .set_flags(c_ares::flags::STAYOPEN | c_ares::flags::EDNS)
-        .set_timeout(500)
-        .set_tries(3);
-    let ares_channel = c_ares::Channel::new(options)
-        .ok()
-        .expect("Failed to create channel");
-    let locked_channel = Arc::new(Mutex::new(ares_channel));
-
-    // Set the first instance of the recurring timer on the event loop.
-    event_loop.timeout_ms((), 500).unwrap();
-
-    // Kick off the event loop.
-    let mut event_handler = CAresEventHandler::new(locked_channel.clone());
-    let handle = thread::spawn(move || {
-        event_loop
-            .run(&mut event_handler)
-            .ok()
-            .expect("failed to run event loop")
-    });
-
-    // Wrap the channel in a Resolver, which transforms our queries into
-    // synchronous requests.  Then make some requests.
-    let resolver = Resolver::new(locked_channel);
+    // Create a Resolver.  Then make some requests.
+    let resolver = Resolver::new();
     let result = resolver.query_cname("dimbleby.github.io");
     println!("");
     print_cname_result(result);
@@ -298,11 +321,4 @@ fn main() {
     let result = resolver.query_naptr("4.3.2.1.5.5.5.0.0.8.1.e164.arpa");
     println!("");
     print_naptr_results(result);
-
-    // Shut down the event loop and wait for it to finish.
-    event_loop_channel
-        .send(CAresHandlerMessage::ShutDown)
-        .ok()
-        .expect("failed to shut down event loop");
-    handle.join().unwrap();
 }

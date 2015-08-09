@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::ptr;
@@ -13,12 +14,16 @@ use types::hostent;
 use utils::ares_error;
 
 /// The result of a successful NS lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct NSResults {
     hostent: *mut hostent,
     phantom: PhantomData<hostent>,
 }
 
 /// The contents of a single NS record.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct NSResult<'a> {
     h_alias: *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
@@ -59,6 +64,22 @@ impl NSResults {
     }
 }
 
+impl fmt::Display for NSResults {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "["));
+        let mut first = true;
+        for ns_result in self {
+            let prefix = if first { "" } else { ", " };
+            first = false;
+            try!(write!(fmt, "{}{{{}}}", prefix, ns_result));
+        }
+        try!(write!(fmt, "]"));
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct NSResultsIterator<'a> {
     next: *const *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
@@ -113,6 +134,12 @@ impl<'a> NSResult<'a> {
             let c_str = CStr::from_ptr(self.h_alias);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
+    }
+}
+
+impl<'a> fmt::Display for NSResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.name_server().fmt(fmt)
     }
 }
 

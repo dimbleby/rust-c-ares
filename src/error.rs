@@ -3,11 +3,7 @@ extern crate libc;
 
 use std::error;
 use std::ffi::CStr;
-use std::fmt::{
-    Display,
-    Error,
-    Formatter,
-};
+use std::fmt;
 use std::str;
 
 /// Error codes that the library might return.
@@ -89,8 +85,8 @@ pub enum AresError {
     UNKNOWN,
 }
 
-impl Display for AresError {
-    fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {
+impl fmt::Display for AresError {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let text = match *self {
             AresError::ENODATA => "ENODATA",
             AresError::EFORMERR => "EFORMERR",
@@ -118,7 +114,7 @@ impl Display for AresError {
             AresError::ECANCELLED => "ECANCELLED",
             AresError::UNKNOWN => "UNKNOWN",
         };
-        formatter.write_str(text)
+        fmt.write_str(text)
     }
 }
 

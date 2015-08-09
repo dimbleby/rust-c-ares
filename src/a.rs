@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::net::Ipv4Addr;
@@ -14,12 +15,16 @@ use types::hostent;
 use utils::ares_error;
 
 /// The result of a successful A lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct AResults {
     hostent: *mut hostent,
     phantom: PhantomData<hostent>,
 }
 
 /// The contents of a single A record.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct AResult<'a> {
     h_addr: *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
@@ -70,6 +75,23 @@ impl AResults {
     }
 }
 
+impl fmt::Display for AResults {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "Hostname: {}, ", self.hostname()));
+        try!(write!(fmt, "A results: ["));
+        let mut first = true;
+        for a_result in self {
+            let prefix = if first { "" } else { ", " };
+            first = false;
+            try!(write!(fmt, "{}{{{}}}", prefix, a_result));
+        }
+        try!(write!(fmt, "]"));
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct AResultsIterator<'a> {
     next: *const *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
@@ -127,6 +149,12 @@ impl<'a> AResult<'a> {
                 *self.h_addr.offset(2) as u8,
                 *self.h_addr.offset(3) as u8)
         }
+    }
+}
+
+impl<'a> fmt::Display for AResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.ipv4_addr().fmt(fmt)
     }
 }
 

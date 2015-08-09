@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::net::Ipv6Addr;
@@ -14,12 +15,16 @@ use types::hostent;
 use utils::ares_error;
 
 /// The result of a successful AAAA lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct AAAAResults {
     hostent: *mut hostent,
     phantom: PhantomData<hostent>,
 }
 
 /// The contents of a single AAAA record.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct AAAAResult<'a> {
     h_addr: *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
@@ -70,6 +75,23 @@ impl AAAAResults {
     }
 }
 
+impl fmt::Display for AAAAResults {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "Hostname: {}, ", self.hostname()));
+        try!(write!(fmt, "AAAA results: ["));
+        let mut first = true;
+        for aaaa_result in self {
+            let prefix = if first { "" } else { ", " };
+            first = false;
+            try!(write!(fmt, "{}{{{}}}", prefix, aaaa_result));
+        }
+        try!(write!(fmt, "]"));
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct AAAAResultsIterator<'a> {
     next: *const *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
@@ -132,6 +154,12 @@ impl<'a> AAAAResult<'a> {
                 ((*h_addr.offset(12) as u16) << 8) + *h_addr.offset(13) as u16,
                 ((*h_addr.offset(14) as u16) << 8) + *h_addr.offset(15) as u16)
         }
+    }
+}
+
+impl<'a> fmt::Display for AAAAResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.ipv6_addr().fmt(fmt)
     }
 }
 

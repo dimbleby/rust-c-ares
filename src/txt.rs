@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::ptr;
@@ -12,12 +13,16 @@ use error::AresError;
 use utils::ares_error;
 
 /// The result of a successful TXT lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct TXTResults {
     txt_reply: *mut c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<c_ares_sys::Struct_ares_txt_reply>,
 }
 
 /// The contents of a single TXT record.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct TXTResult<'a> {
     txt_reply: *const c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
@@ -57,6 +62,22 @@ impl TXTResults {
     }
 }
 
+impl fmt::Display for TXTResults {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "["));
+        let mut first = true;
+        for txt_result in self {
+            let prefix = if first { "" } else { ", " };
+            first = false;
+            try!(write!(fmt, "{}{{{}}}", prefix, txt_result));
+        }
+        try!(write!(fmt, "]"));
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct TXTResultsIterator<'a> {
     next: *const c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
@@ -111,6 +132,12 @@ impl<'a> TXTResult<'a> {
             let c_str = CStr::from_ptr((*self.txt_reply).txt as *const i8);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
+    }
+}
+
+impl<'a> fmt::Display for TXTResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.text().fmt(fmt)
     }
 }
 

@@ -657,7 +657,7 @@ pub unsafe extern "C" fn socket_state_callback<F>(
 
 /// Information about the set of sockets that `c-ares` is interested in, as
 /// returned by `get_sock()`.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct GetSock {
     socks: [c_ares_sys::ares_socket_t; c_ares_sys::ARES_GETSOCK_MAXNUM],
     bitmask: u32,
@@ -684,6 +684,7 @@ impl GetSock {
     }
 }
 
+#[derive(Debug)]
 pub struct GetSockIterator<'a> {
     next: usize,
     getsock: &'a GetSock,

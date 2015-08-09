@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::ptr;
@@ -13,6 +14,8 @@ use types::hostent;
 use utils::ares_error;
 
 /// The result of a successful CNAME lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct CNameResult {
     hostent: *mut hostent,
     phantom: PhantomData<hostent>,
@@ -52,6 +55,12 @@ impl CNameResult {
             let c_str = CStr::from_ptr((*self.hostent).h_name);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
+    }
+}
+
+impl fmt::Display for CNameResult {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.cname().fmt(fmt)
     }
 }
 

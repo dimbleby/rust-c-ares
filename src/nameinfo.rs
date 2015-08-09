@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::str;
@@ -10,6 +11,8 @@ use error::AresError;
 use utils::ares_error;
 
 /// The result of a successful name-info lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct NameInfoResult<'a> {
     node: *const libc::c_char,
     service: *const libc::c_char,
@@ -49,6 +52,16 @@ impl<'a> NameInfoResult<'a> {
                 Some(str::from_utf8_unchecked(c_str.to_bytes()))
             }
         }
+    }
+}
+
+impl<'a> fmt::Display for NameInfoResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        let node = self.node().unwrap_or("<None>");
+        try!(write!(fmt, "Node: {}, ", node));
+        let service = self.service().unwrap_or("<None>");
+        try!(write!(fmt, "Service: {}", service));
+        Ok(())
     }
 }
 

@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::net::{
@@ -23,17 +24,22 @@ use utils::{
 };
 
 /// The result of a successful host lookup.
+#[derive(Debug)]
 pub struct HostResults<'a> {
     hostent: &'a hostent,
 }
 
 /// An alias, as retrieved from a host lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct HostAliasResult<'a> {
     h_alias: *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
 
 /// An address, as retrieved from a host lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct HostAddressResult<'a> {
     family: AddressFamily,
     h_addr: *const libc::c_char,
@@ -82,6 +88,31 @@ impl<'a> HostResults<'a> {
     }
 }
 
+impl<'a> fmt::Display for HostResults<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "Hostname: {}, ", self.hostname()));
+        try!(write!(fmt, "Addresses: ["));
+        let mut first = true;
+        for host_addr in self.addresses() {
+            let prefix = if first { "" } else { ", " };
+            first = false;
+            try!(write!(fmt, "{}{{{}}}", prefix, host_addr));
+        }
+        try!(write!(fmt, "], "));
+        try!(write!(fmt, "Aliases: ["));
+        let mut first = true;
+        for host_alias in self.aliases() {
+            let prefix = if first { "" } else { ", " };
+            first = false;
+            try!(write!(fmt, "{}{{{}}}", prefix, host_alias));
+        }
+        try!(write!(fmt, "]"));
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct HostAddressResultsIterator<'a> {
     family: AddressFamily,
     next: *const *const libc::c_char,
@@ -106,6 +137,8 @@ impl<'a> Iterator for HostAddressResultsIterator<'a> {
     }
 }
 
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct HostAliasResultsIterator<'a> {
     next: *const *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
@@ -181,6 +214,12 @@ impl<'a> HostAddressResult<'a> {
     }
 }
 
+impl<'a> fmt::Display for HostAddressResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.ip_address().fmt(fmt)
+    }
+}
+
 impl<'a> HostAliasResult<'a> {
     /// Returns the alias in this `HostAliasResult`.
     pub fn alias(&self) -> &str {
@@ -188,6 +227,12 @@ impl<'a> HostAliasResult<'a> {
             let c_str = CStr::from_ptr(self.h_alias);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
+    }
+}
+
+impl<'a> fmt::Display for HostAliasResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.alias().fmt(fmt)
     }
 }
 

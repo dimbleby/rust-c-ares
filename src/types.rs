@@ -1,6 +1,7 @@
 extern crate c_ares_sys;
 extern crate libc;
 
+use std::fmt;
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
@@ -12,7 +13,7 @@ use std::os::unix::io;
 pub const INVALID_FD: io::RawFd = c_ares_sys::ARES_SOCKET_BAD as io::RawFd;
 
 /// Address families.
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum AddressFamily {
     /// IPv4.
     INET = 2,
@@ -30,7 +31,18 @@ pub enum IpAddr {
     V6(Ipv6Addr),
 }
 
+impl fmt::Display for IpAddr {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            IpAddr::V4(ref a) => a.fmt(fmt),
+            IpAddr::V6(ref a) => a.fmt(fmt),
+        }
+    }
+}
+
 #[repr(C)]
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct hostent {
     pub h_name: *mut libc::c_char,
     pub h_aliases: *mut *mut libc::c_char,
@@ -40,6 +52,7 @@ pub struct hostent {
 }
 
 // See arpa/nameser.h
+#[derive(Clone, Copy, Debug)]
 pub enum QueryType {
     A = 1,
     NS = 2,
@@ -54,6 +67,7 @@ pub enum QueryType {
 }
 
 // See arpa/nameser.h
+#[derive(Clone, Copy, Debug)]
 pub enum DnsClass {
    IN = 1,
 }

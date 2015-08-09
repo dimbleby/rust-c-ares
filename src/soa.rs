@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::ptr;
@@ -12,6 +13,8 @@ use error::AresError ;
 use utils::ares_error;
 
 /// The result of a successful SOA lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct SOAResult {
     soa_reply: *mut c_ares_sys::Struct_ares_soa_reply,
     phantom: PhantomData<c_ares_sys::Struct_ares_soa_reply>,
@@ -88,6 +91,19 @@ impl SOAResult {
     /// Returns the minimum time-to-live from this `SOAResult`.
     pub fn min_ttl(&self) -> u32 {
         unsafe { (*self.soa_reply).minttl }
+    }
+}
+
+impl fmt::Display for SOAResult {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "Name server: {}, ", self.name_server()));
+        try!(write!(fmt, "Hostmaster: {}, ", self.hostmaster()));
+        try!(write!(fmt, "Serial: {}, ", self.serial()));
+        try!(write!(fmt, "Refresh: {}, ", self.refresh()));
+        try!(write!(fmt, "Retry: {}, ", self.retry()));
+        try!(write!(fmt, "Expire: {}, ", self.expire()));
+        try!(write!(fmt, "Minimum time-to-live: {}", self.min_ttl()));
+        Ok(())
     }
 }
 

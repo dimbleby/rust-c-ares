@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::ptr;
@@ -12,12 +13,16 @@ use error::AresError;
 use utils::ares_error;
 
 /// The result of a successful MX lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct MXResults {
     mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<c_ares_sys::Struct_ares_mx_reply>,
 }
 
 /// The contents of a single MX record.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct MXResult<'a> {
     mx_reply: *const c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
@@ -57,6 +62,22 @@ impl MXResults {
     }
 }
 
+impl fmt::Display for MXResults {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "["));
+        let mut first = true;
+        for mx_result in self {
+            let prefix = if first { "" } else { ", " };
+            first = false;
+            try!(write!(fmt, "{}{{{}}}", prefix, mx_result));
+        }
+        try!(write!(fmt, "]"));
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct MXResultsIterator<'a> {
     next: *const c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
@@ -116,6 +137,14 @@ impl<'a> MXResult<'a> {
     /// Returns the priority from this `MXResult`.
     pub fn priority(&self) -> u16 {
         unsafe { (*self.mx_reply).priority }
+    }
+}
+
+impl<'a> fmt::Display for MXResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "Hostname: {}, ", self.host()));
+        try!(write!(fmt, "Priority: {}", self.priority()));
+        Ok(())
     }
 }
 

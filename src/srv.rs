@@ -2,6 +2,7 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::ffi::CStr;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::str;
@@ -12,12 +13,16 @@ use error::AresError;
 use utils::ares_error;
 
 /// The result of a successful SRV lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct SRVResults {
     srv_reply: *mut c_ares_sys::Struct_ares_srv_reply,
     phantom: PhantomData<c_ares_sys::Struct_ares_srv_reply>,
 }
 
 /// The contents of a single SRV record.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct SRVResult<'a> {
     // A single result - reference into an `SRVResults`.
     srv_reply: *const c_ares_sys::Struct_ares_srv_reply,
@@ -59,6 +64,22 @@ impl SRVResults {
     }
 }
 
+impl fmt::Display for SRVResults {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "["));
+        let mut first = true;
+        for srv_result in self {
+            let prefix = if first { "" } else { ", " };
+            first = false;
+            try!(write!(fmt, "{}{{{}}}", prefix, srv_result));
+        }
+        try!(write!(fmt, "]"));
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
 pub struct SRVResultsIterator<'a> {
     next: *const c_ares_sys::Struct_ares_srv_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_srv_reply>,
@@ -127,6 +148,16 @@ impl<'a> SRVResult<'a> {
     /// Returns the port in this `SRVResult`.
     pub fn port(&self) -> u16 {
         unsafe { (*self.srv_reply).port }
+    }
+}
+
+impl<'a> fmt::Display for SRVResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(fmt, "Host: {}, ", self.host()));
+        try!(write!(fmt, "Port: {}, ", self.port()));
+        try!(write!(fmt, "Priority: {}, ", self.priority()));
+        try!(write!(fmt, "Weight: {}", self.weight()));
+        Ok(())
     }
 }
 

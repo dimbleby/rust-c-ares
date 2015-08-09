@@ -83,7 +83,7 @@ impl fmt::Display for AAAAResults {
         for aaaa_result in self {
             let prefix = if first { "" } else { ", " };
             first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, aaaa_result));
+            try!(write!(fmt, "{}{}", prefix, aaaa_result));
         }
         try!(write!(fmt, "]"));
         Ok(())

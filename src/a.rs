@@ -83,7 +83,7 @@ impl fmt::Display for AResults {
         for a_result in self {
             let prefix = if first { "" } else { ", " };
             first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, a_result));
+            try!(write!(fmt, "{}{}", prefix, a_result));
         }
         try!(write!(fmt, "]"));
         Ok(())

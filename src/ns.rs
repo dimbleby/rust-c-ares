@@ -71,7 +71,7 @@ impl fmt::Display for NSResults {
         for ns_result in self {
             let prefix = if first { "" } else { ", " };
             first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, ns_result));
+            try!(write!(fmt, "{}{}", prefix, ns_result));
         }
         try!(write!(fmt, "]"));
         Ok(())

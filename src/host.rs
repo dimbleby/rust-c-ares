@@ -96,7 +96,7 @@ impl<'a> fmt::Display for HostResults<'a> {
         for host_addr in self.addresses() {
             let prefix = if first { "" } else { ", " };
             first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, host_addr));
+            try!(write!(fmt, "{}{}", prefix, host_addr));
         }
         try!(write!(fmt, "], "));
         try!(write!(fmt, "Aliases: ["));
@@ -104,7 +104,7 @@ impl<'a> fmt::Display for HostResults<'a> {
         for host_alias in self.aliases() {
             let prefix = if first { "" } else { ", " };
             first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, host_alias));
+            try!(write!(fmt, "{}{}", prefix, host_alias));
         }
         try!(write!(fmt, "]"));
         Ok(())

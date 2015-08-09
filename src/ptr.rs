@@ -76,7 +76,7 @@ impl fmt::Display for PTRResults {
         for ptr_result in self {
             let prefix = if first { "" } else { ", " };
             first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, ptr_result));
+            try!(write!(fmt, "{}{}", prefix, ptr_result));
         }
         try!(write!(fmt, "]"));
         Ok(())

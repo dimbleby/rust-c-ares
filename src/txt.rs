@@ -69,7 +69,7 @@ impl fmt::Display for TXTResults {
         for txt_result in self {
             let prefix = if first { "" } else { ", " };
             first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, txt_result));
+            try!(write!(fmt, "{}{}", prefix, txt_result));
         }
         try!(write!(fmt, "]"));
         Ok(())

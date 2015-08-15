@@ -14,4 +14,4 @@ keywords = ["DNS", "c-ares"]
 pkg-config = "0.3.0"
 
 [dependencies]
-libc = "*"
+libc = "0.1.0"

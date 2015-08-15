@@ -30,8 +30,6 @@ Development has taken place on Linux.  The library uses the `std::os::unix::io::
 
 It's a long-term goal to support other platforms - but don't hold your breath.
 
-This crate does not ship with its own copy of `c-ares`.  To compile successfully, you'll need to have installed the `c-ares-devel` package (or equivalent).
-
 ## Contributing ##
 
 Contributions are welcome.  Please send pull requests!

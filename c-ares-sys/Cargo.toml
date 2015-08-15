@@ -3,11 +3,15 @@ name = "c-ares-sys"
 license = "MIT"
 version = "0.3.0"
 authors = ["David Hotham"]
+build = "build.rs"
 description = "Low-level bindings to the c-ares library"
 homepage = "https://github.com/dimbleby/rust-c-ares"
 repository = "https://github.com/dimbleby/rust-c-ares"
 readme = "README.md"
 keywords = ["DNS", "c-ares"]
+
+[build-dependencies]
+pkg-config = "0.3.0"
 
 [dependencies]
 libc = "*"

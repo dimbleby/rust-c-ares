@@ -1,0 +1,3 @@
+[submodule "c-ares-sys/c-ares"]
+	path = c-ares-sys/c-ares
+	url = git@github.com:/bagder/c-ares.git

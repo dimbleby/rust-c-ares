@@ -3,6 +3,7 @@
 A Rust wrapper for the [`c-ares`](http://c-ares.haxx.se/) library, for asynchronous DNS requests.
 
 [![Build Status](https://travis-ci.org/dimbleby/rust-c-ares.svg?branch=master)](https://travis-ci.org/dimbleby/rust-c-ares)
+[![crates.io](http://meritbadge.herokuapp.com/c-ares)](https://crates.io/crates/c-ares)
 
 ## Documentation ##
 

@@ -1,14 +1,8 @@
 language: rust
 sudo: false
 script:
-- cargo test --features "old-cares"
+- cargo test
 - cargo doc --no-deps -p c-ares
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - libc-ares-dev
 branches:
   only:
     master

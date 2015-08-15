@@ -22,6 +22,3 @@ path = "c-ares-sys"
 [dev-dependencies]
 mio = "*"
 nix = "*"
-
-[features]
-old-cares = []

@@ -8,7 +8,7 @@ my @lines = <ARES_H>;
 close(ARES_H);
 
 # Remove line comments.  In principle this is a bit fragile - what about
-# comments that contain quotations that look like comments?  But it's good
+# quotations that contain text that looks like a comment?  But it's good
 # enough.
 s#/\*.*?\*/##gs for @lines;
 

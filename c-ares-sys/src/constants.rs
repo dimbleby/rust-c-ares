@@ -29,10 +29,10 @@ pub const ARES_EBADSTR: libc::c_int = 17;
 pub const ARES_EBADFLAGS: libc::c_int = 18;
 pub const ARES_ENONAME: libc::c_int = 19;
 pub const ARES_EBADHINTS: libc::c_int = 20;
-pub const ARES_ENOTINITIALIZED: libc::c_int = 21          /* introduced in 1.7.0 */;
-pub const ARES_ELOADIPHLPAPI: libc::c_int = 22     /* introduced in 1.7.0 */;
-pub const ARES_EADDRGETNETWORKPARAMS: libc::c_int = 23     /* introduced in 1.7.0 */;
-pub const ARES_ECANCELLED: libc::c_int = 24          /* introduced in 1.7.0 */;
+pub const ARES_ENOTINITIALIZED: libc::c_int = 21;
+pub const ARES_ELOADIPHLPAPI: libc::c_int = 22;
+pub const ARES_EADDRGETNETWORKPARAMS: libc::c_int = 23;
+pub const ARES_ECANCELLED: libc::c_int = 24;
 
 // Flag values
 pub const ARES_FLAG_USEVC: libc::c_int = (1 << 0);

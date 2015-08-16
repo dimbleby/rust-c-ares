@@ -61,6 +61,7 @@ use types::{
     IpAddr,
     QueryType,
 };
+use query::query_callback;
 use txt::{
     TXTResults,
     query_txt_callback,
@@ -618,6 +619,36 @@ impl Channel {
                 mem::size_of::<libc::sockaddr>() as c_ares_sys::ares_socklen_t,
                 flags.bits(),
                 Some(get_name_info_callback::<F>),
+                c_arg);
+        }
+    }
+
+    /// Perform a DNS query for `name`.  The class and type of the query are
+    /// per the provided parameters, taking values as defined in
+    /// `arpa/nameser.h`.
+    ///
+    /// On completion, `handler` is called with the result.
+    ///
+    /// This method is provided so that users can query DNS types for which
+    /// `c-ares` does not provide a parser.  This is expected to be a last
+    /// resort; if a suitable `query_xxx()` is available, that should be
+    /// preferred.
+    pub fn query<F>(
+        &mut self,
+        name: &str,
+        dns_class: u16,
+        query_type: u16,
+        handler: F)
+        where F: FnOnce(Result<&[u8], AresError>) + 'static {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
+            c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                dns_class as libc::c_int,
+                query_type as libc::c_int,
+                Some(query_callback::<F>),
                 c_arg);
         }
     }

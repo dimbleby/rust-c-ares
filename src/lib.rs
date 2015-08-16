@@ -39,6 +39,7 @@ mod naptr;
 pub mod ni_flags;
 mod ns;
 mod ptr;
+mod query;
 mod types;
 mod txt;
 mod soa;

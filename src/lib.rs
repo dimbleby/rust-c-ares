@@ -12,7 +12,7 @@
 //!    is called whenever the set of interesting file descriptors changes, or
 //!    by querying the `Channel` directly with `get_sock()`.
 //!
-//! -  Do as `c-ares` asks!  That it, listen for the events that it requests,
+//! -  Do as `c-ares` asks.  That is, listen for the events that it requests,
 //!    on the file descriptors that it cares about.
 //!
 //! -  When a file descriptor becomes readable or writable, call `process_fd()`

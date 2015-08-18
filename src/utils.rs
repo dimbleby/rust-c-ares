@@ -43,7 +43,7 @@ pub fn ares_error(code: libc::c_int) -> AresError {
     }
 }
 
-// Converts an address family into a more strongly typed AddressFamily.
+// Convert an address family into a more strongly typed AddressFamily.
 pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
     match family {
         libc::AF_INET => Some(AddressFamily::INET),
@@ -52,7 +52,7 @@ pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
     }
 }
 
-// Gets an in_addr from an IPv4Addr.
+// Get an in_addr from an Ipv4Addr.
 pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> libc::in_addr {
     let value = ipv4
         .octets()
@@ -62,7 +62,7 @@ pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> libc::in_addr {
     libc::in_addr { s_addr: value }
 }
 
-// Gets an in6_addr from an IP64Addr.
+// Get an in6_addr from an Ipv6Addr.
 pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> libc::in6_addr {
     let mut segments = ipv6.segments();
     for segment in segments.iter_mut() {
@@ -71,7 +71,7 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> libc::in6_addr {
     libc::in6_addr { s6_addr: segments }
 }
 
-// Gets a sockaddr_in from a SocketAddr4.
+// Get a sockaddr_in from a SocketAddrV4.
 pub fn socket_addrv4_as_sockaddr_in(
     sock_v4: &SocketAddrV4) -> libc::sockaddr_in {
     let in_addr = ipv4_as_in_addr(sock_v4.ip());
@@ -83,7 +83,7 @@ pub fn socket_addrv4_as_sockaddr_in(
     }
 }
 
-// Gets a sockaddr_in6 from a SocketAddr6.
+// Get a sockaddr_in6 from a SocketAddrV6.
 pub fn socket_addrv6_as_sockaddr_in6(
     sock_v6: &SocketAddrV6) -> libc::sockaddr_in6 {
     let in6_addr = ipv6_as_in6_addr(sock_v6.ip());

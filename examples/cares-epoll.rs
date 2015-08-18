@@ -3,6 +3,7 @@
 extern crate c_ares;
 extern crate nix;
 
+use c_ares::HostEntResults;
 use nix::sys::epoll::{
     epoll_create,
     epoll_ctl,
@@ -25,8 +26,8 @@ fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
         Ok(a_results) => {
             println!("Successful A lookup...");
             println!("Hostname: {}", a_results.hostname());
-            for a_result in &a_results {
-                println!("{:}", a_result.ipv4_addr());
+            for a_result in a_results.addresses() {
+                println!("{:}", a_result.ip_address());
             }
         }
     }
@@ -40,8 +41,8 @@ fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
         Ok(aaaa_results) => {
             println!("Successful AAAA lookup...");
             println!("Hostname: {}", aaaa_results.hostname());
-            for aaaa_result in &aaaa_results {
-                println!("{:}", aaaa_result.ipv6_addr());
+            for aaaa_result in aaaa_results.addresses() {
+                println!("{:}", aaaa_result.ip_address());
             }
         }
     }

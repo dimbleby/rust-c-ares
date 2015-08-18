@@ -1,20 +1,18 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
-use std::net::Ipv6Addr;
 use std::ptr;
 use std::slice;
-use std::str;
 
 use error::AresError;
 use types::hostent;
 use utils::ares_error;
 
-/// The result of a successful AAAA lookup.
+/// The result of a successful AAAA lookup.  Details can be extracted via the
+/// `HostEntResults` trait.
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct AAAAResults {
@@ -22,12 +20,10 @@ pub struct AAAAResults {
     phantom: PhantomData<hostent>,
 }
 
-/// The contents of a single AAAA record.
-#[derive(Debug)]
-#[allow(raw_pointer_derive)]
-pub struct AAAAResult<'a> {
-    h_addr: *const libc::c_char,
-    phantom: PhantomData<&'a hostent>,
+impl AsRef<hostent> for AAAAResults {
+    fn as_ref(&self) -> &hostent {
+        unsafe { &*self.hostent }
+    }
 }
 
 impl AAAAResults {
@@ -56,70 +52,11 @@ impl AAAAResults {
             phantom: PhantomData,
         }
     }
-
-    /// Returns the hostname from this `AAAAResults`.
-    pub fn hostname(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr((*self.hostent).h_name);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
-    }
-
-    /// Returns an iterator over the `AAAAResult` values in this
-    /// `AAAAResults`.
-    pub fn iter(&self) -> AAAAResultsIterator {
-        AAAAResultsIterator {
-            next: unsafe { (*self.hostent).h_addr_list as *const *const _ },
-            phantom: PhantomData,
-        }
-    }
 }
 
 impl fmt::Display for AAAAResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "Hostname: {}, ", self.hostname()));
-        try!(write!(fmt, "AAAA results: ["));
-        let mut first = true;
-        for aaaa_result in self {
-            let prefix = if first { "" } else { ", " };
-            first = false;
-            try!(write!(fmt, "{}{}", prefix, aaaa_result));
-        }
-        try!(write!(fmt, "]"));
-        Ok(())
-    }
-}
-
-#[derive(Debug)]
-#[allow(raw_pointer_derive)]
-pub struct AAAAResultsIterator<'a> {
-    next: *const *const libc::c_char,
-    phantom: PhantomData<&'a hostent>,
-}
-
-impl<'a> Iterator for AAAAResultsIterator<'a> {
-    type Item = AAAAResult<'a>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let h_addr = unsafe { *self.next };
-        if h_addr.is_null() {
-            None
-        } else {
-            self.next = unsafe { self.next.offset(1) };
-            let aaaa_result = AAAAResult {
-                h_addr: h_addr,
-                phantom: PhantomData,
-            };
-            Some(aaaa_result)
-        }
-    }
-}
-
-impl<'a> IntoIterator for &'a AAAAResults {
-    type Item = AAAAResult<'a>;
-    type IntoIter = AAAAResultsIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
+        self.as_ref().fmt(fmt)
     }
 }
 
@@ -134,34 +71,6 @@ impl Drop for AAAAResults {
 
 unsafe impl Send for AAAAResults { }
 unsafe impl Sync for AAAAResults { }
-unsafe impl<'a> Send for AAAAResult<'a> { }
-unsafe impl<'a> Sync for AAAAResult<'a> { }
-unsafe impl<'a> Send for AAAAResultsIterator<'a> { }
-unsafe impl<'a> Sync for AAAAResultsIterator<'a> { }
-
-impl<'a> AAAAResult<'a> {
-    /// Returns the IPv6 address in this `AAAAResult`.
-    pub fn ipv6_addr(&self) -> Ipv6Addr {
-        let h_addr = self.h_addr;
-        unsafe {
-            Ipv6Addr::new(
-                ((*h_addr as u16) << 8) + *h_addr.offset(1) as u16,
-                ((*h_addr.offset(2) as u16) << 8) + *h_addr.offset(3) as u16,
-                ((*h_addr.offset(4) as u16) << 8) + *h_addr.offset(5) as u16,
-                ((*h_addr.offset(6) as u16) << 8) + *h_addr.offset(7) as u16,
-                ((*h_addr.offset(8) as u16) << 8) + *h_addr.offset(9) as u16,
-                ((*h_addr.offset(10) as u16) << 8) + *h_addr.offset(11) as u16,
-                ((*h_addr.offset(12) as u16) << 8) + *h_addr.offset(13) as u16,
-                ((*h_addr.offset(14) as u16) << 8) + *h_addr.offset(15) as u16)
-        }
-    }
-}
-
-impl<'a> fmt::Display for AAAAResult<'a> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.ipv6_addr().fmt(fmt)
-    }
-}
 
 pub unsafe extern "C" fn query_aaaa_callback<F>(
     arg: *mut libc::c_void,

@@ -1,20 +1,18 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
-use std::net::Ipv4Addr;
 use std::ptr;
 use std::slice;
-use std::str;
 
 use error::AresError;
 use types::hostent;
 use utils::ares_error;
 
-/// The result of a successful A lookup.
+/// The result of a successful A lookup.  Details can be extracted via the
+/// `HostEntResults` trait.
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct AResults {
@@ -22,12 +20,10 @@ pub struct AResults {
     phantom: PhantomData<hostent>,
 }
 
-/// The contents of a single A record.
-#[derive(Debug)]
-#[allow(raw_pointer_derive)]
-pub struct AResult<'a> {
-    h_addr: *const libc::c_char,
-    phantom: PhantomData<&'a hostent>,
+impl AsRef<hostent> for AResults {
+    fn as_ref(&self) -> &hostent {
+        unsafe { &*self.hostent }
+    }
 }
 
 impl AResults {
@@ -57,69 +53,11 @@ impl AResults {
             phantom: PhantomData,
         }
     }
-
-    /// Returns the hostname from this `AResults`.
-    pub fn hostname(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr((*self.hostent).h_name);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
-    }
-
-    /// Returns an iterator over the `AResult` values in this `AResults`.
-    pub fn iter(&self) -> AResultsIterator {
-        AResultsIterator {
-            next: unsafe { (*self.hostent).h_addr_list as *const *const _ },
-            phantom: PhantomData,
-        }
-    }
 }
 
 impl fmt::Display for AResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "Hostname: {}, ", self.hostname()));
-        try!(write!(fmt, "A results: ["));
-        let mut first = true;
-        for a_result in self {
-            let prefix = if first { "" } else { ", " };
-            first = false;
-            try!(write!(fmt, "{}{}", prefix, a_result));
-        }
-        try!(write!(fmt, "]"));
-        Ok(())
-    }
-}
-
-#[derive(Debug)]
-#[allow(raw_pointer_derive)]
-pub struct AResultsIterator<'a> {
-    next: *const *const libc::c_char,
-    phantom: PhantomData<&'a hostent>,
-}
-
-impl<'a> Iterator for AResultsIterator<'a> {
-    type Item = AResult<'a>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let h_addr = unsafe { *self.next };
-        if h_addr.is_null() {
-            None
-        } else {
-            self.next = unsafe { self.next.offset(1) };
-            let a_result = AResult {
-                h_addr: h_addr,
-                phantom: PhantomData,
-            };
-            Some(a_result)
-        }
-    }
-}
-
-impl<'a> IntoIterator for &'a AResults {
-    type Item = AResult<'a>;
-    type IntoIter = AResultsIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
+        self.as_ref().fmt(fmt)
     }
 }
 
@@ -134,29 +72,6 @@ impl Drop for AResults {
 
 unsafe impl Send for AResults { }
 unsafe impl Sync for AResults { }
-unsafe impl<'a> Send for AResult<'a> { }
-unsafe impl<'a> Sync for AResult<'a> { }
-unsafe impl<'a> Send for AResultsIterator<'a> { }
-unsafe impl<'a> Sync for AResultsIterator<'a> { }
-
-impl<'a> AResult<'a> {
-    /// Returns the IPv4 address in this `AResult`.
-    pub fn ipv4_addr(&self) -> Ipv4Addr {
-        unsafe {
-            Ipv4Addr::new(
-                *self.h_addr as u8,
-                *self.h_addr.offset(1) as u8,
-                *self.h_addr.offset(2) as u8,
-                *self.h_addr.offset(3) as u8)
-        }
-    }
-}
-
-impl<'a> fmt::Display for AResult<'a> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.ipv4_addr().fmt(fmt)
-    }
-}
 
 pub unsafe extern "C" fn query_a_callback<F>(
     arg: *mut libc::c_void,

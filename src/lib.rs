@@ -33,6 +33,7 @@ mod cname;
 mod error;
 pub mod flags;
 mod host;
+mod hostent;
 mod mx;
 mod nameinfo;
 mod naptr;
@@ -46,18 +47,8 @@ mod soa;
 mod utils;
 
 // Re-export public interfaces.
-pub use a::{
-    AResult,
-    AResults,
-};
-pub use aaaa::{
-    AAAAResult,
-    AAAAResults,
-};
-pub use srv::{
-    SRVResult,
-    SRVResults,
-};
+pub use a::AResults;
+pub use aaaa::AAAAResults;
 pub use channel::{
     Channel,
     GetSock,
@@ -65,10 +56,11 @@ pub use channel::{
 };
 pub use cname::CNameResult;
 pub use error::AresError;
-pub use host::{
+pub use host::HostResults;
+pub use hostent::{
+    HostEntResults,
     HostAddressResult,
     HostAliasResult,
-    HostResults,
 };
 pub use mx::{
     MXResult,
@@ -86,6 +78,10 @@ pub use ns::{
 pub use ptr::{
     PTRResult,
     PTRResults,
+};
+pub use srv::{
+    SRVResult,
+    SRVResults,
 };
 pub use types::{
     AddressFamily,

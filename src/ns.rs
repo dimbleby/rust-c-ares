@@ -58,6 +58,15 @@ impl fmt::Display for NSResults {
     }
 }
 
+impl Drop for NSResults {
+    fn drop(&mut self) {
+        unsafe {
+            c_ares_sys::ares_free_hostent(
+                self.hostent as *mut c_ares_sys::Struct_hostent);
+        }
+    }
+}
+
 unsafe impl Send for NSResults { }
 unsafe impl Sync for NSResults { }
 

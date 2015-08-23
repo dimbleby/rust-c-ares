@@ -50,25 +50,24 @@ impl NSResults {
 
     /// Returns the hostname from this `NSResults`.
     pub fn hostname(&self) -> &str {
-        let hostent_ref = unsafe { &*self.hostent };
-        hostent_ref.hostname()
+        let hostent = unsafe { &*self.hostent };
+        hostent.hostname()
     }
 
     /// Returns an iterator over the `HostAliasResult` values in this
     /// `NSResults`.
     pub fn aliases(&self) -> HostAliasResultsIterator {
-        let hostent_ref = unsafe { &*self.hostent };
-        hostent_ref.aliases()
+        let hostent = unsafe { &*self.hostent };
+        hostent.aliases()
     }
 }
 
 impl fmt::Display for NSResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let hostent_ref = unsafe { &*self.hostent };
-        try!(write!(fmt, "Hostname: {}, ", hostent_ref.hostname()));
+        try!(write!(fmt, "Hostname: {}, ", self.hostname()));
         try!(write!(fmt, "Aliases: ["));
         let mut first = true;
-        for host_alias in hostent_ref.aliases() {
+        for host_alias in self.aliases() {
             let prefix = if first { "" } else { ", " };
             first = false;
             try!(write!(fmt, "{}{}", prefix, host_alias));

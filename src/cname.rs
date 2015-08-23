@@ -53,29 +53,29 @@ impl CNameResults {
 
     /// Returns the hostname from this `CNameResults`.
     pub fn hostname(&self) -> &str {
-        let hostent_ref = unsafe { &*self.hostent };
-        hostent_ref.hostname()
+        let hostent = unsafe { &*self.hostent };
+        hostent.hostname()
     }
 
     /// Returns an iterator over the `HostAddressResult` values in this
     /// `CNameResults`.
     pub fn addresses(&self) -> HostAddressResultsIterator {
-        let hostent_ref = unsafe { &*self.hostent };
-        hostent_ref.addresses()
+        let hostent = unsafe { &*self.hostent };
+        hostent.addresses()
     }
 
     /// Returns an iterator over the `HostAliasResult` values in this
     /// `CNameResults`.
     pub fn aliases(&self) -> HostAliasResultsIterator {
-        let hostent_ref = unsafe { &*self.hostent };
-        hostent_ref.aliases()
+        let hostent = unsafe { &*self.hostent };
+        hostent.aliases()
     }
 }
 
 impl fmt::Display for CNameResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let hostent_ref = unsafe { &*self.hostent };
-        hostent_ref.fmt(fmt)
+        let hostent = unsafe { &*self.hostent };
+        hostent.fmt(fmt)
     }
 }
 

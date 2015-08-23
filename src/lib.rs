@@ -54,7 +54,7 @@ pub use channel::{
     GetSock,
     Options,
 };
-pub use cname::CNameResult;
+pub use cname::CNameResults;
 pub use error::AresError;
 pub use host::HostResults;
 pub use hostent::{
@@ -71,10 +71,7 @@ pub use naptr::{
     NAPTRResult,
     NAPTRResults,
 };
-pub use ns::{
-    NSResult,
-    NSResults,
-};
+pub use ns::NSResults;
 pub use ptr::{
     PTRResult,
     PTRResults,

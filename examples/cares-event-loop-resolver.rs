@@ -13,6 +13,7 @@
 extern crate c_ares;
 extern crate mio;
 
+use c_ares::HostEntResults;
 use std::collections::HashSet;
 use std::error::Error;
 use std::mem;
@@ -206,7 +207,7 @@ impl Resolver {
     // A blocking CNAME query.  Achieve this by having the callback send the
     // result to a std::sync::mpsc::channel, and waiting on that channel.
     pub fn query_cname(&self, name: &str)
-        -> Result<c_ares::CNameResult, c_ares::AresError> {
+        -> Result<c_ares::CNameResults, c_ares::AresError> {
         let (tx, rx) = mpsc::channel();
         self.ares_channel.lock().unwrap().query_cname(name, move |result| {
             tx.send(result).unwrap();
@@ -248,14 +249,16 @@ impl Drop for Resolver {
     }
 }
 
-fn print_cname_result(result: Result<c_ares::CNameResult, c_ares::AresError>) {
+fn print_cname_result(result: Result<c_ares::CNameResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             println!("CNAME lookup failed with error '{}'", e.description());
         }
-        Ok(cname_result) => {
+        Ok(cname_results) => {
             println!("Successful CNAME lookup...");
-            println!("{}", cname_result.cname());
+            for cname_result in cname_results.aliases() {
+                println!("{}", cname_result.alias());
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ use aaaa::{
     query_aaaa_callback,
 };
 use cname::{
-    CNameResult,
+    CNameResults,
     query_cname_callback,
 };
 use error::AresError;
@@ -392,7 +392,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_cname<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<CNameResult, AresError>) + 'static {
+        where F: FnOnce(Result<CNameResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
         unsafe {
             let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));

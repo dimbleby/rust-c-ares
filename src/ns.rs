@@ -1,19 +1,18 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::ptr;
 use std::slice;
-use std::str;
 
 use error::AresError;
 use types::hostent;
 use utils::ares_error;
 
-/// The result of a successful NS lookup.
+/// The result of a successful NS lookup.  Details can be extracted via the
+/// `HostEntResults` trait.
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct NSResults {
@@ -21,12 +20,10 @@ pub struct NSResults {
     phantom: PhantomData<hostent>,
 }
 
-/// The contents of a single NS record.
-#[derive(Debug)]
-#[allow(raw_pointer_derive)]
-pub struct NSResult<'a> {
-    h_alias: *const libc::c_char,
-    phantom: PhantomData<&'a hostent>,
+impl AsRef<hostent> for NSResults {
+    fn as_ref(&self) -> &hostent {
+        unsafe { &*self.hostent }
+    }
 }
 
 impl NSResults {
@@ -53,95 +50,16 @@ impl NSResults {
             phantom: PhantomData,
         }
     }
-
-    /// Returns an iterator over the `NSResult` values in this
-    /// `NSResults`.
-    pub fn iter(&self) -> NSResultsIterator {
-        NSResultsIterator {
-            next: unsafe { (*self.hostent).h_aliases as *const *const _ },
-            phantom: PhantomData,
-        }
-    }
 }
 
 impl fmt::Display for NSResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "["));
-        let mut first = true;
-        for ns_result in self {
-            let prefix = if first { "" } else { ", " };
-            first = false;
-            try!(write!(fmt, "{}{}", prefix, ns_result));
-        }
-        try!(write!(fmt, "]"));
-        Ok(())
-    }
-}
-
-#[derive(Debug)]
-#[allow(raw_pointer_derive)]
-pub struct NSResultsIterator<'a> {
-    next: *const *const libc::c_char,
-    phantom: PhantomData<&'a hostent>,
-}
-
-impl<'a> Iterator for NSResultsIterator<'a> {
-    type Item = NSResult<'a>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let h_alias = unsafe { *self.next };
-        if h_alias.is_null() {
-            None
-        } else {
-            self.next = unsafe { self.next.offset(1) };
-            let ns_result = NSResult {
-                h_alias: h_alias,
-                phantom: PhantomData,
-            };
-            Some(ns_result)
-        }
-    }
-}
-
-impl<'a> IntoIterator for &'a NSResults {
-    type Item = NSResult<'a>;
-    type IntoIter = NSResultsIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-
-impl Drop for NSResults {
-    fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_free_hostent(
-                self.hostent as *mut c_ares_sys::Struct_hostent);
-        }
+        self.as_ref().fmt(fmt)
     }
 }
 
 unsafe impl Send for NSResults { }
 unsafe impl Sync for NSResults { }
-unsafe impl<'a> Send for NSResult<'a> { }
-unsafe impl<'a> Sync for NSResult<'a> { }
-unsafe impl<'a> Send for NSResultsIterator<'a> { }
-unsafe impl<'a> Sync for NSResultsIterator<'a> { }
-
-impl<'a> NSResult<'a> {
-    /// Returns the name server in this `NSResult`.
-    pub fn name_server(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr(self.h_alias);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
-    }
-}
-
-impl<'a> fmt::Display for NSResult<'a> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.name_server().fmt(fmt)
-    }
-}
 
 pub unsafe extern "C" fn query_ns_callback<F>(
     arg: *mut libc::c_void,

@@ -6,6 +6,7 @@
 extern crate c_ares;
 extern crate nix;
 
+use c_ares::HostEntResults;
 use nix::sys::epoll::{
     epoll_create,
     epoll_ctl,
@@ -209,8 +210,8 @@ fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
         }
         Ok(ns_results) => {
             println!("Successful NS lookup...");
-            for ns_result in &ns_results {
-                println!("{}", ns_result.name_server());
+            for ns_result in ns_results.aliases() {
+                println!("{}", ns_result.alias());
             }
         }
     }

@@ -224,8 +224,8 @@ fn print_ptr_results(result: Result<c_ares::PTRResults, c_ares::AresError>) {
         }
         Ok(ptr_results) => {
             println!("Successful PTR lookup...");
-            for ptr_result in &ptr_results {
-                println!("{}", ptr_result.cname());
+            for ptr_result in ptr_results.aliases() {
+                println!("{}", ptr_result.alias());
             }
         }
     }

@@ -72,10 +72,7 @@ pub use naptr::{
     NAPTRResults,
 };
 pub use ns::NSResults;
-pub use ptr::{
-    PTRResult,
-    PTRResults,
-};
+pub use ptr::PTRResults;
 pub use srv::{
     SRVResult,
     SRVResults,

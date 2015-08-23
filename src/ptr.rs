@@ -11,7 +11,7 @@ use error::AresError;
 use types::hostent;
 use utils::ares_error;
 
-/// The result of a successful PTR lookup.  Details can be extracted via thei
+/// The result of a successful PTR lookup.  Details can be extracted via the
 /// `HostEntResults` trait.
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]

@@ -46,6 +46,7 @@ impl TXTResults {
             Ok(result)
         }
     }
+
     fn new(txt_reply: *mut c_ares_sys::Struct_ares_txt_reply) -> TXTResults {
         TXTResults {
             txt_reply: txt_reply,

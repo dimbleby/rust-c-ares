@@ -6,7 +6,6 @@
 extern crate c_ares;
 extern crate nix;
 
-use c_ares::HostEntResults;
 use nix::sys::epoll::{
     epoll_create,
     epoll_ctl,

@@ -40,17 +40,6 @@ impl fmt::Display for IpAddr {
     }
 }
 
-#[repr(C)]
-#[derive(Debug)]
-#[allow(raw_pointer_derive)]
-pub struct hostent {
-    pub h_name: *mut libc::c_char,
-    pub h_aliases: *mut *mut libc::c_char,
-    pub h_addrtype: libc::c_int,
-    pub h_length: libc::c_int,
-    pub h_addr_list: *mut *mut libc::c_char,
-}
-
 // See arpa/nameser.h
 #[derive(Clone, Copy, Debug)]
 pub enum QueryType {

@@ -13,60 +13,34 @@ use std::str;
 
 use types::{
     AddressFamily,
-    hostent,
     IpAddr,
 };
 use utils::address_family;
 
-impl AsRef<hostent> for hostent {
-    fn as_ref(&self) -> &hostent {
-        self
-    }
-}
-
-/// Trait for extracting details from structures that implement
-/// `AsRef<hostent>`.
-pub trait HostEntResults {
-    /// Returns the hostname.
-    fn hostname(&self) -> &str;
-
-    /// Returns an iterator over the `HostAddressResult` values.
-    fn addresses(&self) -> HostAddressResultsIterator;
-
-    /// Returns an iterator over the `HostAliasResult` values.
-    fn aliases(&self) -> HostAliasResultsIterator;
-}
-
-/// An alias, as retrieved from a host lookup.
+#[repr(C)]
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
-pub struct HostAliasResult<'a> {
-    h_alias: *const libc::c_char,
-    phantom: PhantomData<&'a hostent>,
+pub struct hostent {
+    pub h_name: *mut libc::c_char,
+    pub h_aliases: *mut *mut libc::c_char,
+    pub h_addrtype: libc::c_int,
+    pub h_length: libc::c_int,
+    pub h_addr_list: *mut *mut libc::c_char,
 }
 
-/// An address, as retrieved from a host lookup.
-#[derive(Debug)]
-#[allow(raw_pointer_derive)]
-pub struct HostAddressResult<'a> {
-    family: AddressFamily,
-    h_addr: *const libc::c_char,
-    phantom: PhantomData<&'a hostent>,
-}
-
-impl<T> HostEntResults for T where T: AsRef<hostent> {
-    fn hostname(&self) -> &str {
+impl hostent {
+    pub fn hostname(&self) -> &str {
         unsafe {
-            let c_str = CStr::from_ptr((*self.as_ref()).h_name);
+            let c_str = CStr::from_ptr(self.h_name);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 
-    fn addresses(&self) -> HostAddressResultsIterator {
-        match address_family(self.as_ref().h_addrtype) {
+    pub fn addresses(&self) -> HostAddressResultsIterator {
+        match address_family(self.h_addrtype) {
             Some(family) => HostAddressResultsIterator {
                 family: family,
-                next: self.as_ref().h_addr_list as *const *const _,
+                next: self.h_addr_list as *const *const _,
                 phantom: PhantomData,
             },
             None => HostAddressResultsIterator {
@@ -77,9 +51,9 @@ impl<T> HostEntResults for T where T: AsRef<hostent> {
         }
     }
 
-    fn aliases(&self) -> HostAliasResultsIterator {
+    pub fn aliases(&self) -> HostAliasResultsIterator {
         HostAliasResultsIterator {
-            next: self.as_ref().h_aliases as *const *const _,
+            next: self.h_aliases as *const *const _,
             phantom: PhantomData,
         }
     }
@@ -108,64 +82,22 @@ impl fmt::Display for hostent {
     }
 }
 
+/// An alias, as retrieved from a host lookup.
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
-pub struct HostAddressResultsIterator<'a> {
+pub struct HostAliasResult<'a> {
+    h_alias: *const libc::c_char,
+    phantom: PhantomData<&'a hostent>,
+}
+
+/// An address, as retrieved from a host lookup.
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
+pub struct HostAddressResult<'a> {
     family: AddressFamily,
-    next: *const *const libc::c_char,
+    h_addr: *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
-
-impl<'a> Iterator for HostAddressResultsIterator<'a> {
-    type Item = HostAddressResult<'a>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let h_addr = unsafe { *self.next };
-        if h_addr.is_null() {
-            None
-        } else {
-            self.next = unsafe { self.next.offset(1) };
-            let addr_result = HostAddressResult {
-                family: self.family,
-                h_addr: h_addr,
-                phantom: PhantomData,
-            };
-            Some(addr_result)
-        }
-    }
-}
-
-#[derive(Debug)]
-#[allow(raw_pointer_derive)]
-pub struct HostAliasResultsIterator<'a> {
-    next: *const *const libc::c_char,
-    phantom: PhantomData<&'a hostent>,
-}
-
-impl<'a> Iterator for HostAliasResultsIterator<'a> {
-    type Item = HostAliasResult<'a>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let h_alias = unsafe { *self.next };
-        if h_alias.is_null() {
-            None
-        } else {
-            self.next = unsafe { self.next.offset(1) };
-            let alias_result = HostAliasResult {
-                h_alias: h_alias,
-                phantom: PhantomData,
-            };
-            Some(alias_result)
-        }
-    }
-}
-
-unsafe impl<'a> Send for HostAliasResult<'a> { }
-unsafe impl<'a> Sync for HostAliasResult<'a> { }
-unsafe impl<'a> Send for HostAliasResultsIterator<'a> { }
-unsafe impl<'a> Sync for HostAliasResultsIterator<'a> { }
-unsafe impl<'a> Send for HostAddressResult<'a> { }
-unsafe impl<'a> Sync for HostAddressResult<'a> { }
-unsafe impl<'a> Send for HostAddressResultsIterator<'a> { }
-unsafe impl<'a> Sync for HostAddressResultsIterator<'a> { }
 
 impl<'a> HostAddressResult<'a> {
     /// Returns the IP address in this `HostResult`.
@@ -215,6 +147,38 @@ impl<'a> fmt::Display for HostAddressResult<'a> {
     }
 }
 
+unsafe impl<'a> Send for HostAddressResult<'a> { }
+unsafe impl<'a> Sync for HostAddressResult<'a> { }
+
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
+pub struct HostAddressResultsIterator<'a> {
+    family: AddressFamily,
+    next: *const *const libc::c_char,
+    phantom: PhantomData<&'a hostent>,
+}
+
+impl<'a> Iterator for HostAddressResultsIterator<'a> {
+    type Item = HostAddressResult<'a>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let h_addr = unsafe { *self.next };
+        if h_addr.is_null() {
+            None
+        } else {
+            self.next = unsafe { self.next.offset(1) };
+            let addr_result = HostAddressResult {
+                family: self.family,
+                h_addr: h_addr,
+                phantom: PhantomData,
+            };
+            Some(addr_result)
+        }
+    }
+}
+
+unsafe impl<'a> Send for HostAddressResultsIterator<'a> { }
+unsafe impl<'a> Sync for HostAddressResultsIterator<'a> { }
+
 impl<'a> HostAliasResult<'a> {
     /// Returns the alias in this `HostAliasResult`.
     pub fn alias(&self) -> &str {
@@ -230,3 +194,33 @@ impl<'a> fmt::Display for HostAliasResult<'a> {
         self.alias().fmt(fmt)
     }
 }
+
+unsafe impl<'a> Send for HostAliasResult<'a> { }
+unsafe impl<'a> Sync for HostAliasResult<'a> { }
+
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
+pub struct HostAliasResultsIterator<'a> {
+    next: *const *const libc::c_char,
+    phantom: PhantomData<&'a hostent>,
+}
+
+impl<'a> Iterator for HostAliasResultsIterator<'a> {
+    type Item = HostAliasResult<'a>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let h_alias = unsafe { *self.next };
+        if h_alias.is_null() {
+            None
+        } else {
+            self.next = unsafe { self.next.offset(1) };
+            let alias_result = HostAliasResult {
+                h_alias: h_alias,
+                phantom: PhantomData,
+            };
+            Some(alias_result)
+        }
+    }
+}
+
+unsafe impl<'a> Send for HostAliasResultsIterator<'a> { }
+unsafe impl<'a> Sync for HostAliasResultsIterator<'a> { }

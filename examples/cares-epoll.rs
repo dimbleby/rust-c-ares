@@ -3,7 +3,6 @@
 extern crate c_ares;
 extern crate nix;
 
-use c_ares::HostEntResults;
 use nix::sys::epoll::{
     epoll_create,
     epoll_ctl,
@@ -18,19 +17,36 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::os::unix::io;
 
-fn print_hostent_results<T>(result: Result<T, c_ares::AresError>)
-    where T: c_ares::HostEntResults {
+fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             println!("Lookup failed with error '{}'", e.description());
         }
-        Ok(hostent_results) => {
+        Ok(a_results) => {
             println!("Successful lookup...");
-            println!("Hostname: {}", hostent_results.hostname());
-            for alias in hostent_results.aliases() {
+            println!("Hostname: {}", a_results.hostname());
+            for alias in a_results.aliases() {
                 println!("{:}", alias.alias());
             }
-            for address in hostent_results.addresses() {
+            for address in a_results.addresses() {
+                println!("{:}", address.ip_address());
+            }
+        }
+    }
+}
+
+fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
+    match result {
+        Err(e) => {
+            println!("Lookup failed with error '{}'", e.description());
+        }
+        Ok(aaaa_results) => {
+            println!("Successful lookup...");
+            println!("Hostname: {}", aaaa_results.hostname());
+            for alias in aaaa_results.aliases() {
+                println!("{:}", alias.alias());
+            }
+            for address in aaaa_results.addresses() {
                 println!("{:}", address.ip_address());
             }
         }
@@ -69,12 +85,12 @@ fn main() {
     // Set up some queries.
     ares_channel.query_a("apple.com", move |result| {
         println!("");
-        print_hostent_results(result);
+        print_a_results(result);
     });
 
     ares_channel.query_aaaa("google.com", move |result| {
         println!("");
-        print_hostent_results(result);
+        print_aaaa_results(result);
     });
 
     ares_channel.query_srv("_xmpp-server._tcp.gmail.com", move |result| {

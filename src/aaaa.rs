@@ -8,22 +8,19 @@ use std::ptr;
 use std::slice;
 
 use error::AresError;
-use types::hostent;
+use hostent::{
+    hostent,
+    HostAddressResultsIterator,
+    HostAliasResultsIterator,
+};
 use utils::ares_error;
 
-/// The result of a successful AAAA lookup.  Details can be extracted via the
-/// `HostEntResults` trait.
+/// The result of a successful AAAA lookup.
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct AAAAResults {
     hostent: *mut hostent,
     phantom: PhantomData<hostent>,
-}
-
-impl AsRef<hostent> for AAAAResults {
-    fn as_ref(&self) -> &hostent {
-        unsafe { &*self.hostent }
-    }
 }
 
 impl AAAAResults {
@@ -46,17 +43,39 @@ impl AAAAResults {
             Ok(result)
         }
     }
+
     fn new(hostent: *mut hostent) -> AAAAResults {
         AAAAResults {
             hostent: hostent,
             phantom: PhantomData,
         }
     }
+
+    /// Returns the hostname from this `AAAAResults`.
+    pub fn hostname(&self) -> &str {
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.hostname()
+    }
+
+    /// Returns an iterator over the `HostAddressResult` values in this
+    /// `AAAAResults`.
+    pub fn addresses(&self) -> HostAddressResultsIterator {
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.addresses()
+    }
+
+    /// Returns an iterator over the `HostAliasResult` values in this
+    /// `AAAAResults`.
+    pub fn aliases(&self) -> HostAliasResultsIterator {
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.aliases()
+    }
 }
 
 impl fmt::Display for AAAAResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.as_ref().fmt(fmt)
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.fmt(fmt)
     }
 }
 

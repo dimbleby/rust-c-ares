@@ -8,22 +8,19 @@ use std::ptr;
 use std::slice;
 
 use error::AresError;
-use types::hostent;
+use hostent::{
+    hostent,
+    HostAddressResultsIterator,
+    HostAliasResultsIterator,
+};
 use utils::ares_error;
 
-/// The result of a successful A lookup.  Details can be extracted via the
-/// `HostEntResults` trait.
+/// The result of a successful A lookup.
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct AResults {
     hostent: *mut hostent,
     phantom: PhantomData<hostent>,
-}
-
-impl AsRef<hostent> for AResults {
-    fn as_ref(&self) -> &hostent {
-        unsafe { &*self.hostent }
-    }
 }
 
 impl AResults {
@@ -53,11 +50,32 @@ impl AResults {
             phantom: PhantomData,
         }
     }
+
+    /// Returns the hostname from this `AResults`.
+    pub fn hostname(&self) -> &str {
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.hostname()
+    }
+
+    /// Returns an iterator over the `HostAddressResult` values in this
+    /// `AResults`.
+    pub fn addresses(&self) -> HostAddressResultsIterator {
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.addresses()
+    }
+
+    /// Returns an iterator over the `HostAliasResult` values in this
+    /// `AResults`.
+    pub fn aliases(&self) -> HostAliasResultsIterator {
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.aliases()
+    }
 }
 
 impl fmt::Display for AResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.as_ref().fmt(fmt)
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.fmt(fmt)
     }
 }
 

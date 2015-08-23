@@ -8,22 +8,18 @@ use std::ptr;
 use std::slice;
 
 use error::AresError;
-use types::hostent;
+use hostent::{
+    hostent,
+    HostAliasResultsIterator,
+};
 use utils::ares_error;
 
-/// The result of a successful NS lookup.  Details can be extracted via the
-/// `HostEntResults` trait.
+/// The result of a successful NS lookup.
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct NSResults {
     hostent: *mut hostent,
     phantom: PhantomData<hostent>,
-}
-
-impl AsRef<hostent> for NSResults {
-    fn as_ref(&self) -> &hostent {
-        unsafe { &*self.hostent }
-    }
 }
 
 impl NSResults {
@@ -44,17 +40,41 @@ impl NSResults {
             Ok(result)
         }
     }
+
     fn new(hostent: *mut hostent) -> NSResults {
         NSResults {
             hostent: hostent,
             phantom: PhantomData,
         }
     }
+
+    /// Returns the hostname from this `NSResults`.
+    pub fn hostname(&self) -> &str {
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.hostname()
+    }
+
+    /// Returns an iterator over the `HostAliasResult` values in this
+    /// `NSResults`.
+    pub fn aliases(&self) -> HostAliasResultsIterator {
+        let hostent_ref = unsafe { &*self.hostent };
+        hostent_ref.aliases()
+    }
 }
 
 impl fmt::Display for NSResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.as_ref().fmt(fmt)
+        let hostent_ref = unsafe { &*self.hostent };
+        try!(write!(fmt, "Hostname: {}, ", hostent_ref.hostname()));
+        try!(write!(fmt, "Aliases: ["));
+        let mut first = true;
+        for host_alias in hostent_ref.aliases() {
+            let prefix = if first { "" } else { ", " };
+            first = false;
+            try!(write!(fmt, "{}{}", prefix, host_alias));
+        }
+        try!(write!(fmt, "]"));
+        Ok(())
     }
 }
 

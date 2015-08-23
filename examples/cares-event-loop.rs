@@ -3,7 +3,6 @@
 extern crate c_ares;
 extern crate mio;
 
-use c_ares::HostEntResults;
 use std::collections::HashSet;
 use std::error::Error;
 use std::mem;

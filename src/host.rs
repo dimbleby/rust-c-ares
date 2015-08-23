@@ -5,20 +5,17 @@ use std::fmt;
 use std::mem;
 
 use error::AresError;
-use types::hostent;
+use hostent::{
+    hostent,
+    HostAddressResultsIterator,
+    HostAliasResultsIterator,
+};
 use utils::ares_error;
 
-/// The result of a successful host lookup.    Details can be extracted via the
-/// `HostEntResults` trait.
+/// The result of a successful host lookup.
 #[derive(Debug)]
 pub struct HostResults<'a> {
     hostent: &'a hostent,
-}
-
-impl<'a> AsRef<hostent> for HostResults<'a> {
-    fn as_ref(&self) -> &hostent {
-        self.hostent
-    }
 }
 
 impl<'a> HostResults<'a> {
@@ -27,11 +24,28 @@ impl<'a> HostResults<'a> {
             hostent: hostent,
         }
     }
+
+    /// Returns the hostname from this `HostResults`.
+    pub fn hostname(&self) -> &str {
+        self.hostent.hostname()
+    }
+
+    /// Returns an iterator over the `HostAddressResult` values in this
+    /// `HostResults`.
+    pub fn addresses(&self) -> HostAddressResultsIterator {
+        self.hostent.addresses()
+    }
+
+    /// Returns an iterator over the `HostAliasResult` values in this
+    /// `HostResults`.
+    pub fn aliases(&self) -> HostAliasResultsIterator {
+        self.hostent.aliases()
+    }
 }
 
 impl<'a> fmt::Display for HostResults<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.as_ref().fmt(fmt)
+        self.hostent.fmt(fmt)
     }
 }
 

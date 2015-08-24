@@ -539,13 +539,15 @@ impl Channel {
         &mut self,
         address: &IpAddr,
         handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
+        let in_addr: libc::in_addr;
+        let in6_addr: libc::in6_addr;
         let c_addr = match *address {
             IpAddr::V4(ref v4) => {
-                let in_addr = ipv4_as_in_addr(v4);
+                in_addr = ipv4_as_in_addr(v4);
                 &in_addr as *const _ as *const libc::c_void
             },
             IpAddr::V6(ref v6) => {
-                let in6_addr = ipv6_as_in6_addr(v6);
+                in6_addr = ipv6_as_in6_addr(v6);
                 &in6_addr as *const _ as *const libc::c_void
             },
         };
@@ -561,7 +563,7 @@ impl Channel {
             let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_gethostbyaddr(
                 self.ares_channel,
-                c_addr,
+                c_addr as *const _ as *const libc::c_void,
                 length as libc::c_int,
                 family as libc::c_int,
                 Some(get_host_callback::<F>),

@@ -1,3 +1,4 @@
+extern crate gcc;
 extern crate pkg_config;
 
 use std::env;
@@ -19,15 +20,13 @@ fn main() {
         Err(..) => {}
     }
 
-    // Compile the bundled libcares.
+    // MSVC builds are different.
     let target = env::var("TARGET").unwrap();
-    let src = env::current_dir().unwrap();
-    let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-    let build = dst.join("build");
+    if target.contains("msvc") {
+        return build_msvc(&target);
+    }
 
-    println!("cargo:rustc-link-search={}/.libs", build.display());
-    println!("cargo:rustc-link-lib=static=cares");
-
+    // Set up compiler options.
     let mut cflags = env::var("CFLAGS").unwrap_or(String::new());
     if target.contains("i686") {
         cflags.push_str(" -m32");
@@ -38,6 +37,8 @@ fn main() {
         cflags.push_str(" -fPIC");
     }
 
+    let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let build = dst.join("build");
     let _ = fs::create_dir(&build);
 
     let mut config_opts = Vec::new();
@@ -46,6 +47,8 @@ fn main() {
     config_opts.push("--enable-optimize".to_string());
     config_opts.push(format!("--prefix={}", dst.display()));
 
+    // Prepare.
+    let src = env::current_dir().unwrap();
     run(Command::new("sh")
                 .current_dir(&src.join("c-ares"))
                 .arg("buildconf"));
@@ -55,9 +58,15 @@ fn main() {
                 .arg("-c")
                 .arg(&format!("{} {}", src.join("c-ares/configure").display(),
                               config_opts.connect(" "))));
+
+    // Compile.
     run(Command::new(make())
                 .arg(&format!("-j{}", env::var("NUM_JOBS").unwrap()))
                 .current_dir(&build));
+
+    // Link to compiled library.
+    println!("cargo:rustc-link-search={}/.libs", build.display());
+    println!("cargo:rustc-link-lib=static=cares");
 }
 
 fn run(cmd: &mut Command) {
@@ -67,4 +76,33 @@ fn run(cmd: &mut Command) {
 
 fn make() -> &'static str {
     if cfg!(target_os = "freebsd") {"gmake"} else {"make"}
+}
+
+fn build_msvc(target: &str) {
+    // Prepare.
+    let src = env::current_dir().unwrap();
+    let c_ares_dir = &src.join("c-ares");
+    run(Command::new("cmd")
+                .current_dir(c_ares_dir)
+                .arg("/c")
+                .arg("buildconf.bat"));
+
+    // Compile.
+    let mut cmd = gcc::windows_registry::find(target, "nmake.exe").unwrap();
+    cmd.current_dir(c_ares_dir);
+    cmd.args(&["/f", "Makefile.msvc", "CFG=lib-release", "c-ares"]);
+    run(&mut cmd);
+
+    // Install library.
+    let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let build = dst.join("build");
+    let mut cmd = gcc::windows_registry::find(target, "nmake.exe").unwrap();
+    cmd.current_dir(c_ares_dir);
+    cmd.args(&["/f", "Makefile.msvc", "/a", "CFG=lib-release", "install"]);
+    cmd.env("INSTALL_DIR", format!("{}", build.display()));
+    run(&mut cmd);
+
+    // Link to compiled library.
+    println!("cargo:rustc-link-search={}/lib", build.display());
+    println!("cargo:rustc-link-lib=static=libcares");
 }

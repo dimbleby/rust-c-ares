@@ -20,7 +20,7 @@ use std::os::unix::io;
 fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
     match result {
         Err(e) => {
-            println!("Lookup failed with error '{}'", e.description());
+            println!("A lookup failed with error '{}'", e.description());
         }
         Ok(a_results) => {
             println!("Successful lookup...");
@@ -38,7 +38,7 @@ fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
 fn print_aaaa_results(result: Result<c_ares::AAAAResults, c_ares::AresError>) {
     match result {
         Err(e) => {
-            println!("Lookup failed with error '{}'", e.description());
+            println!("AAAA lookup failed with error '{}'", e.description());
         }
         Ok(aaaa_results) => {
             println!("Successful lookup...");

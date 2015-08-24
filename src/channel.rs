@@ -563,7 +563,7 @@ impl Channel {
             let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_gethostbyaddr(
                 self.ares_channel,
-                c_addr as *const _ as *const libc::c_void,
+                c_addr,
                 length as libc::c_int,
                 family as libc::c_int,
                 Some(get_host_callback::<F>),

@@ -45,7 +45,7 @@ impl hostent {
             },
             None => HostAddressResultsIterator {
                 family: AddressFamily::INET,
-                next: ptr::null_mut(),
+                next: ptr::null(),
                 phantom: PhantomData,
             }
         }

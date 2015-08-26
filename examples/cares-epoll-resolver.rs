@@ -89,20 +89,20 @@ fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
             0 => {
                 // No events - must be a timeout.  Tell c-ares about it.
                 ares_channel.lock().unwrap().process_fd(
-                    c_ares::INVALID_FD,
-                    c_ares::INVALID_FD);
+                    c_ares::SOCKET_BAD,
+                    c_ares::SOCKET_BAD);
             },
             n => {
                 // Sockets became readable or writable.  Tell c-ares about it.
                 for event in &events[0..n] {
                     let active_fd = event.data as io::RawFd;
                     let readable_fd = if (event.events & EPOLLIN).is_empty() {
-                        c_ares::INVALID_FD
+                        c_ares::SOCKET_BAD
                     } else {
                         active_fd
                     };
                     let writable_fd = if (event.events & EPOLLOUT).is_empty() {
-                        c_ares::INVALID_FD
+                        c_ares::SOCKET_BAD
                     } else {
                         active_fd
                     };

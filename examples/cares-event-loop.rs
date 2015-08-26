@@ -55,12 +55,12 @@ impl mio::Handler for CAresEventHandler {
         let read_fd = if events.is_readable() {
             fd
         } else {
-            c_ares::INVALID_FD
+            c_ares::SOCKET_BAD
         };
         let write_fd = if events.is_writable() {
             fd
         } else {
-            c_ares::INVALID_FD
+            c_ares::SOCKET_BAD
         };
         self.ares_channel.process_fd(read_fd, write_fd);
     }
@@ -126,7 +126,7 @@ impl mio::Handler for CAresEventHandler {
         &mut self,
         event_loop: &mut mio::EventLoop<CAresEventHandler>,
         _timeout: Self::Timeout) {
-        self.ares_channel.process_fd(c_ares::INVALID_FD, c_ares::INVALID_FD);
+        self.ares_channel.process_fd(c_ares::SOCKET_BAD, c_ares::SOCKET_BAD);
         event_loop.timeout_ms((), 500).unwrap();
     }
 }

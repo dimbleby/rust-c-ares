@@ -6,12 +6,25 @@ use std::os::unix::io::{
     RawFd,
 };
 
+#[cfg(target_os = "windows")]
+use std::os::windows::io::{
+    AsRawSocket,
+    RawSocket,
+};
+
 /// The platform-specific socket / file descriptor.
 pub struct Socket(pub c_ares_sys::ares_socket_t);
 
 #[cfg(target_os = "linux")]
 impl AsRawFd for Socket {
     fn as_raw_fd(&self) -> RawFd {
+        self.0
+    }
+}
+
+#[cfg(target_os = "windows")]
+impl AsRawSocket for Socket {
+    fn as_raw_socket(&self) -> RawSocket {
         self.0
     }
 }

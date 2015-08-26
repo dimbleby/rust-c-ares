@@ -6,11 +6,13 @@ use std::net::{
     Ipv4Addr,
     Ipv6Addr,
 };
-use std::os::unix::io;
 
-/// An invalid file descriptor.  Use this to represent 'no action' when calling
-/// `process_fd()` on a channel.
-pub const INVALID_FD: io::RawFd = c_ares_sys::ARES_SOCKET_BAD as io::RawFd;
+/// The platform-specific socket / file descriptor.
+pub type Socket = c_ares_sys::ares_socket_t;
+
+/// An invalid socket / file descriptor.  Use this to represent 'no action'
+/// when calling `process_fd()` on a channel.
+pub const SOCKET_BAD: Socket = c_ares_sys::ARES_SOCKET_BAD;
 
 /// Address families.
 #[derive(Clone, Copy, Debug)]

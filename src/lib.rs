@@ -78,8 +78,9 @@ pub use srv::{
 };
 pub use types::{
     AddressFamily,
-    INVALID_FD,
+    SOCKET_BAD,
     IpAddr,
+    Socket,
 };
 pub use txt::{
     TXTResult,

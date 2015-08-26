@@ -9,7 +9,6 @@ use std::net::{
     Ipv6Addr,
     SocketAddr,
 };
-use std::os::unix::io;
 use std::ptr;
 
 use a::{
@@ -60,6 +59,7 @@ use types::{
     DnsClass,
     IpAddr,
     QueryType,
+    Socket,
 };
 use query::query_callback;
 use txt::{
@@ -84,7 +84,7 @@ pub struct Options {
     optmask: libc::c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
-    socket_state_callback: Option<Box<FnMut(io::RawFd, bool, bool) + 'static>>,
+    socket_state_callback: Option<Box<FnMut(Socket, bool, bool) + 'static>>,
 }
 
 impl Options {
@@ -180,7 +180,7 @@ impl Options {
     /// -  `read` is set to true if the socket should listen for read events
     /// -  `write` is set to true if the socket should listen for write events.
     pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
-        where F: FnMut(io::RawFd, bool, bool) + 'static {
+        where F: FnMut(Socket, bool, bool) + 'static {
         let mut boxed_callback = Box::new(callback);
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
         self.ares_options.sock_state_cb_data =
@@ -225,7 +225,7 @@ pub struct Channel {
 
     // For ownership only.
     #[allow(dead_code)]
-    socket_state_callback: Option<Box<FnMut(io::RawFd, bool, bool) + 'static>>,
+    socket_state_callback: Option<Box<FnMut(Socket, bool, bool) + 'static>>,
 }
 
 impl Channel {
@@ -280,8 +280,8 @@ impl Channel {
     ///
     /// Providing a value for `read_fd` indicates that the identified socket
     /// is readable; likewise providing a value for `write_fd` indicates that
-    /// the identified socket is writable.  Use `INVALID_FD` for "no action".
-    pub fn process_fd(&mut self, read_fd: io::RawFd, write_fd: io::RawFd) {
+    /// the identified socket is writable.  Use `SOCKET_BAD` for "no action".
+    pub fn process_fd(&mut self, read_fd: Socket, write_fd: Socket) {
         unsafe {
             c_ares_sys::ares_process_fd(
                 self.ares_channel,
@@ -683,9 +683,9 @@ pub unsafe extern "C" fn socket_state_callback<F>(
     socket_fd: c_ares_sys::ares_socket_t,
     readable: libc::c_int,
     writable: libc::c_int)
-    where F: FnMut(io::RawFd, bool, bool) + 'static {
+    where F: FnMut(Socket, bool, bool) + 'static {
     let handler = data as *mut F;
-    (*handler)(socket_fd as io::RawFd, readable != 0, writable != 0);
+    (*handler)(socket_fd as Socket, readable != 0, writable != 0);
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as
@@ -724,7 +724,7 @@ pub struct GetSockIterator<'a> {
 }
 
 impl<'a> Iterator for GetSockIterator<'a> {
-    type Item = (io::RawFd, bool, bool);
+    type Item = (Socket, bool, bool);
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.next;
         self.next = self.next + 1;
@@ -736,7 +736,7 @@ impl<'a> Iterator for GetSockIterator<'a> {
             let bit = bit << c_ares_sys::ARES_GETSOCK_MAXNUM;
             let writable = (self.getsock.bitmask & bit) != 0;
             if readable || writable {
-                let fd = self.getsock.socks[index] as io::RawFd;
+                let fd = self.getsock.socks[index] as Socket;
                 Some((fd, readable, writable))
             } else {
                 None
@@ -746,7 +746,7 @@ impl<'a> Iterator for GetSockIterator<'a> {
 }
 
 impl<'a> IntoIterator for &'a GetSock {
-    type Item = (io::RawFd, bool, bool);
+    type Item = (Socket, bool, bool);
     type IntoIter = GetSockIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {

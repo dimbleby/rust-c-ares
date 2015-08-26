@@ -5,6 +5,10 @@ use libc::{
     socklen_t,
     timeval,
 };
+#[cfg(target_os = "windows")]
+use std::os::windows::io::RawSocket;
+#[cfg(target_os = "linux")]
+use std::os::unix::io::RawFd;
 
 pub type Struct_in_addr = in_addr;
 pub type Struct_sockaddr = sockaddr;
@@ -15,7 +19,10 @@ pub type Struct_timeval = timeval;
 pub type ares_socklen_t = socklen_t;
 pub type __cares_rule_02__ = [::libc::c_char; 1usize];
 pub type __cares_rule_03__ = [::libc::c_char; 1usize];
-pub type ares_socket_t = ::libc::c_int;
+#[cfg(target_os = "windows")]
+pub type ares_socket_t = RawSocket;
+#[cfg(target_os = "linux")]
+pub type ares_socket_t = RawFd;
 pub type ares_sock_state_cb =
     ::std::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void,
                                         socket_fd: ares_socket_t,
@@ -236,7 +243,6 @@ impl ::std::clone::Clone for Union_Unnamed2 {
 impl ::std::default::Default for Union_Unnamed2 {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
-#[link(name = "cares")]
 extern "C" {
     pub fn ares_library_init(flags: ::libc::c_int) -> ::libc::c_int;
     pub fn ares_library_cleanup() -> ();

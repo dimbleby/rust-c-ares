@@ -59,7 +59,6 @@ use types::{
     DnsClass,
     IpAddr,
     QueryType,
-    Socket,
 };
 use query::query_callback;
 use txt::{
@@ -70,6 +69,7 @@ use soa::{
     SOAResult,
     query_soa_callback,
 };
+use socket::Socket;
 use utils::{
   ares_error,
   ipv4_as_in_addr,
@@ -285,8 +285,8 @@ impl Channel {
         unsafe {
             c_ares_sys::ares_process_fd(
                 self.ares_channel,
-                read_fd as c_ares_sys::ares_socket_t,
-                write_fd as c_ares_sys::ares_socket_t);
+                read_fd.0,
+                write_fd.0);
         }
     }
 
@@ -685,7 +685,7 @@ pub unsafe extern "C" fn socket_state_callback<F>(
     writable: libc::c_int)
     where F: FnMut(Socket, bool, bool) + 'static {
     let handler = data as *mut F;
-    (*handler)(socket_fd as Socket, readable != 0, writable != 0);
+    (*handler)(Socket(socket_fd), readable != 0, writable != 0);
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as
@@ -736,8 +736,8 @@ impl<'a> Iterator for GetSockIterator<'a> {
             let bit = bit << c_ares_sys::ARES_GETSOCK_MAXNUM;
             let writable = (self.getsock.bitmask & bit) != 0;
             if readable || writable {
-                let fd = self.getsock.socks[index] as Socket;
-                Some((fd, readable, writable))
+                let fd = self.getsock.socks[index];
+                Some((Socket(fd), readable, writable))
             } else {
                 None
             }

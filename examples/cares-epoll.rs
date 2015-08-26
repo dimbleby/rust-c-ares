@@ -15,7 +15,10 @@ use nix::sys::epoll::{
 };
 use std::collections::HashSet;
 use std::error::Error;
-use std::os::unix::io;
+use std::os::unix::io::{
+    AsRawFd,
+    RawFd,
+};
 
 fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
     match result {
@@ -100,12 +103,13 @@ fn main() {
 
     // Create an epoll file descriptor so that we can listen for events.
     let epoll = epoll_create().ok().expect("Failed to create epoll");
-    let mut tracked_fds = HashSet::<io::RawFd>::new();
+    let mut tracked_fds = HashSet::<RawFd>::new();
     loop {
         // Ask c-ares what file descriptors we should be listening on, and map
         // those requests onto the epoll file descriptor.
         let mut active = false;
-        for (fd, readable, writable) in &ares_channel.get_sock() {
+        for (sock, readable, writable) in &ares_channel.get_sock() {
+            let fd = sock.as_raw_fd();
             let mut interest = EpollEventKind::empty();
             if readable { interest = interest | EPOLLIN; }
             if writable { interest = interest | EPOLLOUT; }
@@ -144,16 +148,16 @@ fn main() {
             n => {
                 // Sockets became readable or writable.  Tell c-ares about it.
                 for event in &events[0..n] {
-                    let active_fd = event.data as io::RawFd;
+                    let active_fd = event.data as RawFd;
                     let readable_fd = if (event.events & EPOLLIN).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
-                        active_fd
+                        c_ares::Socket(active_fd)
                     };
                     let writable_fd = if (event.events & EPOLLOUT).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
-                        active_fd
+                        c_ares::Socket(active_fd)
                     };
                     ares_channel.process_fd(readable_fd, writable_fd);
                 }

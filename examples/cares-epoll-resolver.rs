@@ -18,7 +18,10 @@ use nix::sys::epoll::{
 };
 use std::collections::HashSet;
 use std::error::Error;
-use std::os::unix::io;
+use std::os::unix::io::{
+    AsRawFd,
+    RawFd,
+};
 use std::sync::{
     Arc,
     Condvar,
@@ -50,13 +53,14 @@ fn fd_handling_thread(
 fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
     // Create an epoll file descriptor so that we can listen for events.
     let epoll = epoll_create().ok().expect("Failed to create epoll");
-    let mut tracked_fds = HashSet::<io::RawFd>::new();
+    let mut tracked_fds = HashSet::<RawFd>::new();
     loop {
         // Ask c-ares what file descriptors we should be listening on, and map
         // those requests onto the epoll file descriptor.
         let mut active = false;
         let sockets = ares_channel.lock().unwrap().get_sock();
-        for (fd, readable, writable) in &sockets {
+        for (sock, readable, writable) in &sockets {
+            let fd = sock.as_raw_fd();
             let mut interest = EpollEventKind::empty();
             if readable { interest = interest | EPOLLIN; }
             if writable { interest = interest | EPOLLOUT; }
@@ -95,16 +99,16 @@ fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
             n => {
                 // Sockets became readable or writable.  Tell c-ares about it.
                 for event in &events[0..n] {
-                    let active_fd = event.data as io::RawFd;
+                    let active_fd = event.data as RawFd;
                     let readable_fd = if (event.events & EPOLLIN).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
-                        active_fd
+                        c_ares::Socket(active_fd)
                     };
                     let writable_fd = if (event.events & EPOLLOUT).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
-                        active_fd
+                        c_ares::Socket(active_fd)
                     };
                     ares_channel
                         .lock()

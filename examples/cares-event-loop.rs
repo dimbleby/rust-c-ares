@@ -12,7 +12,10 @@ use std::net::{
     SocketAddr,
     SocketAddrV4,
 };
-use std::os::unix::io;
+use std::os::unix::io::{
+    AsRawFd,
+    RawFd
+};
 use std::sync::mpsc;
 use std::thread;
 
@@ -22,7 +25,7 @@ enum CAresHandlerMessage {
     // The first bool is for 'readable' and the second is for 'writable'.  It's
     // allowed to set both of these - or neither, meaning 'I am no longer
     // interested in this file descriptor'.
-    RegisterInterest(io::RawFd, bool, bool),
+    RegisterInterest(c_ares::Socket, bool, bool),
 
     // 'Shut down'.
     ShutDown,
@@ -37,7 +40,7 @@ struct CAresEventHandler {
     // -  send requests to the event handler as messages, and have it make the
     //    queries
     ares_channel: c_ares::Channel,
-    tracked_fds: HashSet<io::RawFd>,
+    tracked_fds: HashSet<RawFd>,
 }
 
 impl mio::Handler for CAresEventHandler {
@@ -51,14 +54,14 @@ impl mio::Handler for CAresEventHandler {
         _event_loop: &mut mio::EventLoop<CAresEventHandler>,
         token: mio::Token,
         events: mio::EventSet) {
-        let fd = token.as_usize() as io::RawFd;
+        let fd = token.as_usize() as RawFd;
         let read_fd = if events.is_readable() {
-            fd
+            c_ares::Socket(fd)
         } else {
             c_ares::SOCKET_BAD
         };
         let write_fd = if events.is_writable() {
-            fd
+            c_ares::Socket(fd)
         } else {
             c_ares::SOCKET_BAD
         };
@@ -74,9 +77,10 @@ impl mio::Handler for CAresEventHandler {
         event_loop:&mut mio::EventLoop<CAresEventHandler>,
         msg: Self::Message) {
         match msg {
-            CAresHandlerMessage::RegisterInterest(fd, readable, writable) => {
+            CAresHandlerMessage::RegisterInterest(sock, read, write) => {
+                let fd = sock.as_raw_fd();
                 let io = mio::Io::from(fd);
-                if !readable && !writable {
+                if !read && !write {
                     self.tracked_fds.remove(&fd);
                     event_loop
                         .deregister(&io)
@@ -84,10 +88,10 @@ impl mio::Handler for CAresEventHandler {
                         .expect("failed to deregister interest");
                 } else {
                     let mut interest = mio::EventSet::none();
-                    if readable {
+                    if read {
                         interest = interest | mio::EventSet::readable();
                     }
-                    if writable {
+                    if write {
                         interest = interest | mio::EventSet::writable();
                     }
                     let token = mio::Token(fd as usize);
@@ -206,7 +210,8 @@ fn main() {
     // Socket state callback for the c_ares::Channel will be to kick the event
     // loop.
     let event_loop_channel_clone = event_loop_channel.clone();
-    let sock_callback = move |fd: io::RawFd, readable: bool, writable: bool| {
+    let sock_callback = 
+        move |fd: c_ares::Socket, readable: bool, writable: bool| {
         let _ = event_loop_channel_clone
             .send(
                 CAresHandlerMessage::RegisterInterest(fd, readable, writable));

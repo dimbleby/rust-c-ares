@@ -18,10 +18,7 @@ use nix::sys::epoll::{
 };
 use std::collections::HashSet;
 use std::error::Error;
-use std::os::unix::io::{
-    AsRawFd,
-    RawFd,
-};
+use std::os::unix::io::RawFd;
 use std::sync::{
     Arc,
     Condvar,
@@ -59,8 +56,7 @@ fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
         // those requests onto the epoll file descriptor.
         let mut active = false;
         let sockets = ares_channel.lock().unwrap().get_sock();
-        for (sock, readable, writable) in &sockets {
-            let fd = sock.as_raw_fd();
+        for (fd, readable, writable) in &sockets {
             let mut interest = EpollEventKind::empty();
             if readable { interest = interest | EPOLLIN; }
             if writable { interest = interest | EPOLLOUT; }
@@ -103,12 +99,12 @@ fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
                     let readable_fd = if (event.events & EPOLLIN).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
-                        c_ares::Socket(active_fd)
+                        active_fd
                     };
                     let writable_fd = if (event.events & EPOLLOUT).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
-                        c_ares::Socket(active_fd)
+                        active_fd
                     };
                     ares_channel
                         .lock()

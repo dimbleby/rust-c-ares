@@ -7,6 +7,13 @@ use std::net::{
     Ipv6Addr,
 };
 
+/// The platform-specific socket / file descriptor.
+pub type Socket = c_ares_sys::ares_socket_t;
+
+/// An invalid socket / file descriptor.  Use this to represent 'no action'
+/// when calling `process_fd()` on a channel.
+pub const SOCKET_BAD: Socket = c_ares_sys::ARES_SOCKET_BAD;
+
 /// Address families.
 #[derive(Clone, Copy, Debug)]
 pub enum AddressFamily {

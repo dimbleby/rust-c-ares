@@ -44,7 +44,6 @@ mod query;
 mod types;
 mod txt;
 mod soa;
-mod socket;
 mod utils;
 
 // Re-export public interfaces.
@@ -74,10 +73,6 @@ pub use naptr::{
 pub use ns::NSResults;
 pub use ptr::PTRResults;
 pub use soa::SOAResult;
-pub use socket::{
-    Socket,
-    SOCKET_BAD,
-};
 pub use srv::{
     SRVResult,
     SRVResults,
@@ -89,4 +84,6 @@ pub use txt::{
 pub use types::{
     AddressFamily,
     IpAddr,
+    Socket,
+    SOCKET_BAD,
 };

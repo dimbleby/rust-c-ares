@@ -50,26 +50,26 @@ use ptr::{
     PTRResults,
     query_ptr_callback,
 };
+use query::query_callback;
+use soa::{
+    SOAResult,
+    query_soa_callback,
+};
 use srv::{
     SRVResults,
     query_srv_callback,
+};
+use txt::{
+    TXTResults,
+    query_txt_callback,
 };
 use types::{
     AddressFamily,
     DnsClass,
     IpAddr,
     QueryType,
+    Socket,
 };
-use query::query_callback;
-use txt::{
-    TXTResults,
-    query_txt_callback,
-};
-use soa::{
-    SOAResult,
-    query_soa_callback,
-};
-use socket::Socket;
 use utils::{
   ares_error,
   ipv4_as_in_addr,
@@ -283,10 +283,7 @@ impl Channel {
     /// the identified socket is writable.  Use `SOCKET_BAD` for "no action".
     pub fn process_fd(&mut self, read_fd: Socket, write_fd: Socket) {
         unsafe {
-            c_ares_sys::ares_process_fd(
-                self.ares_channel,
-                read_fd.0,
-                write_fd.0);
+            c_ares_sys::ares_process_fd(self.ares_channel, read_fd, write_fd);
         }
     }
 
@@ -685,7 +682,7 @@ pub unsafe extern "C" fn socket_state_callback<F>(
     writable: libc::c_int)
     where F: FnMut(Socket, bool, bool) + 'static {
     let handler = data as *mut F;
-    (*handler)(Socket(socket_fd), readable != 0, writable != 0);
+    (*handler)(socket_fd, readable != 0, writable != 0);
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as
@@ -737,7 +734,7 @@ impl<'a> Iterator for GetSockIterator<'a> {
             let writable = (self.getsock.bitmask & bit) != 0;
             if readable || writable {
                 let fd = self.getsock.socks[index];
-                Some((Socket(fd), readable, writable))
+                Some((fd, readable, writable))
             } else {
                 None
             }

@@ -15,10 +15,7 @@ use nix::sys::epoll::{
 };
 use std::collections::HashSet;
 use std::error::Error;
-use std::os::unix::io::{
-    AsRawFd,
-    RawFd,
-};
+use std::os::unix::io::RawFd;
 
 fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
     match result {
@@ -108,8 +105,7 @@ fn main() {
         // Ask c-ares what file descriptors we should be listening on, and map
         // those requests onto the epoll file descriptor.
         let mut active = false;
-        for (sock, readable, writable) in &ares_channel.get_sock() {
-            let fd = sock.as_raw_fd();
+        for (fd, readable, writable) in &ares_channel.get_sock() {
             let mut interest = EpollEventKind::empty();
             if readable { interest = interest | EPOLLIN; }
             if writable { interest = interest | EPOLLOUT; }
@@ -152,12 +148,12 @@ fn main() {
                     let readable_fd = if (event.events & EPOLLIN).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
-                        c_ares::Socket(active_fd)
+                        active_fd
                     };
                     let writable_fd = if (event.events & EPOLLOUT).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
-                        c_ares::Socket(active_fd)
+                        active_fd
                     };
                     ares_channel.process_fd(readable_fd, writable_fd);
                 }

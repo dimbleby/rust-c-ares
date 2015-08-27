@@ -16,10 +16,7 @@ extern crate mio;
 use std::collections::HashSet;
 use std::error::Error;
 use std::mem;
-use std::os::unix::io::{
-    AsRawFd,
-    RawFd,
-};
+use std::os::unix::io::RawFd;
 use std::sync::{
     Arc,
     Mutex,
@@ -66,12 +63,12 @@ impl mio::Handler for CAresEventHandler {
         events: mio::EventSet) {
         let fd = token.as_usize() as RawFd;
         let read_fd = if events.is_readable() {
-            c_ares::Socket(fd)
+            fd
         } else {
             c_ares::SOCKET_BAD
         };
         let write_fd = if events.is_writable() {
-            c_ares::Socket(fd)
+            fd
         } else {
             c_ares::SOCKET_BAD
         };
@@ -87,8 +84,7 @@ impl mio::Handler for CAresEventHandler {
         event_loop:&mut mio::EventLoop<CAresEventHandler>,
         msg: Self::Message) {
         match msg {
-            CAresHandlerMessage::RegisterInterest(sock, read, write) => {
-                let fd = sock.as_raw_fd();
+            CAresHandlerMessage::RegisterInterest(fd, read, write) => {
                 let io = mio::Io::from(fd);
                 if !read && !write {
                     self.tracked_fds.remove(&fd);

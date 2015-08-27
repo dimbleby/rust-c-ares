@@ -15,8 +15,6 @@ extern crate mio;
 
 use std::collections::HashSet;
 use std::error::Error;
-use std::mem;
-use std::os::unix::io::RawFd;
 use std::sync::{
     Arc,
     Mutex,
@@ -38,7 +36,7 @@ enum CAresHandlerMessage {
 
 struct CAresEventHandler {
     ares_channel: Arc<Mutex<c_ares::Channel>>,
-    tracked_fds: HashSet<RawFd>,
+    tracked_fds: HashSet<c_ares::Socket>,
 }
 
 impl CAresEventHandler {
@@ -61,7 +59,7 @@ impl mio::Handler for CAresEventHandler {
         _event_loop: &mut mio::EventLoop<CAresEventHandler>,
         token: mio::Token,
         events: mio::EventSet) {
-        let fd = token.as_usize() as RawFd;
+        let fd = token.as_usize() as c_ares::Socket;
         let read_fd = if events.is_readable() {
             fd
         } else {
@@ -85,11 +83,11 @@ impl mio::Handler for CAresEventHandler {
         msg: Self::Message) {
         match msg {
             CAresHandlerMessage::RegisterInterest(fd, read, write) => {
-                let io = mio::Io::from(fd);
+                let efd = mio::unix::EventedFd(&fd);
                 if !read && !write {
                     self.tracked_fds.remove(&fd);
                     event_loop
-                        .deregister(&io)
+                        .deregister(&efd)
                         .ok()
                         .expect("failed to deregister interest");
                 } else {
@@ -104,23 +102,20 @@ impl mio::Handler for CAresEventHandler {
                     let register_result = if !self.tracked_fds.insert(fd) {
                         event_loop
                             .reregister(
-                                &io,
+                                &efd,
                                 token,
                                 interest,
                                 mio::PollOpt::edge())
                    } else {
                         event_loop
                             .register_opt(
-                                &io,
+                                &efd,
                                 token,
                                 interest,
                                 mio::PollOpt::edge())
                     };
                     register_result.ok().expect("failed to register interest");
                 }
-
-                // Don't accidentally close the file descriptor by dropping io!
-                mem::forget(io);
             },
 
             CAresHandlerMessage::ShutDown => event_loop.shutdown(),

@@ -20,5 +20,5 @@ bitflags = "*"
 path = "c-ares-sys"
 
 [dev-dependencies]
-mio = "*"
+mio = { git = "https://github.com/carllerche/mio" }
 nix = "*"

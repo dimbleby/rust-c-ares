@@ -8,8 +8,6 @@ use std::error::Error;
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
-    SocketAddr,
-    SocketAddrV4,
 };
 use std::sync::mpsc;
 use std::thread;

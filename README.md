@@ -26,12 +26,6 @@ And add this to your crate root:
 extern crate c_ares;
 ```
 
-## Platforms ##
-
-Development has taken place on Linux.  The library uses the `std::os::unix::io::RawFd` type to represent file descriptors - so if Rust doesn't consider that you have a Unix system, then this crate won't work for you.
-
-It's a long-term goal to support other platforms - but don't hold your breath.
-
 ## Contributing ##
 
 Contributions are welcome.  Please send pull requests!

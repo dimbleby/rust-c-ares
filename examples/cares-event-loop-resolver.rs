@@ -77,6 +77,7 @@ impl mio::Handler for CAresEventHandler {
     // - we're asked to register interest (or non-interest) in a file
     // descriptor
     // - we're asked to shut down the event loop.
+    #[cfg(unix)]
     fn notify(
         &mut self,
         event_loop:&mut mio::EventLoop<CAresEventHandler>,
@@ -297,6 +298,11 @@ fn print_naptr_results(
 }
 
 fn main() {
+    if cfg!(windows) {
+        println!("mio isn't quite ready for Windows yet...");
+        return;
+    }
+
     // Create a Resolver.  Then make some requests.
     let resolver = Resolver::new();
     let result = resolver.query_cname("dimbleby.github.io");

@@ -5,14 +5,12 @@ extern crate mio;
 
 use std::collections::HashSet;
 use std::error::Error;
-use std::mem;
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
     SocketAddr,
     SocketAddrV4,
 };
-use std::os::unix::io::RawFd;
 use std::sync::mpsc;
 use std::thread;
 
@@ -37,7 +35,7 @@ struct CAresEventHandler {
     // -  send requests to the event handler as messages, and have it make the
     //    queries
     ares_channel: c_ares::Channel,
-    tracked_fds: HashSet<RawFd>,
+    tracked_fds: HashSet<c_ares::Socket>,
 }
 
 impl mio::Handler for CAresEventHandler {
@@ -51,7 +49,7 @@ impl mio::Handler for CAresEventHandler {
         _event_loop: &mut mio::EventLoop<CAresEventHandler>,
         token: mio::Token,
         events: mio::EventSet) {
-        let fd = token.as_usize() as RawFd;
+        let fd = token.as_usize() as c_ares::Socket;
         let read_fd = if events.is_readable() {
             fd
         } else {
@@ -69,17 +67,18 @@ impl mio::Handler for CAresEventHandler {
     // - we're asked to register interest (or non-interest) in a file
     // descriptor
     // - we're asked to shut down the event loop.
+    #[cfg(unix)]
     fn notify(
         &mut self,
         event_loop:&mut mio::EventLoop<CAresEventHandler>,
         msg: Self::Message) {
         match msg {
             CAresHandlerMessage::RegisterInterest(fd, read, write) => {
-                let io = mio::Io::from(fd);
+                let efd = mio::unix::EventedFd(&fd);
                 if !read && !write {
                     self.tracked_fds.remove(&fd);
                     event_loop
-                        .deregister(&io)
+                        .deregister(&efd)
                         .ok()
                         .expect("failed to deregister interest");
                 } else {
@@ -94,23 +93,20 @@ impl mio::Handler for CAresEventHandler {
                     let register_result = if !self.tracked_fds.insert(fd) {
                         event_loop
                             .reregister(
-                                &io,
+                                &efd,
                                 token,
                                 interest,
                                 mio::PollOpt::edge())
                     } else {
                         event_loop
                             .register_opt(
-                                &io,
+                                &efd,
                                 token,
                                 interest,
                                 mio::PollOpt::edge())
                     };
                     register_result.ok().expect("failed to register interest");
                 }
-
-                // Don't accidentally close the file descriptor by dropping io!
-                mem::forget(io);
             },
 
             CAresHandlerMessage::ShutDown => event_loop.shutdown(),
@@ -140,23 +136,6 @@ impl CAresEventHandler {
     }
 }
 
-fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
-    match result {
-        Err(e) => {
-            println!("SOA lookup failed with error '{}'", e.description());
-        }
-        Ok(soa_result) => {
-            println!("Successful SOA lookup...");
-            println!("Name server: {}", soa_result.name_server());
-            println!("Hostmaster: {}", soa_result.hostmaster());
-            println!("Serial: {}", soa_result.serial());
-            println!("Retry: {}", soa_result.retry());
-            println!("Expire: {}", soa_result.expire());
-            println!("Min TTL: {}", soa_result.min_ttl());
-        }
-    }
-}
-
 fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
     match result {
         Err(e) => {
@@ -178,25 +157,12 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
     }
 }
 
-fn print_name_info_result(
-    result: Result<c_ares::NameInfoResult, c_ares::AresError>) {
-    match result {
-        Err(e) => {
-            println!(
-                "Name info lookup failed with error '{}'",
-                e.description());
-        }
-        Ok(name_info_result) => {
-            println!("Successful name info lookup...");
-            println!("Node: {}", name_info_result.node().unwrap_or("<None>"));
-            println!(
-                "Service: {}",
-                name_info_result.service().unwrap_or("<None>"));
-        }
-    }
-}
-
 fn main() {
+    if cfg!(windows) {
+        println!("mio isn't quite ready for Windows yet...");
+        return;
+    }
+
     // Create an event loop.
     let mut event_loop = mio::EventLoop::new()
         .ok()
@@ -206,7 +172,7 @@ fn main() {
     // Socket state callback for the c_ares::Channel will be to kick the event
     // loop.
     let event_loop_channel_clone = event_loop_channel.clone();
-    let sock_callback = 
+    let sock_callback =
         move |fd: c_ares::Socket, readable: bool, writable: bool| {
         let _ = event_loop_channel_clone
             .send(
@@ -226,13 +192,6 @@ fn main() {
 
     // Set up some queries.
     let (results_tx, results_rx) = mpsc::channel();
-    let tx = results_tx.clone();
-    ares_channel.query_soa("google.com", move |result| {
-        println!("");
-        print_soa_result(result);
-        tx.send(()).unwrap()
-    });
-
     let tx = results_tx.clone();
     ares_channel.get_host_by_name(
         "google.com",
@@ -261,19 +220,6 @@ fn main() {
         tx.send(()).unwrap()
     });
 
-    let tx = results_tx.clone();
-    let ipv4 = Ipv4Addr::new(216, 58, 210, 14);
-    let sock = SocketAddr::V4(SocketAddrV4::new(ipv4, 80));
-    ares_channel.get_name_info(
-        &sock,
-        c_ares::ni_flags::LOOKUPHOST | c_ares::ni_flags::LOOKUPSERVICE,
-        move |result| {
-            println!("");
-            print_name_info_result(result);
-            tx.send(()).unwrap()
-        }
-    );
-
     // Set the first instance of the recurring timer on the event loop.
     event_loop.timeout_ms((), 500).unwrap();
 
@@ -287,7 +233,7 @@ fn main() {
     });
 
     // Wait for results to roll in.
-    for _ in 0..5 {
+    for _ in 0..3 {
         results_rx.recv().unwrap();
     }
 

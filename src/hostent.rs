@@ -20,11 +20,24 @@ use utils::address_family;
 #[repr(C)]
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
+#[cfg(unix)]
 pub struct hostent {
     pub h_name: *mut libc::c_char,
     pub h_aliases: *mut *mut libc::c_char,
     pub h_addrtype: libc::c_int,
     pub h_length: libc::c_int,
+    pub h_addr_list: *mut *mut libc::c_char,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+#[allow(raw_pointer_derive)]
+#[cfg(windows)]
+pub struct hostent {
+    pub h_name: *mut libc::c_char,
+    pub h_aliases: *mut *mut libc::c_char,
+    pub h_addrtype: libc::c_short,
+    pub h_length: libc::c_short,
     pub h_addr_list: *mut *mut libc::c_char,
 }
 
@@ -37,7 +50,7 @@ impl hostent {
     }
 
     pub fn addresses(&self) -> HostAddressResultsIterator {
-        match address_family(self.h_addrtype) {
+        match address_family(self.h_addrtype as libc::c_int) {
             Some(family) => HostAddressResultsIterator {
                 family: family,
                 next: self.h_addr_list as *const *const _,

@@ -5,9 +5,9 @@ use libc::{
     socklen_t,
     timeval,
 };
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 use std::os::windows::io::RawSocket;
-#[cfg(target_os = "linux")]
+#[cfg(unix)]
 use std::os::unix::io::RawFd;
 
 pub type Struct_in_addr = in_addr;
@@ -19,9 +19,9 @@ pub type Struct_timeval = timeval;
 pub type ares_socklen_t = socklen_t;
 pub type __cares_rule_02__ = [::libc::c_char; 1usize];
 pub type __cares_rule_03__ = [::libc::c_char; 1usize];
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 pub type ares_socket_t = RawSocket;
-#[cfg(target_os = "linux")]
+#[cfg(unix)]
 pub type ares_socket_t = RawFd;
 pub type ares_sock_state_cb =
     ::std::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void,

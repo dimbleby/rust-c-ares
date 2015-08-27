@@ -62,9 +62,9 @@ foreach my $line (@lines) {
 
 print "\n";
 print "// A non-existent file descriptor\n";
-print "#[cfg(target_os = \"windows\")]\n";
+print "#[cfg(windows)]\n";
 print "pub const ARES_SOCKET_BAD: ares_socket_t = libc::consts::os::extra::INVALID_SOCKET;\n";
-print "#[cfg(target_os = \"linux\")]\n";
+print "#[cfg(unix)]\n";
 print "pub const ARES_SOCKET_BAD: ares_socket_t = -1;\n";
 
 print "\n";

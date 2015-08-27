@@ -81,9 +81,9 @@ pub const ARES_NI_IDN_ALLOW_UNASSIGNED: libc::c_int = (1 << 11);
 pub const ARES_NI_IDN_USE_STD3_ASCII_RULES: libc::c_int = (1 << 12);
 
 // A non-existent file descriptor
-#[cfg(target_os = "windows")]
+#[cfg(windows)]
 pub const ARES_SOCKET_BAD: ares_socket_t = libc::consts::os::extra::INVALID_SOCKET;
-#[cfg(target_os = "linux")]
+#[cfg(unix)]
 pub const ARES_SOCKET_BAD: ares_socket_t = -1;
 
 // ares_getsock() can return info about this many sockets

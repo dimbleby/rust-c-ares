@@ -4,15 +4,6 @@ To create `ffi.rs`, do this:
 
     bindgen -l cares -match ares -o src/ffi.rs c-ares/ares.h
 
-... and then:
-
-- add a few type definitions for OS types at the top of the file
-    - Compare with the current version to see what's needed
-- add `unsafe` to the function type declarations for `ares_sock_state_cb`, `ares_callback`, `ares_host_callback`, `ares_nameinfo_callback`, `ares_sock_create_callback`
-    - Any non-trivial implementations of these callbacks will involve dereferencing raw pointer parameters
-- remove `ares_fds` and `ares_process`
-    - These both use `fd_set`.
-    - Cursory search didn't find an existing Rust representation of this structure
-    - Since the high-level API doesn't use either of these functions, it's simplest just to pretend they're not there
+and then apply the patch `ffi.patch`,
 
 The script `generate-ffi.sh` automates this process.

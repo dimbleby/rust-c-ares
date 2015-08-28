@@ -25,6 +25,10 @@
 //! Complete examples showing how to use the library can be found
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 #[macro_use] extern crate bitflags;
+
+#[cfg(windows)]
+extern crate winapi;
+
 mod a;
 mod aaaa;
 mod srv;

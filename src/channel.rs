@@ -1,6 +1,9 @@
 extern crate c_ares_sys;
 extern crate libc;
 
+#[cfg(windows)]
+use winapi::winsock2::fd_set;
+
 use std::ffi::CString;
 use std::marker::PhantomData;
 use std::mem;
@@ -287,6 +290,16 @@ impl Channel {
         }
     }
 
+    /// Handle input and output events associated with the specified file
+    /// descriptors (sockets).  Also handles timeouts associated with the
+    /// `Channel`.
+    #[cfg(windows)]
+    pub fn process(&mut self, read_fds: &mut fd_set, write_fds: &mut fd_set) {
+        unsafe {
+            c_ares_sys::ares_process(self.ares_channel, read_fds, write_fds);
+        }
+    }
+
     /// Retrieve the set of socket descriptors which the calling application
     /// should wait on for reading and / or writing.
     pub fn get_sock(&self) -> GetSock {
@@ -298,6 +311,15 @@ impl Channel {
                 c_ares_sys::ARES_GETSOCK_MAXNUM as libc::c_int)
         };
         GetSock::new(socks, bitmask as u32)
+    }
+
+    /// Retrieve the set of socket descriptors which the calling application
+    /// should wait on for reading and / or writing.
+    #[cfg(windows)]
+    pub fn fds(&self, read_fds: &mut fd_set, write_fds: &mut fd_set) -> u32 {
+        unsafe {
+            c_ares_sys::ares_fds(self.ares_channel, read_fds, write_fds) as u32
+        }
     }
 
     /// Set the list of servers to contact, instead of the servers specified

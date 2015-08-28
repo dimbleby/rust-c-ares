@@ -1,17 +1,15 @@
-// This example uses get_sock() to find out which file descriptors c-ares
+// This example uses fds() to find out which file descriptors c-ares
 // wants us to listen on, and uses select() to satisfy those requirements.
 extern crate c_ares;
-extern crate winapi;
-extern crate ws2_32;
 
-use self::winapi::winsock2::{
+use winapi::winsock2::{
     fd_set,
     FD_SETSIZE,
     SOCKET_ERROR,
     timeval,
     WSADATA,
 };
-use self::ws2_32::{
+use ws2_32::{
     select,
     WSACleanup,
     WSAStartup,
@@ -100,34 +98,16 @@ pub fn main() {
 
     // While c-ares wants us to listen for events, do so..
     loop {
-        let sockets = ares_channel.get_sock();
         let mut read_fds = fd_set {
             fd_count: 0,
             fd_array: [c_ares::SOCKET_BAD; FD_SETSIZE],
         };
-        let readable = sockets
-            .iter()
-            .filter_map(|(s, r, _)| if r { Some(s) } else { None })
-            .take(FD_SETSIZE);
-        for (i, s) in readable.enumerate() {
-            read_fds.fd_count += 1;
-            read_fds.fd_array[i] = s;
-        }
-
         let mut write_fds = fd_set {
             fd_count: 0,
             fd_array: [c_ares::SOCKET_BAD; FD_SETSIZE],
         };
-        let writable = sockets
-            .iter()
-            .filter_map(|(s, _, w)| if w { Some(s) } else { None })
-            .take(FD_SETSIZE);
-        for (i, s) in writable.enumerate() {
-            write_fds.fd_count += 1;
-            write_fds.fd_array[i] = s;
-        }
-
-        if read_fds.fd_count == 0 && write_fds.fd_count == 0 { break }
+        let count = ares_channel.fds(&mut read_fds, &mut write_fds);
+        if count == 0 { break }
 
         // Wait for something to happen.
         let timeout = timeval {
@@ -141,23 +121,7 @@ pub fn main() {
         // Process whatever happened.
         match results {
             SOCKET_ERROR => panic!("Socket error"),
-            0 => {
-                // No events - must be a timeout.  Tell c-ares about it.
-                ares_channel.process_fd(
-                    c_ares::SOCKET_BAD,
-                    c_ares::SOCKET_BAD);
-            },
-            _ => {
-                // Sockets became readable or writable.  Tell c-ares.
-                let read_count = read_fds.fd_count as usize;
-                for &rfd in &read_fds.fd_array[0..read_count] {
-                    ares_channel.process_fd(rfd, c_ares::SOCKET_BAD);
-                }
-                let write_count = write_fds.fd_count as usize;
-                for &wfd in &write_fds.fd_array[0..write_count] {
-                    ares_channel.process_fd(c_ares::SOCKET_BAD, wfd);
-                }
-            }
+            _ => ares_channel.process(&mut read_fds, &mut write_fds),
         }
     }
     unsafe { WSACleanup(); }

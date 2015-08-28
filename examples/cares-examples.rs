@@ -8,6 +8,12 @@ fn main() {
 }
 
 #[cfg(windows)]
+extern crate winapi;
+
+#[cfg(windows)]
+extern crate ws2_32;
+
+#[cfg(windows)]
 fn main() {
     mod windows;
     windows::cares_select::main();

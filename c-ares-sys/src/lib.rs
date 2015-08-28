@@ -7,6 +7,9 @@
 #![allow(non_snake_case)]
 extern crate libc;
 
+#[cfg(windows)]
+extern crate winapi;
+
 mod ffi;
 mod constants;
 

@@ -23,7 +23,8 @@ fn main() {
     // MSVC builds are different.
     let target = env::var("TARGET").unwrap();
     if target.contains("msvc") {
-        return build_msvc(&target);
+        build_msvc(&target);
+        return
     }
 
     // Set up compiler options.

@@ -174,6 +174,7 @@ pub struct HostAddressResultsIterator<'a> {
 impl<'a> Iterator for HostAddressResultsIterator<'a> {
     type Item = HostAddressResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
+        if self.next.is_null() { return None }
         let h_addr = unsafe { *self.next };
         if h_addr.is_null() {
             None

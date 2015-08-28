@@ -154,7 +154,7 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
     }
 }
 
-fn main() {
+pub fn main() {
     // Create an event loop.
     let mut event_loop = mio::EventLoop::new()
         .ok()

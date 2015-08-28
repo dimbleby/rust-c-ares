@@ -297,7 +297,7 @@ fn print_naptr_results(
     }
 }
 
-fn main() {
+pub fn main() {
     // Create a Resolver.  Then make some requests.
     let resolver = Resolver::new();
     let result = resolver.query_cname("dimbleby.github.io");

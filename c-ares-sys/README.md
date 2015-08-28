@@ -4,6 +4,6 @@ To create `ffi.rs`, do this:
 
     bindgen -l cares -match ares -o src/ffi.rs c-ares/ares.h
 
-and then apply the patch `ffi.patch`,
+and then apply the patch `ffi.patch`.
 
 The script `generate-ffi.sh` automates this process.

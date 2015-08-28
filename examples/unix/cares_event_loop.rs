@@ -146,8 +146,8 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
             }
             for address in host_results.addresses() {
                 match address.ip_address() {
-                    c_ares::IpAddr::V4(v4) => println!("IPv4: {:}", v4),
-                    c_ares::IpAddr::V6(v6) => println!("IPv6: {:}", v6),
+                    c_ares::IpAddr::V4(v4) => println!("IPv4: {}", v4),
+                    c_ares::IpAddr::V6(v6) => println!("IPv6: {}", v6),
                 }
             }
         }

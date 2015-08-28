@@ -251,8 +251,9 @@ fn print_cname_result(
         }
         Ok(cname_results) => {
             println!("Successful CNAME lookup...");
-            for cname_result in cname_results.aliases() {
-                println!("{}", cname_result.alias());
+            println!("Hostname: {}", cname_results.hostname());
+            for alias in cname_results.aliases() {
+                println!("Alias: {}", alias.alias());
             }
         }
     }

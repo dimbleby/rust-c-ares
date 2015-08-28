@@ -24,7 +24,7 @@ use std::thread;
 
 // Messages for the event loop.
 enum CAresHandlerMessage {
-    // 'Notify me when this file descriptor becomes readable, or writable'
+    // 'Notify me when this file descriptor becomes readable, or writable'.
     // The first bool is for 'readable' and the second is for 'writable'.  It's
     // allowed to set both of these - or neither, meaning 'I am no longer
     // interested in this file descriptor'.
@@ -77,7 +77,6 @@ impl mio::Handler for CAresEventHandler {
     // - we're asked to register interest (or non-interest) in a file
     // descriptor
     // - we're asked to shut down the event loop.
-    #[cfg(unix)]
     fn notify(
         &mut self,
         event_loop:&mut mio::EventLoop<CAresEventHandler>,
@@ -244,7 +243,8 @@ impl Drop for Resolver {
     }
 }
 
-fn print_cname_result(result: Result<c_ares::CNameResults, c_ares::AresError>) {
+fn print_cname_result(
+    result: Result<c_ares::CNameResults, c_ares::AresError>) {
     match result {
         Err(e) => {
             println!("CNAME lookup failed with error '{}'", e.description());
@@ -298,11 +298,6 @@ fn print_naptr_results(
 }
 
 fn main() {
-    if cfg!(windows) {
-        println!("mio isn't quite ready for Windows yet...");
-        return;
-    }
-
     // Create a Resolver.  Then make some requests.
     let resolver = Resolver::new();
     let result = resolver.query_cname("dimbleby.github.io");

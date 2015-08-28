@@ -65,7 +65,6 @@ impl mio::Handler for CAresEventHandler {
     // - we're asked to register interest (or non-interest) in a file
     // descriptor
     // - we're asked to shut down the event loop.
-    #[cfg(unix)]
     fn notify(
         &mut self,
         event_loop:&mut mio::EventLoop<CAresEventHandler>,
@@ -156,11 +155,6 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
 }
 
 fn main() {
-    if cfg!(windows) {
-        println!("mio isn't quite ready for Windows yet...");
-        return;
-    }
-
     // Create an event loop.
     let mut event_loop = mio::EventLoop::new()
         .ok()

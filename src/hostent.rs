@@ -88,7 +88,7 @@ impl fmt::Display for hostent {
 }
 
 /// An alias, as retrieved from a host lookup.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct HostAliasResult<'a> {
     h_alias: *const libc::c_char,
@@ -96,7 +96,7 @@ pub struct HostAliasResult<'a> {
 }
 
 /// An address, as retrieved from a host lookup.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct HostAddressResult<'a> {
     family: AddressFamily,
@@ -155,7 +155,7 @@ impl<'a> fmt::Display for HostAddressResult<'a> {
 unsafe impl<'a> Send for HostAddressResult<'a> { }
 unsafe impl<'a> Sync for HostAddressResult<'a> { }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct HostAddressResultsIterator<'a> {
     family: Option<AddressFamily>,
@@ -204,7 +204,7 @@ impl<'a> fmt::Display for HostAliasResult<'a> {
 unsafe impl<'a> Send for HostAliasResult<'a> { }
 unsafe impl<'a> Sync for HostAliasResult<'a> { }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct HostAliasResultsIterator<'a> {
     next: *const *const libc::c_char,

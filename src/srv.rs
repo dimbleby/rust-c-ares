@@ -21,7 +21,7 @@ pub struct SRVResults {
 }
 
 /// The contents of a single SRV record.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct SRVResult<'a> {
     // A single result - reference into an `SRVResults`.
@@ -78,7 +78,7 @@ impl fmt::Display for SRVResults {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct SRVResultsIterator<'a> {
     next: *const c_ares_sys::Struct_ares_srv_reply,

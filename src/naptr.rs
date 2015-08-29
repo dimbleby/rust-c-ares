@@ -21,7 +21,7 @@ pub struct NAPTRResults {
 }
 
 /// The contents of a single NAPTR record.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct NAPTRResult<'a> {
     naptr_reply: *const c_ares_sys::Struct_ares_naptr_reply,
@@ -79,7 +79,7 @@ impl fmt::Display for NAPTRResults {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct NAPTRResultsIterator<'a> {
     next: *const c_ares_sys::Struct_ares_naptr_reply,

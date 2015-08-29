@@ -13,7 +13,7 @@ use hostent::{
 use utils::ares_error;
 
 /// The result of a successful host lookup.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct HostResults<'a> {
     hostent: &'a hostent,
 }

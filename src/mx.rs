@@ -21,7 +21,7 @@ pub struct MXResults {
 }
 
 /// The contents of a single MX record.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct MXResult<'a> {
     mx_reply: *const c_ares_sys::Struct_ares_mx_reply,
@@ -77,7 +77,7 @@ impl fmt::Display for MXResults {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct MXResultsIterator<'a> {
     next: *const c_ares_sys::Struct_ares_mx_reply,

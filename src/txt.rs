@@ -21,7 +21,7 @@ pub struct TXTResults {
 }
 
 /// The contents of a single TXT record.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct TXTResult<'a> {
     txt_reply: *const c_ares_sys::Struct_ares_txt_reply,
@@ -77,7 +77,7 @@ impl fmt::Display for TXTResults {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct TXTResultsIterator<'a> {
     next: *const c_ares_sys::Struct_ares_txt_reply,

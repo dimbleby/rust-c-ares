@@ -7,7 +7,7 @@ use std::fmt;
 use std::str;
 
 /// Error codes that the library might return.
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum AresError {
     /// DNS server returned answer with no data.
     ENODATA = c_ares_sys::ARES_ENODATA as isize,

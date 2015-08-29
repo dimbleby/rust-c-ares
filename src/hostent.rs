@@ -8,7 +8,6 @@ use std::net::{
     Ipv4Addr,
     Ipv6Addr,
 };
-use std::ptr;
 use std::str;
 
 use types::{
@@ -50,17 +49,10 @@ impl hostent {
     }
 
     pub fn addresses(&self) -> HostAddressResultsIterator {
-        match address_family(self.h_addrtype as libc::c_int) {
-            Some(family) => HostAddressResultsIterator {
-                family: family,
-                next: self.h_addr_list as *const *const _,
-                phantom: PhantomData,
-            },
-            None => HostAddressResultsIterator {
-                family: AddressFamily::INET,
-                next: ptr::null(),
-                phantom: PhantomData,
-            }
+        HostAddressResultsIterator {
+            family: address_family(self.h_addrtype as libc::c_int),
+            next: self.h_addr_list as *const *const _,
+            phantom: PhantomData,
         }
     }
 
@@ -166,7 +158,7 @@ unsafe impl<'a> Sync for HostAddressResult<'a> { }
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct HostAddressResultsIterator<'a> {
-    family: AddressFamily,
+    family: Option<AddressFamily>,
     next: *const *const libc::c_char,
     phantom: PhantomData<&'a hostent>,
 }
@@ -174,18 +166,18 @@ pub struct HostAddressResultsIterator<'a> {
 impl<'a> Iterator for HostAddressResultsIterator<'a> {
     type Item = HostAddressResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.next.is_null() { return None }
         let h_addr = unsafe { *self.next };
         if h_addr.is_null() {
             None
         } else {
             self.next = unsafe { self.next.offset(1) };
-            let addr_result = HostAddressResult {
-                family: self.family,
-                h_addr: h_addr,
-                phantom: PhantomData,
-            };
-            Some(addr_result)
+            self.family.map(|family| {
+                HostAddressResult {
+                    family: family,
+                    h_addr: h_addr,
+                    phantom: PhantomData,
+                }
+            })
         }
     }
 }

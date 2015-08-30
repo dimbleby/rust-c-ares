@@ -303,10 +303,12 @@ extern "C" {
                             callback: ares_nameinfo_callback,
                             arg: *mut ::libc::c_void) -> ();
     #[cfg(windows)]
-    pub fn ares_fds(channel: ares_channel, read_fds: *mut fd_set,
-                    write_fds: *mut fd_set) -> ::libc::c_int;
-    pub fn ares_getsock(channel: ares_channel, socks: *mut ares_socket_t,
-                        numsocks: ::libc::c_int) -> ::libc::c_int;
+    pub fn ares_fds(channel: *const Struct_ares_channeldata,
+                    read_fds: *mut fd_set, write_fds: *mut fd_set)
+     -> ::libc::c_int;
+    pub fn ares_getsock(channel: *const Struct_ares_channeldata,
+                        socks: *mut ares_socket_t, numsocks: ::libc::c_int)
+     -> ::libc::c_int;
     pub fn ares_timeout(channel: ares_channel, maxtv: *mut Struct_timeval,
                         tv: *mut Struct_timeval) -> *mut Struct_timeval;
     #[cfg(windows)]

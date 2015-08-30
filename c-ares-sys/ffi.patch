@@ -1,5 +1,5 @@
---- src/ffi-orig.rs	2015-08-28 14:07:36.970482286 +0100
-+++ src/ffi.rs	2015-08-28 14:06:00.683513359 +0100
+--- src/ffi.orig.rs	2015-08-30 13:40:28.091887206 +0100
++++ src/ffi.rs	2015-08-30 13:41:28.512076379 +0100
 @@ -1,11 +1,34 @@
 +use libc::{
 +    in_addr,
@@ -66,15 +66,16 @@
                                          _type: ::libc::c_int,
                                          data: *mut ::libc::c_void)
                                -> ::libc::c_int>;
-@@ -279,12 +302,14 @@
+@@ -279,6 +302,7 @@
                              salen: ares_socklen_t, flags: ::libc::c_int,
                              callback: ares_nameinfo_callback,
                              arg: *mut ::libc::c_void) -> ();
 +    #[cfg(windows)]
-     pub fn ares_fds(channel: ares_channel, read_fds: *mut fd_set,
-                     write_fds: *mut fd_set) -> ::libc::c_int;
-     pub fn ares_getsock(channel: ares_channel, socks: *mut ares_socket_t,
-                         numsocks: ::libc::c_int) -> ::libc::c_int;
+     pub fn ares_fds(channel: *const Struct_ares_channeldata,
+                     read_fds: *mut fd_set, write_fds: *mut fd_set)
+      -> ::libc::c_int;
+@@ -287,6 +311,7 @@
+      -> ::libc::c_int;
      pub fn ares_timeout(channel: ares_channel, maxtv: *mut Struct_timeval,
                          tv: *mut Struct_timeval) -> *mut Struct_timeval;
 +    #[cfg(windows)]

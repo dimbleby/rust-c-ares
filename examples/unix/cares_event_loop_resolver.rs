@@ -108,7 +108,7 @@ impl mio::Handler for CAresEventHandler {
                                 mio::PollOpt::edge())
                    } else {
                         event_loop
-                            .register_opt(
+                            .register(
                                 &efd,
                                 token,
                                 interest,

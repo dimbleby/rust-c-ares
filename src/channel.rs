@@ -330,7 +330,7 @@ impl Channel {
     pub fn set_servers(
         &mut self,
         servers: &[&str]) -> Result<&mut Self, AresError> {
-        let servers_csv = servers.connect(",");
+        let servers_csv = servers.join(",");
         let c_servers = CString::new(servers_csv).unwrap();
         let ares_rc = unsafe {
             c_ares_sys::ares_set_servers_csv(

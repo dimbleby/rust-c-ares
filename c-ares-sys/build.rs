@@ -58,7 +58,7 @@ fn main() {
                 .current_dir(&build)
                 .arg("-c")
                 .arg(&format!("{} {}", src.join("c-ares/configure").display(),
-                              config_opts.connect(" "))));
+                              config_opts.join(" "))));
 
     // Compile.
     run(Command::new(make())

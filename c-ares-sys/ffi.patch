@@ -1,6 +1,6 @@
---- src/ffi.orig.rs	2015-08-30 13:40:28.091887206 +0100
-+++ src/ffi.rs	2015-08-30 13:41:28.512076379 +0100
-@@ -1,11 +1,34 @@
+--- src/ffi.orig.rs	2015-10-24 10:45:03.289139469 +0100
++++ src/ffi.rs	2015-10-24 10:41:30.663802401 +0100
+@@ -1,9 +1,32 @@
 +use libc::{
 +    in_addr,
 +    size_t,
@@ -32,41 +32,9 @@
 +#[cfg(unix)]
 +pub type ares_socket_t = RawFd;
  pub type ares_sock_state_cb =
--    ::std::option::Option<extern "C" fn(data: *mut ::libc::c_void,
-+    ::std::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void,
-                                         socket_fd: ares_socket_t,
-                                         readable: ::libc::c_int,
-                                         writable: ::libc::c_int) -> ()>;
-@@ -42,24 +65,24 @@
- pub enum Struct_ares_channeldata { }
- pub type ares_channel = *mut Struct_ares_channeldata;
- pub type ares_callback =
--    ::std::option::Option<extern "C" fn(arg: *mut ::libc::c_void,
-+    ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
-                                         status: ::libc::c_int,
-                                         timeouts: ::libc::c_int,
-                                         abuf: *mut ::libc::c_uchar,
-                                         alen: ::libc::c_int) -> ()>;
- pub type ares_host_callback =
--    ::std::option::Option<extern "C" fn(arg: *mut ::libc::c_void,
-+    ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
-                                         status: ::libc::c_int,
-                                         timeouts: ::libc::c_int,
-                                         hostent: *mut Struct_hostent) -> ()>;
- pub type ares_nameinfo_callback =
--    ::std::option::Option<extern "C" fn(arg: *mut ::libc::c_void,
-+    ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
-                                         status: ::libc::c_int,
-                                         timeouts: ::libc::c_int,
-                                         node: *mut ::libc::c_char,
-                                         service: *mut ::libc::c_char) -> ()>;
- pub type ares_sock_create_callback =
--    ::std::option::Option<extern "C" fn(socket_fd: ares_socket_t,
-+    ::std::option::Option<unsafe extern "C" fn(socket_fd: ares_socket_t,
-                                         _type: ::libc::c_int,
-                                         data: *mut ::libc::c_void)
-                               -> ::libc::c_int>;
-@@ -279,6 +302,7 @@
+     ::std::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void,
+                                                socket_fd: ares_socket_t,
+@@ -282,6 +305,7 @@
                              salen: ares_socklen_t, flags: ::libc::c_int,
                              callback: ares_nameinfo_callback,
                              arg: *mut ::libc::c_void) -> ();
@@ -74,7 +42,7 @@
      pub fn ares_fds(channel: *const Struct_ares_channeldata,
                      read_fds: *mut fd_set, write_fds: *mut fd_set)
       -> ::libc::c_int;
-@@ -287,6 +311,7 @@
+@@ -290,6 +314,7 @@
       -> ::libc::c_int;
      pub fn ares_timeout(channel: ares_channel, maxtv: *mut Struct_timeval,
                          tv: *mut Struct_timeval) -> *mut Struct_timeval;

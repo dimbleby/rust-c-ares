@@ -29,9 +29,10 @@ pub type ares_socket_t = RawSocket;
 pub type ares_socket_t = RawFd;
 pub type ares_sock_state_cb =
     ::std::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void,
-                                        socket_fd: ares_socket_t,
-                                        readable: ::libc::c_int,
-                                        writable: ::libc::c_int) -> ()>;
+                                               socket_fd: ares_socket_t,
+                                               readable: ::libc::c_int,
+                                               writable: ::libc::c_int)
+                              -> ()>;
 pub enum Struct_apattern { }
 #[repr(C)]
 #[derive(Copy)]
@@ -66,25 +67,27 @@ pub enum Struct_ares_channeldata { }
 pub type ares_channel = *mut Struct_ares_channeldata;
 pub type ares_callback =
     ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
-                                        status: ::libc::c_int,
-                                        timeouts: ::libc::c_int,
-                                        abuf: *mut ::libc::c_uchar,
-                                        alen: ::libc::c_int) -> ()>;
+                                               status: ::libc::c_int,
+                                               timeouts: ::libc::c_int,
+                                               abuf: *mut ::libc::c_uchar,
+                                               alen: ::libc::c_int) -> ()>;
 pub type ares_host_callback =
     ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
-                                        status: ::libc::c_int,
-                                        timeouts: ::libc::c_int,
-                                        hostent: *mut Struct_hostent) -> ()>;
+                                               status: ::libc::c_int,
+                                               timeouts: ::libc::c_int,
+                                               hostent: *mut Struct_hostent)
+                              -> ()>;
 pub type ares_nameinfo_callback =
     ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
-                                        status: ::libc::c_int,
-                                        timeouts: ::libc::c_int,
-                                        node: *mut ::libc::c_char,
-                                        service: *mut ::libc::c_char) -> ()>;
+                                               status: ::libc::c_int,
+                                               timeouts: ::libc::c_int,
+                                               node: *mut ::libc::c_char,
+                                               service: *mut ::libc::c_char)
+                              -> ()>;
 pub type ares_sock_create_callback =
     ::std::option::Option<unsafe extern "C" fn(socket_fd: ares_socket_t,
-                                        _type: ::libc::c_int,
-                                        data: *mut ::libc::c_void)
+                                               _type: ::libc::c_int,
+                                               data: *mut ::libc::c_void)
                               -> ::libc::c_int>;
 #[repr(C)]
 #[derive(Copy)]

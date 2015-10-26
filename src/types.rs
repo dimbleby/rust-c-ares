@@ -25,6 +25,7 @@ pub enum AddressFamily {
 }
 
 /// An IP address, either an IPv4 or an IPv6 address.
+#[derive(Clone, Copy, Debug)]
 pub enum IpAddr {
     /// An IPv4 address.
     V4(Ipv4Addr),

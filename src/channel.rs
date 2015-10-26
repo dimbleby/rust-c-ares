@@ -141,7 +141,7 @@ impl Options {
     /// Set the UDP port to use for queries.  The default value is 53, the
     /// standard name service port.
     pub fn set_udp_port(&mut self, udp_port: u16) -> &mut Self {
-        self.ares_options.udp_port = udp_port as libc::c_ushort;
+        self.ares_options.udp_port = udp_port;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_UDP_PORT;
         self
     }
@@ -149,7 +149,7 @@ impl Options {
     /// Set the TCP port to use for queries.  The default value is 53, the
     /// standard name service port.
     pub fn set_tcp_port(&mut self, tcp_port: u16) -> &mut Self {
-        self.ares_options.tcp_port = tcp_port as libc::c_ushort;
+        self.ares_options.tcp_port = tcp_port;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TCP_PORT;
         self
     }

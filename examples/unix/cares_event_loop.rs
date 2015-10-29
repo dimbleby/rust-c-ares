@@ -76,7 +76,6 @@ impl mio::Handler for CAresEventHandler {
                     self.tracked_fds.remove(&fd);
                     event_loop
                         .deregister(&efd)
-                        .ok()
                         .expect("failed to deregister interest");
                 } else {
                     let mut interest = mio::EventSet::none();
@@ -102,7 +101,7 @@ impl mio::Handler for CAresEventHandler {
                                 interest,
                                 mio::PollOpt::edge())
                     };
-                    register_result.ok().expect("failed to register interest");
+                    register_result.expect("failed to register interest");
                 }
             },
 
@@ -157,7 +156,6 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
 pub fn main() {
     // Create an event loop.
     let mut event_loop = mio::EventLoop::new()
-        .ok()
         .expect("failed to create event loop");
     let event_loop_channel = event_loop.channel();
 
@@ -179,7 +177,6 @@ pub fn main() {
         .set_timeout(500)
         .set_tries(3);
     let mut ares_channel = c_ares::Channel::new(options)
-        .ok()
         .expect("Failed to create channel");
 
     // Set up some queries.
@@ -220,7 +217,6 @@ pub fn main() {
     let handle = thread::spawn(move || {
         event_loop
             .run(&mut event_handler)
-            .ok()
             .expect("failed to run event loop")
     });
 
@@ -232,7 +228,6 @@ pub fn main() {
     // Shut down the event loop and wait for it to finish.
     event_loop_channel
         .send(CAresHandlerMessage::ShutDown)
-        .ok()
         .expect("failed to shut down event loop");
     handle.join().unwrap();
 }

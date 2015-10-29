@@ -88,7 +88,6 @@ impl mio::Handler for CAresEventHandler {
                     self.tracked_fds.remove(&fd);
                     event_loop
                         .deregister(&efd)
-                        .ok()
                         .expect("failed to deregister interest");
                 } else {
                     let mut interest = mio::EventSet::none();
@@ -114,7 +113,7 @@ impl mio::Handler for CAresEventHandler {
                                 interest,
                                 mio::PollOpt::edge())
                     };
-                    register_result.ok().expect("failed to register interest");
+                    register_result.expect("failed to register interest");
                 }
             },
 
@@ -150,7 +149,6 @@ impl Resolver {
     pub fn new() -> Resolver {
         // Create an event loop.
         let mut event_loop = mio::EventLoop::new()
-            .ok()
             .expect("failed to create event loop");
         let event_loop_channel = event_loop.channel();
 
@@ -175,7 +173,6 @@ impl Resolver {
             .set_timeout(500)
             .set_tries(3);
         let ares_channel = c_ares::Channel::new(options)
-            .ok()
             .expect("Failed to create channel");
         let locked_channel = Arc::new(Mutex::new(ares_channel));
 
@@ -187,7 +184,6 @@ impl Resolver {
         let event_loop_handle = thread::spawn(move || {
             event_loop
                 .run(&mut event_handler)
-                .ok()
                 .expect("failed to run event loop")
         });
 
@@ -235,7 +231,6 @@ impl Drop for Resolver {
         // Shut down the event loop and wait for it to finish.
         self.event_loop_channel
             .send(CAresHandlerMessage::ShutDown)
-            .ok()
             .expect("failed to shut down event loop");
        for handle in self.event_loop_handle.take() {
            handle.join().unwrap();

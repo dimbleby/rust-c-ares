@@ -49,7 +49,7 @@ fn fd_handling_thread(
 // Process file descriptors for c-ares, while it wants us to do so.
 fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
     // Create an epoll file descriptor so that we can listen for events.
-    let epoll = epoll_create().ok().expect("Failed to create epoll");
+    let epoll = epoll_create().expect("Failed to create epoll");
     let mut tracked_fds = HashSet::<RawFd>::new();
     loop {
         // Ask c-ares what file descriptors we should be listening on, and map
@@ -69,7 +69,7 @@ fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
             } else {
                 EpollOp::EpollCtlMod
             };
-            epoll_ctl(epoll, op, fd, &event).ok().expect("epoll_ctl failed");
+            epoll_ctl(epoll, op, fd, &event).expect("epoll_ctl failed");
             active = true;
         }
         if !active { break }
@@ -81,7 +81,6 @@ fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
         };
         let mut events = [empty_event; 2];
         let results = epoll_wait(epoll, &mut events, 500)
-            .ok()
             .expect("epoll_wait failed");
 
         // Process whatever happened.
@@ -123,7 +122,6 @@ impl Resolver {
             .set_timeout(500)
             .set_tries(3);
         let ares_channel = c_ares::Channel::new(options)
-            .ok()
             .expect("Failed to create channel");
         let locked_channel = Arc::new(Mutex::new(ares_channel));
 

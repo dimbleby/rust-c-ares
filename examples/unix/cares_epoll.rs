@@ -83,7 +83,6 @@ pub fn main() {
         .set_timeout(500)
         .set_tries(3);
     let mut ares_channel = c_ares::Channel::new(options)
-        .ok()
         .expect("Failed to create channel");
 
     // Set up some queries.
@@ -103,7 +102,7 @@ pub fn main() {
     });
 
     // Create an epoll file descriptor so that we can listen for events.
-    let epoll = epoll_create().ok().expect("Failed to create epoll");
+    let epoll = epoll_create().expect("Failed to create epoll");
     let mut tracked_fds = HashSet::<RawFd>::new();
     loop {
         // Ask c-ares what file descriptors we should be listening on, and map
@@ -122,7 +121,7 @@ pub fn main() {
             } else {
                 EpollOp::EpollCtlMod
             };
-            epoll_ctl(epoll, op, fd, &event).ok().expect("epoll_ctl failed");
+            epoll_ctl(epoll, op, fd, &event).expect("epoll_ctl failed");
             active = true;
         }
         if !active { break }
@@ -134,7 +133,6 @@ pub fn main() {
         };
         let mut events = [empty_event; 2];
         let results = epoll_wait(epoll, &mut events, 500)
-            .ok()
             .expect("epoll_wait failed");
 
         // Process whatever happened.

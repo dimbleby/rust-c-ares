@@ -377,15 +377,15 @@ impl Channel {
     pub fn query_a<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<AResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::A as libc::c_int,
                 Some(query_a_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -395,15 +395,15 @@ impl Channel {
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<AAAAResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::AAAA as libc::c_int,
                 Some(query_aaaa_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -413,15 +413,15 @@ impl Channel {
     pub fn query_cname<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<CNameResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::CNAME as libc::c_int,
                 Some(query_cname_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -431,15 +431,15 @@ impl Channel {
     pub fn query_mx<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<MXResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::MX as libc::c_int,
                 Some(query_mx_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -449,15 +449,15 @@ impl Channel {
     pub fn query_naptr<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<NAPTRResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::NAPTR as libc::c_int,
                 Some(query_naptr_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -467,15 +467,15 @@ impl Channel {
     pub fn query_ns<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<NSResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::NS as libc::c_int,
                 Some(query_ns_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -485,15 +485,15 @@ impl Channel {
     pub fn query_ptr<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<PTRResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::PTR as libc::c_int,
                 Some(query_ptr_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -503,15 +503,15 @@ impl Channel {
     pub fn query_srv<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<SRVResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::SRV as libc::c_int,
                 Some(query_srv_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -521,15 +521,15 @@ impl Channel {
     pub fn query_txt<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<TXTResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::TXT as libc::c_int,
                 Some(query_txt_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -539,15 +539,15 @@ impl Channel {
     pub fn query_soa<F>(&mut self, name: &str, handler: F)
         where F: FnOnce(Result<SOAResult, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as libc::c_int,
                 QueryType::SOA as libc::c_int,
                 Some(query_soa_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -578,15 +578,15 @@ impl Channel {
                 (AddressFamily::INET6, mem::size_of::<libc::in6_addr>())
             },
         };
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_gethostbyaddr(
                 self.ares_channel,
                 c_addr,
                 length as libc::c_int,
                 family as libc::c_int,
                 Some(get_host_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -599,14 +599,14 @@ impl Channel {
         family: AddressFamily,
         handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_gethostbyname(
                 self.ares_channel,
                 c_name.as_ptr(),
                 family as libc::c_int,
                 Some(get_host_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -632,15 +632,15 @@ impl Channel {
                 &sockaddr as *const _ as *const libc::sockaddr
             },
         };
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_getnameinfo(
                 self.ares_channel,
                 c_addr,
                 mem::size_of::<libc::sockaddr>() as c_ares_sys::ares_socklen_t,
                 flags.bits(),
                 Some(get_name_info_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 
@@ -662,15 +662,15 @@ impl Channel {
         handler: F)
         where F: FnOnce(Result<&[u8], AresError>) + 'static {
         let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
-            let c_arg: *mut libc::c_void = mem::transmute(Box::new(handler));
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
                 dns_class as libc::c_int,
                 query_type as libc::c_int,
                 Some(query_callback::<F>),
-                c_arg);
+                c_arg as *mut libc::c_void);
         }
     }
 

@@ -2,7 +2,6 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::fmt;
-use std::mem;
 
 use error::AresError;
 use hostent::{
@@ -65,6 +64,6 @@ pub unsafe extern "C" fn get_host_callback<F>(
         let host_results = HostResults::new(hostent_ref);
         Ok(host_results)
     };
-    let handler: Box<F> = mem::transmute(arg);
+    let handler = Box::from_raw(arg as *mut F);
     handler(result);
 }

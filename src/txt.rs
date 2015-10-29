@@ -4,7 +4,6 @@ extern crate libc;
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::mem;
 use std::ptr;
 use std::slice;
 use std::str;
@@ -155,6 +154,6 @@ pub unsafe extern "C" fn query_txt_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         TXTResults::parse_from(data)
     };
-    let handler: Box<F> = mem::transmute(arg);
+    let handler = Box::from_raw(arg as *mut F);
     handler(result);
 }

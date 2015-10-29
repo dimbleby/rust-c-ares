@@ -3,7 +3,6 @@ extern crate libc;
 
 use std::fmt;
 use std::marker::PhantomData;
-use std::mem;
 use std::ptr;
 use std::slice;
 
@@ -106,6 +105,6 @@ pub unsafe extern "C" fn query_ptr_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         PTRResults::parse_from(data)
     };
-    let handler: Box<F> = mem::transmute(arg);
+    let handler = Box::from_raw(arg as *mut F);
     handler(result);
 }

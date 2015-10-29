@@ -1,7 +1,6 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use std::mem;
 use std::slice;
 
 use error::AresError;
@@ -20,6 +19,6 @@ pub unsafe extern "C" fn query_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         Ok(data)
     };
-    let handler: Box<F> = mem::transmute(arg);
+    let handler = Box::from_raw(arg as *mut F);
     handler(result);
 }

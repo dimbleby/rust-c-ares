@@ -4,7 +4,6 @@ extern crate libc;
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::mem;
 use std::str;
 
 use error::AresError;
@@ -81,6 +80,6 @@ pub unsafe extern "C" fn get_name_info_callback<F>(
         let name_info_result = NameInfoResult::new(node, service);
         Ok(name_info_result)
     };
-    let handler: Box<F> = mem::transmute(arg);
+    let handler = Box::from_raw(arg as *mut F);
     handler(result);
 }

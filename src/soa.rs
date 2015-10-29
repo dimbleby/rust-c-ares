@@ -4,7 +4,6 @@ extern crate libc;
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::mem;
 use std::ptr;
 use std::slice;
 use std::str;
@@ -125,6 +124,6 @@ pub unsafe extern "C" fn query_soa_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         SOAResult::parse_from(data)
     };
-    let handler: Box<F> = mem::transmute(arg);
+    let handler = Box::from_raw(arg as *mut F);
     handler(result);
 }

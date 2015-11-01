@@ -64,7 +64,7 @@ pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> libc::in_addr {
 // Get an in6_addr from an Ipv6Addr.
 pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> libc::in6_addr {
     let mut segments = ipv6.segments();
-    for segment in segments.iter_mut() {
+    for segment in &mut segments {
         *segment = segment.to_be();
     }
     libc::in6_addr { s6_addr: segments }

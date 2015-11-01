@@ -3,7 +3,6 @@ extern crate libc;
 
 use error::AresError;
 use types::AddressFamily;
-use std::mem;
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
@@ -79,7 +78,7 @@ pub fn socket_addrv4_as_sockaddr_in(
         sin_family: libc::AF_INET as libc::sa_family_t,
         sin_port: sock_v4.port().to_be(),
         sin_addr: in_addr,
-        .. unsafe { mem::zeroed() }
+        sin_zero: [0; 8],
     }
 }
 
@@ -93,6 +92,5 @@ pub fn socket_addrv6_as_sockaddr_in6(
         sin6_addr: in6_addr,
         sin6_flowinfo: sock_v6.flowinfo().to_be(),
         sin6_scope_id: sock_v6.scope_id().to_be(),
-        .. unsafe { mem::zeroed() }
     }
 }

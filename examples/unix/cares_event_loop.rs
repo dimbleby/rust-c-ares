@@ -5,7 +5,6 @@ extern crate mio;
 
 use std::collections::HashSet;
 use std::error::Error;
-use std::mem;
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
@@ -72,11 +71,11 @@ impl mio::Handler for CAresEventHandler {
         msg: Self::Message) {
         match msg {
             CAresHandlerMessage::RegisterInterest(fd, read, write) => {
-                let io = mio::Io::from(fd);
+                let efd = mio::unix::EventedFd(&fd);
                 if !read && !write {
                     self.tracked_fds.remove(&fd);
                     event_loop
-                        .deregister(&io)
+                        .deregister(&efd)
                         .expect("failed to deregister interest");
                 } else {
                     let mut interest = mio::EventSet::none();
@@ -90,22 +89,20 @@ impl mio::Handler for CAresEventHandler {
                     let register_result = if !self.tracked_fds.insert(fd) {
                         event_loop
                             .reregister(
-                                &io,
+                                &efd,
                                 token,
                                 interest,
                                 mio::PollOpt::edge())
                     } else {
                         event_loop
-                            .register_opt(
-                                &io,
+                            .register(
+                                &efd,
                                 token,
                                 interest,
                                 mio::PollOpt::edge())
                     };
                     register_result.expect("failed to register interest");
                 }
-                // Don't accidentally close the file descriptor by dropping io!
-                mem::forget(io);
             },
 
             CAresHandlerMessage::ShutDown => event_loop.shutdown(),

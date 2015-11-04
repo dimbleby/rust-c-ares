@@ -1,13 +1,13 @@
 #[cfg(unix)]
 mod unix;
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
+#[cfg(all(unix, any(target_os = "linux", target_os = "android")))]
 fn epoll_examples() {
     unix::cares_epoll::main();
     unix::cares_epoll_resolver::main();
 }
 
-#[cfg(not(any(target_os = "linux", target_os = "android")))]
+#[cfg(all(unix, not(any(target_os = "linux", target_os = "android"))))]
 fn epoll_examples() { }
 
 #[cfg(unix)]

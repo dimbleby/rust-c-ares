@@ -558,16 +558,16 @@ impl Channel {
         &mut self,
         address: &IpAddr,
         handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
-        let in_addr: libc::in_addr;
-        let in6_addr: libc::in6_addr;
+        let in_addr: &libc::in_addr;
+        let in6_addr: &libc::in6_addr;
         let c_addr = match *address {
             IpAddr::V4(ref v4) => {
                 in_addr = ipv4_as_in_addr(v4);
-                &in_addr as *const _ as *const libc::c_void
+                in_addr as *const _ as *const libc::c_void
             },
             IpAddr::V6(ref v6) => {
                 in6_addr = ipv6_as_in6_addr(v6);
-                &in6_addr as *const _ as *const libc::c_void
+                in6_addr as *const _ as *const libc::c_void
             },
         };
         let (family, length) = match *address {
@@ -625,11 +625,11 @@ impl Channel {
         let c_addr = match *address {
             SocketAddr::V4(ref v4) => {
                 let sockaddr = socket_addrv4_as_sockaddr_in(v4);
-                &sockaddr as *const _ as *const libc::sockaddr
+                sockaddr as *const _ as *const libc::sockaddr
             },
             SocketAddr::V6(ref v6) => {
                 let sockaddr = socket_addrv6_as_sockaddr_in6(v6);
-                &sockaddr as *const _ as *const libc::sockaddr
+                sockaddr as *const _ as *const libc::sockaddr
             },
         };
         let c_arg = Box::into_raw(Box::new(handler));

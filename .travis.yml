@@ -1,5 +1,12 @@
 language: rust
 sudo: false
+os:
+- linux
+- osx
+rust:
+- nightly
+- beta
+- stable
 script:
 - cargo test
 - cargo doc --no-deps -p c-ares

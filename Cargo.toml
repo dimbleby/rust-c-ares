@@ -13,7 +13,7 @@ readme = "README.md"
 keywords = ["DNS", "c-ares"]
 
 [dependencies]
-libc = "0.1.*"
+libc = "0.1.12"
 bitflags = "*"
 winapi = "*"
 
@@ -21,6 +21,6 @@ winapi = "*"
 path = "c-ares-sys"
 
 [dev-dependencies]
-mio = { git = "https://github.com/carllerche/mio" }
+mio = "0.4.3"
 nix = "*"
 ws2_32-sys = "*"

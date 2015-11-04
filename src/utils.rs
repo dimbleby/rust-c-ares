@@ -3,6 +3,7 @@ extern crate libc;
 
 use error::AresError;
 use types::AddressFamily;
+use std::mem;
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
@@ -52,45 +53,23 @@ pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
 }
 
 // Get an in_addr from an Ipv4Addr.
-pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> libc::in_addr {
-    let value = ipv4
-        .octets()
-        .iter()
-        .fold(0, |v, &o| (v << 8) | o as u32)
-        .to_be() as libc::in_addr_t;
-    libc::in_addr { s_addr: value }
+pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> &libc::in_addr {
+    unsafe { mem::transmute(ipv4) }
 }
 
 // Get an in6_addr from an Ipv6Addr.
-pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> libc::in6_addr {
-    let mut segments = ipv6.segments();
-    for segment in &mut segments {
-        *segment = segment.to_be();
-    }
-    libc::in6_addr { s6_addr: segments }
+pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> &libc::in6_addr {
+    unsafe { mem::transmute(ipv6) }
 }
 
 // Get a sockaddr_in from a SocketAddrV4.
 pub fn socket_addrv4_as_sockaddr_in(
-    sock_v4: &SocketAddrV4) -> libc::sockaddr_in {
-    let in_addr = ipv4_as_in_addr(sock_v4.ip());
-    libc::sockaddr_in {
-        sin_family: libc::AF_INET as libc::sa_family_t,
-        sin_port: sock_v4.port().to_be(),
-        sin_addr: in_addr,
-        sin_zero: [0; 8],
-    }
+    sock_v4: &SocketAddrV4) -> &libc::sockaddr_in {
+    unsafe { mem::transmute(sock_v4) }
 }
 
 // Get a sockaddr_in6 from a SocketAddrV6.
 pub fn socket_addrv6_as_sockaddr_in6(
-    sock_v6: &SocketAddrV6) -> libc::sockaddr_in6 {
-    let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
-    libc::sockaddr_in6 {
-        sin6_family: libc::AF_INET6 as libc::sa_family_t,
-        sin6_port: sock_v6.port().to_be(),
-        sin6_addr: in6_addr,
-        sin6_flowinfo: sock_v6.flowinfo().to_be(),
-        sin6_scope_id: sock_v6.scope_id().to_be(),
-    }
+    sock_v6: &SocketAddrV6) -> &libc::sockaddr_in6 {
+    unsafe { mem::transmute(sock_v6) }
 }

@@ -21,6 +21,6 @@ winapi = "*"
 path = "c-ares-sys"
 
 [dev-dependencies]
-mio = "0.4.3"
+mio = { git = "https://github.com/dimbleby/mio", branch = "use-time-not-clock-ticks" }
 nix = "*"
 ws2_32-sys = "*"

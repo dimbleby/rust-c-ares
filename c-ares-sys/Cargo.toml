@@ -16,5 +16,5 @@ gcc = "*"
 pkg-config = "*"
 
 [dependencies]
-libc = "*"
+libc = "0.1.*"
 winapi = "*"

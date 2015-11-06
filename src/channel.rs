@@ -632,12 +632,16 @@ impl Channel {
                 sockaddr as *const _ as *const libc::sockaddr
             },
         };
+        let length = match *address {
+            SocketAddr::V4(_) => mem::size_of::<libc::sockaddr>(),
+            SocketAddr::V6(_) => mem::size_of::<libc::sockaddr_in6>(),
+        };
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
             c_ares_sys::ares_getnameinfo(
                 self.ares_channel,
                 c_addr,
-                mem::size_of::<libc::sockaddr>() as c_ares_sys::ares_socklen_t,
+                length as c_ares_sys::ares_socklen_t,
                 flags.bits(),
                 Some(get_name_info_callback::<F>),
                 c_arg as *mut libc::c_void);

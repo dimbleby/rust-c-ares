@@ -18,8 +18,10 @@ use std::error::Error;
 use std::mem;
 use std::net::{
     Ipv4Addr,
+    Ipv6Addr,
     SocketAddr,
     SocketAddrV4,
+    SocketAddrV6,
 };
 use std::ptr;
 
@@ -85,6 +87,17 @@ pub fn main() {
 
     let ipv4 = Ipv4Addr::new(216, 58, 210, 14);
     let sock = SocketAddr::V4(SocketAddrV4::new(ipv4, 80));
+    ares_channel.get_name_info(
+        &sock,
+        c_ares::ni_flags::LOOKUPHOST | c_ares::ni_flags::LOOKUPSERVICE,
+        move |result| {
+            println!("");
+            print_name_info_result(result);
+        }
+    );
+
+    let ipv6 = Ipv6Addr::new(0x2a00, 0x1450, 0x4009, 0x80a, 0, 0, 0, 0x200e);
+    let sock = SocketAddr::V6(SocketAddrV6::new(ipv6, 80, 0, 0));
     ares_channel.get_name_info(
         &sock,
         c_ares::ni_flags::LOOKUPHOST | c_ares::ni_flags::LOOKUPSERVICE,

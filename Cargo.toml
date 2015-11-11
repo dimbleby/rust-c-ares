@@ -21,6 +21,6 @@ winapi = "*"
 path = "c-ares-sys"
 
 [dev-dependencies]
-mio = { git = "https://github.com/carllerche/mio", rev = "70298b27" }
+mio = { git = "https://github.com/carllerche/mio", rev = "ac165e089" }
 nix = "*"
 ws2_32-sys = "*"

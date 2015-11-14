@@ -7,7 +7,8 @@ use std::net::{
     Ipv6Addr,
 };
 
-/// The platform-specific socket / file descriptor.
+/// The platform-specific file descriptor / socket type.  That is, either a
+/// `RawFd` or a `RawSocket`.
 pub type Socket = c_ares_sys::ares_socket_t;
 
 /// An invalid socket / file descriptor.  Use this to represent 'no action'

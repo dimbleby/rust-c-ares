@@ -3,6 +3,8 @@
 mod unix {
   extern crate libc;
 
+  /// A re-export of the platform-specific type.  That is, either a
+  /// `libc::fd_set` or a `winapi::fd_set`.
   pub type fd_set = libc::fd_set;
 
   #[repr(C)]
@@ -31,6 +33,8 @@ mod unix {
 mod windows {
   extern crate winapi;
 
+  /// A re-export of the platform-specific type.  That is, either a
+  /// `libc::fd_set` or a `winapi::fd_set`.
   pub type fd_set = winapi::fd_set;
   pub type hostent = winapi::winsock2::hostent;
   pub type in_addr = winapi::in_addr;

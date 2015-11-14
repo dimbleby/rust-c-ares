@@ -53,14 +53,23 @@ pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
     }
 }
 
-// Get an in_addr from an Ipv4Addr.
-pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> ctypes::in_addr {
-    let value = ipv4
-        .octets()
+// Get the u32 value from an Ipv4Addr.
+fn ipv4_as_value(ipv4: &Ipv4Addr) -> u32 {
+    ipv4.octets()
         .iter()
         .fold(0, |v, &o| (v << 8) | o as u32)
-        .to_be() as libc::in_addr_t;
-    libc::in_addr { s_addr: value }
+        .to_be()
+}
+
+// Get an in_addr from an Ipv4Addr.
+#[cfg(unix)]
+pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> ctypes::in_addr {
+    ctypes::in_addr { s_addr: ipv4_as_value(ipv4) }
+}
+
+#[cfg(windows)]
+pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> ctypes::in_addr {
+    ctypes::in_addr { S_un: ipv4_as_value(ipv4) }
 }
 
 // Get an in6_addr from an Ipv6Addr.
@@ -90,8 +99,8 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> ctypes::in6_addr {
 pub fn socket_addrv4_as_sockaddr_in(
     sock_v4: &SocketAddrV4) -> ctypes::sockaddr_in {
     let in_addr = ipv4_as_in_addr(sock_v4.ip());
-    libc::sockaddr_in {
-        sin_family: libc::AF_INET as libc::sa_family_t,
+    ctypes::sockaddr_in {
+        sin_family: ctypes::AF_INET as u16,
         sin_port: sock_v4.port().to_be(),
         sin_addr: in_addr,
         sin_zero: [0; 8],
@@ -102,8 +111,8 @@ pub fn socket_addrv4_as_sockaddr_in(
 pub fn socket_addrv6_as_sockaddr_in6(
     sock_v6: &SocketAddrV6) -> ctypes::sockaddr_in6 {
     let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
-    libc::sockaddr_in6 {
-        sin6_family: libc::AF_INET6 as libc::sa_family_t,
+    ctypes::sockaddr_in6 {
+        sin6_family: ctypes::AF_INET6 as i16,
         sin6_port: sock_v6.port().to_be(),
         sin6_addr: in6_addr,
         sin6_flowinfo: sock_v6.flowinfo().to_be(),

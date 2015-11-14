@@ -2,14 +2,15 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::fmt;
-use std::marker::PhantomData;
 use std::ptr;
 use std::slice;
 
+use ctypes;
 use error::AresError;
 use hostent::{
-    hostent,
+    HasHostent,
     HostAliasResultsIterator,
+    Hostent,
 };
 use utils::ares_error;
 
@@ -17,14 +18,13 @@ use utils::ares_error;
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct NSResults {
-    hostent: *mut hostent,
-    phantom: PhantomData<hostent>,
+    hostent: Hostent,
 }
 
 impl NSResults {
     /// Obtain an `NSResults` from the response to an NS lookup.
     pub fn parse_from(data: &[u8]) -> Result<NSResults, AresError> {
-        let mut hostent: *mut hostent = ptr::null_mut();
+        let mut hostent: *mut ctypes::hostent = ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_ns_reply(
                 data.as_ptr(),
@@ -40,24 +40,21 @@ impl NSResults {
         }
     }
 
-    fn new(hostent: *mut hostent) -> NSResults {
+    fn new(hostent: *mut ctypes::hostent) -> NSResults {
         NSResults {
-            hostent: hostent,
-            phantom: PhantomData,
+            hostent: Hostent::new(hostent),
         }
     }
 
     /// Returns the hostname from this `NSResults`.
     pub fn hostname(&self) -> &str {
-        let hostent = unsafe { &*self.hostent };
-        hostent.hostname()
+        self.hostent.hostname()
     }
 
     /// Returns an iterator over the `HostAliasResult` values in this
     /// `NSResults`.
     pub fn aliases(&self) -> HostAliasResultsIterator {
-        let hostent = unsafe { &*self.hostent };
-        hostent.aliases()
+        self.hostent.aliases()
     }
 }
 
@@ -73,15 +70,6 @@ impl fmt::Display for NSResults {
         }
         try!(write!(fmt, "]"));
         Ok(())
-    }
-}
-
-impl Drop for NSResults {
-    fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_free_hostent(
-                self.hostent as *mut c_ares_sys::Struct_hostent);
-        }
     }
 }
 

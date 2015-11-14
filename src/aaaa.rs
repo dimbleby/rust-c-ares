@@ -2,15 +2,16 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::fmt;
-use std::marker::PhantomData;
 use std::ptr;
 use std::slice;
 
+use ctypes;
 use error::AresError;
 use hostent::{
-    hostent,
+    HasHostent,
     HostAddressResultsIterator,
     HostAliasResultsIterator,
+    Hostent,
 };
 use utils::ares_error;
 
@@ -18,14 +19,13 @@ use utils::ares_error;
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct AAAAResults {
-    hostent: *mut hostent,
-    phantom: PhantomData<hostent>,
+    hostent: Hostent,
 }
 
 impl AAAAResults {
     /// Obtain an `AAAAResults` from the response to an AAAA lookup.
     pub fn parse_from(data: &[u8]) -> Result<AAAAResults, AresError> {
-        let mut hostent: *mut hostent = ptr::null_mut();
+        let mut hostent: *mut ctypes::hostent = ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_aaaa_reply(
                 data.as_ptr(),
@@ -43,47 +43,33 @@ impl AAAAResults {
         }
     }
 
-    fn new(hostent: *mut hostent) -> AAAAResults {
+    fn new(hostent: *mut ctypes::hostent) -> AAAAResults {
         AAAAResults {
-            hostent: hostent,
-            phantom: PhantomData,
+            hostent: Hostent::new(hostent),
         }
     }
 
     /// Returns the hostname from this `AAAAResults`.
     pub fn hostname(&self) -> &str {
-        let hostent = unsafe { &*self.hostent };
-        hostent.hostname()
+        self.hostent.hostname()
     }
 
     /// Returns an iterator over the `HostAddressResult` values in this
     /// `AAAAResults`.
     pub fn addresses(&self) -> HostAddressResultsIterator {
-        let hostent = unsafe { &*self.hostent };
-        hostent.addresses()
+        self.hostent.addresses()
     }
 
     /// Returns an iterator over the `HostAliasResult` values in this
     /// `AAAAResults`.
     pub fn aliases(&self) -> HostAliasResultsIterator {
-        let hostent = unsafe { &*self.hostent };
-        hostent.aliases()
+        self.hostent.aliases()
     }
 }
 
 impl fmt::Display for AAAAResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let hostent = unsafe { &*self.hostent };
-        hostent.fmt(fmt)
-    }
-}
-
-impl Drop for AAAAResults {
-    fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_free_hostent(
-                self.hostent as *mut c_ares_sys::Struct_hostent);
-        }
+        self.hostent.fmt(fmt)
     }
 }
 

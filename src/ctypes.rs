@@ -2,9 +2,23 @@
 #[cfg(unix)]
 mod unix {
   extern crate libc;
+
+  pub type fd_set = libc::fd_set;
+
+  #[repr(C)]
+  #[derive(Debug)]
+  #[allow(raw_pointer_derive)]
+  #[cfg(unix)]
+  pub struct hostent {
+      pub h_name: *mut libc::c_char,
+      pub h_aliases: *mut *mut libc::c_char,
+      pub h_addrtype: libc::c_int,
+      pub h_length: libc::c_int,
+      pub h_addr_list: *mut *mut libc::c_char,
+  }
+
   pub type in_addr = libc::in_addr;
   pub type in6_addr = libc::in6_addr;
-  pub type fd_set = libc::fd_set;
   pub type sockaddr = libc::sockaddr;
   pub type sockaddr_in = libc::sockaddr_in;
   pub type sockaddr_in6 = libc::sockaddr_in6;
@@ -16,9 +30,10 @@ mod unix {
 #[cfg(windows)]
 mod windows {
   extern crate winapi;
+  pub type fd_set = winapi::fd_set;
+  pub type hostent = winapi::winsock2::hostent;
   pub type in_addr = winapi::in_addr;
   pub type in6_addr = winapi::in6_addr;
-  pub type fd_set = winapi::fd_set;
   pub type sockaddr = winapi::SOCKADDR;
   pub type sockaddr_in = winapi::ws2def::SOCKADDR_IN;
   pub type sockaddr_in6 = winapi::ws2ipdef::sockaddr_in6;

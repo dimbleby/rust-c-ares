@@ -2,15 +2,15 @@ extern crate c_ares_sys;
 extern crate libc;
 
 use std::fmt;
-use std::marker::PhantomData;
 use std::ptr;
 use std::slice;
 
 use ctypes;
 use error::AresError;
 use hostent::{
-    hostent,
+    HasHostent,
     HostAliasResultsIterator,
+    Hostent,
 };
 use utils::ares_error;
 
@@ -18,14 +18,13 @@ use utils::ares_error;
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct PTRResults {
-    hostent: *mut hostent,
-    phantom: PhantomData<hostent>,
+    hostent: Hostent,
 }
 
 impl PTRResults {
     /// Obtain a `PTRResults` from the response to a PTR lookup.
     pub fn parse_from(data: &[u8]) -> Result<PTRResults, AresError> {
-        let mut hostent: *mut hostent = ptr::null_mut();
+        let mut hostent: *mut ctypes::hostent = ptr::null_mut();
         let dummy_ip = [0,0,0,0];
         let parse_status = unsafe {
             c_ares_sys::ares_parse_ptr_reply(
@@ -45,24 +44,21 @@ impl PTRResults {
         }
     }
 
-    fn new(hostent: *mut hostent) -> PTRResults {
+    fn new(hostent: *mut ctypes::hostent) -> PTRResults {
         PTRResults {
-            hostent: hostent,
-            phantom: PhantomData,
+            hostent: Hostent::new(hostent),
         }
     }
 
     /// Returns the hostname from this `PTRResults`.
     pub fn hostname(&self) -> &str {
-        let hostent = unsafe { &*self.hostent };
-        hostent.hostname()
+        self.hostent.hostname()
     }
 
     /// Returns an iterator over the `HostAliasResult` values in this
     /// `PTRResults`.
     pub fn aliases(&self) -> HostAliasResultsIterator {
-        let hostent = unsafe { &*self.hostent };
-        hostent.aliases()
+        self.hostent.aliases()
     }
 }
 
@@ -78,15 +74,6 @@ impl fmt::Display for PTRResults {
         }
         try!(write!(fmt, "]"));
         Ok(())
-    }
-}
-
-impl Drop for PTRResults {
-    fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_free_hostent(
-                self.hostent as *mut c_ares_sys::Struct_hostent);
-        }
     }
 }
 

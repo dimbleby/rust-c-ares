@@ -8,7 +8,6 @@ mod unix {
   #[repr(C)]
   #[derive(Debug)]
   #[allow(raw_pointer_derive)]
-  #[cfg(unix)]
   pub struct hostent {
       pub h_name: *mut libc::c_char,
       pub h_aliases: *mut *mut libc::c_char,
@@ -30,6 +29,7 @@ mod unix {
 #[cfg(windows)]
 mod windows {
   extern crate winapi;
+
   pub type fd_set = winapi::fd_set;
   pub type hostent = winapi::winsock2::hostent;
   pub type in_addr = winapi::in_addr;

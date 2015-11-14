@@ -54,23 +54,59 @@ pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
 }
 
 // Get an in_addr from an Ipv4Addr.
-pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> &ctypes::in_addr {
-    unsafe { mem::transmute(ipv4) }
+pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> ctypes::in_addr {
+    let value = ipv4
+        .octets()
+        .iter()
+        .fold(0, |v, &o| (v << 8) | o as u32)
+        .to_be() as libc::in_addr_t;
+    libc::in_addr { s_addr: value }
 }
 
 // Get an in6_addr from an Ipv6Addr.
-pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> &ctypes::in6_addr {
-    unsafe { mem::transmute(ipv6) }
+pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> ctypes::in6_addr {
+    let segments = ipv6.segments();
+    let mut in6_addr: ctypes::in6_addr = unsafe { mem::uninitialized() };
+    in6_addr.s6_addr[0] = (segments[0] >> 8) as u8;
+    in6_addr.s6_addr[1] = segments[0] as u8;
+    in6_addr.s6_addr[2] = (segments[1] >> 8) as u8;
+    in6_addr.s6_addr[3] = segments[1] as u8;
+    in6_addr.s6_addr[4] = (segments[2] >> 8) as u8;
+    in6_addr.s6_addr[5] = segments[2] as u8;
+    in6_addr.s6_addr[6] = (segments[3] >> 8) as u8;
+    in6_addr.s6_addr[7] = segments[3] as u8;
+    in6_addr.s6_addr[8] = (segments[4] >> 8) as u8;
+    in6_addr.s6_addr[9] = segments[4] as u8;
+    in6_addr.s6_addr[10] = (segments[5] >> 8) as u8;
+    in6_addr.s6_addr[11] = segments[5] as u8;
+    in6_addr.s6_addr[12] = (segments[6] >> 8) as u8;
+    in6_addr.s6_addr[13] = segments[6] as u8;
+    in6_addr.s6_addr[14] = (segments[7] >> 8) as u8;
+    in6_addr.s6_addr[15] = segments[7] as u8;
+    in6_addr
 }
 
 // Get a sockaddr_in from a SocketAddrV4.
 pub fn socket_addrv4_as_sockaddr_in(
-    sock_v4: &SocketAddrV4) -> &ctypes::sockaddr_in {
-    unsafe { mem::transmute(sock_v4) }
+    sock_v4: &SocketAddrV4) -> ctypes::sockaddr_in {
+    let in_addr = ipv4_as_in_addr(sock_v4.ip());
+    libc::sockaddr_in {
+        sin_family: libc::AF_INET as libc::sa_family_t,
+        sin_port: sock_v4.port().to_be(),
+        sin_addr: in_addr,
+        sin_zero: [0; 8],
+    }
 }
 
 // Get a sockaddr_in6 from a SocketAddrV6.
 pub fn socket_addrv6_as_sockaddr_in6(
-    sock_v6: &SocketAddrV6) -> &ctypes::sockaddr_in6 {
-    unsafe { mem::transmute(sock_v6) }
+    sock_v6: &SocketAddrV6) -> ctypes::sockaddr_in6 {
+    let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
+    libc::sockaddr_in6 {
+        sin6_family: libc::AF_INET6 as libc::sa_family_t,
+        sin6_port: sock_v6.port().to_be(),
+        sin6_addr: in6_addr,
+        sin6_flowinfo: sock_v6.flowinfo().to_be(),
+        sin6_scope_id: sock_v6.scope_id().to_be(),
+    }
 }

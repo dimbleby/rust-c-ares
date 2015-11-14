@@ -560,16 +560,16 @@ impl Channel {
         &mut self,
         address: &IpAddr,
         handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
-        let in_addr: &ctypes::in_addr;
-        let in6_addr: &ctypes::in6_addr;
+        let in_addr: ctypes::in_addr;
+        let in6_addr: ctypes::in6_addr;
         let c_addr = match *address {
             IpAddr::V4(ref v4) => {
                 in_addr = ipv4_as_in_addr(v4);
-                in_addr as *const _ as *const libc::c_void
+                &in_addr as *const _ as *const libc::c_void
             },
             IpAddr::V6(ref v6) => {
                 in6_addr = ipv6_as_in6_addr(v6);
-                in6_addr as *const _ as *const libc::c_void
+                &in6_addr as *const _ as *const libc::c_void
             },
         };
         let (family, length) = match *address {
@@ -624,18 +624,20 @@ impl Channel {
         flags: NIFlags,
         handler: F)
         where F: FnOnce(Result<NameInfoResult, AresError>) + 'static {
+        let sockaddr_in: ctypes::sockaddr_in;
+        let sockaddr_in6: ctypes::sockaddr_in6;
         let c_addr = match *address {
             SocketAddr::V4(ref v4) => {
-                let sockaddr = socket_addrv4_as_sockaddr_in(v4);
-                sockaddr as *const _ as *const ctypes::sockaddr
+                sockaddr_in = socket_addrv4_as_sockaddr_in(v4);
+                &sockaddr_in as *const _ as *const ctypes::sockaddr
             },
             SocketAddr::V6(ref v6) => {
-                let sockaddr = socket_addrv6_as_sockaddr_in6(v6);
-                sockaddr as *const _ as *const ctypes::sockaddr
+                sockaddr_in6 = socket_addrv6_as_sockaddr_in6(v6);
+                &sockaddr_in6 as *const _ as *const ctypes::sockaddr
             },
         };
         let length = match *address {
-            SocketAddr::V4(_) => mem::size_of::<ctypes::sockaddr>(),
+            SocketAddr::V4(_) => mem::size_of::<ctypes::sockaddr_in>(),
             SocketAddr::V6(_) => mem::size_of::<ctypes::sockaddr_in6>(),
         };
         let c_arg = Box::into_raw(Box::new(handler));

@@ -100,7 +100,7 @@ pub fn socket_addrv4_as_sockaddr_in(
     sock_v4: &SocketAddrV4) -> ctypes::sockaddr_in {
     let in_addr = ipv4_as_in_addr(sock_v4.ip());
     ctypes::sockaddr_in {
-        sin_family: ctypes::AF_INET as u16,
+        sin_family: ctypes::AF_INET as ctypes::sa_family_t,
         sin_port: sock_v4.port().to_be(),
         sin_addr: in_addr,
         sin_zero: [0; 8],
@@ -112,7 +112,7 @@ pub fn socket_addrv6_as_sockaddr_in6(
     sock_v6: &SocketAddrV6) -> ctypes::sockaddr_in6 {
     let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
     ctypes::sockaddr_in6 {
-        sin6_family: ctypes::AF_INET6 as i16,
+        sin6_family: ctypes::AF_INET6 as ctypes::sa_family_t,
         sin6_port: sock_v6.port().to_be(),
         sin6_addr: in6_addr,
         sin6_flowinfo: sock_v6.flowinfo().to_be(),

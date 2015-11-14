@@ -114,18 +114,6 @@ impl<'a> HasHostent for HostentBorrowed<'a> {
     }
 }
 
-impl fmt::Display for Hostent {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.display(fmt)
-    }
-}
-
-impl<'a> fmt::Display for HostentBorrowed<'a> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.display(fmt)
-    }
-}
-
 /// An alias, as retrieved from a host lookup.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]

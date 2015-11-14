@@ -69,7 +69,7 @@ impl AResults {
 
 impl fmt::Display for AResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.hostent.fmt(fmt)
+        self.hostent.display(fmt)
     }
 }
 

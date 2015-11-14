@@ -69,7 +69,7 @@ impl CNameResults {
 
 impl fmt::Display for CNameResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.hostent.fmt(fmt)
+        self.hostent.display(fmt)
     }
 }
 

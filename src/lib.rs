@@ -57,6 +57,7 @@ pub use channel::{
     Options,
 };
 pub use cname::CNameResults;
+pub use ctypes::fd_set;
 pub use error::AresError;
 pub use host::HostResults;
 pub use hostent::{

@@ -1,0 +1,34 @@
+#![allow(non_camel_case_types)]
+#[cfg(unix)]
+mod unix {
+  extern crate libc;
+  pub type in_addr = libc::in_addr;
+  pub type in6_addr = libc::in6_addr;
+  pub type fd_set = libc::fd_set;
+  pub type sockaddr = libc::sockaddr;
+  pub type sockaddr_in = libc::sockaddr_in;
+  pub type sockaddr_in6 = libc::sockaddr_in6;
+
+  pub const AF_INET: i32 = libc::AF_INET;
+  pub const AF_INET6: i32 = libc::AF_INET6;
+}
+
+#[cfg(windows)]
+mod windows {
+  extern crate winapi;
+  pub type in_addr = winapi::in_addr;
+  pub type in6_addr = winapi::in6_addr;
+  pub type fd_set = winapi::fd_set;
+  pub type sockaddr = winapi::SOCKADDR;
+  pub type sockaddr_in = winapi::ws2def::SOCKADDR_IN;
+  pub type sockaddr_in6 = winapi::ws2ipdef::sockaddr_in6;
+
+  pub const AF_INET: i32 = winapi::ws2def::AF_INET;
+  pub const AF_INET6: i32 = winapi::ws2def::AF_INET6;
+}
+
+#[cfg(unix)]
+pub use self::unix::*;
+
+#[cfg(windows)]
+pub use self::windows::*;

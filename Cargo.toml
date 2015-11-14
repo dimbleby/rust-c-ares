@@ -13,7 +13,7 @@ readme = "README.md"
 keywords = ["DNS", "c-ares"]
 
 [dependencies]
-libc = "0.1.*"
+libc = "*"
 bitflags = "*"
 winapi = "*"
 

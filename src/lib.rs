@@ -26,14 +26,11 @@
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 #[macro_use] extern crate bitflags;
 
-#[cfg(windows)]
-extern crate winapi;
-
 mod a;
 mod aaaa;
-mod srv;
 mod channel;
 mod cname;
+mod ctypes;
 mod error;
 pub mod flags;
 mod host;
@@ -45,6 +42,7 @@ pub mod ni_flags;
 mod ns;
 mod ptr;
 mod query;
+mod srv;
 mod types;
 mod txt;
 mod soa;

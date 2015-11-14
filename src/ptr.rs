@@ -6,6 +6,7 @@ use std::marker::PhantomData;
 use std::ptr;
 use std::slice;
 
+use ctypes;
 use error::AresError;
 use hostent::{
     hostent,
@@ -32,7 +33,7 @@ impl PTRResults {
                 data.len() as libc::c_int,
                 dummy_ip.as_ptr() as *const libc::c_void,
                 dummy_ip.len() as libc::c_int,
-                libc::AF_INET,
+                ctypes::AF_INET,
                 &mut hostent
                     as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent)
         };

@@ -96,6 +96,32 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> ctypes::in6_addr {
 }
 
 // Get a sockaddr_in from a SocketAddrV4.
+#[cfg(any(target_os = "macos",
+          target_os = "ios",
+          target_os = "freebsd",
+          target_os = "dragonfly",
+          target_os = "openbsd",
+          target_os = "netbsd",
+          target_os = "bitrig"))]
+pub fn socket_addrv4_as_sockaddr_in(
+    sock_v4: &SocketAddrV4) -> ctypes::sockaddr_in {
+    let in_addr = ipv4_as_in_addr(sock_v4.ip());
+    ctypes::sockaddr_in {
+        sin_len: mem::size_of::<ctypes::sockaddr_in>(),
+        sin_family: ctypes::AF_INET as ctypes::sa_family_t,
+        sin_port: sock_v4.port().to_be(),
+        sin_addr: in_addr,
+        sin_zero: [0; 8],
+    }
+}
+
+#[cfg(not(any(target_os = "macos",
+              target_os = "ios",
+              target_os = "freebsd",
+              target_os = "dragonfly",
+              target_os = "openbsd",
+              target_os = "netbsd",
+              target_os = "bitrig")))]
 pub fn socket_addrv4_as_sockaddr_in(
     sock_v4: &SocketAddrV4) -> ctypes::sockaddr_in {
     let in_addr = ipv4_as_in_addr(sock_v4.ip());
@@ -108,7 +134,33 @@ pub fn socket_addrv4_as_sockaddr_in(
 }
 
 // Get a sockaddr_in6 from a SocketAddrV6.
-#[cfg(unix)]
+#[cfg(any(target_os = "macos",
+          target_os = "ios",
+          target_os = "freebsd",
+          target_os = "dragonfly",
+          target_os = "openbsd",
+          target_os = "netbsd",
+          target_os = "bitrig"))]
+pub fn socket_addrv6_as_sockaddr_in6(
+    sock_v6: &SocketAddrV6) -> ctypes::sockaddr_in6 {
+    let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
+    ctypes::sockaddr_in6 {
+        sin6_len: mem::size_of::<ctypes::sockaddr_in6>(),
+        sin6_family: ctypes::AF_INET6 as ctypes::sa_family_t,
+        sin6_port: sock_v6.port().to_be(),
+        sin6_addr: in6_addr,
+        sin6_flowinfo: sock_v6.flowinfo().to_be(),
+        sin6_scope_id: sock_v6.scope_id().to_be(),
+    }
+}
+
+#[cfg(all(unix,not(any(target_os = "macos",
+                       target_os = "ios",
+                       target_os = "freebsd",
+                       target_os = "dragonfly",
+                       target_os = "openbsd",
+                       target_os = "netbsd",
+                       target_os = "bitrig"))))]
 pub fn socket_addrv6_as_sockaddr_in6(
     sock_v6: &SocketAddrV6) -> ctypes::sockaddr_in6 {
     let in6_addr = ipv6_as_in6_addr(sock_v6.ip());

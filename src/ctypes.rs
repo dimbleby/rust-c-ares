@@ -35,7 +35,7 @@ mod windows {
   pub type hostent = winapi::winsock2::hostent;
   pub type in_addr = winapi::in_addr;
   pub type in6_addr = winapi::in6_addr;
-  pub type sa_family_t = i16;
+  pub type sa_family_t = winapi::ws2def::ADDRESS_FAMILY;
   pub type sockaddr = winapi::SOCKADDR;
   pub type sockaddr_in = winapi::ws2def::SOCKADDR_IN;
   pub type sockaddr_in6 = winapi::ws2ipdef::sockaddr_in6;

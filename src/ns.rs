@@ -10,7 +10,7 @@ use error::AresError;
 use hostent::{
     HasHostent,
     HostAliasResultsIterator,
-    Hostent,
+    HostentOwned,
 };
 use utils::ares_error;
 
@@ -18,7 +18,7 @@ use utils::ares_error;
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct NSResults {
-    hostent: Hostent,
+    hostent: HostentOwned,
 }
 
 impl NSResults {
@@ -42,7 +42,7 @@ impl NSResults {
 
     fn new(hostent: *mut ctypes::hostent) -> NSResults {
         NSResults {
-            hostent: Hostent::new(hostent),
+            hostent: HostentOwned::new(hostent),
         }
     }
 

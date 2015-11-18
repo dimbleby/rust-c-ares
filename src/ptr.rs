@@ -10,7 +10,7 @@ use error::AresError;
 use hostent::{
     HasHostent,
     HostAliasResultsIterator,
-    Hostent,
+    HostentOwned,
 };
 use utils::ares_error;
 
@@ -18,7 +18,7 @@ use utils::ares_error;
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct PTRResults {
-    hostent: Hostent,
+    hostent: HostentOwned,
 }
 
 impl PTRResults {
@@ -46,7 +46,7 @@ impl PTRResults {
 
     fn new(hostent: *mut ctypes::hostent) -> PTRResults {
         PTRResults {
-            hostent: Hostent::new(hostent),
+            hostent: HostentOwned::new(hostent),
         }
     }
 

@@ -11,7 +11,7 @@ use hostent::{
     HasHostent,
     HostAddressResultsIterator,
     HostAliasResultsIterator,
-    Hostent,
+    HostentOwned,
 };
 use utils::ares_error;
 
@@ -19,7 +19,7 @@ use utils::ares_error;
 #[derive(Debug)]
 #[allow(raw_pointer_derive)]
 pub struct AResults {
-    hostent: Hostent,
+    hostent: HostentOwned,
 }
 
 impl AResults {
@@ -45,7 +45,7 @@ impl AResults {
 
     fn new(hostent: *mut ctypes::hostent) -> AResults {
         AResults {
-            hostent: Hostent::new(hostent),
+            hostent: HostentOwned::new(hostent),
         }
     }
 

@@ -19,21 +19,21 @@ use utils::address_family;
 
 #[allow(raw_pointer_derive)]
 #[derive(Debug)]
-pub struct Hostent {
+pub struct HostentOwned {
     inner: *mut ctypes::hostent,
     phantom: PhantomData<ctypes::hostent>,
 }
 
-impl Hostent {
-    pub fn new(hostent: *mut ctypes::hostent) -> Hostent {
-        Hostent {
+impl HostentOwned {
+    pub fn new(hostent: *mut ctypes::hostent) -> HostentOwned {
+        HostentOwned {
             inner: hostent,
             phantom: PhantomData,
         }
     }
 }
 
-impl Drop for Hostent {
+impl Drop for HostentOwned {
     fn drop(&mut self) {
         unsafe {
             c_ares_sys::ares_free_hostent(
@@ -102,7 +102,7 @@ pub trait HasHostent {
     }
 }
 
-impl HasHostent for Hostent {
+impl HasHostent for HostentOwned {
     fn hostent(&self) -> &ctypes::hostent {
         unsafe { &*self.inner }
     }

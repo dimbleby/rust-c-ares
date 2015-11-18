@@ -15,7 +15,6 @@ use self::nix::sys::epoll::{
 };
 use std::collections::HashSet;
 use std::error::Error;
-use std::os::unix::io::RawFd;
 
 fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
     match result {
@@ -103,7 +102,7 @@ pub fn main() {
 
     // Create an epoll file descriptor so that we can listen for events.
     let epoll = epoll_create().expect("Failed to create epoll");
-    let mut tracked_fds = HashSet::<RawFd>::new();
+    let mut tracked_fds = HashSet::<c_ares::Socket>::new();
     loop {
         // Ask c-ares what file descriptors we should be listening on, and map
         // those requests onto the epoll file descriptor.
@@ -146,7 +145,7 @@ pub fn main() {
             n => {
                 // Sockets became readable or writable.  Tell c-ares.
                 for event in &events[0..n] {
-                    let active_fd = event.data as RawFd;
+                    let active_fd = event.data as c_ares::Socket;
                     let rfd = if (event.events & EPOLLIN).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {

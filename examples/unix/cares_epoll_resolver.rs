@@ -18,7 +18,6 @@ use self::nix::sys::epoll::{
 };
 use std::collections::HashSet;
 use std::error::Error;
-use std::os::unix::io::RawFd;
 use std::sync::{
     Arc,
     Condvar,
@@ -50,7 +49,7 @@ fn fd_handling_thread(
 fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
     // Create an epoll file descriptor so that we can listen for events.
     let epoll = epoll_create().expect("Failed to create epoll");
-    let mut tracked_fds = HashSet::<RawFd>::new();
+    let mut tracked_fds = HashSet::<c_ares::Socket>::new();
     loop {
         // Ask c-ares what file descriptors we should be listening on, and map
         // those requests onto the epoll file descriptor.
@@ -94,7 +93,7 @@ fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
             n => {
                 // Sockets became readable or writable.  Tell c-ares.
                 for event in &events[0..n] {
-                    let active_fd = event.data as RawFd;
+                    let active_fd = event.data as c_ares::Socket;
                     let rfd = if (event.events & EPOLLIN).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {

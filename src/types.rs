@@ -1,5 +1,4 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::fmt;
 use std::net::{

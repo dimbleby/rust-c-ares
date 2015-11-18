@@ -74,6 +74,7 @@ use types::{
 use utils::{
   ares_error,
   ipv4_as_in_addr,
+  ipv4_as_value,
   ipv6_as_in6_addr,
   socket_addrv4_as_sockaddr_in,
   socket_addrv6_as_sockaddr_in6,
@@ -348,8 +349,11 @@ impl Channel {
 
     /// Set the local IPv4 address from which to make queries.
     pub fn set_local_ipv4(&mut self, ipv4: &Ipv4Addr) -> &mut Self {
-        let value = ipv4.octets().iter().fold(0, |v, &o| (v << 8) | o as u32);
-        unsafe { c_ares_sys::ares_set_local_ip4(self.ares_channel, value); }
+        unsafe {
+            c_ares_sys::ares_set_local_ip4(
+                self.ares_channel,
+                ipv4_as_value(ipv4));
+        }
         self
     }
 

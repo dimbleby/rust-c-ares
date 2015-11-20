@@ -8,7 +8,7 @@ use std::ptr;
 use std::slice;
 use std::str;
 
-use error::AresError ;
+use error::AresError;
 use utils::ares_error;
 
 /// The result of a successful SOA lookup.

@@ -74,7 +74,7 @@ use types::{
 use utils::{
   ares_error,
   ipv4_as_in_addr,
-  ipv4_as_value,
+  ipv4_as_u32,
   ipv6_as_in6_addr,
   socket_addrv4_as_sockaddr_in,
   socket_addrv6_as_sockaddr_in6,
@@ -352,7 +352,7 @@ impl Channel {
         unsafe {
             c_ares_sys::ares_set_local_ip4(
                 self.ares_channel,
-                ipv4_as_value(ipv4));
+                ipv4_as_u32(ipv4));
         }
         self
     }

@@ -54,19 +54,19 @@ pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
 }
 
 // Get the u32 value from an Ipv4Addr.
-pub fn ipv4_as_value(ipv4: &Ipv4Addr) -> u32 {
+pub fn ipv4_as_u32(ipv4: &Ipv4Addr) -> u32 {
     ipv4.octets().iter().fold(0, |v, &o| (v << 8) | o as u32)
 }
 
 // Get an in_addr from an Ipv4Addr.
 #[cfg(unix)]
 pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> ctypes::in_addr {
-    ctypes::in_addr { s_addr: ipv4_as_value(ipv4).to_be() }
+    ctypes::in_addr { s_addr: ipv4_as_u32(ipv4).to_be() }
 }
 
 #[cfg(windows)]
 pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> ctypes::in_addr {
-    ctypes::in_addr { S_un: ipv4_as_value(ipv4).to_be() }
+    ctypes::in_addr { S_un: ipv4_as_u32(ipv4).to_be() }
 }
 
 // Get an in6_addr from an Ipv6Addr.

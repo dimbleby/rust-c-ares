@@ -140,7 +140,7 @@ impl<'a> HostAddressResult<'a> {
                 IpAddr::V4(ipv4)
             },
             AddressFamily::INET6 => {
-                let ipv6 = self.ipv6_addr();
+                let ipv6 = self.ipv6_address();
                 IpAddr::V6(ipv6)
             },
         }
@@ -157,7 +157,7 @@ impl<'a> HostAddressResult<'a> {
         }
     }
 
-    fn ipv6_addr(&self) -> Ipv6Addr {
+    fn ipv6_address(&self) -> Ipv6Addr {
         let h_addr = self.h_addr;
         unsafe {
             Ipv6Addr::new(

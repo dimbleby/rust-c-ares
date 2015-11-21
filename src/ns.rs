@@ -5,7 +5,8 @@ use std::fmt;
 use std::ptr;
 use std::slice;
 
-use ctypes;
+use c_types;
+
 use error::AresError;
 use hostent::{
     HasHostent,
@@ -24,7 +25,7 @@ pub struct NSResults {
 impl NSResults {
     /// Obtain an `NSResults` from the response to an NS lookup.
     pub fn parse_from(data: &[u8]) -> Result<NSResults, AresError> {
-        let mut hostent: *mut ctypes::hostent = ptr::null_mut();
+        let mut hostent: *mut c_types::hostent = ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_ns_reply(
                 data.as_ptr(),
@@ -40,7 +41,7 @@ impl NSResults {
         }
     }
 
-    fn new(hostent: *mut ctypes::hostent) -> NSResults {
+    fn new(hostent: *mut c_types::hostent) -> NSResults {
         NSResults {
             hostent: HostentOwned::new(hostent),
         }

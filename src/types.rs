@@ -6,7 +6,7 @@ use std::net::{
     Ipv6Addr,
 };
 
-use ctypes;
+use c_types;
 
 /// The platform-specific file descriptor / socket type.  That is, either a
 /// `RawFd` or a `RawSocket`.
@@ -20,10 +20,10 @@ pub const SOCKET_BAD: Socket = c_ares_sys::ARES_SOCKET_BAD;
 #[derive(Clone, Copy, Debug)]
 pub enum AddressFamily {
     /// IPv4.
-    INET = ctypes::AF_INET as isize,
+    INET = c_types::AF_INET as isize,
 
     /// IPv6.
-    INET6 = ctypes::AF_INET6 as isize,
+    INET6 = c_types::AF_INET6 as isize,
 }
 
 /// An IP address, either an IPv4 or an IPv6 address.

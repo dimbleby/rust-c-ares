@@ -10,7 +10,8 @@ use std::net::{
 };
 use std::str;
 
-use ctypes;
+use c_types;
+
 use types::{
     AddressFamily,
     IpAddr,
@@ -20,12 +21,12 @@ use utils::address_family;
 #[allow(raw_pointer_derive)]
 #[derive(Debug)]
 pub struct HostentOwned {
-    inner: *mut ctypes::hostent,
-    phantom: PhantomData<ctypes::hostent>,
+    inner: *mut c_types::hostent,
+    phantom: PhantomData<c_types::hostent>,
 }
 
 impl HostentOwned {
-    pub fn new(hostent: *mut ctypes::hostent) -> HostentOwned {
+    pub fn new(hostent: *mut c_types::hostent) -> HostentOwned {
         HostentOwned {
             inner: hostent,
             phantom: PhantomData,
@@ -44,11 +45,11 @@ impl Drop for HostentOwned {
 
 #[derive(Clone, Copy, Debug)]
 pub struct HostentBorrowed<'a> {
-    inner: &'a ctypes::hostent,
+    inner: &'a c_types::hostent,
 }
 
 impl<'a> HostentBorrowed<'a> {
-    pub fn new(hostent: &ctypes::hostent) -> HostentBorrowed {
+    pub fn new(hostent: &c_types::hostent) -> HostentBorrowed {
         HostentBorrowed {
             inner: hostent,
         }
@@ -56,7 +57,7 @@ impl<'a> HostentBorrowed<'a> {
 }
 
 pub trait HasHostent {
-    fn hostent(&self) -> &ctypes::hostent;
+    fn hostent(&self) -> &c_types::hostent;
 
     fn hostname(&self) -> &str {
         unsafe {
@@ -103,13 +104,13 @@ pub trait HasHostent {
 }
 
 impl HasHostent for HostentOwned {
-    fn hostent(&self) -> &ctypes::hostent {
+    fn hostent(&self) -> &c_types::hostent {
         unsafe { &*self.inner }
     }
 }
 
 impl<'a> HasHostent for HostentBorrowed<'a> {
-    fn hostent(&self) -> &ctypes::hostent {
+    fn hostent(&self) -> &c_types::hostent {
         self.inner
     }
 }
@@ -119,7 +120,7 @@ impl<'a> HasHostent for HostentBorrowed<'a> {
 #[allow(raw_pointer_derive)]
 pub struct HostAliasResult<'a> {
     h_alias: *const libc::c_char,
-    phantom: PhantomData<&'a ctypes::hostent>,
+    phantom: PhantomData<&'a c_types::hostent>,
 }
 
 /// An address, as retrieved from a host lookup.
@@ -128,7 +129,7 @@ pub struct HostAliasResult<'a> {
 pub struct HostAddressResult<'a> {
     family: AddressFamily,
     h_addr: *const libc::c_char,
-    phantom: PhantomData<&'a ctypes::hostent>,
+    phantom: PhantomData<&'a c_types::hostent>,
 }
 
 impl<'a> HostAddressResult<'a> {
@@ -187,7 +188,7 @@ unsafe impl<'a> Sync for HostAddressResult<'a> { }
 pub struct HostAddressResultsIterator<'a> {
     family: Option<AddressFamily>,
     next: *const *const libc::c_char,
-    phantom: PhantomData<&'a ctypes::hostent>,
+    phantom: PhantomData<&'a c_types::hostent>,
 }
 
 impl<'a> Iterator for HostAddressResultsIterator<'a> {
@@ -235,7 +236,7 @@ unsafe impl<'a> Sync for HostAliasResult<'a> { }
 #[allow(raw_pointer_derive)]
 pub struct HostAliasResultsIterator<'a> {
     next: *const *const libc::c_char,
-    phantom: PhantomData<&'a ctypes::hostent>,
+    phantom: PhantomData<&'a c_types::hostent>,
 }
 
 impl<'a> Iterator for HostAliasResultsIterator<'a> {

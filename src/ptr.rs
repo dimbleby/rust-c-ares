@@ -5,7 +5,8 @@ use std::fmt;
 use std::ptr;
 use std::slice;
 
-use ctypes;
+use c_types;
+
 use error::AresError;
 use hostent::{
     HasHostent,
@@ -24,7 +25,7 @@ pub struct PTRResults {
 impl PTRResults {
     /// Obtain a `PTRResults` from the response to a PTR lookup.
     pub fn parse_from(data: &[u8]) -> Result<PTRResults, AresError> {
-        let mut hostent: *mut ctypes::hostent = ptr::null_mut();
+        let mut hostent: *mut c_types::hostent = ptr::null_mut();
         let dummy_ip = [0,0,0,0];
         let parse_status = unsafe {
             c_ares_sys::ares_parse_ptr_reply(
@@ -32,7 +33,7 @@ impl PTRResults {
                 data.len() as libc::c_int,
                 dummy_ip.as_ptr() as *const libc::c_void,
                 dummy_ip.len() as libc::c_int,
-                ctypes::AF_INET,
+                c_types::AF_INET,
                 &mut hostent
                     as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent)
         };
@@ -44,7 +45,7 @@ impl PTRResults {
         }
     }
 
-    fn new(hostent: *mut ctypes::hostent) -> PTRResults {
+    fn new(hostent: *mut c_types::hostent) -> PTRResults {
         PTRResults {
             hostent: HostentOwned::new(hostent),
         }

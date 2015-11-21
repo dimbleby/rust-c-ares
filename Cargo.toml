@@ -16,6 +16,7 @@ keywords = ["DNS", "c-ares"]
 libc = "*"
 bitflags = "*"
 winapi = "*"
+c-types = "*"
 
 [dependencies.c-ares-sys]
 path = "c-ares-sys"

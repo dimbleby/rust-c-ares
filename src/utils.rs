@@ -1,7 +1,8 @@
 extern crate c_ares_sys;
 extern crate libc;
 
-use ctypes;
+use c_types;
+
 use error::AresError;
 use types::AddressFamily;
 use std::mem;
@@ -47,8 +48,8 @@ pub fn ares_error(code: libc::c_int) -> AresError {
 // Convert an address family into a more strongly typed AddressFamily.
 pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
     match family {
-        ctypes::AF_INET => Some(AddressFamily::INET),
-        ctypes::AF_INET6 => Some(AddressFamily::INET6),
+        c_types::AF_INET => Some(AddressFamily::INET),
+        c_types::AF_INET6 => Some(AddressFamily::INET6),
         _ => None,
     }
 }
@@ -60,19 +61,19 @@ pub fn ipv4_as_u32(ipv4: &Ipv4Addr) -> u32 {
 
 // Get an in_addr from an Ipv4Addr.
 #[cfg(unix)]
-pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> ctypes::in_addr {
-    ctypes::in_addr { s_addr: ipv4_as_u32(ipv4).to_be() }
+pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
+    c_types::in_addr { s_addr: ipv4_as_u32(ipv4).to_be() }
 }
 
 #[cfg(windows)]
-pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> ctypes::in_addr {
-    ctypes::in_addr { S_un: ipv4_as_u32(ipv4).to_be() }
+pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
+    c_types::in_addr { S_un: ipv4_as_u32(ipv4).to_be() }
 }
 
 // Get an in6_addr from an Ipv6Addr.
-pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> ctypes::in6_addr {
+pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
     let segments = ipv6.segments();
-    let mut in6_addr: ctypes::in6_addr = unsafe { mem::uninitialized() };
+    let mut in6_addr: c_types::in6_addr = unsafe { mem::uninitialized() };
     in6_addr.s6_addr[0] = (segments[0] >> 8) as u8;
     in6_addr.s6_addr[1] = segments[0] as u8;
     in6_addr.s6_addr[2] = (segments[1] >> 8) as u8;
@@ -101,11 +102,11 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> ctypes::in6_addr {
           target_os = "netbsd",
           target_os = "bitrig"))]
 pub fn socket_addrv4_as_sockaddr_in(
-    sock_v4: &SocketAddrV4) -> ctypes::sockaddr_in {
+    sock_v4: &SocketAddrV4) -> c_types::sockaddr_in {
     let in_addr = ipv4_as_in_addr(sock_v4.ip());
-    ctypes::sockaddr_in {
-        sin_len: mem::size_of::<ctypes::sockaddr_in>() as u8,
-        sin_family: ctypes::AF_INET as ctypes::sa_family_t,
+    c_types::sockaddr_in {
+        sin_len: mem::size_of::<c_types::sockaddr_in>() as u8,
+        sin_family: c_types::AF_INET as c_types::sa_family_t,
         sin_port: sock_v4.port().to_be(),
         sin_addr: in_addr,
         sin_zero: [0; 8],
@@ -120,10 +121,10 @@ pub fn socket_addrv4_as_sockaddr_in(
               target_os = "netbsd",
               target_os = "bitrig")))]
 pub fn socket_addrv4_as_sockaddr_in(
-    sock_v4: &SocketAddrV4) -> ctypes::sockaddr_in {
+    sock_v4: &SocketAddrV4) -> c_types::sockaddr_in {
     let in_addr = ipv4_as_in_addr(sock_v4.ip());
-    ctypes::sockaddr_in {
-        sin_family: ctypes::AF_INET as ctypes::sa_family_t,
+    c_types::sockaddr_in {
+        sin_family: c_types::AF_INET as c_types::sa_family_t,
         sin_port: sock_v4.port().to_be(),
         sin_addr: in_addr,
         sin_zero: [0; 8],
@@ -139,11 +140,11 @@ pub fn socket_addrv4_as_sockaddr_in(
           target_os = "netbsd",
           target_os = "bitrig"))]
 pub fn socket_addrv6_as_sockaddr_in6(
-    sock_v6: &SocketAddrV6) -> ctypes::sockaddr_in6 {
+    sock_v6: &SocketAddrV6) -> c_types::sockaddr_in6 {
     let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
-    ctypes::sockaddr_in6 {
-        sin6_len: mem::size_of::<ctypes::sockaddr_in6>() as u8,
-        sin6_family: ctypes::AF_INET6 as ctypes::sa_family_t,
+    c_types::sockaddr_in6 {
+        sin6_len: mem::size_of::<c_types::sockaddr_in6>() as u8,
+        sin6_family: c_types::AF_INET6 as c_types::sa_family_t,
         sin6_port: sock_v6.port().to_be(),
         sin6_addr: in6_addr,
         sin6_flowinfo: sock_v6.flowinfo().to_be(),
@@ -159,10 +160,10 @@ pub fn socket_addrv6_as_sockaddr_in6(
                        target_os = "netbsd",
                        target_os = "bitrig"))))]
 pub fn socket_addrv6_as_sockaddr_in6(
-    sock_v6: &SocketAddrV6) -> ctypes::sockaddr_in6 {
+    sock_v6: &SocketAddrV6) -> c_types::sockaddr_in6 {
     let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
-    ctypes::sockaddr_in6 {
-        sin6_family: ctypes::AF_INET6 as ctypes::sa_family_t,
+    c_types::sockaddr_in6 {
+        sin6_family: c_types::AF_INET6 as c_types::sa_family_t,
         sin6_port: sock_v6.port().to_be(),
         sin6_addr: in6_addr,
         sin6_flowinfo: sock_v6.flowinfo().to_be(),
@@ -172,10 +173,10 @@ pub fn socket_addrv6_as_sockaddr_in6(
 
 #[cfg(windows)]
 pub fn socket_addrv6_as_sockaddr_in6(
-    sock_v6: &SocketAddrV6) -> ctypes::sockaddr_in6 {
+    sock_v6: &SocketAddrV6) -> c_types::sockaddr_in6 {
     let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
-    ctypes::sockaddr_in6 {
-        sin6_family: ctypes::AF_INET6 as i16,
+    c_types::sockaddr_in6 {
+        sin6_family: c_types::AF_INET6 as i16,
         sin6_port: sock_v6.port().to_be(),
         sin6_addr: in6_addr,
         sin6_flowinfo: sock_v6.flowinfo().to_be(),

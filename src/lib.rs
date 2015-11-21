@@ -25,12 +25,12 @@
 //! Complete examples showing how to use the library can be found
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 #[macro_use] extern crate bitflags;
+extern crate c_types;
 
 mod a;
 mod aaaa;
 mod channel;
 mod cname;
-mod ctypes;
 mod error;
 pub mod flags;
 mod host;
@@ -57,7 +57,6 @@ pub use channel::{
     Options,
 };
 pub use cname::CNameResults;
-pub use ctypes::fd_set;
 pub use error::AresError;
 pub use host::HostResults;
 pub use hostent::{

@@ -3,7 +3,8 @@ extern crate libc;
 
 use std::fmt;
 
-use ctypes;
+use c_types;
+
 use error::AresError;
 use hostent::{
     HasHostent,
@@ -20,7 +21,7 @@ pub struct HostResults<'a> {
 }
 
 impl<'a> HostResults<'a> {
-    fn new(hostent: &'a ctypes::hostent) -> HostResults {
+    fn new(hostent: &'a c_types::hostent) -> HostResults {
         HostResults {
             hostent: HostentBorrowed::new(hostent),
         }
@@ -62,7 +63,7 @@ pub unsafe extern "C" fn get_host_callback<F>(
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))
     } else {
-        let hostent_ref = &*(hostent as *mut ctypes::hostent);
+        let hostent_ref = &*(hostent as *mut c_types::hostent);
         let host_results = HostResults::new(hostent_ref);
         Ok(host_results)
     };

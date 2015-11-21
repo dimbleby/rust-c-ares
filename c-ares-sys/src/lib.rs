@@ -6,9 +6,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 extern crate libc;
-
-#[cfg(windows)]
-extern crate winapi;
+extern crate c_types;
 
 mod ffi;
 mod constants;

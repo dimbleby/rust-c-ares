@@ -18,3 +18,4 @@ pkg-config = "*"
 [dependencies]
 libc = "*"
 c-types = "*"
+winapi = "*"

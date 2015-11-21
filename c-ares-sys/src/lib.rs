@@ -8,6 +8,9 @@
 extern crate libc;
 extern crate c_types;
 
+#[cfg(windows)]
+extern crate winapi;
+
 mod ffi;
 mod constants;
 

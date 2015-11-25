@@ -183,6 +183,7 @@ impl<'a> fmt::Display for HostAddressResult<'a> {
 unsafe impl<'a> Send for HostAddressResult<'a> { }
 unsafe impl<'a> Sync for HostAddressResult<'a> { }
 
+/// Iterator of `HostAddressResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct HostAddressResultsIterator<'a> {
@@ -232,6 +233,7 @@ impl<'a> fmt::Display for HostAliasResult<'a> {
 unsafe impl<'a> Send for HostAliasResult<'a> { }
 unsafe impl<'a> Sync for HostAliasResult<'a> { }
 
+/// Iterator of `HostAliasResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct HostAliasResultsIterator<'a> {

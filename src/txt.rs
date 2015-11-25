@@ -76,6 +76,7 @@ impl fmt::Display for TXTResults {
     }
 }
 
+/// Iterator of `TXTResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct TXTResultsIterator<'a> {

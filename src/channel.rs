@@ -739,8 +739,6 @@ impl GetSock {
     }
 
     /// Returns an iterator over the sockets that `c-ares` is interested in.
-    ///
-    /// Iterator items are `(fd, readable, writable)`.
     pub fn iter(&self) -> GetSockIterator {
         GetSockIterator {
             next: 0,
@@ -749,6 +747,9 @@ impl GetSock {
     }
 }
 
+/// Iterator for sockets of interest to `c-ares`.
+///
+/// Iterator items are `(socket, readable, writable)`.
 #[derive(Clone, Copy, Debug)]
 pub struct GetSockIterator<'a> {
     next: usize,

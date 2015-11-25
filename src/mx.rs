@@ -76,6 +76,7 @@ impl fmt::Display for MXResults {
     }
 }
 
+/// Iterator of `MXResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct MXResultsIterator<'a> {

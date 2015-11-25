@@ -54,6 +54,7 @@ pub use aaaa::AAAAResults;
 pub use channel::{
     Channel,
     GetSock,
+    GetSockIterator,
     Options,
 };
 pub use cname::CNameResults;
@@ -61,16 +62,20 @@ pub use error::AresError;
 pub use host::HostResults;
 pub use hostent::{
     HostAddressResult,
+    HostAddressResultsIterator,
     HostAliasResult,
+    HostAliasResultsIterator,
 };
 pub use mx::{
     MXResult,
     MXResults,
+    MXResultsIterator,
 };
 pub use nameinfo::NameInfoResult;
 pub use naptr::{
     NAPTRResult,
     NAPTRResults,
+    NAPTRResultsIterator,
 };
 pub use ns::NSResults;
 pub use ptr::PTRResults;
@@ -78,10 +83,12 @@ pub use soa::SOAResult;
 pub use srv::{
     SRVResult,
     SRVResults,
+    SRVResultsIterator,
 };
 pub use txt::{
     TXTResult,
     TXTResults,
+    TXTResultsIterator,
 };
 pub use types::{
     AddressFamily,

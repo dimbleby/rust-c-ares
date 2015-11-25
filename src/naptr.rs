@@ -78,6 +78,7 @@ impl fmt::Display for NAPTRResults {
     }
 }
 
+/// Iterator of `NAPTRResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct NAPTRResultsIterator<'a> {

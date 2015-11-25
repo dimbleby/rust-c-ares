@@ -77,6 +77,7 @@ impl fmt::Display for SRVResults {
     }
 }
 
+/// Iterator of `SRVResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
 pub struct SRVResultsIterator<'a> {

@@ -66,16 +66,16 @@ pub trait HasHostent {
         }
     }
 
-    fn addresses(&self) -> HostAddressResultsIterator {
-        HostAddressResultsIterator {
+    fn addresses(&self) -> HostAddressResultsIter {
+        HostAddressResultsIter {
             family: address_family(self.hostent().h_addrtype as libc::c_int),
             next: self.hostent().h_addr_list as *const *const _,
             phantom: PhantomData,
         }
     }
 
-    fn aliases(&self) -> HostAliasResultsIterator {
-        HostAliasResultsIterator {
+    fn aliases(&self) -> HostAliasResultsIter {
+        HostAliasResultsIter {
             next: self.hostent().h_aliases as *const *const _,
             phantom: PhantomData,
         }
@@ -186,13 +186,13 @@ unsafe impl<'a> Sync for HostAddressResult<'a> { }
 /// Iterator of `HostAddressResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
-pub struct HostAddressResultsIterator<'a> {
+pub struct HostAddressResultsIter<'a> {
     family: Option<AddressFamily>,
     next: *const *const libc::c_char,
     phantom: PhantomData<&'a c_types::hostent>,
 }
 
-impl<'a> Iterator for HostAddressResultsIterator<'a> {
+impl<'a> Iterator for HostAddressResultsIter<'a> {
     type Item = HostAddressResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let h_addr = unsafe { *self.next };
@@ -211,8 +211,8 @@ impl<'a> Iterator for HostAddressResultsIterator<'a> {
     }
 }
 
-unsafe impl<'a> Send for HostAddressResultsIterator<'a> { }
-unsafe impl<'a> Sync for HostAddressResultsIterator<'a> { }
+unsafe impl<'a> Send for HostAddressResultsIter<'a> { }
+unsafe impl<'a> Sync for HostAddressResultsIter<'a> { }
 
 impl<'a> HostAliasResult<'a> {
     /// Returns the alias in this `HostAliasResult`.
@@ -236,12 +236,12 @@ unsafe impl<'a> Sync for HostAliasResult<'a> { }
 /// Iterator of `HostAliasResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
-pub struct HostAliasResultsIterator<'a> {
+pub struct HostAliasResultsIter<'a> {
     next: *const *const libc::c_char,
     phantom: PhantomData<&'a c_types::hostent>,
 }
 
-impl<'a> Iterator for HostAliasResultsIterator<'a> {
+impl<'a> Iterator for HostAliasResultsIter<'a> {
     type Item = HostAliasResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let h_alias = unsafe { *self.next };
@@ -258,5 +258,5 @@ impl<'a> Iterator for HostAliasResultsIterator<'a> {
     }
 }
 
-unsafe impl<'a> Send for HostAliasResultsIterator<'a> { }
-unsafe impl<'a> Sync for HostAliasResultsIterator<'a> { }
+unsafe impl<'a> Send for HostAliasResultsIter<'a> { }
+unsafe impl<'a> Sync for HostAliasResultsIter<'a> { }

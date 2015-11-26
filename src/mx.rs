@@ -54,8 +54,8 @@ impl MXResults {
     }
 
     /// Returns an iterator over the `MXResult` values in this `MXResults`.
-    pub fn iter(&self) -> MXResultsIterator {
-        MXResultsIterator {
+    pub fn iter(&self) -> MXResultsIter {
+        MXResultsIter {
             next: self.mx_reply,
             phantom: PhantomData,
         }
@@ -79,12 +79,12 @@ impl fmt::Display for MXResults {
 /// Iterator of `MXResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
-pub struct MXResultsIterator<'a> {
+pub struct MXResultsIter<'a> {
     next: *const c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
 }
 
-impl<'a> Iterator for MXResultsIterator<'a> {
+impl<'a> Iterator for MXResultsIter<'a> {
     type Item = MXResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let mx_reply = self.next;
@@ -104,7 +104,7 @@ impl<'a> Iterator for MXResultsIterator<'a> {
 }
 impl<'a> IntoIterator for &'a MXResults {
     type Item = MXResult<'a>;
-    type IntoIter = MXResultsIterator<'a>;
+    type IntoIter = MXResultsIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -123,8 +123,8 @@ unsafe impl Send for MXResults { }
 unsafe impl Sync for MXResults { }
 unsafe impl<'a> Send for MXResult<'a> { }
 unsafe impl<'a> Sync for MXResult<'a> { }
-unsafe impl<'a> Send for MXResultsIterator<'a> { }
-unsafe impl<'a> Sync for MXResultsIterator<'a> { }
+unsafe impl<'a> Send for MXResultsIter<'a> { }
+unsafe impl<'a> Sync for MXResultsIter<'a> { }
 
 impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.

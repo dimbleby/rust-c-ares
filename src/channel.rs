@@ -739,8 +739,8 @@ impl GetSock {
     }
 
     /// Returns an iterator over the sockets that `c-ares` is interested in.
-    pub fn iter(&self) -> GetSockIterator {
-        GetSockIterator {
+    pub fn iter(&self) -> GetSockIter {
+        GetSockIter {
             next: 0,
             getsock: self,
         }
@@ -751,12 +751,12 @@ impl GetSock {
 ///
 /// Iterator items are `(socket, readable, writable)`.
 #[derive(Clone, Copy, Debug)]
-pub struct GetSockIterator<'a> {
+pub struct GetSockIter<'a> {
     next: usize,
     getsock: &'a GetSock,
 }
 
-impl<'a> Iterator for GetSockIterator<'a> {
+impl<'a> Iterator for GetSockIter<'a> {
     type Item = (Socket, bool, bool);
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.next;
@@ -780,7 +780,7 @@ impl<'a> Iterator for GetSockIterator<'a> {
 
 impl<'a> IntoIterator for &'a GetSock {
     type Item = (Socket, bool, bool);
-    type IntoIter = GetSockIterator<'a>;
+    type IntoIter = GetSockIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()

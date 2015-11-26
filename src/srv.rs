@@ -55,8 +55,8 @@ impl SRVResults {
     }
 
     /// Returns an iterator over the `SRVResult` values in this `SRVResults`.
-    pub fn iter(&self) -> SRVResultsIterator {
-        SRVResultsIterator {
+    pub fn iter(&self) -> SRVResultsIter {
+        SRVResultsIter {
             next: self.srv_reply,
             phantom: PhantomData,
         }
@@ -80,12 +80,12 @@ impl fmt::Display for SRVResults {
 /// Iterator of `SRVResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
-pub struct SRVResultsIterator<'a> {
+pub struct SRVResultsIter<'a> {
     next: *const c_ares_sys::Struct_ares_srv_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_srv_reply>,
 }
 
-impl<'a> Iterator for SRVResultsIterator<'a> {
+impl<'a> Iterator for SRVResultsIter<'a> {
     type Item = SRVResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let srv_reply = self.next;
@@ -104,7 +104,7 @@ impl<'a> Iterator for SRVResultsIterator<'a> {
 
 impl<'a> IntoIterator for &'a SRVResults {
     type Item = SRVResult<'a>;
-    type IntoIter = SRVResultsIterator<'a>;
+    type IntoIter = SRVResultsIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -123,8 +123,8 @@ unsafe impl Send for SRVResults { }
 unsafe impl Sync for SRVResults { }
 unsafe impl<'a> Send for SRVResult<'a> { }
 unsafe impl<'a> Sync for SRVResult<'a> { }
-unsafe impl<'a> Send for SRVResultsIterator<'a> { }
-unsafe impl<'a> Sync for SRVResultsIterator<'a> { }
+unsafe impl<'a> Send for SRVResultsIter<'a> { }
+unsafe impl<'a> Sync for SRVResultsIter<'a> { }
 
 impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.

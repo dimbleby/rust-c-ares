@@ -10,7 +10,7 @@ use c_types;
 use error::AresError;
 use hostent::{
     HasHostent,
-    HostAliasResultsIterator,
+    HostAliasResultsIter,
     HostentOwned,
 };
 use utils::ares_error;
@@ -58,7 +58,7 @@ impl PTRResults {
 
     /// Returns an iterator over the `HostAliasResult` values in this
     /// `PTRResults`.
-    pub fn aliases(&self) -> HostAliasResultsIterator {
+    pub fn aliases(&self) -> HostAliasResultsIter {
         self.hostent.aliases()
     }
 }

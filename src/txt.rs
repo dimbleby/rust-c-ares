@@ -54,8 +54,8 @@ impl TXTResults {
     }
 
     /// Returns an iterator over the `TXTResult` values in this `TXTResults`.
-    pub fn iter(&self) -> TXTResultsIterator {
-        TXTResultsIterator {
+    pub fn iter(&self) -> TXTResultsIter {
+        TXTResultsIter {
             next: self.txt_reply,
             phantom: PhantomData,
         }
@@ -79,12 +79,12 @@ impl fmt::Display for TXTResults {
 /// Iterator of `TXTResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
-pub struct TXTResultsIterator<'a> {
+pub struct TXTResultsIter<'a> {
     next: *const c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
 }
 
-impl<'a> Iterator for TXTResultsIterator<'a> {
+impl<'a> Iterator for TXTResultsIter<'a> {
     type Item = TXTResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let txt_reply = self.next;
@@ -104,7 +104,7 @@ impl<'a> Iterator for TXTResultsIterator<'a> {
 }
 impl<'a> IntoIterator for &'a TXTResults {
     type Item = TXTResult<'a>;
-    type IntoIter = TXTResultsIterator<'a>;
+    type IntoIter = TXTResultsIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -123,8 +123,8 @@ unsafe impl Send for TXTResults { }
 unsafe impl Sync for TXTResults { }
 unsafe impl<'a> Send for TXTResult<'a> { }
 unsafe impl<'a> Sync for TXTResult<'a> { }
-unsafe impl<'a> Send for TXTResultsIterator<'a> { }
-unsafe impl<'a> Sync for TXTResultsIterator<'a> { }
+unsafe impl<'a> Send for TXTResultsIter<'a> { }
+unsafe impl<'a> Sync for TXTResultsIter<'a> { }
 
 impl<'a> TXTResult<'a> {
     /// Returns the text in this `TXTResult`.

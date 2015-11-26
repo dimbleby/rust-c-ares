@@ -56,8 +56,8 @@ impl NAPTRResults {
 
     /// Returns an iterator over the `NAPTRResult` values in this
     /// `NAPTRResults`.
-    pub fn iter(&self) -> NAPTRResultsIterator {
-        NAPTRResultsIterator {
+    pub fn iter(&self) -> NAPTRResultsIter {
+        NAPTRResultsIter {
             next: self.naptr_reply,
             phantom: PhantomData,
         }
@@ -81,12 +81,12 @@ impl fmt::Display for NAPTRResults {
 /// Iterator of `NAPTRResult`s.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]
-pub struct NAPTRResultsIterator<'a> {
+pub struct NAPTRResultsIter<'a> {
     next: *const c_ares_sys::Struct_ares_naptr_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_naptr_reply>,
 }
 
-impl<'a> Iterator for NAPTRResultsIterator<'a> {
+impl<'a> Iterator for NAPTRResultsIter<'a> {
     type Item = NAPTRResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let naptr_reply = self.next;
@@ -105,7 +105,7 @@ impl<'a> Iterator for NAPTRResultsIterator<'a> {
 
 impl<'a> IntoIterator for &'a NAPTRResults {
     type Item = NAPTRResult<'a>;
-    type IntoIter = NAPTRResultsIterator<'a>;
+    type IntoIter = NAPTRResultsIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -124,8 +124,8 @@ unsafe impl Send for NAPTRResults { }
 unsafe impl Sync for NAPTRResults { }
 unsafe impl<'a> Send for NAPTRResult<'a> { }
 unsafe impl<'a> Sync for NAPTRResult<'a> { }
-unsafe impl<'a> Send for NAPTRResultsIterator<'a> { }
-unsafe impl<'a> Sync for NAPTRResultsIterator<'a> { }
+unsafe impl<'a> Send for NAPTRResultsIter<'a> { }
+unsafe impl<'a> Sync for NAPTRResultsIter<'a> { }
 
 impl<'a> NAPTRResult<'a> {
     /// Returns the flags in this `NAPTRResult`.

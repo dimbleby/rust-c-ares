@@ -10,8 +10,8 @@ use c_types;
 use error::AresError;
 use hostent::{
     HasHostent,
-    HostAddressResultsIterator,
-    HostAliasResultsIterator,
+    HostAddressResultsIter,
+    HostAliasResultsIter,
     HostentOwned,
 };
 use utils::ares_error;
@@ -57,13 +57,13 @@ impl CNameResults {
 
     /// Returns an iterator over the `HostAddressResult` values in this
     /// `CNameResults`.
-    pub fn addresses(&self) -> HostAddressResultsIterator {
+    pub fn addresses(&self) -> HostAddressResultsIter {
         self.hostent.addresses()
     }
 
     /// Returns an iterator over the `HostAliasResult` values in this
     /// `CNameResults`.
-    pub fn aliases(&self) -> HostAliasResultsIterator {
+    pub fn aliases(&self) -> HostAliasResultsIter {
         self.hostent.aliases()
     }
 }

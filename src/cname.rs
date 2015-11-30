@@ -74,9 +74,6 @@ impl fmt::Display for CNameResults {
     }
 }
 
-unsafe impl Send for CNameResults { }
-unsafe impl Sync for CNameResults { }
-
 pub unsafe extern "C" fn query_cname_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,

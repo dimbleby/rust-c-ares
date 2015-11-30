@@ -74,9 +74,6 @@ impl fmt::Display for AAAAResults {
     }
 }
 
-unsafe impl Send for AAAAResults { }
-unsafe impl Sync for AAAAResults { }
-
 pub unsafe extern "C" fn query_aaaa_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,

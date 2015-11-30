@@ -115,6 +115,12 @@ impl<'a> HasHostent for HostentBorrowed<'a> {
     }
 }
 
+unsafe impl Send for HostentOwned { }
+unsafe impl Sync for HostentOwned { }
+
+unsafe impl<'a> Send for HostentBorrowed<'a> { }
+unsafe impl<'a> Sync for HostentBorrowed<'a> { }
+
 /// An alias, as retrieved from a host lookup.
 #[derive(Clone, Copy, Debug)]
 #[allow(raw_pointer_derive)]

@@ -74,9 +74,6 @@ impl fmt::Display for NSResults {
     }
 }
 
-unsafe impl Send for NSResults { }
-unsafe impl Sync for NSResults { }
-
 pub unsafe extern "C" fn query_ns_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,

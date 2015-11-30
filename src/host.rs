@@ -51,9 +51,6 @@ impl<'a> fmt::Display for HostResults<'a> {
     }
 }
 
-unsafe impl<'a> Send for HostResults<'a> { }
-unsafe impl<'a> Sync for HostResults<'a> { }
-
 pub unsafe extern "C" fn get_host_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,

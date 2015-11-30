@@ -48,6 +48,9 @@ mod txt;
 mod soa;
 mod utils;
 
+#[cfg(test)]
+mod tests;
+
 // Re-export public interfaces.
 pub use a::AResults;
 pub use aaaa::AAAAResults;

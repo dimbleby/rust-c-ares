@@ -74,9 +74,6 @@ impl fmt::Display for AResults {
     }
 }
 
-unsafe impl Send for AResults { }
-unsafe impl Sync for AResults { }
-
 pub unsafe extern "C" fn query_a_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,

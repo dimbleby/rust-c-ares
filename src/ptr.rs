@@ -78,9 +78,6 @@ impl fmt::Display for PTRResults {
     }
 }
 
-unsafe impl Send for PTRResults { }
-unsafe impl Sync for PTRResults { }
-
 pub unsafe extern "C" fn query_ptr_callback<F>(
     arg: *mut libc::c_void,
     status: libc::c_int,

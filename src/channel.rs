@@ -12,6 +12,7 @@ use std::net::{
 use std::ptr;
 
 use c_types;
+use ip::IpAddr;
 
 use a::{
     AResults,
@@ -68,7 +69,6 @@ use txt::{
 use types::{
     AddressFamily,
     DnsClass,
-    IpAddr,
     QueryType,
     Socket,
 };

@@ -1,11 +1,5 @@
 extern crate c_ares_sys;
 
-use std::fmt;
-use std::net::{
-    Ipv4Addr,
-    Ipv6Addr,
-};
-
 use c_types;
 
 /// The platform-specific file descriptor / socket type.  That is, either a
@@ -24,25 +18,6 @@ pub enum AddressFamily {
 
     /// IPv6.
     INET6 = c_types::AF_INET6 as isize,
-}
-
-/// An IP address, either an IPv4 or an IPv6 address.
-#[derive(Clone, Copy, Debug)]
-pub enum IpAddr {
-    /// An IPv4 address.
-    V4(Ipv4Addr),
-
-    /// An IPv6 address.
-    V6(Ipv6Addr),
-}
-
-impl fmt::Display for IpAddr {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            IpAddr::V4(ref a) => a.fmt(fmt),
-            IpAddr::V6(ref a) => a.fmt(fmt),
-        }
-    }
 }
 
 // See arpa/nameser.h

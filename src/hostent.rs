@@ -11,11 +11,9 @@ use std::net::{
 use std::str;
 
 use c_types;
+use ip::IpAddr;
 
-use types::{
-    AddressFamily,
-    IpAddr,
-};
+use types::AddressFamily;
 use utils::address_family;
 
 #[allow(raw_pointer_derive)]

@@ -1,14 +1,11 @@
 // This example uses the callback mechanism to find out which file descriptors
 // c-ares cares about.  This is a good fit for an event loop; here we use mio.
 extern crate c_ares;
+extern crate ip;
 extern crate mio;
 
 use std::collections::HashSet;
 use std::error::Error;
-use std::net::{
-    Ipv4Addr,
-    Ipv6Addr,
-};
 use std::sync::mpsc;
 use std::thread;
 
@@ -145,8 +142,8 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
             }
             for address in host_results.addresses() {
                 match address.ip_address() {
-                    c_ares::IpAddr::V4(v4) => println!("IPv4: {}", v4),
-                    c_ares::IpAddr::V6(v6) => println!("IPv6: {}", v6),
+                    ip::IpAddr::V4(v4) => println!("IPv4: {}", v4),
+                    ip::IpAddr::V6(v6) => println!("IPv6: {}", v6),
                 }
             }
         }
@@ -193,7 +190,7 @@ pub fn main() {
     );
 
     let tx = results_tx.clone();
-    let ipv4 = c_ares::IpAddr::V4(Ipv4Addr::new(216, 58, 208, 78));
+    let ipv4 = "216.58.208.78".parse::<ip::IpAddr>().unwrap();
     ares_channel.get_host_by_address(&ipv4, move |results| {
         println!("");
         print_host_results(results);
@@ -201,8 +198,7 @@ pub fn main() {
     });
 
     let tx = results_tx.clone();
-    let ipv6 = c_ares::IpAddr::V6(
-        Ipv6Addr::new(0x2a00, 0x1450, 0x4009, 0x80a, 0, 0, 0, 0x200e));
+    let ipv6 = "2a00:1450:4009:80a::200e".parse::<ip::IpAddr>().unwrap();
     ares_channel.get_host_by_address(&ipv6, move |results| {
         println!("");
         print_host_results(results);

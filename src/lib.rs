@@ -26,6 +26,7 @@
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 #[macro_use] extern crate bitflags;
 extern crate c_types;
+extern crate ip;
 
 mod a;
 mod aaaa;
@@ -95,7 +96,6 @@ pub use txt::{
 };
 pub use types::{
     AddressFamily,
-    IpAddr,
     Socket,
     SOCKET_BAD,
 };

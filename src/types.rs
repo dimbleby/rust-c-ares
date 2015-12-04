@@ -11,7 +11,7 @@ pub type Socket = c_ares_sys::ares_socket_t;
 pub const SOCKET_BAD: Socket = c_ares_sys::ARES_SOCKET_BAD;
 
 /// Address families.
-#[derive(Clone, Copy, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub enum AddressFamily {
     /// IPv4.
     INET = c_types::AF_INET as isize,
@@ -21,7 +21,7 @@ pub enum AddressFamily {
 }
 
 // See arpa/nameser.h
-#[derive(Clone, Copy, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub enum QueryType {
     A = 1,
     NS = 2,
@@ -36,7 +36,7 @@ pub enum QueryType {
 }
 
 // See arpa/nameser.h
-#[derive(Clone, Copy, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub enum DnsClass {
    IN = 1,
 }

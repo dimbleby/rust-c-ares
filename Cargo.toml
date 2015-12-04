@@ -22,7 +22,7 @@ ip = "*"
 path = "c-ares-sys"
 
 [dev-dependencies]
-mio = { git = "https://github.com/carllerche/mio", rev = "ac165e089" }
+mio = "*"
 nix = "*"
 winapi = "*"
 ws2_32-sys = "*"

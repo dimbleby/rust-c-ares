@@ -85,7 +85,7 @@ pub fn main() {
         print_soa_result(result);
     });
 
-    let ipv4 = Ipv4Addr::new(216, 58, 210, 14);
+    let ipv4 = "216.58.210.14".parse::<Ipv4Addr>().unwrap();
     let sock = SocketAddr::V4(SocketAddrV4::new(ipv4, 80));
     ares_channel.get_name_info(
         &sock,
@@ -96,7 +96,7 @@ pub fn main() {
         }
     );
 
-    let ipv6 = Ipv6Addr::new(0x2a00, 0x1450, 0x4009, 0x80a, 0, 0, 0, 0x200e);
+    let ipv6 = "2a00:1450:4009:80a::200e".parse::<Ipv6Addr>().unwrap();
     let sock = SocketAddr::V6(SocketAddrV6::new(ipv6, 80, 0, 0));
     ares_channel.get_name_info(
         &sock,

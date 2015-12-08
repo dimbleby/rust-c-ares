@@ -21,7 +21,7 @@ pub struct HostResults<'a> {
 }
 
 impl<'a> HostResults<'a> {
-    fn new(hostent: &'a c_types::hostent) -> HostResults {
+    fn new(hostent: *const c_types::hostent) -> HostResults<'a> {
         HostResults {
             hostent: HostentBorrowed::new(hostent),
         }
@@ -60,8 +60,8 @@ pub unsafe extern "C" fn get_host_callback<F>(
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))
     } else {
-        let hostent_ref = &*(hostent as *mut c_types::hostent);
-        let host_results = HostResults::new(hostent_ref);
+        let host_results = HostResults::new(
+            hostent as *const c_types::hostent);
         Ok(host_results)
     };
     let handler = Box::from_raw(arg as *mut F);

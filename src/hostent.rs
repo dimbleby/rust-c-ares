@@ -16,7 +16,6 @@ use ip::IpAddr;
 use types::AddressFamily;
 use utils::address_family;
 
-#[allow(raw_pointer_derive)]
 #[derive(Debug)]
 pub struct HostentOwned {
     inner: *mut c_types::hostent,
@@ -41,7 +40,6 @@ impl Drop for HostentOwned {
     }
 }
 
-#[allow(raw_pointer_derive)]
 #[derive(Clone, Copy, Debug)]
 pub struct HostentBorrowed<'a> {
     inner: *const c_types::hostent,
@@ -124,7 +122,6 @@ unsafe impl<'a> Sync for HostentBorrowed<'a> { }
 
 /// An alias, as retrieved from a host lookup.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct HostAliasResult<'a> {
     h_alias: *const libc::c_char,
     phantom: PhantomData<&'a c_types::hostent>,
@@ -132,7 +129,6 @@ pub struct HostAliasResult<'a> {
 
 /// An address, as retrieved from a host lookup.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct HostAddressResult<'a> {
     family: AddressFamily,
     h_addr: *const libc::c_char,
@@ -192,7 +188,6 @@ unsafe impl<'a> Sync for HostAddressResult<'a> { }
 
 /// Iterator of `HostAddressResult`s.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct HostAddressResultsIter<'a> {
     family: Option<AddressFamily>,
     next: *const *const libc::c_char,
@@ -242,7 +237,6 @@ unsafe impl<'a> Sync for HostAliasResult<'a> { }
 
 /// Iterator of `HostAliasResult`s.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct HostAliasResultsIter<'a> {
     next: *const *const libc::c_char,
     phantom: PhantomData<&'a c_types::hostent>,

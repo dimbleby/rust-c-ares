@@ -18,7 +18,6 @@ use utils::ares_error;
 
 /// The result of a successful AAAA lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct AAAAResults {
     hostent: HostentOwned,
 }

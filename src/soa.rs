@@ -13,7 +13,6 @@ use utils::ares_error;
 
 /// The result of a successful SOA lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct SOAResult {
     soa_reply: *mut c_ares_sys::Struct_ares_soa_reply,
     phantom: PhantomData<c_ares_sys::Struct_ares_soa_reply>,

@@ -13,7 +13,6 @@ use utils::ares_error;
 
 /// The result of a successful SRV lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct SRVResults {
     srv_reply: *mut c_ares_sys::Struct_ares_srv_reply,
     phantom: PhantomData<c_ares_sys::Struct_ares_srv_reply>,
@@ -21,7 +20,6 @@ pub struct SRVResults {
 
 /// The contents of a single SRV record.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct SRVResult<'a> {
     // A single result - reference into an `SRVResults`.
     srv_reply: *const c_ares_sys::Struct_ares_srv_reply,
@@ -79,7 +77,6 @@ impl fmt::Display for SRVResults {
 
 /// Iterator of `SRVResult`s.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct SRVResultsIter<'a> {
     next: *const c_ares_sys::Struct_ares_srv_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_srv_reply>,

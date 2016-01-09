@@ -17,7 +17,6 @@ use utils::ares_error;
 
 /// The result of a successful NS lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct NSResults {
     hostent: HostentOwned,
 }

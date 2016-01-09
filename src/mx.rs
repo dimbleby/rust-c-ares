@@ -13,7 +13,6 @@ use utils::ares_error;
 
 /// The result of a successful MX lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct MXResults {
     mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<c_ares_sys::Struct_ares_mx_reply>,
@@ -21,7 +20,6 @@ pub struct MXResults {
 
 /// The contents of a single MX record.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct MXResult<'a> {
     mx_reply: *const c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
@@ -78,7 +76,6 @@ impl fmt::Display for MXResults {
 
 /// Iterator of `MXResult`s.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct MXResultsIter<'a> {
     next: *const c_ares_sys::Struct_ares_mx_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,

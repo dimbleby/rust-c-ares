@@ -18,7 +18,6 @@ use utils::ares_error;
 
 /// The result of a successful A lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct AResults {
     hostent: HostentOwned,
 }

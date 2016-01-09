@@ -11,7 +11,6 @@ use utils::ares_error;
 
 /// The result of a successful name-info lookup.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct NameInfoResult<'a> {
     node: *const libc::c_char,
     service: *const libc::c_char,

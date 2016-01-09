@@ -13,7 +13,6 @@ use utils::ares_error;
 
 /// The result of a successful NAPTR lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct NAPTRResults {
     naptr_reply: *mut c_ares_sys::Struct_ares_naptr_reply,
     phantom: PhantomData<c_ares_sys::Struct_ares_naptr_reply>,
@@ -21,7 +20,6 @@ pub struct NAPTRResults {
 
 /// The contents of a single NAPTR record.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct NAPTRResult<'a> {
     naptr_reply: *const c_ares_sys::Struct_ares_naptr_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_naptr_reply>,
@@ -80,7 +78,6 @@ impl fmt::Display for NAPTRResults {
 
 /// Iterator of `NAPTRResult`s.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct NAPTRResultsIter<'a> {
     next: *const c_ares_sys::Struct_ares_naptr_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_naptr_reply>,

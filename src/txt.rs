@@ -13,7 +13,6 @@ use utils::ares_error;
 
 /// The result of a successful TXT lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct TXTResults {
     txt_reply: *mut c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<c_ares_sys::Struct_ares_txt_reply>,
@@ -21,7 +20,6 @@ pub struct TXTResults {
 
 /// The contents of a single TXT record.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct TXTResult<'a> {
     txt_reply: *const c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
@@ -78,7 +76,6 @@ impl fmt::Display for TXTResults {
 
 /// Iterator of `TXTResult`s.
 #[derive(Clone, Copy, Debug)]
-#[allow(raw_pointer_derive)]
 pub struct TXTResultsIter<'a> {
     next: *const c_ares_sys::Struct_ares_txt_reply,
     phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,

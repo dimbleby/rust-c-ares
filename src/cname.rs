@@ -18,7 +18,6 @@ use utils::ares_error;
 
 /// The result of a successful CNAME lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct CNameResults {
     hostent: HostentOwned,
 }

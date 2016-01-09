@@ -17,7 +17,6 @@ use utils::ares_error;
 
 /// The result of a successful PTR lookup.
 #[derive(Debug)]
-#[allow(raw_pointer_derive)]
 pub struct PTRResults {
     hostent: HostentOwned,
 }

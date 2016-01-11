@@ -56,7 +56,7 @@ pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
 
 // Get the u32 value from an Ipv4Addr.
 pub fn ipv4_as_u32(ipv4: &Ipv4Addr) -> u32 {
-    ipv4.octets().iter().fold(0, |v, &o| (v << 8) | o as u32)
+    u32::from(*ipv4)
 }
 
 // Get an in_addr from an Ipv4Addr.

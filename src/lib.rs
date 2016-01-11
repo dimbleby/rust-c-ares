@@ -92,7 +92,6 @@ pub use srv::{
     SRVResultsIter,
 };
 pub use txt::{
-    TXTResult,
     TXTResults,
     TXTResultsIter,
 };

@@ -109,11 +109,6 @@ pub fn srv_results_iter_is_send() {
 }
 
 #[test]
-pub fn txt_result_is_send() {
-    assert_send::<TXTResult>();
-}
-
-#[test]
 pub fn txt_results_are_send() {
     assert_send::<TXTResults>();
 }
@@ -226,11 +221,6 @@ pub fn srv_results_are_sync() {
 #[test]
 pub fn srv_results_iter_is_sync() {
     assert_sync::<SRVResultsIter>();
-}
-
-#[test]
-pub fn txt_result_is_sync() {
-    assert_sync::<TXTResult>();
 }
 
 #[test]

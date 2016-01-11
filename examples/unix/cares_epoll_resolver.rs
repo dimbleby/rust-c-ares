@@ -236,7 +236,7 @@ fn print_txt_results(
         Ok(txt_results) => {
             println!("Successful TXT lookup...");
             for txt_result in &txt_results {
-                println!("{}", txt_result.text());
+                println!("{}", txt_result);
             }
         }
     }

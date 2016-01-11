@@ -18,13 +18,6 @@ pub struct TXTResults {
     phantom: PhantomData<c_ares_sys::Struct_ares_txt_reply>,
 }
 
-/// The contents of a single TXT record.
-#[derive(Clone, Copy, Debug)]
-pub struct TXTResult<'a> {
-    txt_reply: *const c_ares_sys::Struct_ares_txt_reply,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
-}
-
 impl TXTResults {
     /// Obtain a `TXTResults` from the response to a TXT lookup.
     pub fn parse_from(data: &[u8]) -> Result<TXTResults, AresError> {
@@ -51,7 +44,7 @@ impl TXTResults {
         }
     }
 
-    /// Returns an iterator over the `TXTResult` values in this `TXTResults`.
+    /// Returns an iterator over the values in this `TXTResults`.
     pub fn iter(&self) -> TXTResultsIter {
         TXTResultsIter {
             next: self.txt_reply,
@@ -74,7 +67,7 @@ impl fmt::Display for TXTResults {
     }
 }
 
-/// Iterator of `TXTResult`s.
+/// Iterator of `&'a str`s.
 #[derive(Clone, Copy, Debug)]
 pub struct TXTResultsIter<'a> {
     next: *const c_ares_sys::Struct_ares_txt_reply,
@@ -82,7 +75,7 @@ pub struct TXTResultsIter<'a> {
 }
 
 impl<'a> Iterator for TXTResultsIter<'a> {
-    type Item = TXTResult<'a>;
+    type Item = &'a str;
     fn next(&mut self) -> Option<Self::Item> {
         let txt_reply = self.next;
         if txt_reply.is_null() {
@@ -90,17 +83,14 @@ impl<'a> Iterator for TXTResultsIter<'a> {
         } else {
             unsafe {
                 self.next = (*txt_reply).next;
+                let c_str = CStr::from_ptr((*txt_reply).txt as *const i8);
+                Some(str::from_utf8_unchecked(c_str.to_bytes()))
             }
-            let txt_result = TXTResult {
-                txt_reply: txt_reply,
-                phantom: PhantomData,
-            };
-            Some(txt_result)
         }
     }
 }
 impl<'a> IntoIterator for &'a TXTResults {
-    type Item = TXTResult<'a>;
+    type Item = &'a str;
     type IntoIter = TXTResultsIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -118,26 +108,8 @@ impl Drop for TXTResults {
 
 unsafe impl Send for TXTResults { }
 unsafe impl Sync for TXTResults { }
-unsafe impl<'a> Send for TXTResult<'a> { }
-unsafe impl<'a> Sync for TXTResult<'a> { }
 unsafe impl<'a> Send for TXTResultsIter<'a> { }
 unsafe impl<'a> Sync for TXTResultsIter<'a> { }
-
-impl<'a> TXTResult<'a> {
-    /// Returns the text in this `TXTResult`.
-    pub fn text(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr((*self.txt_reply).txt as *const i8);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
-    }
-}
-
-impl<'a> fmt::Display for TXTResult<'a> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.text().fmt(fmt)
-    }
-}
 
 pub unsafe extern "C" fn query_txt_callback<F>(
     arg: *mut libc::c_void,

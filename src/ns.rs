@@ -51,8 +51,7 @@ impl NSResults {
         self.hostent.hostname()
     }
 
-    /// Returns an iterator over the `HostAliasResult` values in this
-    /// `NSResults`.
+    /// Returns an iterator over the host aliases in this `NSResults`.
     pub fn aliases(&self) -> HostAliasResultsIter {
         self.hostent.aliases()
     }

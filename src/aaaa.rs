@@ -54,13 +54,12 @@ impl AAAAResults {
         self.hostent.hostname()
     }
 
-    /// Returns an iterator over the `HostAddressResult` values in this
-    /// `AAAAResults`.
+    /// Returns an iterator over the `IpAddr` values in this `AAAAResults`.
     pub fn addresses(&self) -> HostAddressResultsIter {
         self.hostent.addresses()
     }
 
-    /// Returns an iterator over the `HostAliasResult` values in this
+    /// Returns an iterator over the host aliases in this
     /// `AAAAResults`.
     pub fn aliases(&self) -> HostAliasResultsIter {
         self.hostent.aliases()

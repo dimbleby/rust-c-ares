@@ -55,8 +55,7 @@ impl PTRResults {
         self.hostent.hostname()
     }
 
-    /// Returns an iterator over the `HostAliasResult` values in this
-    /// `PTRResults`.
+    /// Returns an iterator over the host aliases in this `PTRResults`.
     pub fn aliases(&self) -> HostAliasResultsIter {
         self.hostent.aliases()
     }

@@ -69,9 +69,7 @@ pub use cname::CNameResults;
 pub use error::AresError;
 pub use host::HostResults;
 pub use hostent::{
-    HostAddressResult,
     HostAddressResultsIter,
-    HostAliasResult,
     HostAliasResultsIter,
 };
 pub use mx::{

@@ -138,10 +138,10 @@ fn print_host_results(result: Result<c_ares::HostResults, c_ares::AresError>) {
             println!("Successful host lookup...");
             println!("Hostname: {}", host_results.hostname());
             for alias in host_results.aliases() {
-                println!("Alias: {}", alias.alias());
+                println!("Alias: {}", alias);
             }
             for address in host_results.addresses() {
-                match address.ip_address() {
+                match address {
                     ip::IpAddr::V4(v4) => println!("IPv4: {}", v4),
                     ip::IpAddr::V6(v6) => println!("IPv6: {}", v6),
                 }

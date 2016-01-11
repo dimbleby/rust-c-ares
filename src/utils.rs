@@ -93,6 +93,24 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
     in6_addr
 }
 
+// Get an Ipv4Addr from an array of four bytes, as found in a `hostent`.
+pub fn ipv4_address_from_bytes(bytes: &[u8]) -> Ipv4Addr {
+    Ipv4Addr::new(bytes[0], bytes[1], bytes[2], bytes[3])
+}
+
+// Get an Ipv6Addr from an array of sixteen bytes, as found in a `hostent`.
+pub fn ipv6_address_from_bytes(bytes: &[u8]) -> Ipv6Addr {
+    Ipv6Addr::new(
+        ((bytes[0] as u16) << 8) | bytes[1] as u16,
+        ((bytes[2] as u16) << 8) | bytes[3] as u16,
+        ((bytes[4] as u16) << 8) | bytes[5] as u16,
+        ((bytes[6] as u16) << 8) | bytes[7] as u16,
+        ((bytes[8] as u16) << 8) | bytes[9] as u16,
+        ((bytes[10] as u16) << 8) | bytes[11] as u16,
+        ((bytes[12] as u16) << 8) | bytes[13] as u16,
+        ((bytes[14] as u16) << 8) | bytes[15] as u16)
+}
+
 // Get a sockaddr_in from a SocketAddrV4.
 #[cfg(any(target_os = "macos",
           target_os = "ios",

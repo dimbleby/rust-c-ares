@@ -204,7 +204,7 @@ fn print_ns_results(result: Result<c_ares::NSResults, c_ares::AresError>) {
         Ok(ns_results) => {
             println!("Successful NS lookup...");
             for ns_result in ns_results.aliases() {
-                println!("{}", ns_result.alias());
+                println!("{}", ns_result);
             }
         }
     }
@@ -220,7 +220,7 @@ fn print_ptr_results(
         Ok(ptr_results) => {
             println!("Successful PTR lookup...");
             for ptr_result in ptr_results.aliases() {
-                println!("{}", ptr_result.alias());
+                println!("{}", ptr_result);
             }
         }
     }

@@ -4,10 +4,6 @@ extern crate libc;
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::net::{
-    Ipv4Addr,
-    Ipv6Addr,
-};
 use std::slice;
 use std::str;
 

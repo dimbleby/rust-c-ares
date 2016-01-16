@@ -18,8 +18,7 @@ pub type ares_sock_state_cb =
     ::std::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void,
                                                socket_fd: ares_socket_t,
                                                readable: ::libc::c_int,
-                                               writable: ::libc::c_int)
-                              -> ()>;
+                                               writable: ::libc::c_int)>;
 pub enum Struct_apattern { }
 #[repr(C)]
 #[derive(Copy)]
@@ -57,20 +56,18 @@ pub type ares_callback =
                                                status: ::libc::c_int,
                                                timeouts: ::libc::c_int,
                                                abuf: *mut ::libc::c_uchar,
-                                               alen: ::libc::c_int) -> ()>;
+                                               alen: ::libc::c_int)>;
 pub type ares_host_callback =
     ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
                                                status: ::libc::c_int,
                                                timeouts: ::libc::c_int,
-                                               hostent: *mut Struct_hostent)
-                              -> ()>;
+                                               hostent: *mut Struct_hostent)>;
 pub type ares_nameinfo_callback =
     ::std::option::Option<unsafe extern "C" fn(arg: *mut ::libc::c_void,
                                                status: ::libc::c_int,
                                                timeouts: ::libc::c_int,
                                                node: *mut ::libc::c_char,
-                                               service: *mut ::libc::c_char)
-                              -> ()>;
+                                               service: *mut ::libc::c_char)>;
 pub type ares_sock_create_callback =
     ::std::option::Option<unsafe extern "C" fn(socket_fd: ares_socket_t,
                                                _type: ::libc::c_int,
@@ -239,7 +236,7 @@ impl ::std::default::Default for Union_Unnamed2 {
 }
 extern "C" {
     pub fn ares_library_init(flags: ::libc::c_int) -> ::libc::c_int;
-    pub fn ares_library_cleanup() -> ();
+    pub fn ares_library_cleanup();
     pub fn ares_version(version: *mut ::libc::c_int) -> *const ::libc::c_char;
     pub fn ares_init(channelptr: *mut ares_channel) -> ::libc::c_int;
     pub fn ares_init_options(channelptr: *mut ares_channel,
@@ -248,36 +245,34 @@ extern "C" {
     pub fn ares_save_options(channel: ares_channel,
                              options: *mut Struct_ares_options,
                              optmask: *mut ::libc::c_int) -> ::libc::c_int;
-    pub fn ares_destroy_options(options: *mut Struct_ares_options) -> ();
+    pub fn ares_destroy_options(options: *mut Struct_ares_options);
     pub fn ares_dup(dest: *mut ares_channel, src: ares_channel)
      -> ::libc::c_int;
-    pub fn ares_destroy(channel: ares_channel) -> ();
-    pub fn ares_cancel(channel: ares_channel) -> ();
-    pub fn ares_set_local_ip4(channel: ares_channel, local_ip: ::libc::c_uint)
-     -> ();
+    pub fn ares_destroy(channel: ares_channel);
+    pub fn ares_cancel(channel: ares_channel);
+    pub fn ares_set_local_ip4(channel: ares_channel,
+                              local_ip: ::libc::c_uint);
     pub fn ares_set_local_ip6(channel: ares_channel,
-                              local_ip6: *const ::libc::c_uchar) -> ();
+                              local_ip6: *const ::libc::c_uchar);
     pub fn ares_set_local_dev(channel: ares_channel,
-                              local_dev_name: *const ::libc::c_char) -> ();
+                              local_dev_name: *const ::libc::c_char);
     pub fn ares_set_socket_callback(channel: ares_channel,
                                     callback: ares_sock_create_callback,
-                                    user_data: *mut ::libc::c_void) -> ();
+                                    user_data: *mut ::libc::c_void);
     pub fn ares_send(channel: ares_channel, qbuf: *const ::libc::c_uchar,
                      qlen: ::libc::c_int, callback: ares_callback,
-                     arg: *mut ::libc::c_void) -> ();
+                     arg: *mut ::libc::c_void);
     pub fn ares_query(channel: ares_channel, name: *const ::libc::c_char,
                       dnsclass: ::libc::c_int, _type: ::libc::c_int,
-                      callback: ares_callback, arg: *mut ::libc::c_void)
-     -> ();
+                      callback: ares_callback, arg: *mut ::libc::c_void);
     pub fn ares_search(channel: ares_channel, name: *const ::libc::c_char,
                        dnsclass: ::libc::c_int, _type: ::libc::c_int,
-                       callback: ares_callback, arg: *mut ::libc::c_void)
-     -> ();
+                       callback: ares_callback, arg: *mut ::libc::c_void);
     pub fn ares_gethostbyname(channel: ares_channel,
                               name: *const ::libc::c_char,
                               family: ::libc::c_int,
                               callback: ares_host_callback,
-                              arg: *mut ::libc::c_void) -> ();
+                              arg: *mut ::libc::c_void);
     pub fn ares_gethostbyname_file(channel: ares_channel,
                                    name: *const ::libc::c_char,
                                    family: ::libc::c_int,
@@ -287,11 +282,11 @@ extern "C" {
                               addr: *const ::libc::c_void,
                               addrlen: ::libc::c_int, family: ::libc::c_int,
                               callback: ares_host_callback,
-                              arg: *mut ::libc::c_void) -> ();
+                              arg: *mut ::libc::c_void);
     pub fn ares_getnameinfo(channel: ares_channel, sa: *const Struct_sockaddr,
                             salen: ares_socklen_t, flags: ::libc::c_int,
                             callback: ares_nameinfo_callback,
-                            arg: *mut ::libc::c_void) -> ();
+                            arg: *mut ::libc::c_void);
     pub fn ares_fds(channel: *const Struct_ares_channeldata,
                     read_fds: *mut fd_set, write_fds: *mut fd_set)
      -> ::libc::c_int;
@@ -301,9 +296,9 @@ extern "C" {
     pub fn ares_timeout(channel: ares_channel, maxtv: *mut Struct_timeval,
                         tv: *mut Struct_timeval) -> *mut Struct_timeval;
     pub fn ares_process(channel: ares_channel, read_fds: *mut fd_set,
-                        write_fds: *mut fd_set) -> ();
+                        write_fds: *mut fd_set);
     pub fn ares_process_fd(channel: ares_channel, read_fd: ares_socket_t,
-                           write_fd: ares_socket_t) -> ();
+                           write_fd: ares_socket_t);
     pub fn ares_create_query(name: *const ::libc::c_char,
                              dnsclass: ::libc::c_int, _type: ::libc::c_int,
                              id: ::libc::c_ushort, rd: ::libc::c_int,
@@ -365,9 +360,9 @@ extern "C" {
                                 alen: ::libc::c_int,
                                 soa_out: *mut *mut Struct_ares_soa_reply)
      -> ::libc::c_int;
-    pub fn ares_free_string(str: *mut ::libc::c_void) -> ();
-    pub fn ares_free_hostent(host: *mut Struct_hostent) -> ();
-    pub fn ares_free_data(dataptr: *mut ::libc::c_void) -> ();
+    pub fn ares_free_string(str: *mut ::libc::c_void);
+    pub fn ares_free_hostent(host: *mut Struct_hostent);
+    pub fn ares_free_data(dataptr: *mut ::libc::c_void);
     pub fn ares_strerror(code: ::libc::c_int) -> *const ::libc::c_char;
     pub fn ares_set_servers(channel: ares_channel,
                             servers: *mut Struct_ares_addr_node)

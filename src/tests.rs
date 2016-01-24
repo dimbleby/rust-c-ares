@@ -24,13 +24,33 @@ pub fn get_sock_iter_is_send() {
 }
 
 #[test]
+pub fn a_result_is_send() {
+    assert_send::<AResult>();
+}
+
+#[test]
 pub fn a_results_are_send() {
     assert_send::<AResults>();
 }
 
 #[test]
+pub fn a_results_iter_is_send() {
+    assert_send::<AResultsIter>();
+}
+
+#[test]
+pub fn aaaa_result_is_send() {
+    assert_send::<AAAAResult>();
+}
+
+#[test]
 pub fn aaaa_results_are_send() {
     assert_send::<AAAAResults>();
+}
+
+#[test]
+pub fn aaaa_results_iter_is_send() {
+    assert_send::<AAAAResultsIter>();
 }
 
 #[test]
@@ -139,13 +159,33 @@ pub fn get_sock_iter_is_sync() {
 }
 
 #[test]
+pub fn a_result_is_sync() {
+    assert_sync::<AResult>();
+}
+
+#[test]
 pub fn a_results_are_sync() {
     assert_sync::<AResults>();
 }
 
 #[test]
+pub fn a_results_iter_is_sync() {
+    assert_sync::<AResultsIter>();
+}
+
+#[test]
+pub fn aaaa_result_is_sync() {
+    assert_sync::<AAAAResult>();
+}
+
+#[test]
 pub fn aaaa_results_are_sync() {
     assert_sync::<AAAAResults>();
+}
+
+#[test]
+pub fn aaaa_results_iter_is_sync() {
+    assert_sync::<AAAAResultsIter>();
 }
 
 #[test]

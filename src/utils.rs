@@ -70,6 +70,17 @@ pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
     c_types::in_addr { S_un: ipv4_as_u32(ipv4).to_be() }
 }
 
+// Get an Ipv4Addr from an in_addr.
+#[cfg(unix)]
+pub fn ipv4_from_in_addr(in_addr: &c_types::in_addr) -> Ipv4Addr {
+    Ipv4Addr::from(u32::from_be(in_addr.s_addr))
+}
+
+#[cfg(windows)]
+pub fn ipv4_from_in_addr(in_addr: &c_types::in_addr) -> Ipv4Addr {
+    Ipv4Addr::from(u32::from_be(in_addr.S_un))
+}
+
 // Get an in6_addr from an Ipv6Addr.
 pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
     let segments = ipv6.segments();

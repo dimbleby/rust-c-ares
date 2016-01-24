@@ -23,12 +23,9 @@ fn print_a_results(result: Result<c_ares::AResults, c_ares::AresError>) {
         }
         Ok(a_results) => {
             println!("Successful A lookup...");
-            println!("Hostname: {}", a_results.hostname());
-            for alias in a_results.aliases() {
-                println!("Alias: {}", alias);
-            }
-            for address in a_results.addresses() {
-                println!("IPv4: {}", address);
+            for a_result in &a_results {
+                println!("IPv4: {}", a_result.ipv4());
+                println!("TTL: {}", a_result.ttl());
             }
         }
     }
@@ -43,12 +40,9 @@ fn print_aaaa_results(
         }
         Ok(aaaa_results) => {
             println!("Successful AAAA lookup...");
-            println!("Hostname: {}", aaaa_results.hostname());
-            for alias in aaaa_results.aliases() {
-                println!("Alias: {}", alias);
-            }
-            for address in aaaa_results.addresses() {
-                println!("IPv6: {}", address);
+            for aaaa_result in &aaaa_results {
+                println!("IPv6: {}", aaaa_result.ipv6());
+                println!("TTL: {}", aaaa_result.ttl());
             }
         }
     }

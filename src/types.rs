@@ -40,3 +40,5 @@ pub enum QueryType {
 pub enum DnsClass {
    IN = 1,
 }
+
+pub const MAX_ADDRTTLS: usize = 32;

@@ -57,8 +57,16 @@ pub use c_types::fd_set;
 pub use ip::IpAddr;
 
 // Re-export public interfaces.
-pub use a::AResults;
-pub use aaaa::AAAAResults;
+pub use a::{
+    AResult,
+    AResults,
+    AResultsIter,
+};
+pub use aaaa::{
+    AAAAResult,
+    AAAAResults,
+    AAAAResultsIter,
+};
 pub use channel::{
     Channel,
     GetSock,

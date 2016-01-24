@@ -1,9 +1,13 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
+use std::os::raw::{
+    c_int,
+    c_uchar,
+    c_void,
+};
 use std::str;
 use std::ptr;
 use std::slice;
@@ -34,7 +38,7 @@ impl SRVResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_srv_reply(
                 data.as_ptr(),
-                data.len() as libc::c_int,
+                data.len() as c_int,
                 &mut srv_reply)
         };
         if parse_status != c_ares_sys::ARES_SUCCESS {
@@ -111,7 +115,7 @@ impl<'a> IntoIterator for &'a SRVResults {
 impl Drop for SRVResults {
     fn drop(&mut self) {
         unsafe {
-            c_ares_sys::ares_free_data(self.srv_reply as *mut libc::c_void);
+            c_ares_sys::ares_free_data(self.srv_reply as *mut c_void);
         }
     }
 }
@@ -159,11 +163,11 @@ impl<'a> fmt::Display for SRVResult<'a> {
 }
 
 pub unsafe extern "C" fn query_srv_callback<F>(
-    arg: *mut libc::c_void,
-    status: libc::c_int,
-    _timeouts: libc::c_int,
-    abuf: *mut libc::c_uchar,
-    alen: libc::c_int)
+    arg: *mut c_void,
+    status: c_int,
+    _timeouts: c_int,
+    abuf: *mut c_uchar,
+    alen: c_int)
     where F: FnOnce(Result<SRVResults, AresError>) + 'static {
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))

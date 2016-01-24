@@ -1,9 +1,9 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::error;
 use std::ffi::CStr;
 use std::fmt;
+use std::os::raw::c_int;
 use std::str;
 
 /// Error codes that the library might return.
@@ -121,7 +121,7 @@ impl fmt::Display for AresError {
 impl error::Error for AresError {
     fn description(&self) -> &str {
         unsafe {
-            let ptr = c_ares_sys::ares_strerror(*self as libc::c_int);
+            let ptr = c_ares_sys::ares_strerror(*self as c_int);
             let buf = CStr::from_ptr(ptr).to_bytes();
             str::from_utf8_unchecked(buf)
         }

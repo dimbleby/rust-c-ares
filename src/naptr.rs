@@ -1,9 +1,14 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
+use std::os::raw::{
+    c_char,
+    c_int,
+    c_uchar,
+    c_void,
+};
 use std::str;
 use std::ptr;
 use std::slice;
@@ -33,7 +38,7 @@ impl NAPTRResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_naptr_reply(
                 data.as_ptr(),
-                data.len() as libc::c_int,
+                data.len() as c_int,
                 &mut naptr_reply)
         };
         if parse_status != c_ares_sys::ARES_SUCCESS {
@@ -112,7 +117,7 @@ impl<'a> IntoIterator for &'a NAPTRResults {
 impl Drop for NAPTRResults {
     fn drop(&mut self) {
         unsafe {
-            c_ares_sys::ares_free_data(self.naptr_reply as *mut libc::c_void);
+            c_ares_sys::ares_free_data(self.naptr_reply as *mut c_void);
         }
     }
 }
@@ -129,7 +134,7 @@ impl<'a> NAPTRResult<'a> {
     pub fn flags(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr(
-                (*self.naptr_reply).flags as *const libc::c_char);
+                (*self.naptr_reply).flags as *const c_char);
             str::from_utf8(c_str.to_bytes()).unwrap()
         }
     }
@@ -138,7 +143,7 @@ impl<'a> NAPTRResult<'a> {
     pub fn service_name(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr(
-                (*self.naptr_reply).service as *const libc::c_char);
+                (*self.naptr_reply).service as *const c_char);
             str::from_utf8(c_str.to_bytes()).unwrap()
         }
     }
@@ -147,7 +152,7 @@ impl<'a> NAPTRResult<'a> {
     pub fn reg_exp(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr(
-                (*self.naptr_reply).regexp as *const libc::c_char);
+                (*self.naptr_reply).regexp as *const c_char);
             str::from_utf8(c_str.to_bytes()).unwrap()
         }
     }
@@ -187,11 +192,11 @@ impl<'a> fmt::Display for NAPTRResult<'a> {
 }
 
 pub unsafe extern "C" fn query_naptr_callback<F>(
-    arg: *mut libc::c_void,
-    status: libc::c_int,
-    _timeouts: libc::c_int,
-    abuf: *mut libc::c_uchar,
-    alen: libc::c_int)
+    arg: *mut c_void,
+    status: c_int,
+    _timeouts: c_int,
+    abuf: *mut c_uchar,
+    alen: c_int)
     where F: FnOnce(Result<NAPTRResults, AresError>) + 'static {
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))

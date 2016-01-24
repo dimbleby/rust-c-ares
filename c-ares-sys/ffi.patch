@@ -1,5 +1,5 @@
---- src/ffi.rs.orig	2015-11-21 13:59:24.561623652 +0000
-+++ src/ffi.rs	2015-11-21 13:58:44.209711606 +0000
+--- src/ffi.rs.orig	2016-01-24 16:16:13.219072184 +0000
++++ src/ffi.rs	2016-01-24 16:17:12.318729753 +0000
 @@ -1,9 +1,19 @@
 +use c_types::fd_set;
 +use libc::size_t;
@@ -12,13 +12,13 @@
  
 -pub type ares_socklen_t = socklen_t;
 +pub type ares_socklen_t = ::c_types::socklen_t;
- pub type __cares_rule_02__ = [::libc::c_char; 1usize];
- pub type __cares_rule_03__ = [::libc::c_char; 1usize];
--pub type ares_socket_t = ::libc::c_int;
+ pub type __cares_rule_02__ = [::std::os::raw::c_char; 1usize];
+ pub type __cares_rule_03__ = [::std::os::raw::c_char; 1usize];
+-pub type ares_socket_t = ::std::os::raw::c_int;
 +#[cfg(windows)]
 +pub type ares_socket_t = ::std::os::windows::io::RawSocket;
 +#[cfg(unix)]
 +pub type ares_socket_t = ::std::os::unix::io::RawFd;
  pub type ares_sock_state_cb =
-     ::std::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void,
-                                                socket_fd: ares_socket_t,
+     ::std::option::Option<unsafe extern "C" fn(data:
+                                                    *mut ::std::os::raw::c_void,

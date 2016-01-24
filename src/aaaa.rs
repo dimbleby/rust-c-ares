@@ -1,9 +1,13 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::fmt;
 use std::mem;
 use std::net::Ipv6Addr;
+use std::os::raw::{
+    c_int,
+    c_uchar,
+    c_void,
+};
 use std::ptr;
 use std::slice;
 
@@ -36,10 +40,10 @@ impl AAAAResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_aaaa_reply(
                 data.as_ptr(),
-                data.len() as libc::c_int,
+                data.len() as c_int,
                 ptr::null_mut(),
                 results.addr6ttls.as_mut_ptr(),
-                &mut results.naddr6ttls as *mut _ as *mut libc::c_int)
+                &mut results.naddr6ttls as *mut _ as *mut c_int)
         };
         if parse_status != c_ares_sys::ARES_SUCCESS {
             Err(ares_error(parse_status))
@@ -125,11 +129,11 @@ impl<'a> fmt::Display for AAAAResult<'a> {
 }
 
 pub unsafe extern "C" fn query_aaaa_callback<F>(
-    arg: *mut libc::c_void,
-    status: libc::c_int,
-    _timeouts: libc::c_int,
-    abuf: *mut libc::c_uchar,
-    alen: libc::c_int)
+    arg: *mut c_void,
+    status: c_int,
+    _timeouts: c_int,
+    abuf: *mut c_uchar,
+    alen: c_int)
     where F: FnOnce(Result<AAAAResults, AresError>) + 'static {
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))

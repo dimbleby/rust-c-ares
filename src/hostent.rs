@@ -1,9 +1,12 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
+use std::os::raw::{
+    c_char,
+    c_int,
+};
 use std::slice;
 use std::str;
 
@@ -68,7 +71,7 @@ pub trait HasHostent {
 
     fn addresses(&self) -> HostAddressResultsIter {
         HostAddressResultsIter {
-            family: address_family(self.hostent().h_addrtype as libc::c_int),
+            family: address_family(self.hostent().h_addrtype as c_int),
             next: self.hostent().h_addr_list as *const *const _,
             phantom: PhantomData,
         }
@@ -125,7 +128,7 @@ unsafe impl<'a> Sync for HostentBorrowed<'a> { }
 #[derive(Clone, Copy, Debug)]
 pub struct HostAddressResultsIter<'a> {
     family: Option<AddressFamily>,
-    next: *const *const libc::c_char,
+    next: *const *const c_char,
     phantom: PhantomData<&'a c_types::hostent>,
 }
 
@@ -166,7 +169,7 @@ unsafe impl<'a> Sync for HostAddressResultsIter<'a> { }
 /// Iterator of `&'a str`s.
 #[derive(Clone, Copy, Debug)]
 pub struct HostAliasResultsIter<'a> {
-    next: *const *const libc::c_char,
+    next: *const *const c_char,
     phantom: PhantomData<&'a c_types::hostent>,
 }
 

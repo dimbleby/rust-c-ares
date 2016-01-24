@@ -1,5 +1,4 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::ffi::CString;
 use std::marker::PhantomData;
@@ -8,6 +7,12 @@ use std::net::{
     Ipv4Addr,
     Ipv6Addr,
     SocketAddr,
+};
+use std::os::raw::{
+    c_char,
+    c_int,
+    c_uchar,
+    c_void,
 };
 use std::ptr;
 
@@ -84,7 +89,7 @@ use utils::{
 /// Used to configure the behaviour of the name resolver.
 pub struct Options {
     ares_options: c_ares_sys::Struct_ares_options,
-    optmask: libc::c_int,
+    optmask: c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
     socket_state_callback: Option<Box<FnMut(Socket, bool, bool) + 'static>>,
@@ -115,7 +120,7 @@ impl Options {
     /// becomes more complicated, but scales linearly with the value of
     /// timeout).  The default is 5000ms.
     pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
-        self.ares_options.timeout = ms as libc::c_int;
+        self.ares_options.timeout = ms as c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TIMEOUTMS;
         self
     }
@@ -123,7 +128,7 @@ impl Options {
     /// Set the number of tries the resolver will try contacting each name
     /// server before giving up.  The default is four tries.
     pub fn set_tries(&mut self, tries: u32) -> &mut Self {
-        self.ares_options.tries = tries as libc::c_int;
+        self.ares_options.tries = tries as c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_TRIES;
         self
     }
@@ -133,7 +138,7 @@ impl Options {
     /// extensions appended.  The default value is 1 unless set otherwise by
     /// resolv.conf or the RES_OPTIONS environment variable.
     pub fn set_ndots(&mut self, ndots: u32) -> &mut Self {
-        self.ares_options.ndots = ndots as libc::c_int;
+        self.ares_options.ndots = ndots as c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_NDOTS;
         self
     }
@@ -187,7 +192,7 @@ impl Options {
         let mut boxed_callback = Box::new(callback);
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
         self.ares_options.sock_state_cb_data =
-            &mut *boxed_callback as *mut _ as *mut libc::c_void;
+            &mut *boxed_callback as *mut _ as *mut c_void;
         self.socket_state_callback = Some(boxed_callback);
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         self
@@ -195,14 +200,14 @@ impl Options {
 
     /// Set the socket send buffer size.
     pub fn set_sock_send_buffer_size(&mut self, size: u32) -> &mut Self {
-        self.ares_options.socket_send_buffer_size = size as libc::c_int;
+        self.ares_options.socket_send_buffer_size = size as c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_SNDBUF;
         self
     }
 
     /// Set the socket receive buffer size.
     pub fn set_sock_receive_buffer_size(&mut self, size: u32) -> &mut Self {
-        self.ares_options.socket_receive_buffer_size = size as libc::c_int;
+        self.ares_options.socket_receive_buffer_size = size as c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_RCVBUF;
         self
     }
@@ -215,7 +220,7 @@ impl Options {
 
     /// Set the EDNS packet size.
     pub fn set_ednspsz(&mut self, size: u32) -> &mut Self {
-        self.ares_options.ednspsz = size as libc::c_int;
+        self.ares_options.ednspsz = size as c_int;
         self.optmask = self.optmask | c_ares_sys::ARES_OPT_EDNSPSZ;
         self
     }
@@ -248,13 +253,13 @@ impl Channel {
             .map(|s| s.as_ptr())
             .collect();
         options.ares_options.domains =
-            domains.as_ptr() as *mut *mut libc::c_char;
-        options.ares_options.ndomains = domains.len() as libc::c_int;
+            domains.as_ptr() as *mut *mut c_char;
+        options.ares_options.ndomains = domains.len() as c_int;
 
         // Likewise for lookups.
         for c_lookup in options.lookups.iter() {
             options.ares_options.lookups =
-                c_lookup.as_ptr() as *mut libc::c_char;
+                c_lookup.as_ptr() as *mut c_char;
         }
 
         // Initialize the channel.
@@ -310,7 +315,7 @@ impl Channel {
             c_ares_sys::ares_getsock(
                 self.ares_channel,
                 socks.as_mut_ptr(),
-                c_ares_sys::ARES_GETSOCK_MAXNUM as libc::c_int)
+                c_ares_sys::ARES_GETSOCK_MAXNUM as c_int)
         };
         GetSock::new(socks, bitmask as u32)
     }
@@ -364,7 +369,7 @@ impl Channel {
         unsafe {
             c_ares_sys::ares_set_local_ip6(
                 self.ares_channel,
-                &in6_addr as *const _ as *const libc::c_uchar);
+                &in6_addr as *const _ as *const c_uchar);
         }
         self
     }
@@ -389,10 +394,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::A as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::A as c_int,
                 Some(query_a_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -407,10 +412,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::AAAA as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::AAAA as c_int,
                 Some(query_aaaa_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -425,10 +430,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::CNAME as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::CNAME as c_int,
                 Some(query_cname_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -443,10 +448,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::MX as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::MX as c_int,
                 Some(query_mx_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -461,10 +466,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::NAPTR as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::NAPTR as c_int,
                 Some(query_naptr_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -479,10 +484,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::NS as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::NS as c_int,
                 Some(query_ns_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -497,10 +502,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::PTR as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::PTR as c_int,
                 Some(query_ptr_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -515,10 +520,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::SRV as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::SRV as c_int,
                 Some(query_srv_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -533,10 +538,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::TXT as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::TXT as c_int,
                 Some(query_txt_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -551,10 +556,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                DnsClass::IN as libc::c_int,
-                QueryType::SOA as libc::c_int,
+                DnsClass::IN as c_int,
+                QueryType::SOA as c_int,
                 Some(query_soa_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -570,11 +575,11 @@ impl Channel {
         let c_addr = match *address {
             IpAddr::V4(ref v4) => {
                 in_addr = ipv4_as_in_addr(v4);
-                &in_addr as *const _ as *const libc::c_void
+                &in_addr as *const _ as *const c_void
             },
             IpAddr::V6(ref v6) => {
                 in6_addr = ipv6_as_in6_addr(v6);
-                &in6_addr as *const _ as *const libc::c_void
+                &in6_addr as *const _ as *const c_void
             },
         };
         let (family, length) = match *address {
@@ -590,10 +595,10 @@ impl Channel {
             c_ares_sys::ares_gethostbyaddr(
                 self.ares_channel,
                 c_addr,
-                length as libc::c_int,
-                family as libc::c_int,
+                length as c_int,
+                family as c_int,
                 Some(get_host_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -611,9 +616,9 @@ impl Channel {
             c_ares_sys::ares_gethostbyname(
                 self.ares_channel,
                 c_name.as_ptr(),
-                family as libc::c_int,
+                family as c_int,
                 Some(get_host_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -653,7 +658,7 @@ impl Channel {
                 length as c_ares_sys::ares_socklen_t,
                 flags.bits(),
                 Some(get_name_info_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -680,10 +685,10 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                dns_class as libc::c_int,
-                query_type as libc::c_int,
+                dns_class as c_int,
+                query_type as c_int,
                 Some(query_callback::<F>),
-                c_arg as *mut libc::c_void);
+                c_arg as *mut c_void);
         }
     }
 
@@ -711,10 +716,10 @@ unsafe impl Send for Options { }
 unsafe impl Sync for Options { }
 
 pub unsafe extern "C" fn socket_state_callback<F>(
-    data: *mut libc::c_void,
+    data: *mut c_void,
     socket_fd: c_ares_sys::ares_socket_t,
-    readable: libc::c_int,
-    writable: libc::c_int)
+    readable: c_int,
+    writable: c_int)
     where F: FnMut(Socket, bool, bool) + 'static {
     let handler = data as *mut F;
     (*handler)(socket_fd, readable != 0, writable != 0);

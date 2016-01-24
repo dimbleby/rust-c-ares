@@ -1,9 +1,13 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
+use std::os::raw::{
+    c_char,
+    c_int,
+    c_void,
+};
 use std::str;
 
 use error::AresError;
@@ -12,15 +16,15 @@ use utils::ares_error;
 /// The result of a successful name-info lookup.
 #[derive(Clone, Copy, Debug)]
 pub struct NameInfoResult<'a> {
-    node: *const libc::c_char,
-    service: *const libc::c_char,
-    phantom: PhantomData<&'a libc::c_char>,
+    node: *const c_char,
+    service: *const c_char,
+    phantom: PhantomData<&'a c_char>,
 }
 
 impl<'a> NameInfoResult<'a> {
     fn new(
-        node: *const libc::c_char,
-        service: *const libc::c_char) -> NameInfoResult<'a> {
+        node: *const c_char,
+        service: *const c_char) -> NameInfoResult<'a> {
         NameInfoResult {
             node: node,
             service: service,
@@ -67,11 +71,11 @@ unsafe impl<'a> Send for NameInfoResult<'a> { }
 unsafe impl<'a> Sync for NameInfoResult<'a> { }
 
 pub unsafe extern "C" fn get_name_info_callback<F>(
-    arg: *mut libc::c_void,
-    status: libc::c_int,
-    _timeouts: libc::c_int,
-    node: *mut libc::c_char,
-    service: *mut libc::c_char)
+    arg: *mut c_void,
+    status: c_int,
+    _timeouts: c_int,
+    node: *mut c_char,
+    service: *mut c_char)
     where F: FnOnce(Result<NameInfoResult, AresError>) + 'static {
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))

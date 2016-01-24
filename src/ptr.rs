@@ -1,7 +1,11 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::fmt;
+use std::os::raw::{
+    c_int,
+    c_uchar,
+    c_void,
+};
 use std::ptr;
 use std::slice;
 
@@ -29,9 +33,9 @@ impl PTRResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_ptr_reply(
                 data.as_ptr(),
-                data.len() as libc::c_int,
-                dummy_ip.as_ptr() as *const libc::c_void,
-                dummy_ip.len() as libc::c_int,
+                data.len() as c_int,
+                dummy_ip.as_ptr() as *const c_void,
+                dummy_ip.len() as c_int,
                 c_types::AF_INET,
                 &mut hostent
                     as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent)
@@ -77,11 +81,11 @@ impl fmt::Display for PTRResults {
 }
 
 pub unsafe extern "C" fn query_ptr_callback<F>(
-    arg: *mut libc::c_void,
-    status: libc::c_int,
-    _timeouts: libc::c_int,
-    abuf: *mut libc::c_uchar,
-    alen: libc::c_int)
+    arg: *mut c_void,
+    status: c_int,
+    _timeouts: c_int,
+    abuf: *mut c_uchar,
+    alen: c_int)
     where F: FnOnce(Result<PTRResults, AresError>) + 'static {
     let result = if status != c_ares_sys::ARES_SUCCESS {
         Err(ares_error(status))

@@ -1,7 +1,10 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use std::fmt;
+use std::os::raw::{
+    c_int,
+    c_void,
+};
 
 use c_types;
 
@@ -50,9 +53,9 @@ impl<'a> fmt::Display for HostResults<'a> {
 }
 
 pub unsafe extern "C" fn get_host_callback<F>(
-    arg: *mut libc::c_void,
-    status: libc::c_int,
-    _timeouts: libc::c_int,
+    arg: *mut c_void,
+    status: c_int,
+    _timeouts: c_int,
     hostent: *mut c_ares_sys::Struct_hostent)
     where F: FnOnce(Result<HostResults, AresError>) + 'static {
     let result = if status != c_ares_sys::ARES_SUCCESS {

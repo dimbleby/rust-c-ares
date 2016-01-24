@@ -1,11 +1,11 @@
 extern crate c_ares_sys;
-extern crate libc;
 
 use c_types;
 
 use error::AresError;
 use types::AddressFamily;
 use std::mem;
+use std::os::raw::c_int;
 use std::net::{
     Ipv4Addr,
     Ipv6Addr,
@@ -14,7 +14,7 @@ use std::net::{
 };
 
 // Convert an error code from the library into a more strongly typed AresError.
-pub fn ares_error(code: libc::c_int) -> AresError {
+pub fn ares_error(code: c_int) -> AresError {
     match code {
         c_ares_sys::ARES_ENODATA => AresError::ENODATA,
         c_ares_sys::ARES_EFORMERR => AresError::EFORMERR,
@@ -46,7 +46,7 @@ pub fn ares_error(code: libc::c_int) -> AresError {
 }
 
 // Convert an address family into a more strongly typed AddressFamily.
-pub fn address_family(family: libc::c_int) -> Option<AddressFamily> {
+pub fn address_family(family: c_int) -> Option<AddressFamily> {
     match family {
         c_types::AF_INET => Some(AddressFamily::INET),
         c_types::AF_INET6 => Some(AddressFamily::INET6),

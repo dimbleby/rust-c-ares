@@ -55,8 +55,7 @@ impl AAAAResults {
     /// Returns an iterator over the `AAAAResult` values in this `AAAAResults`.
     pub fn iter(&self) -> AAAAResultsIter {
         AAAAResultsIter {
-            next: 0,
-            results: self,
+            addr6ttls: self.addr6ttls[0 .. self.naddr6ttls].iter()
         }
     }
 }
@@ -76,25 +75,15 @@ impl fmt::Display for AAAAResults {
 }
 
 /// Iterator of `AAAAResult`s.
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct AAAAResultsIter<'a> {
-    next: usize,
-    results: &'a AAAAResults,
+    addr6ttls: slice::Iter<'a, c_ares_sys::Struct_ares_addr6ttl>,
 }
 
 impl<'a> Iterator for AAAAResultsIter<'a> {
     type Item = AAAAResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        let next = self.next;
-        if next >= self.results.naddr6ttls {
-            None
-        } else {
-            self.next = next + 1;
-            let a_result = AAAAResult {
-                addr6ttl: &self.results.addr6ttls[next],
-            };
-            Some(a_result)
-        }
+        self.addr6ttls.next().map(|addr6ttl| AAAAResult { addr6ttl: addr6ttl })
     }
 }
 

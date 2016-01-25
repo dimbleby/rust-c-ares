@@ -133,7 +133,9 @@ pub struct HostAddressResultsIter<'a> {
 }
 
 // Get an IpAddr from a family and an array of bytes, as found in a `hostent`.
-unsafe fn ip_address_from_bytes(family: AddressFamily, h_addr: *const u8) -> IpAddr {
+unsafe fn ip_address_from_bytes(
+    family: AddressFamily,
+    h_addr: *const u8) -> IpAddr {
     match family {
         AddressFamily::INET => {
             let bytes = slice::from_raw_parts(h_addr, 4);
@@ -157,7 +159,9 @@ impl<'a> Iterator for HostAddressResultsIter<'a> {
         } else {
             unsafe {
                 self.next = self.next.offset(1);
-                self.family.map(|family| ip_address_from_bytes(family, h_addr as *const u8))
+                self.family.map(|family| {
+                    ip_address_from_bytes(family, h_addr as *const u8)
+                })
             }
         }
     }

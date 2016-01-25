@@ -54,20 +54,15 @@ pub fn address_family(family: c_int) -> Option<AddressFamily> {
     }
 }
 
-// Get the u32 value from an Ipv4Addr.
-pub fn ipv4_as_u32(ipv4: &Ipv4Addr) -> u32 {
-    u32::from(*ipv4)
-}
-
 // Get an in_addr from an Ipv4Addr.
 #[cfg(unix)]
 pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
-    c_types::in_addr { s_addr: ipv4_as_u32(ipv4).to_be() }
+    c_types::in_addr { s_addr: u32::from(*ipv4).to_be() }
 }
 
 #[cfg(windows)]
 pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
-    c_types::in_addr { S_un: ipv4_as_u32(ipv4).to_be() }
+    c_types::in_addr { S_un: u32::from(*ipv4).to_be() }
 }
 
 // Get an Ipv4Addr from an in_addr.

@@ -305,7 +305,7 @@ pub fn main() {
     println!("");
     print_mx_results(result);
 
-    let result = resolver.query_naptr("4.3.2.1.5.5.5.0.0.8.1.e164.arpa");
+    let result = resolver.query_naptr("apple.com");
     println!("");
     print_naptr_results(result);
 }

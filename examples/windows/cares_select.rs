@@ -76,8 +76,7 @@ pub fn main() {
         .set_tries(3);
     let mut ares_channel = c_ares::Channel::new(options)
         .expect("Failed to create channel");
-    ares_channel.set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    ares_channel.set_servers(&["8.8.8.8"]).expect("Failed to set servers");
 
     // Set up some queries.
     ares_channel.query_soa("google.com", move |result| {

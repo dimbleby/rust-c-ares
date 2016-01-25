@@ -120,8 +120,9 @@ impl Resolver {
             .set_flags(c_ares::flags::STAYOPEN)
             .set_timeout(500)
             .set_tries(3);
-        let ares_channel = c_ares::Channel::new(options)
+        let mut ares_channel = c_ares::Channel::new(options)
             .expect("Failed to create channel");
+        ares_channel.set_servers(&["8.8.8.8"]).expect("Failed to set servers");
         let locked_channel = Arc::new(Mutex::new(ares_channel));
 
         // Create a thread to handle file descriptors.

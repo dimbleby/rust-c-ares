@@ -64,10 +64,10 @@ impl fmt::Display for AAAAResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "["));
         let mut first = true;
-        for a_result in self {
+        for aaaa_result in self {
             let prefix = if first { "" } else { ", " };
             first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, a_result));
+            try!(write!(fmt, "{}{{{}}}", prefix, aaaa_result));
         }
         try!(write!(fmt, "]"));
         Ok(())

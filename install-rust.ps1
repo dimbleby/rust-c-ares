@@ -1,16 +1,17 @@
 param([string]$channel=${env:channel}, [string]$target=${env:target})
 
 $downloadUrl = "https://static.rust-lang.org/dist/"
-$manifest = "${env:Temp}\channel-rust-${channel}"
-Start-FileDownload "${downloadUrl}channel-rust-${channel}" -FileName "${manifest}"
+$manifest = "channel-rust-${channel}"
+$localManifest = "${env:Temp}\${manifest}"
+Start-FileDownload "${downloadUrl}${manifest}" -FileName "${localManifest}"
 
-$match = Get-Content "${manifest}" | Select-String -pattern "${target}.exe" -simplematch
+$match = Get-Content "${localManifest}" | Select-String -pattern "${target}.exe" -simplematch
 $installer = $match.line
+$localInstaller = "${env:Temp}\${installer}"
+Start-FileDownload "${downloadUrl}${installer}" -FileName "${localInstaller}"
 
-Start-FileDownload "${downloadUrl}${installer}" -FileName "${env:Temp}\${installer}"
-
-$installDir = "C:\Program Files (x86)\Rust"
-&"${env:Temp}\${installer}" /VERYSILENT /NORESTART /DIR="${installDir}" | Write-Output
+$installDir = "C:\Rust"
+&"${localInstaller}" /VERYSILENT /NORESTART /DIR="${installDir}" | Write-Output
 $env:Path += ";${installDir}\bin"
 
 rustc -V

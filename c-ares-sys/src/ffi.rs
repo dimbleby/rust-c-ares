@@ -248,9 +248,63 @@ impl ::std::clone::Clone for Union_Unnamed2 {
 impl ::std::default::Default for Union_Unnamed2 {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
+#[repr(C)]
+#[derive(Copy)]
+pub struct Struct_ares_addr_port_node {
+    pub next: *mut Struct_ares_addr_port_node,
+    pub family: ::std::os::raw::c_int,
+    pub addr: Union_Unnamed3,
+    pub udp_port: ::std::os::raw::c_int,
+    pub tcp_port: ::std::os::raw::c_int,
+}
+impl ::std::clone::Clone for Struct_ares_addr_port_node {
+    fn clone(&self) -> Self { *self }
+}
+impl ::std::default::Default for Struct_ares_addr_port_node {
+    fn default() -> Self { unsafe { ::std::mem::zeroed() } }
+}
+#[repr(C)]
+#[derive(Copy)]
+pub struct Union_Unnamed3 {
+    pub _bindgen_data_: [u32; 4usize],
+}
+impl Union_Unnamed3 {
+    pub unsafe fn addr4(&mut self) -> *mut Struct_in_addr {
+        let raw: *mut u8 = ::std::mem::transmute(&self._bindgen_data_);
+        ::std::mem::transmute(raw.offset(0))
+    }
+    pub unsafe fn addr6(&mut self) -> *mut Struct_ares_in6_addr {
+        let raw: *mut u8 = ::std::mem::transmute(&self._bindgen_data_);
+        ::std::mem::transmute(raw.offset(0))
+    }
+}
+impl ::std::clone::Clone for Union_Unnamed3 {
+    fn clone(&self) -> Self { *self }
+}
+impl ::std::default::Default for Union_Unnamed3 {
+    fn default() -> Self { unsafe { ::std::mem::zeroed() } }
+}
 extern "C" {
     pub fn ares_library_init(flags: ::std::os::raw::c_int)
      -> ::std::os::raw::c_int;
+    pub fn ares_library_init_mem(flags: ::std::os::raw::c_int,
+                                 amalloc:
+                                     ::std::option::Option<extern "C" fn(size:
+                                                                             size_t)
+                                                               ->
+                                                                   *mut ::std::os::raw::c_void>,
+                                 afree:
+                                     ::std::option::Option<unsafe extern "C" fn(ptr:
+                                                                                    *mut ::std::os::raw::c_void)>,
+                                 arealloc:
+                                     ::std::option::Option<unsafe extern "C" fn(ptr:
+                                                                                    *mut ::std::os::raw::c_void,
+                                                                                size:
+                                                                                    size_t)
+                                                               ->
+                                                                   *mut ::std::os::raw::c_void>)
+     -> ::std::os::raw::c_int;
+    pub fn ares_library_initialized() -> ::std::os::raw::c_int;
     pub fn ares_library_cleanup();
     pub fn ares_version(version: *mut ::std::os::raw::c_int)
      -> *const ::std::os::raw::c_char;
@@ -277,6 +331,9 @@ extern "C" {
     pub fn ares_set_socket_callback(channel: ares_channel,
                                     callback: ares_sock_create_callback,
                                     user_data: *mut ::std::os::raw::c_void);
+    pub fn ares_set_sortlist(channel: ares_channel,
+                             sortstr: *const ::std::os::raw::c_char)
+     -> ::std::os::raw::c_int;
     pub fn ares_send(channel: ares_channel,
                      qbuf: *const ::std::os::raw::c_uchar,
                      qlen: ::std::os::raw::c_int, callback: ares_callback,
@@ -406,11 +463,21 @@ extern "C" {
     pub fn ares_set_servers(channel: ares_channel,
                             servers: *mut Struct_ares_addr_node)
      -> ::std::os::raw::c_int;
+    pub fn ares_set_servers_ports(channel: ares_channel,
+                                  servers: *mut Struct_ares_addr_port_node)
+     -> ::std::os::raw::c_int;
     pub fn ares_set_servers_csv(channel: ares_channel,
                                 servers: *const ::std::os::raw::c_char)
      -> ::std::os::raw::c_int;
+    pub fn ares_set_servers_ports_csv(channel: ares_channel,
+                                      servers: *const ::std::os::raw::c_char)
+     -> ::std::os::raw::c_int;
     pub fn ares_get_servers(channel: ares_channel,
                             servers: *mut *mut Struct_ares_addr_node)
+     -> ::std::os::raw::c_int;
+    pub fn ares_get_servers_ports(channel: ares_channel,
+                                  servers:
+                                      *mut *mut Struct_ares_addr_port_node)
      -> ::std::os::raw::c_int;
     pub fn ares_inet_ntop(af: ::std::os::raw::c_int,
                           src: *const ::std::os::raw::c_void,

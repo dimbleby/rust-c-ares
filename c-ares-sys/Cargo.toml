@@ -13,7 +13,6 @@ keywords = ["DNS", "c-ares"]
 
 [build-dependencies]
 gcc = "*"
-pkg-config = "*"
 
 [dependencies]
 libc = "*"

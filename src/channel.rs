@@ -341,7 +341,7 @@ impl Channel {
         let servers_csv = servers.join(",");
         let c_servers = CString::new(servers_csv).unwrap();
         let ares_rc = unsafe {
-            c_ares_sys::ares_set_servers_csv(
+            c_ares_sys::ares_set_servers_ports_csv(
                 self.ares_channel,
                 c_servers.as_ptr())
         };

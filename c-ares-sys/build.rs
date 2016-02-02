@@ -1,5 +1,4 @@
 extern crate gcc;
-extern crate pkg_config;
 
 use std::env;
 use std::fs;
@@ -14,12 +13,6 @@ macro_rules! t {
 }
 
 fn main() {
-    // Use the installed libcares if it is available.
-    match pkg_config::Config::new().atleast_version("1.10.0").find("libcares") {
-        Ok(..) => return,
-        Err(..) => {}
-    }
-
     // MSVC builds are different.
     let target = env::var("TARGET").unwrap();
     if target.contains("msvc") {

@@ -147,7 +147,13 @@ impl<'a> TXTResult<'a> {
 
 impl<'a> fmt::Display for TXTResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.text().fmt(fmt)
+        try!(
+            write!(
+                fmt,
+                "Record start: {}, Text: {}",
+                self.record_start(),
+                self.text()));
+        Ok(())
     }
 }
 

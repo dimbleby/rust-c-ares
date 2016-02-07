@@ -237,7 +237,10 @@ fn print_txt_results(
         Ok(txt_results) => {
             println!("Successful TXT lookup...");
             for txt_result in &txt_results {
-                println!("{}", txt_result);
+                println!(
+                    "record start: {}, text: {}",
+                    txt_result.record_start(),
+                    txt_result.text());
             }
         }
     }

@@ -18,17 +18,24 @@ use utils::ares_error;
 /// The result of a successful TXT lookup.
 #[derive(Debug)]
 pub struct TXTResults {
-    txt_reply: *mut c_ares_sys::Struct_ares_txt_reply,
-    phantom: PhantomData<c_ares_sys::Struct_ares_txt_reply>,
+    txt_reply: *mut c_ares_sys::Struct_ares_txt_ext,
+    phantom: PhantomData<c_ares_sys::Struct_ares_txt_ext>,
+}
+
+/// The contents of a single TXT record.
+#[derive(Clone, Copy, Debug)]
+pub struct TXTResult<'a> {
+    txt_reply: *const c_ares_sys::Struct_ares_txt_ext,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_ext>,
 }
 
 impl TXTResults {
     /// Obtain a `TXTResults` from the response to a TXT lookup.
     pub fn parse_from(data: &[u8]) -> Result<TXTResults, AresError> {
-        let mut txt_reply: *mut c_ares_sys::Struct_ares_txt_reply =
+        let mut txt_reply: *mut c_ares_sys::Struct_ares_txt_ext =
             ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_txt_reply(
+            c_ares_sys::ares_parse_txt_reply_ext(
                 data.as_ptr(),
                 data.len() as c_int,
                 &mut txt_reply)
@@ -41,14 +48,14 @@ impl TXTResults {
         }
     }
 
-    fn new(txt_reply: *mut c_ares_sys::Struct_ares_txt_reply) -> TXTResults {
+    fn new(txt_reply: *mut c_ares_sys::Struct_ares_txt_ext) -> TXTResults {
         TXTResults {
             txt_reply: txt_reply,
             phantom: PhantomData,
         }
     }
 
-    /// Returns an iterator over the values in this `TXTResults`.
+    /// Returns an iterator over the `TXTResult` values in this `TXTResults`.
     pub fn iter(&self) -> TXTResultsIter {
         TXTResultsIter {
             next: self.txt_reply,
@@ -71,15 +78,15 @@ impl fmt::Display for TXTResults {
     }
 }
 
-/// Iterator of `&'a str`s.
+/// Iterator of `TXTResult`s.
 #[derive(Clone, Copy, Debug)]
 pub struct TXTResultsIter<'a> {
-    next: *const c_ares_sys::Struct_ares_txt_reply,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_reply>,
+    next: *const c_ares_sys::Struct_ares_txt_ext,
+    phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_ext>,
 }
 
 impl<'a> Iterator for TXTResultsIter<'a> {
-    type Item = &'a str;
+    type Item = TXTResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let txt_reply = self.next;
         if txt_reply.is_null() {
@@ -87,14 +94,17 @@ impl<'a> Iterator for TXTResultsIter<'a> {
         } else {
             unsafe {
                 self.next = (*txt_reply).next;
-                let c_str = CStr::from_ptr((*txt_reply).txt as *const i8);
-                Some(str::from_utf8_unchecked(c_str.to_bytes()))
             }
+            let txt_result = TXTResult {
+                txt_reply: txt_reply,
+                phantom: PhantomData,
+            };
+            Some(txt_result)
         }
     }
 }
 impl<'a> IntoIterator for &'a TXTResults {
-    type Item = &'a str;
+    type Item = TXTResult<'a>;
     type IntoIter = TXTResultsIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -110,10 +120,36 @@ impl Drop for TXTResults {
     }
 }
 
+unsafe impl<'a> Send for TXTResult<'a> { }
+unsafe impl<'a> Sync for TXTResult<'a> { }
 unsafe impl Send for TXTResults { }
 unsafe impl Sync for TXTResults { }
 unsafe impl<'a> Send for TXTResultsIter<'a> { }
 unsafe impl<'a> Sync for TXTResultsIter<'a> { }
+
+impl<'a> TXTResult<'a> {
+    /// Is this the start of a text record, or the continuation of a previous
+    /// record?
+    pub fn record_start(&self) -> bool {
+        unsafe {
+            (*self.txt_reply).record_start != 0
+        }
+    }
+
+    /// Returns the text in this `TXTResult`.
+    pub fn text(&self) -> &str {
+        unsafe {
+            let c_str = CStr::from_ptr((*self.txt_reply).txt as *const i8);
+            str::from_utf8_unchecked(c_str.to_bytes())
+        }
+    }
+}
+
+impl<'a> fmt::Display for TXTResult<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.text().fmt(fmt)
+    }
+}
 
 pub unsafe extern "C" fn query_txt_callback<F>(
     arg: *mut c_void,

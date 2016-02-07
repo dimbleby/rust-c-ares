@@ -182,6 +182,20 @@ impl ::std::default::Default for Struct_ares_txt_reply {
 }
 #[repr(C)]
 #[derive(Copy)]
+pub struct Struct_ares_txt_ext {
+    pub next: *mut Struct_ares_txt_ext,
+    pub txt: *mut ::std::os::raw::c_uchar,
+    pub length: size_t,
+    pub record_start: ::std::os::raw::c_uchar,
+}
+impl ::std::clone::Clone for Struct_ares_txt_ext {
+    fn clone(&self) -> Self { *self }
+}
+impl ::std::default::Default for Struct_ares_txt_ext {
+    fn default() -> Self { unsafe { ::std::mem::zeroed() } }
+}
+#[repr(C)]
+#[derive(Copy)]
 pub struct Struct_ares_naptr_reply {
     pub next: *mut Struct_ares_naptr_reply,
     pub flags: *mut ::std::os::raw::c_uchar,
@@ -445,6 +459,10 @@ extern "C" {
     pub fn ares_parse_txt_reply(abuf: *const ::std::os::raw::c_uchar,
                                 alen: ::std::os::raw::c_int,
                                 txt_out: *mut *mut Struct_ares_txt_reply)
+     -> ::std::os::raw::c_int;
+    pub fn ares_parse_txt_reply_ext(abuf: *const ::std::os::raw::c_uchar,
+                                    alen: ::std::os::raw::c_int,
+                                    txt_out: *mut *mut Struct_ares_txt_ext)
      -> ::std::os::raw::c_int;
     pub fn ares_parse_naptr_reply(abuf: *const ::std::os::raw::c_uchar,
                                   alen: ::std::os::raw::c_int,

@@ -15,7 +15,6 @@ keywords = ["DNS", "c-ares"]
 [dependencies]
 bitflags = "*"
 c-types = "*"
-ip = "*"
 
 [dependencies.c-ares-sys]
 path = "c-ares-sys"

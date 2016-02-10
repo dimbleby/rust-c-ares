@@ -3,6 +3,7 @@ extern crate c_ares_sys;
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
+use std::net::IpAddr;
 use std::os::raw::{
     c_char,
     c_int,
@@ -11,7 +12,6 @@ use std::slice;
 use std::str;
 
 use c_types;
-use ip::IpAddr;
 
 use types::AddressFamily;
 use utils::{

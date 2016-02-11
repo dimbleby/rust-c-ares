@@ -86,6 +86,12 @@ pub type ares_sock_create_callback =
                                                data:
                                                    *mut ::std::os::raw::c_void)
                               -> ::std::os::raw::c_int>;
+pub type ares_sock_config_callback =
+    ::std::option::Option<unsafe extern "C" fn(socket_fd: ares_socket_t,
+                                               _type: ::std::os::raw::c_int,
+                                               data:
+                                                   *mut ::std::os::raw::c_void)
+                              -> ::std::os::raw::c_int>;
 #[repr(C)]
 #[derive(Copy)]
 pub struct Struct_ares_in6_addr {
@@ -345,6 +351,11 @@ extern "C" {
     pub fn ares_set_socket_callback(channel: ares_channel,
                                     callback: ares_sock_create_callback,
                                     user_data: *mut ::std::os::raw::c_void);
+    pub fn ares_set_socket_configure_callback(channel: ares_channel,
+                                              callback:
+                                                  ares_sock_config_callback,
+                                              user_data:
+                                                  *mut ::std::os::raw::c_void);
     pub fn ares_set_sortlist(channel: ares_channel,
                              sortstr: *const ::std::os::raw::c_char)
      -> ::std::os::raw::c_int;

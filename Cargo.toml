@@ -13,12 +13,10 @@ readme = "README.md"
 keywords = ["DNS", "c-ares"]
 
 [dependencies]
+c-ares-sys = { version = "0.10.0", path = "c-ares-sys" }
 bitflags = "*"
 c-types = "*"
 ip = "*"
-
-[dependencies.c-ares-sys]
-path = "c-ares-sys"
 
 [dev-dependencies]
 mio = "*"

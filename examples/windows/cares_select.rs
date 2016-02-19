@@ -1,6 +1,8 @@
 // This example uses fds() to find out which file descriptors c-ares
 // wants us to listen on, and uses select() to satisfy those requirements.
 extern crate c_ares;
+extern crate winapi;
+extern crate ws2_32;
 
 use winapi::winsock2::{
     fd_set,

@@ -4,6 +4,12 @@ mod unix;
 #[cfg(windows)]
 mod windows;
 
+#[cfg(windows)]
+extern crate winapi;
+
+#[cfg(windows)]
+extern crate ws2_32;
+
 #[cfg(all(unix, any(target_os = "linux", target_os = "android")))]
 fn epoll_examples() {
     unix::cares_epoll::main();

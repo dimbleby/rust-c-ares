@@ -4,6 +4,7 @@ use std::ffi::CString;
 use std::marker::PhantomData;
 use std::mem;
 use std::net::{
+    IpAddr,
     Ipv4Addr,
     Ipv6Addr,
     SocketAddr,
@@ -17,7 +18,6 @@ use std::os::raw::{
 use std::ptr;
 
 use c_types;
-use ip::IpAddr;
 
 use a::{
     AResults,

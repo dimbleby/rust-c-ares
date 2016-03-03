@@ -26,7 +26,6 @@
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 #[macro_use] extern crate bitflags;
 extern crate c_types;
-extern crate ip;
 
 mod a;
 mod aaaa;
@@ -54,7 +53,6 @@ mod tests;
 
 // Re-export types from other crates that are on our interface.
 pub use c_types::fd_set;
-pub use ip::IpAddr;
 
 // Re-export public interfaces.
 pub use a::{

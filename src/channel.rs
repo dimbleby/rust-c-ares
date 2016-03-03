@@ -345,10 +345,10 @@ impl Channel {
                 self.ares_channel,
                 c_servers.as_ptr())
         };
-        if ares_rc != c_ares_sys::ARES_SUCCESS {
-            Err(ares_error(ares_rc))
-        } else {
+        if ares_rc == c_ares_sys::ARES_SUCCESS {
             Ok(self)
+        } else {
+            Err(ares_error(ares_rc))
         }
     }
 

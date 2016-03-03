@@ -58,12 +58,12 @@ pub unsafe extern "C" fn get_host_callback<F>(
     _timeouts: c_int,
     hostent: *mut c_ares_sys::Struct_hostent)
     where F: FnOnce(Result<HostResults, AresError>) + 'static {
-    let result = if status != c_ares_sys::ARES_SUCCESS {
-        Err(ares_error(status))
-    } else {
+    let result = if status == c_ares_sys::ARES_SUCCESS {
         let host_results = HostResults::new(
             hostent as *const c_types::hostent);
         Ok(host_results)
+    } else {
+        Err(ares_error(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

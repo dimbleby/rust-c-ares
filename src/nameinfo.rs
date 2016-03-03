@@ -77,11 +77,11 @@ pub unsafe extern "C" fn get_name_info_callback<F>(
     node: *mut c_char,
     service: *mut c_char)
     where F: FnOnce(Result<NameInfoResult, AresError>) + 'static {
-    let result = if status != c_ares_sys::ARES_SUCCESS {
-        Err(ares_error(status))
-    } else {
+    let result = if status == c_ares_sys::ARES_SUCCESS {
         let name_info_result = NameInfoResult::new(node, service);
         Ok(name_info_result)
+    } else {
+        Err(ares_error(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

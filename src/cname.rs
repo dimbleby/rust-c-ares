@@ -39,11 +39,11 @@ impl CNameResults {
                 ptr::null_mut(),
                 ptr::null_mut())
         };
-        if parse_status != c_ares_sys::ARES_SUCCESS {
-            Err(ares_error(parse_status))
-        } else {
+        if parse_status == c_ares_sys::ARES_SUCCESS {
             let result = CNameResults::new(hostent);
             Ok(result)
+        } else {
+            Err(ares_error(parse_status))
         }
     }
 
@@ -82,11 +82,11 @@ pub unsafe extern "C" fn query_cname_callback<F>(
     abuf: *mut c_uchar,
     alen: c_int)
     where F: FnOnce(Result<CNameResults, AresError>) + 'static {
-    let result = if status != c_ares_sys::ARES_SUCCESS {
-        Err(ares_error(status))
-    } else {
+    let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         CNameResults::parse_from(data)
+    } else {
+        Err(ares_error(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

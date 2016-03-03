@@ -45,10 +45,10 @@ impl AResults {
                 results.addrttls.as_mut_ptr(),
                 &mut results.naddrttls as *mut _ as *mut c_int)
         };
-        if parse_status != c_ares_sys::ARES_SUCCESS {
-            Err(ares_error(parse_status))
-        } else {
+        if parse_status == c_ares_sys::ARES_SUCCESS {
             Ok(results)
+        } else {
+            Err(ares_error(parse_status))
         }
     }
 
@@ -121,11 +121,11 @@ pub unsafe extern "C" fn query_a_callback<F>(
     abuf: *mut c_uchar,
     alen: c_int)
     where F: FnOnce(Result<AResults, AresError>) + 'static {
-    let result = if status != c_ares_sys::ARES_SUCCESS {
-        Err(ares_error(status))
-    } else {
+    let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         AResults::parse_from(data)
+    } else {
+        Err(ares_error(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

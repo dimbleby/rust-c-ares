@@ -13,12 +13,12 @@ readme = "README.md"
 keywords = ["DNS", "c-ares"]
 
 [dependencies]
-c-ares-sys = { version = "0.10.0", path = "c-ares-sys" }
-bitflags = "*"
-c-types = "*"
+c-ares-sys = "0.10.0"
+bitflags = "0.3.3"
+c-types = "0.1.3"
 
 [dev-dependencies]
-mio = "*"
-nix = "*"
-winapi = "*"
-ws2_32-sys = "*"
+mio = "0.5.0"
+nix = "0.5.0"
+winapi = "0.2.5"
+ws2_32-sys = "0.2.1"

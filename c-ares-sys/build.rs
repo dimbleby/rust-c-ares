@@ -45,7 +45,6 @@ fn main() {
     let _ = fs::create_dir(&build);
 
     let mut config_opts = Vec::new();
-    config_opts.push("--disable-tests".to_string());
     config_opts.push("--enable-static=yes".to_string());
     config_opts.push("--enable-shared=no".to_string());
     config_opts.push("--enable-optimize".to_string());

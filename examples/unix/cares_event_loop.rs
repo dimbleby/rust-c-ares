@@ -199,7 +199,7 @@ pub fn main() {
     });
 
     let tx = results_tx.clone();
-    let ipv6 = "2a00:1450:4009:80a::200e".parse::<IpAddr>().unwrap();
+    let ipv6 = "2001:4860:4860::8888".parse::<IpAddr>().unwrap();
     ares_channel.get_host_by_address(&ipv6, move |results| {
         println!("");
         print_host_results(results);

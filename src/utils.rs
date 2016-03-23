@@ -171,8 +171,8 @@ pub fn socket_addrv6_as_sockaddr_in6(
         sin6_family: c_types::AF_INET6 as c_types::sa_family_t,
         sin6_port: sock_v6.port().to_be(),
         sin6_addr: in6_addr,
-        sin6_flowinfo: sock_v6.flowinfo().to_be(),
-        sin6_scope_id: sock_v6.scope_id().to_be(),
+        sin6_flowinfo: sock_v6.flowinfo(),
+        sin6_scope_id: sock_v6.scope_id(),
     }
 }
 
@@ -190,8 +190,8 @@ pub fn socket_addrv6_as_sockaddr_in6(
         sin6_family: c_types::AF_INET6 as c_types::sa_family_t,
         sin6_port: sock_v6.port().to_be(),
         sin6_addr: in6_addr,
-        sin6_flowinfo: sock_v6.flowinfo().to_be(),
-        sin6_scope_id: sock_v6.scope_id().to_be(),
+        sin6_flowinfo: sock_v6.flowinfo(),
+        sin6_scope_id: sock_v6.scope_id(),
     }
 }
 
@@ -203,7 +203,7 @@ pub fn socket_addrv6_as_sockaddr_in6(
         sin6_family: c_types::AF_INET6 as i16,
         sin6_port: sock_v6.port().to_be(),
         sin6_addr: in6_addr,
-        sin6_flowinfo: sock_v6.flowinfo().to_be(),
-        sin6_scope_id: sock_v6.scope_id().to_be(),
+        sin6_flowinfo: sock_v6.flowinfo(),
+        sin6_scope_id: sock_v6.scope_id(),
     }
 }

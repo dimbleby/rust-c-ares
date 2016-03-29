@@ -86,6 +86,7 @@ use utils::{
 };
 
 /// Used to configure the behaviour of the name resolver.
+#[derive(Default)]
 pub struct Options {
     ares_options: c_ares_sys::Struct_ares_options,
     optmask: c_int,
@@ -96,14 +97,8 @@ pub struct Options {
 
 impl Options {
     /// Returns a fresh `Options`, on which no values are set.
-    pub fn new() -> Options {
-        Options {
-            ares_options: c_ares_sys::Struct_ares_options::default(),
-            optmask: 0,
-            domains: Vec::new(),
-            lookups: None,
-            socket_state_callback: None,
-        }
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Set flags controlling the behaviour of the resolver.  The available

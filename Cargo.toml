@@ -17,8 +17,10 @@ c-ares-sys = { version = "0.11.0", path = "c-ares-sys" }
 bitflags = "0.4.0"
 c-types = "*"
 
-[dev-dependencies]
+[target.'cfg(unix)'.dev-dependencies]
 mio = "*"
 nix = "*"
+
+[target.'cfg(windows)'.dev-dependencies]
 winapi = "*"
 ws2_32-sys = "*"

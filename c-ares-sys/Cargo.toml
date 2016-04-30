@@ -18,4 +18,6 @@ pkg-config = "*"
 [dependencies]
 libc = "*"
 c-types = "*"
+
+[target.'cfg(windows)'.dependencies]
 winapi = "*"

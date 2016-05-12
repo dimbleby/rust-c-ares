@@ -25,7 +25,7 @@ pub type ares_sock_state_cb =
                                                    ::std::os::raw::c_int)>;
 pub enum Struct_apattern { }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_options {
     pub flags: ::std::os::raw::c_int,
     pub timeout: ::std::os::raw::c_int,
@@ -45,9 +45,6 @@ pub struct Struct_ares_options {
     pub sortlist: *mut Struct_apattern,
     pub nsort: ::std::os::raw::c_int,
     pub ednspsz: ::std::os::raw::c_int,
-}
-impl ::std::clone::Clone for Struct_ares_options {
-    fn clone(&self) -> Self { *self }
 }
 impl ::std::default::Default for Struct_ares_options {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
@@ -94,18 +91,15 @@ pub type ares_sock_config_callback =
                                                    *mut ::std::os::raw::c_void)
                               -> ::std::os::raw::c_int>;
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_in6_addr {
     pub _S6_un: Union_Unnamed1,
-}
-impl ::std::clone::Clone for Struct_ares_in6_addr {
-    fn clone(&self) -> Self { *self }
 }
 impl ::std::default::Default for Struct_ares_in6_addr {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Union_Unnamed1 {
     pub _bindgen_data_: [u8; 16usize],
 }
@@ -116,38 +110,29 @@ impl Union_Unnamed1 {
         ::std::mem::transmute(raw.offset(0))
     }
 }
-impl ::std::clone::Clone for Union_Unnamed1 {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Union_Unnamed1 {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_addrttl {
     pub ipaddr: Struct_in_addr,
     pub ttl: ::std::os::raw::c_int,
-}
-impl ::std::clone::Clone for Struct_ares_addrttl {
-    fn clone(&self) -> Self { *self }
 }
 impl ::std::default::Default for Struct_ares_addrttl {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_addr6ttl {
     pub ip6addr: Struct_ares_in6_addr,
     pub ttl: ::std::os::raw::c_int,
-}
-impl ::std::clone::Clone for Struct_ares_addr6ttl {
-    fn clone(&self) -> Self { *self }
 }
 impl ::std::default::Default for Struct_ares_addr6ttl {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_srv_reply {
     pub next: *mut Struct_ares_srv_reply,
     pub host: *mut ::std::os::raw::c_char,
@@ -155,54 +140,42 @@ pub struct Struct_ares_srv_reply {
     pub weight: ::std::os::raw::c_ushort,
     pub port: ::std::os::raw::c_ushort,
 }
-impl ::std::clone::Clone for Struct_ares_srv_reply {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Struct_ares_srv_reply {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_mx_reply {
     pub next: *mut Struct_ares_mx_reply,
     pub host: *mut ::std::os::raw::c_char,
     pub priority: ::std::os::raw::c_ushort,
 }
-impl ::std::clone::Clone for Struct_ares_mx_reply {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Struct_ares_mx_reply {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_txt_reply {
     pub next: *mut Struct_ares_txt_reply,
     pub txt: *mut ::std::os::raw::c_uchar,
     pub length: size_t,
 }
-impl ::std::clone::Clone for Struct_ares_txt_reply {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Struct_ares_txt_reply {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_txt_ext {
     pub next: *mut Struct_ares_txt_ext,
     pub txt: *mut ::std::os::raw::c_uchar,
     pub length: size_t,
     pub record_start: ::std::os::raw::c_uchar,
 }
-impl ::std::clone::Clone for Struct_ares_txt_ext {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Struct_ares_txt_ext {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_naptr_reply {
     pub next: *mut Struct_ares_naptr_reply,
     pub flags: *mut ::std::os::raw::c_uchar,
@@ -212,14 +185,11 @@ pub struct Struct_ares_naptr_reply {
     pub order: ::std::os::raw::c_ushort,
     pub preference: ::std::os::raw::c_ushort,
 }
-impl ::std::clone::Clone for Struct_ares_naptr_reply {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Struct_ares_naptr_reply {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_soa_reply {
     pub nsname: *mut ::std::os::raw::c_char,
     pub hostmaster: *mut ::std::os::raw::c_char,
@@ -229,27 +199,21 @@ pub struct Struct_ares_soa_reply {
     pub expire: ::std::os::raw::c_uint,
     pub minttl: ::std::os::raw::c_uint,
 }
-impl ::std::clone::Clone for Struct_ares_soa_reply {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Struct_ares_soa_reply {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_addr_node {
     pub next: *mut Struct_ares_addr_node,
     pub family: ::std::os::raw::c_int,
     pub addr: Union_Unnamed2,
 }
-impl ::std::clone::Clone for Struct_ares_addr_node {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Struct_ares_addr_node {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Union_Unnamed2 {
     pub _bindgen_data_: [u32; 4usize],
 }
@@ -263,14 +227,11 @@ impl Union_Unnamed2 {
         ::std::mem::transmute(raw.offset(0))
     }
 }
-impl ::std::clone::Clone for Union_Unnamed2 {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Union_Unnamed2 {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Struct_ares_addr_port_node {
     pub next: *mut Struct_ares_addr_port_node,
     pub family: ::std::os::raw::c_int,
@@ -278,14 +239,11 @@ pub struct Struct_ares_addr_port_node {
     pub udp_port: ::std::os::raw::c_int,
     pub tcp_port: ::std::os::raw::c_int,
 }
-impl ::std::clone::Clone for Struct_ares_addr_port_node {
-    fn clone(&self) -> Self { *self }
-}
 impl ::std::default::Default for Struct_ares_addr_port_node {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Union_Unnamed3 {
     pub _bindgen_data_: [u32; 4usize],
 }
@@ -298,9 +256,6 @@ impl Union_Unnamed3 {
         let raw: *mut u8 = ::std::mem::transmute(&self._bindgen_data_);
         ::std::mem::transmute(raw.offset(0))
     }
-}
-impl ::std::clone::Clone for Union_Unnamed3 {
-    fn clone(&self) -> Self { *self }
 }
 impl ::std::default::Default for Union_Unnamed3 {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }

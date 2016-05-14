@@ -19,6 +19,7 @@ use utils::{
 };
 
 /// The result of a successful AAAA lookup.
+#[derive(Clone, Copy)]
 pub struct AAAAResults {
     naddr6ttls: usize,
     addr6ttls: [c_ares_sys::Struct_ares_addr6ttl; MAX_ADDRTTLS],

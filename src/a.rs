@@ -19,6 +19,7 @@ use utils::{
 };
 
 /// The result of a successful A lookup.
+#[derive(Clone, Copy)]
 pub struct AResults {
     naddrttls: usize,
     addrttls: [c_ares_sys::Struct_ares_addrttl; MAX_ADDRTTLS],

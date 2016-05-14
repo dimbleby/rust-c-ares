@@ -105,7 +105,7 @@ impl Options {
     /// flags are documented [here](flags/index.html).
     pub fn set_flags(&mut self, flags: Flags) -> &mut Self {
         self.ares_options.flags = flags.bits();
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_FLAGS;
+        self.optmask |= c_ares_sys::ARES_OPT_FLAGS;
         self
     }
 
@@ -115,7 +115,7 @@ impl Options {
     /// timeout).  The default is 5000ms.
     pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
         self.ares_options.timeout = ms as c_int;
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_TIMEOUTMS;
+        self.optmask |= c_ares_sys::ARES_OPT_TIMEOUTMS;
         self
     }
 
@@ -123,7 +123,7 @@ impl Options {
     /// server before giving up.  The default is four tries.
     pub fn set_tries(&mut self, tries: u32) -> &mut Self {
         self.ares_options.tries = tries as c_int;
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_TRIES;
+        self.optmask |= c_ares_sys::ARES_OPT_TRIES;
         self
     }
 
@@ -133,7 +133,7 @@ impl Options {
     /// resolv.conf or the RES_OPTIONS environment variable.
     pub fn set_ndots(&mut self, ndots: u32) -> &mut Self {
         self.ares_options.ndots = ndots as c_int;
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_NDOTS;
+        self.optmask |= c_ares_sys::ARES_OPT_NDOTS;
         self
     }
 
@@ -141,7 +141,7 @@ impl Options {
     /// standard name service port.
     pub fn set_udp_port(&mut self, udp_port: u16) -> &mut Self {
         self.ares_options.udp_port = udp_port;
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_UDP_PORT;
+        self.optmask |= c_ares_sys::ARES_OPT_UDP_PORT;
         self
     }
 
@@ -149,7 +149,7 @@ impl Options {
     /// standard name service port.
     pub fn set_tcp_port(&mut self, tcp_port: u16) -> &mut Self {
         self.ares_options.tcp_port = tcp_port;
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_TCP_PORT;
+        self.optmask |= c_ares_sys::ARES_OPT_TCP_PORT;
         self
     }
 
@@ -160,7 +160,7 @@ impl Options {
             .iter()
             .map(|&s| CString::new(s).unwrap())
             .collect();
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_DOMAINS;
+        self.optmask |= c_ares_sys::ARES_OPT_DOMAINS;
         self
     }
 
@@ -170,7 +170,7 @@ impl Options {
     pub fn set_lookups(&mut self, lookups: &str) -> &mut Self {
         let c_lookups = CString::new(lookups).unwrap();
         self.lookups = Some(c_lookups);
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_LOOKUPS;
+        self.optmask |= c_ares_sys::ARES_OPT_LOOKUPS;
         self
     }
 
@@ -188,34 +188,34 @@ impl Options {
         self.ares_options.sock_state_cb_data =
             &mut *boxed_callback as *mut _ as *mut c_void;
         self.socket_state_callback = Some(boxed_callback);
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_STATE_CB;
+        self.optmask |= c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         self
     }
 
     /// Set the socket send buffer size.
     pub fn set_sock_send_buffer_size(&mut self, size: u32) -> &mut Self {
         self.ares_options.socket_send_buffer_size = size as c_int;
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_SNDBUF;
+        self.optmask |= c_ares_sys::ARES_OPT_SOCK_SNDBUF;
         self
     }
 
     /// Set the socket receive buffer size.
     pub fn set_sock_receive_buffer_size(&mut self, size: u32) -> &mut Self {
         self.ares_options.socket_receive_buffer_size = size as c_int;
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_SOCK_RCVBUF;
+        self.optmask |= c_ares_sys::ARES_OPT_SOCK_RCVBUF;
         self
     }
 
     /// Configure round robin selection of nameservers.
     pub fn set_rotate(&mut self) -> &mut Self {
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_ROTATE;
+        self.optmask |= c_ares_sys::ARES_OPT_ROTATE;
         self
     }
 
     /// Set the EDNS packet size.
     pub fn set_ednspsz(&mut self, size: u32) -> &mut Self {
         self.ares_options.ednspsz = size as c_int;
-        self.optmask = self.optmask | c_ares_sys::ARES_OPT_EDNSPSZ;
+        self.optmask |= c_ares_sys::ARES_OPT_EDNSPSZ;
         self
     }
 }
@@ -759,7 +759,7 @@ impl<'a> Iterator for GetSockIter<'a> {
     type Item = (Socket, bool, bool);
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.next;
-        self.next = self.next + 1;
+        self.next += 1;
         if index >= c_ares_sys::ARES_GETSOCK_MAXNUM {
             None
         } else {

@@ -34,12 +34,14 @@ mod aaaa;
 mod channel;
 mod cname;
 mod error;
+/// Flags that may be passed when initializing a `Channel`.
 pub mod flags;
 mod host;
 mod hostent;
 mod mx;
 mod nameinfo;
 mod naptr;
+/// Flags that may be provided on a call to `get_name_info()`
 pub mod ni_flags;
 mod ns;
 mod ptr;

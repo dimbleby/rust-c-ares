@@ -2,7 +2,7 @@ extern crate c_ares_sys;
 
 bitflags!(
     /// Flags that may be passed when initializing a channel.
-    flags Flags: i32 {
+    pub flags Flags: i32 {
         /// Always use TCP queries (the "virtual circuit") instead of UDP
         /// queries.  Normally, TCP is only used if a UDP query yields a
         /// truncated result.

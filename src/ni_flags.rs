@@ -2,7 +2,7 @@ extern crate c_ares_sys;
 
 bitflags!(
     /// Flags that may be provided on a call to `get_name_info()`.
-    flags NIFlags: i32 {
+    pub flags NIFlags: i32 {
         /// Only the nodename portion of the FQDN is returned for local hosts.
         const NOFQDN = c_ares_sys::ARES_NI_NOFQDN,
 

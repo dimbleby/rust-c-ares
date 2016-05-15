@@ -24,6 +24,7 @@
 //!
 //! Complete examples showing how to use the library can be found
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
+#![deny(missing_docs)]
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
 #[macro_use] extern crate bitflags;
@@ -34,14 +35,12 @@ mod aaaa;
 mod channel;
 mod cname;
 mod error;
-/// Flags that may be passed when initializing a `Channel`.
 pub mod flags;
 mod host;
 mod hostent;
 mod mx;
 mod nameinfo;
 mod naptr;
-/// Flags that may be provided on a call to `get_name_info()`
 pub mod ni_flags;
 mod ns;
 mod ptr;

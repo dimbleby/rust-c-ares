@@ -135,7 +135,7 @@ impl<'a> NAPTRResult<'a> {
         unsafe {
             let c_str = CStr::from_ptr(
                 (*self.naptr_reply).flags as *const c_char);
-            str::from_utf8(c_str.to_bytes()).unwrap()
+            str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 
@@ -144,7 +144,7 @@ impl<'a> NAPTRResult<'a> {
         unsafe {
             let c_str = CStr::from_ptr(
                 (*self.naptr_reply).service as *const c_char);
-            str::from_utf8(c_str.to_bytes()).unwrap()
+            str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 
@@ -153,7 +153,7 @@ impl<'a> NAPTRResult<'a> {
         unsafe {
             let c_str = CStr::from_ptr(
                 (*self.naptr_reply).regexp as *const c_char);
-            str::from_utf8(c_str.to_bytes()).unwrap()
+            str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 
@@ -161,7 +161,7 @@ impl<'a> NAPTRResult<'a> {
     pub fn replacement_pattern(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr((*self.naptr_reply).replacement);
-            str::from_utf8(c_str.to_bytes()).unwrap()
+            str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 

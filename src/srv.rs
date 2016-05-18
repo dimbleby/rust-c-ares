@@ -132,7 +132,7 @@ impl<'a> SRVResult<'a> {
     pub fn host(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr((*self.srv_reply).host);
-            str::from_utf8(c_str.to_bytes()).unwrap()
+            str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 

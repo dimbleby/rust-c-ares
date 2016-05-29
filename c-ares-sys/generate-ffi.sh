@@ -8,7 +8,7 @@ fi
 
 # Prepare for bindgen, do it, and then apply manual patches.
 (cd c-ares && ./buildconf && ./configure)
-bindgen --link=cares --match=ares --output=src/ffi.rs c-ares/ares.h
+bindgen --match=ares --output=src/ffi.rs c-ares/ares.h
 patch -p0 < ffi.patch
 
 # Generate constants.

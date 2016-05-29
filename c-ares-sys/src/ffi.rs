@@ -283,7 +283,6 @@ impl Union_Unnamed3 {
 impl ::std::default::Default for Union_Unnamed3 {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
-#[link(name = "cares", kind = "dylib")]
 extern "C" {
     pub fn ares_library_init(flags: ::std::os::raw::c_int)
      -> ::std::os::raw::c_int;

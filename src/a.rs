@@ -22,13 +22,13 @@ use utils::{
 #[derive(Clone, Copy)]
 pub struct AResults {
     naddrttls: usize,
-    addrttls: [c_ares_sys::Struct_ares_addrttl; MAX_ADDRTTLS],
+    addrttls: [c_ares_sys::ares_addrttl; MAX_ADDRTTLS],
 }
 
 /// The contents of a single A record.
 #[derive(Clone, Copy)]
 pub struct AResult<'a> {
-    addrttl: &'a c_ares_sys::Struct_ares_addrttl,
+    addrttl: &'a c_ares_sys::ares_addrttl,
 }
 
 impl AResults {
@@ -76,7 +76,7 @@ impl fmt::Display for AResults {
 /// Iterator of `AResult`s.
 #[derive(Clone)]
 pub struct AResultsIter<'a> {
-    addrttls: slice::Iter<'a, c_ares_sys::Struct_ares_addrttl>,
+    addrttls: slice::Iter<'a, c_ares_sys::ares_addrttl>,
 }
 
 impl<'a> Iterator for AResultsIter<'a> {

@@ -18,21 +18,21 @@ use utils::ares_error;
 /// The result of a successful MX lookup.
 #[derive(Debug)]
 pub struct MXResults {
-    mx_reply: *mut c_ares_sys::Struct_ares_mx_reply,
-    phantom: PhantomData<c_ares_sys::Struct_ares_mx_reply>,
+    mx_reply: *mut c_ares_sys::ares_mx_reply,
+    phantom: PhantomData<c_ares_sys::ares_mx_reply>,
 }
 
 /// The contents of a single MX record.
 #[derive(Clone, Copy, Debug)]
 pub struct MXResult<'a> {
-    mx_reply: *const c_ares_sys::Struct_ares_mx_reply,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
+    mx_reply: *const c_ares_sys::ares_mx_reply,
+    phantom: PhantomData<&'a c_ares_sys::ares_mx_reply>,
 }
 
 impl MXResults {
     /// Obtain an `MXResults` from the response to an MX lookup.
     pub fn parse_from(data: &[u8]) -> Result<MXResults, AresError> {
-        let mut mx_reply: *mut c_ares_sys::Struct_ares_mx_reply =
+        let mut mx_reply: *mut c_ares_sys::ares_mx_reply =
             ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_mx_reply(
@@ -48,7 +48,7 @@ impl MXResults {
         }
     }
 
-    fn new(mx_reply: *mut c_ares_sys::Struct_ares_mx_reply) -> MXResults {
+    fn new(mx_reply: *mut c_ares_sys::ares_mx_reply) -> MXResults {
         MXResults {
             mx_reply: mx_reply,
             phantom: PhantomData,
@@ -81,8 +81,8 @@ impl fmt::Display for MXResults {
 /// Iterator of `MXResult`s.
 #[derive(Clone, Copy, Debug)]
 pub struct MXResultsIter<'a> {
-    next: *const c_ares_sys::Struct_ares_mx_reply,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_mx_reply>,
+    next: *const c_ares_sys::ares_mx_reply,
+    phantom: PhantomData<&'a c_ares_sys::ares_mx_reply>,
 }
 
 impl<'a> Iterator for MXResultsIter<'a> {

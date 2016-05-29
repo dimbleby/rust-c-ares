@@ -3,7 +3,6 @@ name = "c-ares-sys"
 license = "MIT"
 version = "0.11.0"
 authors = ["David Hotham"]
-links = "cares"
 build = "build.rs"
 description = "Low-level bindings to the c-ares library"
 homepage = "https://github.com/dimbleby/rust-c-ares"

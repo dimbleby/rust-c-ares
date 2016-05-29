@@ -39,7 +39,7 @@ impl Drop for HostentOwned {
     fn drop(&mut self) {
         unsafe {
             c_ares_sys::ares_free_hostent(
-                self.inner as *mut c_ares_sys::Struct_hostent);
+                self.inner as *mut c_ares_sys::hostent);
         }
     }
 }

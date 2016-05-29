@@ -18,21 +18,21 @@ use utils::ares_error;
 /// The result of a successful TXT lookup.
 #[derive(Debug)]
 pub struct TXTResults {
-    txt_reply: *mut c_ares_sys::Struct_ares_txt_ext,
-    phantom: PhantomData<c_ares_sys::Struct_ares_txt_ext>,
+    txt_reply: *mut c_ares_sys::ares_txt_ext,
+    phantom: PhantomData<c_ares_sys::ares_txt_ext>,
 }
 
 /// The contents of a single TXT record.
 #[derive(Clone, Copy, Debug)]
 pub struct TXTResult<'a> {
-    txt_reply: *const c_ares_sys::Struct_ares_txt_ext,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_ext>,
+    txt_reply: *const c_ares_sys::ares_txt_ext,
+    phantom: PhantomData<&'a c_ares_sys::ares_txt_ext>,
 }
 
 impl TXTResults {
     /// Obtain a `TXTResults` from the response to a TXT lookup.
     pub fn parse_from(data: &[u8]) -> Result<TXTResults, AresError> {
-        let mut txt_reply: *mut c_ares_sys::Struct_ares_txt_ext =
+        let mut txt_reply: *mut c_ares_sys::ares_txt_ext =
             ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_txt_reply_ext(
@@ -48,7 +48,7 @@ impl TXTResults {
         }
     }
 
-    fn new(txt_reply: *mut c_ares_sys::Struct_ares_txt_ext) -> TXTResults {
+    fn new(txt_reply: *mut c_ares_sys::ares_txt_ext) -> TXTResults {
         TXTResults {
             txt_reply: txt_reply,
             phantom: PhantomData,
@@ -81,8 +81,8 @@ impl fmt::Display for TXTResults {
 /// Iterator of `TXTResult`s.
 #[derive(Clone, Copy, Debug)]
 pub struct TXTResultsIter<'a> {
-    next: *const c_ares_sys::Struct_ares_txt_ext,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_txt_ext>,
+    next: *const c_ares_sys::ares_txt_ext,
+    phantom: PhantomData<&'a c_ares_sys::ares_txt_ext>,
 }
 
 impl<'a> Iterator for TXTResultsIter<'a> {

@@ -88,7 +88,7 @@ use utils::{
 /// Used to configure the behaviour of the name resolver.
 #[derive(Default)]
 pub struct Options {
-    ares_options: c_ares_sys::Struct_ares_options,
+    ares_options: c_ares_sys::ares_options,
     optmask: c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
@@ -223,7 +223,7 @@ impl Options {
 /// A channel for name service lookups.
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
-    phantom: PhantomData<c_ares_sys::Struct_ares_channeldata>,
+    phantom: PhantomData<c_ares_sys::ares_channeldata>,
 
     // For ownership only.
     #[allow(dead_code)]

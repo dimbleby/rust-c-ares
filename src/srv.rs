@@ -18,22 +18,22 @@ use utils::ares_error;
 /// The result of a successful SRV lookup.
 #[derive(Debug)]
 pub struct SRVResults {
-    srv_reply: *mut c_ares_sys::Struct_ares_srv_reply,
-    phantom: PhantomData<c_ares_sys::Struct_ares_srv_reply>,
+    srv_reply: *mut c_ares_sys::ares_srv_reply,
+    phantom: PhantomData<c_ares_sys::ares_srv_reply>,
 }
 
 /// The contents of a single SRV record.
 #[derive(Clone, Copy, Debug)]
 pub struct SRVResult<'a> {
     // A single result - reference into an `SRVResults`.
-    srv_reply: *const c_ares_sys::Struct_ares_srv_reply,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_srv_reply>,
+    srv_reply: *const c_ares_sys::ares_srv_reply,
+    phantom: PhantomData<&'a c_ares_sys::ares_srv_reply>,
 }
 
 impl SRVResults {
     /// Obtain an `SRVResults` from the response to an SRV lookup.
     pub fn parse_from(data: &[u8]) -> Result<SRVResults, AresError> {
-        let mut srv_reply: *mut c_ares_sys::Struct_ares_srv_reply =
+        let mut srv_reply: *mut c_ares_sys::ares_srv_reply =
             ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_srv_reply(
@@ -49,7 +49,7 @@ impl SRVResults {
         }
     }
 
-    fn new(srv_reply: *mut c_ares_sys::Struct_ares_srv_reply) -> SRVResults {
+    fn new(srv_reply: *mut c_ares_sys::ares_srv_reply) -> SRVResults {
         SRVResults {
             srv_reply: srv_reply,
             phantom: PhantomData,
@@ -82,8 +82,8 @@ impl fmt::Display for SRVResults {
 /// Iterator of `SRVResult`s.
 #[derive(Clone, Copy, Debug)]
 pub struct SRVResultsIter<'a> {
-    next: *const c_ares_sys::Struct_ares_srv_reply,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_srv_reply>,
+    next: *const c_ares_sys::ares_srv_reply,
+    phantom: PhantomData<&'a c_ares_sys::ares_srv_reply>,
 }
 
 impl<'a> Iterator for SRVResultsIter<'a> {

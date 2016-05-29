@@ -38,7 +38,7 @@ impl PTRResults {
                 dummy_ip.len() as c_int,
                 c_types::AF_INET,
                 &mut hostent
-                    as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent)
+                    as *mut *mut _ as *mut *mut c_ares_sys::hostent)
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             let result = PTRResults::new(hostent);

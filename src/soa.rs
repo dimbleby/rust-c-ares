@@ -18,14 +18,14 @@ use utils::ares_error;
 /// The result of a successful SOA lookup.
 #[derive(Debug)]
 pub struct SOAResult {
-    soa_reply: *mut c_ares_sys::Struct_ares_soa_reply,
-    phantom: PhantomData<c_ares_sys::Struct_ares_soa_reply>,
+    soa_reply: *mut c_ares_sys::ares_soa_reply,
+    phantom: PhantomData<c_ares_sys::ares_soa_reply>,
 }
 
 impl SOAResult {
     /// Obtain an `SOAResult` from the response to an SOA lookup.
     pub fn parse_from(data: &[u8]) -> Result<SOAResult, AresError> {
-        let mut soa_reply: *mut c_ares_sys::Struct_ares_soa_reply =
+        let mut soa_reply: *mut c_ares_sys::ares_soa_reply =
             ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_soa_reply(
@@ -41,7 +41,7 @@ impl SOAResult {
         }
     }
 
-    fn new(soa_reply: *mut c_ares_sys::Struct_ares_soa_reply) -> SOAResult {
+    fn new(soa_reply: *mut c_ares_sys::ares_soa_reply) -> SOAResult {
         SOAResult {
             soa_reply: soa_reply,
             phantom: PhantomData,

@@ -35,7 +35,7 @@ impl CNameResults {
                 data.as_ptr(),
                 data.len() as c_int,
                 &mut hostent
-                    as *mut *mut _ as *mut *mut c_ares_sys::Struct_hostent,
+                    as *mut *mut _ as *mut *mut c_ares_sys::hostent,
                 ptr::null_mut(),
                 ptr::null_mut())
         };

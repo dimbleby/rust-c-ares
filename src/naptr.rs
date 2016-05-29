@@ -19,21 +19,21 @@ use utils::ares_error;
 /// The result of a successful NAPTR lookup.
 #[derive(Debug)]
 pub struct NAPTRResults {
-    naptr_reply: *mut c_ares_sys::Struct_ares_naptr_reply,
-    phantom: PhantomData<c_ares_sys::Struct_ares_naptr_reply>,
+    naptr_reply: *mut c_ares_sys::ares_naptr_reply,
+    phantom: PhantomData<c_ares_sys::ares_naptr_reply>,
 }
 
 /// The contents of a single NAPTR record.
 #[derive(Clone, Copy, Debug)]
 pub struct NAPTRResult<'a> {
-    naptr_reply: *const c_ares_sys::Struct_ares_naptr_reply,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_naptr_reply>,
+    naptr_reply: *const c_ares_sys::ares_naptr_reply,
+    phantom: PhantomData<&'a c_ares_sys::ares_naptr_reply>,
 }
 
 impl NAPTRResults {
     /// Obtain a `NAPTRResults` from the response to a NAPTR lookup.
     pub fn parse_from(data: &[u8]) -> Result<NAPTRResults, AresError> {
-        let mut naptr_reply: *mut c_ares_sys::Struct_ares_naptr_reply =
+        let mut naptr_reply: *mut c_ares_sys::ares_naptr_reply =
             ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_naptr_reply(
@@ -50,7 +50,7 @@ impl NAPTRResults {
     }
 
     fn new(
-        reply: *mut c_ares_sys::Struct_ares_naptr_reply) -> NAPTRResults {
+        reply: *mut c_ares_sys::ares_naptr_reply) -> NAPTRResults {
         NAPTRResults {
             naptr_reply: reply,
             phantom: PhantomData,
@@ -84,8 +84,8 @@ impl fmt::Display for NAPTRResults {
 /// Iterator of `NAPTRResult`s.
 #[derive(Clone, Copy, Debug)]
 pub struct NAPTRResultsIter<'a> {
-    next: *const c_ares_sys::Struct_ares_naptr_reply,
-    phantom: PhantomData<&'a c_ares_sys::Struct_ares_naptr_reply>,
+    next: *const c_ares_sys::ares_naptr_reply,
+    phantom: PhantomData<&'a c_ares_sys::ares_naptr_reply>,
 }
 
 impl<'a> Iterator for NAPTRResultsIter<'a> {

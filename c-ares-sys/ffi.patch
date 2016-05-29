@@ -21,11 +21,3 @@
  pub type ares_sock_state_cb =
      ::std::option::Option<unsafe extern "C" fn(data:
                                                     *mut ::std::os::raw::c_void,
-@@ -111,7 +120,6 @@
- }
- #[repr(C)]
- #[derive(Copy, Clone)]
--#[derive(Debug)]
- pub struct ares_addrttl {
-     pub ipaddr: in_addr,
-     pub ttl: ::std::os::raw::c_int,

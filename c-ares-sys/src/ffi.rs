@@ -28,7 +28,6 @@ pub type ares_sock_state_cb =
 pub enum apattern { }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_options {
     pub flags: ::std::os::raw::c_int,
     pub timeout: ::std::os::raw::c_int,
@@ -95,7 +94,6 @@ pub type ares_sock_config_callback =
                               -> ::std::os::raw::c_int>;
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_in6_addr {
     pub _S6_un: Union_Unnamed1,
 }
@@ -104,7 +102,6 @@ impl ::std::default::Default for ares_in6_addr {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct Union_Unnamed1 {
     pub _bindgen_data_: [u8; 16usize],
 }
@@ -129,7 +126,6 @@ impl ::std::default::Default for ares_addrttl {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_addr6ttl {
     pub ip6addr: ares_in6_addr,
     pub ttl: ::std::os::raw::c_int,
@@ -139,7 +135,6 @@ impl ::std::default::Default for ares_addr6ttl {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_srv_reply {
     pub next: *mut ares_srv_reply,
     pub host: *mut ::std::os::raw::c_char,
@@ -153,7 +148,6 @@ impl ::std::default::Default for ares_srv_reply {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_mx_reply {
     pub next: *mut ares_mx_reply,
     pub host: *mut ::std::os::raw::c_char,
@@ -165,7 +159,6 @@ impl ::std::default::Default for ares_mx_reply {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_txt_reply {
     pub next: *mut ares_txt_reply,
     pub txt: *mut ::std::os::raw::c_uchar,
@@ -176,7 +169,6 @@ impl ::std::default::Default for ares_txt_reply {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_txt_ext {
     pub next: *mut ares_txt_ext,
     pub txt: *mut ::std::os::raw::c_uchar,
@@ -189,7 +181,6 @@ impl ::std::default::Default for ares_txt_ext {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_naptr_reply {
     pub next: *mut ares_naptr_reply,
     pub flags: *mut ::std::os::raw::c_uchar,
@@ -205,7 +196,6 @@ impl ::std::default::Default for ares_naptr_reply {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_soa_reply {
     pub nsname: *mut ::std::os::raw::c_char,
     pub hostmaster: *mut ::std::os::raw::c_char,
@@ -221,7 +211,6 @@ impl ::std::default::Default for ares_soa_reply {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_addr_node {
     pub next: *mut ares_addr_node,
     pub family: ::std::os::raw::c_int,
@@ -233,7 +222,6 @@ impl ::std::default::Default for ares_addr_node {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct Union_Unnamed2 {
     pub _bindgen_data_: [u32; 4usize],
 }
@@ -252,7 +240,6 @@ impl ::std::default::Default for Union_Unnamed2 {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct ares_addr_port_node {
     pub next: *mut ares_addr_port_node,
     pub family: ::std::os::raw::c_int,
@@ -266,7 +253,6 @@ impl ::std::default::Default for ares_addr_port_node {
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-#[derive(Debug)]
 pub struct Union_Unnamed3 {
     pub _bindgen_data_: [u32; 4usize],
 }

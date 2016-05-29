@@ -13,7 +13,10 @@ use libc::timeval;
 pub type ares_socklen_t = socklen_t;
 pub type __cares_rule_02__ = [::std::os::raw::c_char; 1usize];
 pub type __cares_rule_03__ = [::std::os::raw::c_char; 1usize];
-pub type ares_socket_t = ::std::os::raw::c_int;
+#[cfg(windows)]
+pub type ares_socket_t = ::std::os::windows::io::RawSocket;
+#[cfg(unix)]
+pub type ares_socket_t = ::std::os::unix::io::RawFd;
 pub type ares_sock_state_cb =
     ::std::option::Option<unsafe extern "C" fn(data:
                                                    *mut ::std::os::raw::c_void,

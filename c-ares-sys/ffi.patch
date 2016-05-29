@@ -1,6 +1,6 @@
---- src/ffi.rs.orig	2016-05-29 13:12:59.639187785 +0100
-+++ src/ffi.rs	2016-05-29 13:13:08.104810007 +0100
-@@ -4,6 +4,12 @@
+--- src/ffi.orig.rs	2016-05-29 13:30:17.726371399 +0100
++++ src/ffi.rs	2016-05-29 13:30:43.161252218 +0100
+@@ -4,10 +4,19 @@
           non_camel_case_types,
           non_upper_case_globals,
           non_snake_case)]
@@ -13,7 +13,15 @@
  pub type ares_socklen_t = socklen_t;
  pub type __cares_rule_02__ = [::std::os::raw::c_char; 1usize];
  pub type __cares_rule_03__ = [::std::os::raw::c_char; 1usize];
-@@ -111,7 +117,6 @@
+-pub type ares_socket_t = ::std::os::raw::c_int;
++#[cfg(windows)]
++pub type ares_socket_t = ::std::os::windows::io::RawSocket;
++#[cfg(unix)]
++pub type ares_socket_t = ::std::os::unix::io::RawFd;
+ pub type ares_sock_state_cb =
+     ::std::option::Option<unsafe extern "C" fn(data:
+                                                    *mut ::std::os::raw::c_void,
+@@ -111,7 +120,6 @@
  }
  #[repr(C)]
  #[derive(Copy, Clone)]

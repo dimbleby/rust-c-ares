@@ -3,6 +3,21 @@
 use strict;
 use warnings;
 
+# Find the values matching a prefix, and print Rust-y versions.
+sub print_values {
+    my ($prefix, @lines) = @_;
+    foreach my $line (@lines) {
+        if ($line =~ /#define ($prefix\w+)\s+(.*)/) {
+            my $flag = $1;
+            my $value = $2;
+            if ($value =~ /1 << 0/) {
+                print "#[cfg_attr(feature=\"clippy\", allow(identity_op))]\n";
+            }
+            print "pub const $flag: c_int = $value;\n";
+        }
+    }
+}
+
 open(ARES_H, 'c-ares/ares.h');
 my @lines = <ARES_H>;
 close(ARES_H);
@@ -20,44 +35,24 @@ print "use std::os::raw::c_int;\n";
 
 print "\n";
 print "// Library initialization flags\n";
-foreach my $line (@lines) {
-    if ($line =~ /#define (ARES_LIB_INIT_\w+)\s+(.*)/) {
-        print "pub const $1: c_int = $2;\n";
-    }
-}
+print_values("ARES_LIB_INIT_", @lines);
 
 print "\n";
 print "// Error codes\n";
 print "pub const ARES_SUCCESS: c_int = 0;\n";
-foreach my $line (@lines) {
-    if ($line =~ /#define (ARES_E\w+)\s+(.*)/) {
-        print "pub const $1: c_int = $2;\n";
-    }
-}
+print_values("ARES_E", @lines);
 
 print "\n";
 print "// Flag values\n";
-foreach my $line (@lines) {
-    if ($line =~ /#define (ARES_FLAG_\w+)\s+(.*)/) {
-        print "pub const $1: c_int = $2;\n";
-    }
-}
+print_values("ARES_FLAG_", @lines);
 
 print "\n";
 print "// Option mask values\n";
-foreach my $line (@lines) {
-    if ($line =~ /#define (ARES_OPT_\w+)\s+(.*)/) {
-        print "pub const $1: c_int = $2;\n";
-    }
-}
+print_values("ARES_OPT_", @lines);
 
 print "\n";
 print "// Flags for nameinfo queries\n";
-foreach my $line (@lines) {
-    if ($line =~ /#define (ARES_NI_\w+)\s+(.*)/) {
-        print "pub const $1: c_int = $2;\n";
-    }
-}
+print_values("ARES_NI_", @lines);
 
 print "\n";
 print "// A non-existent file descriptor\n";

@@ -33,8 +33,7 @@ impl NSResults {
             c_ares_sys::ares_parse_ns_reply(
                 data.as_ptr(),
                 data.len() as c_int,
-                &mut hostent
-                    as *mut *mut _ as *mut *mut c_ares_sys::hostent)
+                &mut hostent as *mut _ as *mut *mut c_ares_sys::hostent)
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             let result = NSResults::new(hostent);

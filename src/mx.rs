@@ -24,10 +24,9 @@ pub struct MXResults {
 }
 
 /// The contents of a single MX record.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct MXResult<'a> {
-    mx_reply: *const c_ares_sys::ares_mx_reply,
-    phantom: PhantomData<&'a c_ares_sys::ares_mx_reply>,
+    mx_reply: &'a c_ares_sys::ares_mx_reply,
 }
 
 impl MXResults {
@@ -59,8 +58,7 @@ impl MXResults {
     /// Returns an iterator over the `MXResult` values in this `MXResults`.
     pub fn iter(&self) -> MXResultsIter {
         MXResultsIter {
-            next: self.mx_reply,
-            phantom: PhantomData,
+            next: unsafe { self.mx_reply.as_ref() },
         }
     }
 }
@@ -74,28 +72,21 @@ impl fmt::Display for MXResults {
 }
 
 /// Iterator of `MXResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct MXResultsIter<'a> {
-    next: *const c_ares_sys::ares_mx_reply,
-    phantom: PhantomData<&'a c_ares_sys::ares_mx_reply>,
+    next: Option<&'a c_ares_sys::ares_mx_reply>,
 }
 
 impl<'a> Iterator for MXResultsIter<'a> {
     type Item = MXResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        let mx_reply = self.next;
-        if mx_reply.is_null() {
-            None
-        } else {
-            unsafe {
-                self.next = (*mx_reply).next;
+        let opt_reply = self.next;
+        self.next = opt_reply.and_then(|reply| unsafe { reply.next.as_ref() });
+        opt_reply.map(|reply| {
+            MXResult {
+                mx_reply: reply,
             }
-            let mx_result = MXResult {
-                mx_reply: mx_reply,
-                phantom: PhantomData,
-            };
-            Some(mx_result)
-        }
+        })
     }
 }
 impl<'a> IntoIterator for &'a MXResults {
@@ -126,14 +117,14 @@ impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.
     pub fn host(&self) -> &str {
         unsafe {
-            let c_str = CStr::from_ptr((*self.mx_reply).host);
+            let c_str = CStr::from_ptr(self.mx_reply.host);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 
     /// Returns the priority from this `MXResult`.
     pub fn priority(&self) -> u16 {
-        unsafe { (*self.mx_reply).priority }
+        self.mx_reply.priority
     }
 }
 

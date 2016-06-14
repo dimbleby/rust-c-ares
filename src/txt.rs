@@ -24,10 +24,9 @@ pub struct TXTResults {
 }
 
 /// The contents of a single TXT record.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct TXTResult<'a> {
-    txt_reply: *const c_ares_sys::ares_txt_ext,
-    phantom: PhantomData<&'a c_ares_sys::ares_txt_ext>,
+    txt_reply: &'a c_ares_sys::ares_txt_ext,
 }
 
 impl TXTResults {
@@ -59,8 +58,7 @@ impl TXTResults {
     /// Returns an iterator over the `TXTResult` values in this `TXTResults`.
     pub fn iter(&self) -> TXTResultsIter {
         TXTResultsIter {
-            next: self.txt_reply,
-            phantom: PhantomData,
+            next: unsafe { self.txt_reply.as_ref() },
         }
     }
 }
@@ -74,28 +72,21 @@ impl fmt::Display for TXTResults {
 }
 
 /// Iterator of `TXTResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct TXTResultsIter<'a> {
-    next: *const c_ares_sys::ares_txt_ext,
-    phantom: PhantomData<&'a c_ares_sys::ares_txt_ext>,
+    next: Option<&'a c_ares_sys::ares_txt_ext>,
 }
 
 impl<'a> Iterator for TXTResultsIter<'a> {
     type Item = TXTResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        let txt_reply = self.next;
-        if txt_reply.is_null() {
-            None
-        } else {
-            unsafe {
-                self.next = (*txt_reply).next;
+        let opt_reply = self.next;
+        self.next = opt_reply.and_then(|reply| unsafe { reply.next.as_ref() });
+        opt_reply.map(|reply| {
+            TXTResult {
+                txt_reply: reply,
             }
-            let txt_result = TXTResult {
-                txt_reply: txt_reply,
-                phantom: PhantomData,
-            };
-            Some(txt_result)
-        }
+        })
     }
 }
 impl<'a> IntoIterator for &'a TXTResults {
@@ -126,15 +117,13 @@ impl<'a> TXTResult<'a> {
     /// Is this the start of a text record, or the continuation of a previous
     /// record?
     pub fn record_start(&self) -> bool {
-        unsafe {
-            (*self.txt_reply).record_start != 0
-        }
+        self.txt_reply.record_start != 0
     }
 
     /// Returns the text in this `TXTResult`.
     pub fn text(&self) -> &str {
         unsafe {
-            let c_str = CStr::from_ptr((*self.txt_reply).txt as *const i8);
+            let c_str = CStr::from_ptr(self.txt_reply.txt as *const i8);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }

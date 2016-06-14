@@ -25,10 +25,9 @@ pub struct NAPTRResults {
 }
 
 /// The contents of a single NAPTR record.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct NAPTRResult<'a> {
-    naptr_reply: *const c_ares_sys::ares_naptr_reply,
-    phantom: PhantomData<&'a c_ares_sys::ares_naptr_reply>,
+    naptr_reply: &'a c_ares_sys::ares_naptr_reply,
 }
 
 impl NAPTRResults {
@@ -62,8 +61,7 @@ impl NAPTRResults {
     /// `NAPTRResults`.
     pub fn iter(&self) -> NAPTRResultsIter {
         NAPTRResultsIter {
-            next: self.naptr_reply,
-            phantom: PhantomData,
+            next: unsafe { self.naptr_reply.as_ref() },
         }
     }
 }
@@ -77,26 +75,21 @@ impl fmt::Display for NAPTRResults {
 }
 
 /// Iterator of `NAPTRResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct NAPTRResultsIter<'a> {
-    next: *const c_ares_sys::ares_naptr_reply,
-    phantom: PhantomData<&'a c_ares_sys::ares_naptr_reply>,
+    next: Option<&'a c_ares_sys::ares_naptr_reply>,
 }
 
 impl<'a> Iterator for NAPTRResultsIter<'a> {
     type Item = NAPTRResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        let naptr_reply = self.next;
-        if naptr_reply.is_null() {
-            None
-        } else {
-            self.next = unsafe { (*naptr_reply).next };
-            let naptr_result = NAPTRResult {
-                naptr_reply: naptr_reply,
-                phantom: PhantomData,
-            };
-            Some(naptr_result)
-        }
+        let opt_reply = self.next;
+        self.next = opt_reply.and_then(|reply| unsafe { reply.next.as_ref() });
+        opt_reply.map(|reply| {
+            NAPTRResult {
+                naptr_reply: reply,
+            }
+        })
     }
 }
 
@@ -129,7 +122,7 @@ impl<'a> NAPTRResult<'a> {
     pub fn flags(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr(
-                (*self.naptr_reply).flags as *const c_char);
+                self.naptr_reply.flags as *const c_char);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
@@ -138,7 +131,7 @@ impl<'a> NAPTRResult<'a> {
     pub fn service_name(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr(
-                (*self.naptr_reply).service as *const c_char);
+                self.naptr_reply.service as *const c_char);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
@@ -147,7 +140,7 @@ impl<'a> NAPTRResult<'a> {
     pub fn reg_exp(&self) -> &str {
         unsafe {
             let c_str = CStr::from_ptr(
-                (*self.naptr_reply).regexp as *const c_char);
+                self.naptr_reply.regexp as *const c_char);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
@@ -155,19 +148,19 @@ impl<'a> NAPTRResult<'a> {
     /// Returns the replacement pattern in this `NAPTRResult`.
     pub fn replacement_pattern(&self) -> &str {
         unsafe {
-            let c_str = CStr::from_ptr((*self.naptr_reply).replacement);
+            let c_str = CStr::from_ptr(self.naptr_reply.replacement);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 
     /// Returns the order value in this `NAPTRResult`.
     pub fn order(&self) -> u16 {
-        unsafe { (*self.naptr_reply).order }
+        self.naptr_reply.order
     }
 
     /// Returns the preference value in this `NAPTRResult`.
     pub fn preference(&self) -> u16 {
-        unsafe { (*self.naptr_reply).preference }
+        self.naptr_reply.preference
     }
 }
 

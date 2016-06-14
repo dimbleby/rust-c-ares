@@ -24,11 +24,10 @@ pub struct SRVResults {
 }
 
 /// The contents of a single SRV record.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct SRVResult<'a> {
     // A single result - reference into an `SRVResults`.
-    srv_reply: *const c_ares_sys::ares_srv_reply,
-    phantom: PhantomData<&'a c_ares_sys::ares_srv_reply>,
+    srv_reply: &'a c_ares_sys::ares_srv_reply,
 }
 
 impl SRVResults {
@@ -60,8 +59,7 @@ impl SRVResults {
     /// Returns an iterator over the `SRVResult` values in this `SRVResults`.
     pub fn iter(&self) -> SRVResultsIter {
         SRVResultsIter {
-            next: self.srv_reply,
-            phantom: PhantomData,
+            next: unsafe { self.srv_reply.as_ref() },
         }
     }
 }
@@ -75,26 +73,21 @@ impl fmt::Display for SRVResults {
 }
 
 /// Iterator of `SRVResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct SRVResultsIter<'a> {
-    next: *const c_ares_sys::ares_srv_reply,
-    phantom: PhantomData<&'a c_ares_sys::ares_srv_reply>,
+    next: Option<&'a c_ares_sys::ares_srv_reply>,
 }
 
 impl<'a> Iterator for SRVResultsIter<'a> {
     type Item = SRVResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        let srv_reply = self.next;
-        if srv_reply.is_null() {
-            None
-        } else {
-            self.next = unsafe { (*srv_reply).next };
-            let srv_result = SRVResult {
-                srv_reply: srv_reply,
-                phantom: PhantomData,
-            };
-            Some(srv_result)
-        }
+        let opt_reply = self.next;
+        self.next = opt_reply.and_then(|reply| unsafe { reply.next.as_ref() });
+        opt_reply.map(|reply| {
+            SRVResult {
+                srv_reply: reply,
+            }
+        })
     }
 }
 
@@ -126,24 +119,24 @@ impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
     pub fn host(&self) -> &str {
         unsafe {
-            let c_str = CStr::from_ptr((*self.srv_reply).host);
+            let c_str = CStr::from_ptr(self.srv_reply.host);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
 
     /// Returns the weight in this `SRVResult`.
     pub fn weight(&self) -> u16 {
-        unsafe { (*self.srv_reply).weight }
+        self.srv_reply.weight
     }
 
     /// Returns the priority in this `SRVResult`.
     pub fn priority(&self) -> u16 {
-        unsafe { (*self.srv_reply).priority }
+        self.srv_reply.priority
     }
 
     /// Returns the port in this `SRVResult`.
     pub fn port(&self) -> u16 {
-        unsafe { (*self.srv_reply).port }
+        self.srv_reply.port
     }
 }
 

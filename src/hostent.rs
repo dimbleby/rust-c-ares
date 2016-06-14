@@ -45,17 +45,15 @@ impl Drop for HostentOwned {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct HostentBorrowed<'a> {
-    inner: *const c_types::hostent,
-    phantom: PhantomData<&'a c_types::hostent>,
+    inner: &'a c_types::hostent,
 }
 
 impl<'a> HostentBorrowed<'a> {
-    pub fn new(hostent: *const c_types::hostent) -> HostentBorrowed<'a> {
+    pub fn new(hostent: &'a c_types::hostent) -> HostentBorrowed<'a> {
         HostentBorrowed {
             inner: hostent,
-            phantom: PhantomData,
         }
     }
 }
@@ -103,7 +101,7 @@ impl HasHostent for HostentOwned {
 
 impl<'a> HasHostent for HostentBorrowed<'a> {
     fn hostent(&self) -> &c_types::hostent {
-        unsafe { &*self.inner }
+        self.inner
     }
 }
 

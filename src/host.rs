@@ -17,13 +17,13 @@ use hostent::{
 use utils::ares_error;
 
 /// The result of a successful host lookup.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct HostResults<'a> {
     hostent: HostentBorrowed<'a>,
 }
 
 impl<'a> HostResults<'a> {
-    fn new(hostent: *const c_types::hostent) -> HostResults<'a> {
+    fn new(hostent: &'a c_types::hostent) -> HostResults<'a> {
         HostResults {
             hostent: HostentBorrowed::new(hostent),
         }
@@ -58,8 +58,7 @@ pub unsafe extern "C" fn get_host_callback<F>(
     hostent: *mut c_ares_sys::hostent)
     where F: FnOnce(Result<HostResults, AresError>) + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
-        let host_results = HostResults::new(
-            hostent as *const c_types::hostent);
+        let host_results = HostResults::new(&*(hostent as *const c_types::hostent));
         Ok(host_results)
     } else {
         Err(ares_error(status))

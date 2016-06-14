@@ -71,15 +71,13 @@ pub trait HasHostent {
     fn addresses(&self) -> HostAddressResultsIter {
         HostAddressResultsIter {
             family: address_family(self.hostent().h_addrtype as c_int),
-            next: self.hostent().h_addr_list as *const *const _,
-            phantom: PhantomData,
+            next: unsafe { &*(self.hostent().h_addr_list as *const _) },
         }
     }
 
     fn aliases(&self) -> HostAliasResultsIter {
         HostAliasResultsIter {
-            next: self.hostent().h_aliases as *const *const _,
-            phantom: PhantomData,
+            next: unsafe { &*(self.hostent().h_aliases as *const _) },
         }
     }
 
@@ -115,8 +113,7 @@ unsafe impl<'a> Sync for HostentBorrowed<'a> { }
 #[derive(Clone, Copy, Debug)]
 pub struct HostAddressResultsIter<'a> {
     family: Option<AddressFamily>,
-    next: *const *const c_char,
-    phantom: PhantomData<&'a c_types::hostent>,
+    next: &'a *const c_char,
 }
 
 // Get an IpAddr from a family and an array of bytes, as found in a `hostent`.
@@ -144,12 +141,12 @@ unsafe fn ip_address_from_bytes(
 impl<'a> Iterator for HostAddressResultsIter<'a> {
     type Item = IpAddr;
     fn next(&mut self) -> Option<Self::Item> {
-        let h_addr = unsafe { *self.next };
+        let h_addr = *self.next;
         if h_addr.is_null() {
             None
         } else {
             unsafe {
-                self.next = self.next.offset(1);
+                self.next = &*(self.next as *const _).offset(1);
                 self.family.map(|family| {
                     ip_address_from_bytes(family, h_addr as *const u8)
                 })
@@ -164,19 +161,18 @@ unsafe impl<'a> Sync for HostAddressResultsIter<'a> { }
 /// Iterator of `&'a str`s.
 #[derive(Clone, Copy, Debug)]
 pub struct HostAliasResultsIter<'a> {
-    next: *const *const c_char,
-    phantom: PhantomData<&'a c_types::hostent>,
+    next: &'a *const c_char,
 }
 
 impl<'a> Iterator for HostAliasResultsIter<'a> {
     type Item = &'a str;
     fn next(&mut self) -> Option<Self::Item> {
-        let h_alias = unsafe { *self.next };
+        let h_alias = *self.next;
         if h_alias.is_null() {
             None
         } else {
             unsafe {
-                self.next = self.next.offset(1);
+                self.next = &*(self.next as *const _).offset(1);
                 let c_str = CStr::from_ptr(h_alias);
                 Some(str::from_utf8_unchecked(c_str.to_bytes()))
             }

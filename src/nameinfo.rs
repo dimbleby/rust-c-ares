@@ -71,7 +71,9 @@ pub unsafe extern "C" fn get_name_info_callback<F>(
     service: *mut c_char)
     where F: FnOnce(Result<NameInfoResult, AresError>) + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
-        let name_info_result = NameInfoResult::new(node.as_ref(), service.as_ref());
+        let name_info_result = NameInfoResult::new(
+            node.as_ref(),
+            service.as_ref());
         Ok(name_info_result)
     } else {
         Err(ares_error(status))

@@ -3,7 +3,11 @@ extern crate c_ares_sys;
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::net::IpAddr;
+use std::net::{
+    IpAddr,
+    Ipv4Addr,
+    Ipv6Addr,
+};
 use std::os::raw::{
     c_char,
     c_int,
@@ -14,11 +18,7 @@ use std::str;
 use c_types;
 
 use types::AddressFamily;
-use utils::{
-    address_family,
-    ipv4_address_from_bytes,
-    ipv6_address_from_bytes,
-};
+use utils::address_family;
 
 #[derive(Debug)]
 pub struct HostentOwned {
@@ -138,13 +138,17 @@ unsafe fn ip_address_from_bytes(
     h_addr: *const u8) -> IpAddr {
     match family {
         AddressFamily::INET => {
-            let bytes = slice::from_raw_parts(h_addr, 4);
-            let ipv4 = ipv4_address_from_bytes(bytes);
+            let source = slice::from_raw_parts(h_addr, 4);
+            let mut bytes = [0u8; 4];
+            bytes.copy_from_slice(source);
+            let ipv4 = Ipv4Addr::from(bytes);
             IpAddr::V4(ipv4)
         },
         AddressFamily::INET6 => {
-            let bytes = slice::from_raw_parts(h_addr, 16);
-            let ipv6 = ipv6_address_from_bytes(bytes);
+            let source = slice::from_raw_parts(h_addr, 16);
+            let mut bytes = [0u8; 16];
+            bytes.copy_from_slice(source);
+            let ipv6 = Ipv6Addr::from(bytes);
             IpAddr::V6(ipv6)
         },
     }

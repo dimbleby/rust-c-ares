@@ -13,10 +13,7 @@ use std::slice;
 
 use error::AresError;
 use types::MAX_ADDRTTLS;
-use utils::{
-    ares_error,
-    ipv6_address_from_bytes,
-};
+use utils::ares_error;
 
 /// The result of a successful AAAA lookup.
 #[derive(Clone, Copy)]
@@ -101,8 +98,8 @@ impl<'a> AAAAResult<'a> {
     /// Returns the IPv6 address in this `AAAAResult`.
     #[cfg_attr(feature="clippy", allow(used_underscore_binding))]
     pub fn ipv6(&self) -> Ipv6Addr {
-        let bytes = &self.addr6ttl.ip6addr._S6_un._bindgen_data_;
-        ipv6_address_from_bytes(bytes)
+        let bytes = self.addr6ttl.ip6addr._S6_un._bindgen_data_;
+        Ipv6Addr::from(bytes)
     }
 
     /// Returns the time-to-live in this `AAAAResult`.

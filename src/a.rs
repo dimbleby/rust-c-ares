@@ -11,6 +11,8 @@ use std::os::raw::{
 use std::ptr;
 use std::slice;
 
+use itertools::Itertools;
+
 use error::AresError;
 use types::MAX_ADDRTTLS;
 use utils::{
@@ -61,14 +63,8 @@ impl AResults {
 
 impl fmt::Display for AResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "["));
-        let mut first = true;
-        for a_result in self {
-            let prefix = if first { "" } else { ", " };
-            first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, a_result));
-        }
-        try!(write!(fmt, "]"));
+        let results = self.iter().format_default("}, {");
+        try!(write!(fmt, "[{{{}}}]", results));
         Ok(())
     }
 }
@@ -110,7 +106,7 @@ impl<'a> AResult<'a> {
 impl<'a> fmt::Display for AResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "IPv4: {}, ", self.ipv4()));
-        try!(write!(fmt, "TTL: {}, ", self.ttl()));
+        try!(write!(fmt, "TTL: {}", self.ttl()));
         Ok(())
     }
 }

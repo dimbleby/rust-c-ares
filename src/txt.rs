@@ -12,6 +12,8 @@ use std::ptr;
 use std::slice;
 use std::str;
 
+use itertools::Itertools;
+
 use error::AresError;
 use utils::ares_error;
 
@@ -66,14 +68,8 @@ impl TXTResults {
 
 impl fmt::Display for TXTResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "["));
-        let mut first = true;
-        for txt_result in self {
-            let prefix = if first { "" } else { ", " };
-            first = false;
-            try!(write!(fmt, "{}{}", prefix, txt_result));
-        }
-        try!(write!(fmt, "]"));
+        let results = self.iter().format_default("}, {");
+        try!(write!(fmt, "[{{{}}}]", results));
         Ok(())
     }
 }

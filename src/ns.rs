@@ -10,6 +10,7 @@ use std::ptr;
 use std::slice;
 
 use c_types;
+use itertools::Itertools;
 
 use error::AresError;
 use hostent::{
@@ -64,14 +65,8 @@ impl NSResults {
 impl fmt::Display for NSResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "Hostname: {}, ", self.hostname()));
-        try!(write!(fmt, "Aliases: ["));
-        let mut first = true;
-        for host_alias in self.aliases() {
-            let prefix = if first { "" } else { ", " };
-            first = false;
-            try!(write!(fmt, "{}{}", prefix, host_alias));
-        }
-        try!(write!(fmt, "]"));
+        let aliases = self.aliases().format_default("}, {");
+        try!(write!(fmt, "Aliases: [{{{}}}]", aliases));
         Ok(())
     }
 }

@@ -27,6 +27,7 @@
 #![deny(missing_docs)]
 #[macro_use] extern crate bitflags;
 extern crate c_types;
+extern crate itertools;
 
 mod a;
 mod aaaa;

@@ -17,6 +17,7 @@ use std::slice;
 use std::str;
 
 use c_types;
+use itertools::Itertools;
 
 use types::AddressFamily;
 use utils::address_family;
@@ -87,22 +88,10 @@ pub trait HasHostent {
 
     fn display(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "Hostname: {}, ", self.hostname()));
-        try!(write!(fmt, "Addresses: ["));
-        let mut first = true;
-        for host_addr in self.addresses() {
-            let prefix = if first { "" } else { ", " };
-            first = false;
-            try!(write!(fmt, "{}{}", prefix, host_addr));
-        }
-        try!(write!(fmt, "], "));
-        try!(write!(fmt, "Aliases: ["));
-        let mut first = true;
-        for host_alias in self.aliases() {
-            let prefix = if first { "" } else { ", " };
-            first = false;
-            try!(write!(fmt, "{}{}", prefix, host_alias));
-        }
-        try!(write!(fmt, "]"));
+        let addresses = self.addresses().format_default("}, {");
+        try!(write!(fmt, "Addresses: [{{{}}}]", addresses));
+        let aliases = self.aliases().format_default("}, {");
+        try!(write!(fmt, "Aliases: [{{{}}}]", aliases));
         Ok(())
     }
 }

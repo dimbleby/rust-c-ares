@@ -12,6 +12,8 @@ use std::str;
 use std::ptr;
 use std::slice;
 
+use itertools::Itertools;
+
 use error::AresError;
 use utils::ares_error;
 
@@ -67,14 +69,8 @@ impl SRVResults {
 
 impl fmt::Display for SRVResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "["));
-        let mut first = true;
-        for srv_result in self {
-            let prefix = if first { "" } else { ", " };
-            first = false;
-            try!(write!(fmt, "{}{{{}}}", prefix, srv_result));
-        }
-        try!(write!(fmt, "]"));
+        let results = self.iter().format_default("}, {");
+        try!(write!(fmt, "[{{{}}}]", results));
         Ok(())
     }
 }

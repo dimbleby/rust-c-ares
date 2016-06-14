@@ -1,5 +1,3 @@
-extern crate c_ares_sys;
-
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
@@ -9,6 +7,8 @@ use std::os::raw::{
     c_void,
 };
 use std::str;
+
+use c_ares_sys;
 
 use error::AresError;
 use utils::ares_error;

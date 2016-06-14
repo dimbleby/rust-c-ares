@@ -1,5 +1,4 @@
-extern crate c_ares_sys;
-
+use c_ares_sys;
 use c_types;
 
 use error::AresError;

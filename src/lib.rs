@@ -26,6 +26,7 @@
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 #![deny(missing_docs)]
 #[macro_use] extern crate bitflags;
+extern crate c_ares_sys;
 extern crate c_types;
 extern crate itertools;
 

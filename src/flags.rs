@@ -1,5 +1,5 @@
 //! Flags that may be passed when initializing a `Channel`.
-extern crate c_ares_sys;
+use c_ares_sys;
 
 bitflags!(
     /// Flags that may be passed when initializing a `Channel`.

@@ -1,5 +1,3 @@
-extern crate c_ares_sys;
-
 use std::fmt;
 use std::os::raw::{
     c_int,
@@ -9,6 +7,7 @@ use std::os::raw::{
 use std::ptr;
 use std::slice;
 
+use c_ares_sys;
 use c_types;
 use itertools::Itertools;
 

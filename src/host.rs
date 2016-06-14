@@ -1,11 +1,10 @@
-extern crate c_ares_sys;
-
 use std::fmt;
 use std::os::raw::{
     c_int,
     c_void,
 };
 
+use c_ares_sys;
 use c_types;
 
 use error::AresError;

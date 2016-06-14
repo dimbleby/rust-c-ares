@@ -1,5 +1,5 @@
 //! Flags that may be provided on a call to `get_name_info()`
-extern crate c_ares_sys;
+use c_ares_sys;
 
 bitflags!(
     /// Flags that may be provided on a call to `get_name_info()`.

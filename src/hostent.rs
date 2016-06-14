@@ -1,5 +1,3 @@
-extern crate c_ares_sys;
-
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
@@ -16,6 +14,7 @@ use std::os::raw::{
 use std::slice;
 use std::str;
 
+use c_ares_sys;
 use c_types;
 use itertools::Itertools;
 

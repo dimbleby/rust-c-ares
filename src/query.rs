@@ -1,11 +1,11 @@
-extern crate c_ares_sys;
-
 use std::os::raw::{
     c_int,
     c_uchar,
     c_void,
 };
 use std::slice;
+
+use c_ares_sys;
 
 use error::AresError;
 use utils::ares_error;

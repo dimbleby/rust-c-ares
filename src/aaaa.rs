@@ -1,5 +1,3 @@
-extern crate c_ares_sys;
-
 use std::fmt;
 use std::mem;
 use std::net::Ipv6Addr;
@@ -11,6 +9,7 @@ use std::os::raw::{
 use std::ptr;
 use std::slice;
 
+use c_ares_sys;
 use itertools::Itertools;
 
 use error::AresError;

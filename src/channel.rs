@@ -1,5 +1,3 @@
-extern crate c_ares_sys;
-
 use std::ffi::CString;
 use std::marker::PhantomData;
 use std::mem;
@@ -17,6 +15,7 @@ use std::os::raw::{
 };
 use std::ptr;
 
+use c_ares_sys;
 use c_types;
 
 use a::{

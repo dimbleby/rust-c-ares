@@ -1,10 +1,10 @@
-extern crate c_ares_sys;
-
 use std::error;
 use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::c_int;
 use std::str;
+
+use c_ares_sys;
 
 /// Error codes that the library might return.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]

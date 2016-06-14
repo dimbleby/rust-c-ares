@@ -3,6 +3,7 @@ extern crate c_ares_sys;
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
+use std::mem;
 use std::net::{
     IpAddr,
     Ipv4Addr,
@@ -139,14 +140,14 @@ unsafe fn ip_address_from_bytes(
     match family {
         AddressFamily::INET => {
             let source = slice::from_raw_parts(h_addr, 4);
-            let mut bytes = [0u8; 4];
+            let mut bytes: [u8; 4] = mem::uninitialized();
             bytes.copy_from_slice(source);
             let ipv4 = Ipv4Addr::from(bytes);
             IpAddr::V4(ipv4)
         },
         AddressFamily::INET6 => {
             let source = slice::from_raw_parts(h_addr, 16);
-            let mut bytes = [0u8; 16];
+            let mut bytes: [u8; 16] = mem::uninitialized();
             bytes.copy_from_slice(source);
             let ipv6 = Ipv6Addr::from(bytes);
             IpAddr::V6(ipv6)

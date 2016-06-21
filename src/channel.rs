@@ -182,10 +182,10 @@ impl Options {
     /// -  `write` is set to true if the socket should listen for write events.
     pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
         where F: FnMut(Socket, bool, bool) + 'static {
-        let mut boxed_callback = Box::new(callback);
+        let boxed_callback = Box::new(callback);
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
         self.ares_options.sock_state_cb_data =
-            &mut *boxed_callback as *mut _ as *mut c_void;
+            &*boxed_callback as *const _ as *mut c_void;
         self.socket_state_callback = Some(boxed_callback);
         self.optmask |= c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         self

@@ -11,9 +11,11 @@ sub print_values {
             my $flag = $1;
             my $value = $2;
             if ($value =~ /1 << 0/) {
-                print "#[cfg_attr(feature=\"clippy\", allow(identity_op))]\n";
+                # Sidestep clippy's "identity_op" warning
+                print "pub const $flag: c_int = 1;\n";
+            } else {
+                print "pub const $flag: c_int = $value;\n";
             }
-            print "pub const $flag: c_int = $value;\n";
         }
     }
 }

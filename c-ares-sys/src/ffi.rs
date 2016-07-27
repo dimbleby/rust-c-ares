@@ -141,7 +141,6 @@ pub struct ares_srv_reply {
     pub priority: ::std::os::raw::c_ushort,
     pub weight: ::std::os::raw::c_ushort,
     pub port: ::std::os::raw::c_ushort,
-    _bindgen_padding_0_: [u8; 2usize],
 }
 impl ::std::default::Default for ares_srv_reply {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
@@ -152,7 +151,6 @@ pub struct ares_mx_reply {
     pub next: *mut ares_mx_reply,
     pub host: *mut ::std::os::raw::c_char,
     pub priority: ::std::os::raw::c_ushort,
-    _bindgen_padding_0_: [u8; 6usize],
 }
 impl ::std::default::Default for ares_mx_reply {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
@@ -174,7 +172,6 @@ pub struct ares_txt_ext {
     pub txt: *mut ::std::os::raw::c_uchar,
     pub length: size_t,
     pub record_start: ::std::os::raw::c_uchar,
-    _bindgen_padding_0_: [u8; 7usize],
 }
 impl ::std::default::Default for ares_txt_ext {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
@@ -189,7 +186,6 @@ pub struct ares_naptr_reply {
     pub replacement: *mut ::std::os::raw::c_char,
     pub order: ::std::os::raw::c_ushort,
     pub preference: ::std::os::raw::c_ushort,
-    _bindgen_padding_0_: [u8; 4usize],
 }
 impl ::std::default::Default for ares_naptr_reply {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
@@ -204,7 +200,6 @@ pub struct ares_soa_reply {
     pub retry: ::std::os::raw::c_uint,
     pub expire: ::std::os::raw::c_uint,
     pub minttl: ::std::os::raw::c_uint,
-    _bindgen_padding_0_: [u8; 4usize],
 }
 impl ::std::default::Default for ares_soa_reply {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
@@ -215,7 +210,6 @@ pub struct ares_addr_node {
     pub next: *mut ares_addr_node,
     pub family: ::std::os::raw::c_int,
     pub addr: Union_Unnamed2,
-    _bindgen_padding_0_: [u8; 4usize],
 }
 impl ::std::default::Default for ares_addr_node {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
@@ -246,7 +240,6 @@ pub struct ares_addr_port_node {
     pub addr: Union_Unnamed3,
     pub udp_port: ::std::os::raw::c_int,
     pub tcp_port: ::std::os::raw::c_int,
-    _bindgen_padding_0_: [u8; 4usize],
 }
 impl ::std::default::Default for ares_addr_port_node {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }

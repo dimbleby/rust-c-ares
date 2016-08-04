@@ -13,7 +13,6 @@ use std::str;
 use c_ares_sys;
 
 use error::AresError;
-use utils::ares_error;
 
 /// The result of a successful SOA lookup.
 #[derive(Debug)]
@@ -37,7 +36,7 @@ impl SOAResult {
             let result = SOAResult::new(soa_reply);
             Ok(result)
         } else {
-            Err(ares_error(parse_status))
+            Err(AresError::from(parse_status))
         }
     }
 
@@ -125,7 +124,7 @@ pub unsafe extern "C" fn query_soa_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         SOAResult::parse_from(data)
     } else {
-        Err(ares_error(status))
+        Err(AresError::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

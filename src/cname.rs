@@ -17,7 +17,6 @@ use hostent::{
     HostAliasResultsIter,
     HostentOwned,
 };
-use utils::ares_error;
 
 /// The result of a successful CNAME lookup.
 #[derive(Debug)]
@@ -41,7 +40,7 @@ impl CNameResults {
             let result = CNameResults::new(hostent);
             Ok(result)
         } else {
-            Err(ares_error(parse_status))
+            Err(AresError::from(parse_status))
         }
     }
 
@@ -84,7 +83,7 @@ pub unsafe extern "C" fn query_cname_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         CNameResults::parse_from(data)
     } else {
-        Err(ares_error(status))
+        Err(AresError::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

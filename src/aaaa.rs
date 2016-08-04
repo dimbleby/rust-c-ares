@@ -14,7 +14,6 @@ use itertools::Itertools;
 
 use error::AresError;
 use types::MAX_ADDRTTLS;
-use utils::ares_error;
 
 /// The result of a successful AAAA lookup.
 #[derive(Clone, Copy)]
@@ -47,7 +46,7 @@ impl AAAAResults {
         if parse_status == c_ares_sys::ARES_SUCCESS {
             Ok(results)
         } else {
-            Err(ares_error(parse_status))
+            Err(AresError::from(parse_status))
         }
     }
 
@@ -122,7 +121,7 @@ pub unsafe extern "C" fn query_aaaa_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         AAAAResults::parse_from(data)
     } else {
-        Err(ares_error(status))
+        Err(AresError::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

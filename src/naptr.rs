@@ -15,7 +15,6 @@ use c_ares_sys;
 use itertools::Itertools;
 
 use error::AresError;
-use utils::ares_error;
 
 /// The result of a successful NAPTR lookup.
 #[derive(Debug)]
@@ -45,7 +44,7 @@ impl NAPTRResults {
             let naptr_result = NAPTRResults::new(naptr_reply);
             Ok(naptr_result)
         } else {
-            Err(ares_error(parse_status))
+            Err(AresError::from(parse_status))
         }
     }
 
@@ -190,7 +189,7 @@ pub unsafe extern "C" fn query_naptr_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         NAPTRResults::parse_from(data)
     } else {
-        Err(ares_error(status))
+        Err(AresError::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

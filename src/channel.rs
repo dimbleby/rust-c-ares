@@ -77,7 +77,6 @@ use types::{
     Socket,
 };
 use utils::{
-  ares_error,
   ipv4_as_in_addr,
   ipv6_as_in6_addr,
   socket_addrv4_as_sockaddr_in,
@@ -237,7 +236,7 @@ impl Channel {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
         };
         if lib_rc != c_ares_sys::ARES_SUCCESS {
-            return Err(ares_error(lib_rc))
+            return Err(AresError::from(lib_rc))
         }
 
         // We deferred setting up domains in the options - do it now.
@@ -265,7 +264,7 @@ impl Channel {
         };
         if channel_rc != c_ares_sys::ARES_SUCCESS {
             unsafe { c_ares_sys::ares_library_cleanup(); }
-            return Err(ares_error(channel_rc))
+            return Err(AresError::from(channel_rc))
         }
 
         let channel = Channel {
@@ -342,7 +341,7 @@ impl Channel {
         if ares_rc == c_ares_sys::ARES_SUCCESS {
             Ok(self)
         } else {
-            Err(ares_error(ares_rc))
+            Err(AresError::from(ares_rc))
         }
     }
 

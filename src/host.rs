@@ -14,7 +14,6 @@ use hostent::{
     HostAliasResultsIter,
     HostentBorrowed,
 };
-use utils::ares_error;
 
 /// The result of a successful host lookup.
 #[derive(Clone, Copy)]
@@ -62,7 +61,7 @@ pub unsafe extern "C" fn get_host_callback<F>(
             &*(hostent as *const c_types::hostent));
         Ok(host_results)
     } else {
-        Err(ares_error(status))
+        Err(AresError::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

@@ -14,10 +14,7 @@ use itertools::Itertools;
 
 use error::AresError;
 use types::MAX_ADDRTTLS;
-use utils::{
-    ares_error,
-    ipv4_from_in_addr,
-};
+use utils:: ipv4_from_in_addr;
 
 /// The result of a successful A lookup.
 #[derive(Clone, Copy)]
@@ -50,7 +47,7 @@ impl AResults {
         if parse_status == c_ares_sys::ARES_SUCCESS {
             Ok(results)
         } else {
-            Err(ares_error(parse_status))
+            Err(AresError::from(parse_status))
         }
     }
 
@@ -121,7 +118,7 @@ pub unsafe extern "C" fn query_a_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         AResults::parse_from(data)
     } else {
-        Err(ares_error(status))
+        Err(AresError::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

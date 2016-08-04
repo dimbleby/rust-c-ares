@@ -10,7 +10,6 @@ use std::str;
 use c_ares_sys;
 
 use error::AresError;
-use utils::ares_error;
 
 /// The result of a successful name-info lookup.
 #[derive(Clone, Copy, Debug)]
@@ -76,7 +75,7 @@ pub unsafe extern "C" fn get_name_info_callback<F>(
             service.as_ref());
         Ok(name_info_result)
     } else {
-        Err(ares_error(status))
+        Err(AresError::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

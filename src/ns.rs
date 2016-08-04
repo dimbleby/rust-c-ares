@@ -17,7 +17,6 @@ use hostent::{
     HostAliasResultsIter,
     HostentOwned,
 };
-use utils::ares_error;
 
 /// The result of a successful NS lookup.
 #[derive(Debug)]
@@ -39,7 +38,7 @@ impl NSResults {
             let result = NSResults::new(hostent);
             Ok(result)
         } else {
-            Err(ares_error(parse_status))
+            Err(AresError::from(parse_status))
         }
     }
 
@@ -80,7 +79,7 @@ pub unsafe extern "C" fn query_ns_callback<F>(
         let data = slice::from_raw_parts(abuf, alen as usize);
         NSResults::parse_from(data)
     } else {
-        Err(ares_error(status))
+        Err(AresError::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

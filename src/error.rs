@@ -128,8 +128,8 @@ impl error::Error for AresError {
     }
 }
 
-impl From<c_int> for AresError {
-    fn from(code: c_int) -> Self {
+impl From<i32> for AresError {
+    fn from(code: i32) -> Self {
         match code {
             c_ares_sys::ARES_ENODATA => AresError::ENODATA,
             c_ares_sys::ARES_EFORMERR => AresError::EFORMERR,

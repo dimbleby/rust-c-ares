@@ -2,9 +2,6 @@
 //
 // Here we:
 //
-// - Have the event loop take an `Arc<Mutex<Channel>>`, so that even after it
-// is running we still have the ability to submit new queries
-//
 // - Have the event loop be run by a `Resolver`, hiding away the event loop
 // details from the writer of `main()`.
 //
@@ -21,9 +18,11 @@ use std::sync::{
     mpsc,
 };
 use std::thread;
+use std::time::Duration;
 
 // Messages for the event loop.
-enum CAresHandlerMessage {
+#[derive(Debug)]
+enum Message {
     // 'Notify me when this file descriptor becomes readable, or writable'.
     // The first bool is for 'readable' and the second is for 'writable'.  It's
     // allowed to set both of these - or neither, meaning 'I am no longer
@@ -34,135 +33,155 @@ enum CAresHandlerMessage {
     ShutDown,
 }
 
-struct CAresEventHandler {
+// We also use Token(fd) for file descriptors, so this relies on zero not
+// being a valid file descriptor for c-ares to use.  Zero is stdin, so that's
+// true.
+const CHANNEL: mio::Token = mio::Token(0);
+
+struct EventLoop {
     ares_channel: Arc<Mutex<c_ares::Channel>>,
+    msg_channel: mio::channel::Receiver<Message>,
     tracked_fds: HashSet<c_ares::Socket>,
+    poll: mio::Poll,
+    quit: bool,
 }
 
-impl CAresEventHandler {
-    fn new(ares_channel: Arc<Mutex<c_ares::Channel>>) -> CAresEventHandler {
-        CAresEventHandler {
+impl EventLoop {
+    // Create a new event loop.
+    pub fn new(
+        ares_channel: Arc<Mutex<c_ares::Channel>>,
+        rx: mio::channel::Receiver<Message>) -> EventLoop {
+        let poll = mio::Poll::new().expect("Failed to create poll");
+        poll.register(&rx, CHANNEL, mio::Ready::readable(), mio::PollOpt::edge())
+            .expect("failed to register channel with poll");
+
+        EventLoop {
             ares_channel: ares_channel,
-            tracked_fds: HashSet::new(),
+            msg_channel: rx,
+            tracked_fds: HashSet::<c_ares::Socket>::new(),
+            poll: poll,
+            quit: false,
         }
     }
-}
 
-impl mio::Handler for CAresEventHandler {
-    type Timeout = ();
-    type Message = CAresHandlerMessage;
-
-    // mio notifies us that a file descriptor is readable or writable, so we
-    // tell the Channel the same.
-    fn ready(
-        &mut self,
-        _event_loop: &mut mio::EventLoop<CAresEventHandler>,
-        token: mio::Token,
-        events: mio::EventSet) {
-        let fd = token.as_usize() as c_ares::Socket;
-        let read_fd = if events.is_readable() {
-            fd
-        } else {
-            c_ares::SOCKET_BAD
-        };
-        let write_fd = if events.is_writable() {
-            fd
-        } else {
-            c_ares::SOCKET_BAD
-        };
-        self.ares_channel.lock().unwrap().process_fd(read_fd, write_fd);
+    // Run the event loop.
+    pub fn run(self) -> thread::JoinHandle<()> {
+        thread::spawn(move || { self.event_loop_thread() })
     }
 
-    // Process received messages.  Either:
-    // - we're asked to register interest (or non-interest) in a file
-    // descriptor
-    // - we're asked to shut down the event loop.
-    fn notify(
-        &mut self,
-        event_loop:&mut mio::EventLoop<CAresEventHandler>,
-        msg: Self::Message) {
-        match msg {
-            CAresHandlerMessage::RegisterInterest(fd, read, write) => {
-                let efd = mio::unix::EventedFd(&fd);
-                if !read && !write {
-                    self.tracked_fds.remove(&fd);
-                    event_loop
-                        .deregister(&efd)
-                        .expect("failed to deregister interest");
-                } else {
-                    let mut interest = mio::EventSet::none();
-                    if read{
-                        interest = interest | mio::EventSet::readable();
+    // Event loop thread - waits for events, and handles them.
+    fn event_loop_thread(mut self) {
+        let mut events = mio::Events::with_capacity(16);
+        loop {
+            // Wait for something to happen.
+            let timeout = Duration::from_millis(500);
+            let results = self.poll
+                .poll(&mut events, Some(timeout))
+                .expect("poll failed");
+
+            // Process whatever happened.
+            match results {
+                0 => {
+                    // No events - must be a timeout.  Tell c-ares about it.
+                    self.ares_channel.lock().unwrap().process_fd(
+                        c_ares::SOCKET_BAD,
+                        c_ares::SOCKET_BAD);
+                },
+                _ => {
+                    // Process events.  One of them might cause us to quit.
+                    for event in &events {
+                        self.handle_event(&event);
+                        if self.quit { break }
                     }
-                    if write {
-                        interest = interest | mio::EventSet::writable();
-                    }
-                    let token = mio::Token(fd as usize);
-                    let register_result = if !self.tracked_fds.insert(fd) {
-                        event_loop
-                            .reregister(
-                                &efd,
-                                token,
-                                interest,
-                                mio::PollOpt::edge())
-                   } else {
-                        event_loop
-                            .register(
-                                &efd,
-                                token,
-                                interest,
-                                mio::PollOpt::edge())
-                    };
-                    register_result.expect("failed to register interest");
+                    if self.quit { break }
                 }
+            }
+        }
+    }
+
+    // Handle a single event.
+    fn handle_event(&mut self, event: &mio::Event) {
+        match event.token() {
+            CHANNEL => {
+                // The channel is readable.
+                self.handle_messages()
             },
 
-            CAresHandlerMessage::ShutDown => event_loop.shutdown(),
+            mio::Token(fd) => {
+                // Sockets became readable or writable - tell c-ares.
+                let rfd = if event.kind().is_readable() {
+                    fd as c_ares::Socket
+                } else {
+                    c_ares::SOCKET_BAD
+                };
+                let wfd = if event.kind().is_writable() {
+                    fd as c_ares::Socket
+                } else {
+                    c_ares::SOCKET_BAD
+                };
+                self.ares_channel.lock().unwrap().process_fd(rfd, wfd);
+            }
         }
     }
 
-    // We run a recurring timer so that we can spot non-responsive servers.
-    //
-    // In that case we won't get a callback saying that anything is happening
-    // on any file descriptor, but nevertheless need to give the Channel an
-    // opportunity to notice that it has timed-out requests pending.
-    fn timeout(
-        &mut self,
-        event_loop: &mut mio::EventLoop<CAresEventHandler>,
-        _timeout: Self::Timeout) {
-        event_loop.timeout_ms((), 500).unwrap();
-        self.ares_channel
-            .lock()
-            .unwrap()
-            .process_fd(c_ares::SOCKET_BAD, c_ares::SOCKET_BAD);
+    // Process messages incoming on the channel.
+    fn handle_messages(&mut self) {
+        loop {
+            match self.msg_channel.try_recv() {
+                Ok(Message::RegisterInterest(fd, readable, writable)) => {
+                    // Instruction to do something with a file descriptor.
+                    let efd = mio::unix::EventedFd(&fd);
+                    if !readable && !writable {
+                        self.tracked_fds.remove(&fd);
+                        self.poll
+                            .deregister(&efd)
+                            .expect("failed to deregister interest");
+                    } else {
+                        let token = mio::Token(fd as usize);
+                        let mut interest = mio::Ready::none();
+                        if readable { interest.insert(mio::Ready::readable()) }
+                        if writable { interest.insert(mio::Ready::writable()) }
+                        let register_result = if !self.tracked_fds.insert(fd) {
+                            self.poll
+                                .reregister(&efd, token, interest, mio::PollOpt::edge())
+                        } else {
+                            self.poll
+                                .register(&efd, token, interest, mio::PollOpt::edge())
+                        };
+                        register_result.expect("failed to register interest");
+                    }
+                },
+
+                Ok(Message::ShutDown) => {
+                    // Instruction to shut down.
+                    self.quit = true;
+                    break
+                },
+
+                // No more instructions.
+                Err(_) => break,
+            }
+        }
     }
 }
 
 struct Resolver {
     ares_channel: Arc<Mutex<c_ares::Channel>>,
-    event_loop_channel: mio::Sender<CAresHandlerMessage>,
+    event_loop_channel: mio::channel::Sender<Message>,
     event_loop_handle: Option<thread::JoinHandle<()>>,
 }
 
 impl Resolver {
     // Create a new Resolver.
     pub fn new() -> Resolver {
-        // Create an event loop.
-        let mut event_loop = mio::EventLoop::new()
-            .expect("failed to create event loop");
-        let event_loop_channel = event_loop.channel();
-
-        // Socket state callback for the c_ares::Channel will be to kick the
-        // event loop.
-        let event_loop_channel_clone = event_loop_channel.clone();
+        // Whenever c-ares tells us what to do with a file descriptor, we'll
+        // send that request along, in a message to the event loop thread.
+        let (tx, rx) = mio::channel::channel();
+        let tx_clone = tx.clone();
         let sock_callback =
-            move |sock: c_ares::Socket, readable: bool, writable: bool| {
-                let _ = event_loop_channel_clone
-                    .send(
-                        CAresHandlerMessage::RegisterInterest(
-                            sock,
-                            readable,
-                            writable));
+            move |fd: c_ares::Socket, readable: bool, writable: bool| {
+                let _ = tx_clone.send(
+                    Message::RegisterInterest(fd, readable, writable));
             };
 
         // Create a c_ares::Channel.
@@ -177,21 +196,16 @@ impl Resolver {
         ares_channel.set_servers(&["8.8.8.8"]).expect("Failed to set servers");
         let locked_channel = Arc::new(Mutex::new(ares_channel));
 
-        // Set the first instance of the recurring timer on the event loop.
-        event_loop.timeout_ms((), 500).unwrap();
+        // Create and run the event loop.
+        let channel_clone = locked_channel.clone();
+        let event_loop = EventLoop::new(channel_clone, rx);
+        let handle = event_loop.run();
 
-        // Kick off the event loop.
-        let mut event_handler = CAresEventHandler::new(locked_channel.clone());
-        let event_loop_handle = thread::spawn(move || {
-            event_loop
-                .run(&mut event_handler)
-                .expect("failed to run event loop")
-        });
-
+        // Return the Resolver.
         Resolver {
             ares_channel: locked_channel,
-            event_loop_channel: event_loop_channel,
-            event_loop_handle: Some(event_loop_handle),
+            event_loop_channel: tx,
+            event_loop_handle: Some(handle),
         }
     }
 
@@ -231,11 +245,11 @@ impl Drop for Resolver {
     fn drop(&mut self) {
         // Shut down the event loop and wait for it to finish.
         self.event_loop_channel
-            .send(CAresHandlerMessage::ShutDown)
-            .expect("failed to shut down event loop");
-       for handle in self.event_loop_handle.take() {
-           handle.join().unwrap();
-       }
+            .send(Message::ShutDown)
+            .expect("failed to request event loop to shut down");
+        for handle in self.event_loop_handle.take() {
+           handle.join().expect("failed to shut down event loop");
+        }
     }
 }
 

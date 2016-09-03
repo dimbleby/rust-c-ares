@@ -19,7 +19,7 @@ c-types = "0.1.4"
 itertools = "0.4.17"
 
 [target.'cfg(unix)'.dev-dependencies]
-mio = "0.5.1"
+mio = "0.6.0"
 nix = "0.6.0"
 
 [target.'cfg(windows)'.dev-dependencies]

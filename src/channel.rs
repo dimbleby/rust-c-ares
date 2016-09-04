@@ -90,7 +90,7 @@ pub struct Options {
     optmask: c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
-    socket_state_callback: Option<Box<FnMut(Socket, bool, bool) + 'static>>,
+    socket_state_callback: Option<Box<FnMut(Socket, bool, bool) + Send + 'static>>,
 }
 
 impl Options {
@@ -180,7 +180,7 @@ impl Options {
     /// -  `read` is set to true if the socket should listen for read events
     /// -  `write` is set to true if the socket should listen for write events.
     pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
-        where F: FnMut(Socket, bool, bool) + 'static {
+        where F: FnMut(Socket, bool, bool) + Send + 'static {
         let boxed_callback = Box::new(callback);
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
         self.ares_options.sock_state_cb_data =
@@ -225,7 +225,7 @@ pub struct Channel {
 
     // For ownership only.
     #[allow(dead_code)]
-    socket_state_callback: Option<Box<FnMut(Socket, bool, bool) + 'static>>,
+    socket_state_callback: Option<Box<FnMut(Socket, bool, bool) + Send + 'static>>,
 }
 
 impl Channel {
@@ -379,7 +379,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_a<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AResults, AresError>) + 'static {
+        where F: FnOnce(Result<AResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -397,7 +397,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AAAAResults, AresError>) + 'static {
+        where F: FnOnce(Result<AAAAResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -415,7 +415,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_cname<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<CNameResults, AresError>) + 'static {
+        where F: FnOnce(Result<CNameResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -433,7 +433,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_mx<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<MXResults, AresError>) + 'static {
+        where F: FnOnce(Result<MXResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -451,7 +451,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_naptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NAPTRResults, AresError>) + 'static {
+        where F: FnOnce(Result<NAPTRResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -469,7 +469,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ns<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NSResults, AresError>) + 'static {
+        where F: FnOnce(Result<NSResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -487,7 +487,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<PTRResults, AresError>) + 'static {
+        where F: FnOnce(Result<PTRResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -505,7 +505,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_srv<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SRVResults, AresError>) + 'static {
+        where F: FnOnce(Result<SRVResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -523,7 +523,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_txt<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<TXTResults, AresError>) + 'static {
+        where F: FnOnce(Result<TXTResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -541,7 +541,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_soa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SOAResult, AresError>) + 'static {
+        where F: FnOnce(Result<SOAResult, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -561,7 +561,7 @@ impl Channel {
     pub fn get_host_by_address<F>(
         &mut self,
         address: &IpAddr,
-        handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
+        handler: F) where F: FnOnce(Result<HostResults, AresError>) + Send + 'static {
         let in_addr: c_types::in_addr;
         let in6_addr: c_types::in6_addr;
         let c_addr = match *address {
@@ -601,7 +601,7 @@ impl Channel {
         &mut self,
         name: &str,
         family: AddressFamily,
-        handler: F) where F: FnOnce(Result<HostResults, AresError>) + 'static {
+        handler: F) where F: FnOnce(Result<HostResults, AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -625,7 +625,7 @@ impl Channel {
         address: &SocketAddr,
         flags: NIFlags,
         handler: F)
-        where F: FnOnce(Result<NameInfoResult, AresError>) + 'static {
+        where F: FnOnce(Result<NameInfoResult, AresError>) + Send + 'static {
         let sockaddr_in: c_types::sockaddr_in;
         let sockaddr_in6: c_types::sockaddr_in6;
         let c_addr = match *address {
@@ -670,7 +670,7 @@ impl Channel {
         dns_class: u16,
         query_type: u16,
         handler: F)
-        where F: FnOnce(Result<&[u8], AresError>) + 'static {
+        where F: FnOnce(Result<&[u8], AresError>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -712,7 +712,7 @@ pub unsafe extern "C" fn socket_state_callback<F>(
     socket_fd: c_ares_sys::ares_socket_t,
     readable: c_int,
     writable: c_int)
-    where F: FnMut(Socket, bool, bool) + 'static {
+    where F: FnMut(Socket, bool, bool) + Send + 'static {
     let handler = data as *mut F;
     (*handler)(socket_fd, readable != 0, writable != 0);
 }

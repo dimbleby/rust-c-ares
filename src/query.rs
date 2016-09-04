@@ -15,7 +15,7 @@ pub unsafe extern "C" fn query_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<&[u8], AresError>) + 'static {
+    where F: FnOnce(Result<&[u8], AresError>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         Ok(data)

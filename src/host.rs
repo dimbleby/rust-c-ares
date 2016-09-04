@@ -55,7 +55,7 @@ pub unsafe extern "C" fn get_host_callback<F>(
     status: c_int,
     _timeouts: c_int,
     hostent: *mut c_ares_sys::hostent)
-    where F: FnOnce(Result<HostResults, AresError>) + 'static {
+    where F: FnOnce(Result<HostResults, AresError>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let host_results = HostResults::new(
             &*(hostent as *const c_types::hostent));

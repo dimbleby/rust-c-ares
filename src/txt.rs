@@ -146,7 +146,7 @@ pub unsafe extern "C" fn query_txt_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<TXTResults, AresError>) + 'static {
+    where F: FnOnce(Result<TXTResults, AresError>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         TXTResults::parse_from(data)

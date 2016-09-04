@@ -78,7 +78,7 @@ pub unsafe extern "C" fn query_cname_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<CNameResults, AresError>) + 'static {
+    where F: FnOnce(Result<CNameResults, AresError>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         CNameResults::parse_from(data)

@@ -68,7 +68,7 @@ pub unsafe extern "C" fn get_name_info_callback<F>(
     _timeouts: c_int,
     node: *mut c_char,
     service: *mut c_char)
-    where F: FnOnce(Result<NameInfoResult, AresError>) + 'static {
+    where F: FnOnce(Result<NameInfoResult, AresError>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let name_info_result = NameInfoResult::new(
             node.as_ref(),

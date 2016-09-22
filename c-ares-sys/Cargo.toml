@@ -16,7 +16,7 @@ gcc = "0.3.32"
 pkg-config = "0.3.8"
 
 [dependencies]
-libc = "0.2.15"
+libc = "0.2.16"
 c-types = "0.1.4"
 
 [target.'cfg(windows)'.dependencies]

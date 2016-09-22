@@ -16,7 +16,7 @@ branches:
     master
 install:
 - pip install ghp-import --user $USER
-- [ "$TRAVIS_OS_NAME" == "osx" ] && brew reinstall -s libtool
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall -s libtool; fi
 after_success: |
   [ "$TRAVIS_PULL_REQUEST" == "false" ] &&
   [ "$TRAVIS_RUST_VERSION" == "stable" ] &&

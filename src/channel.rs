@@ -210,6 +210,12 @@ impl Options {
         self
     }
 
+    /// Prevent round robin selection of nameservers.
+    pub fn set_no_rotate(&mut self) -> &mut Self {
+        self.optmask |= c_ares_sys::ARES_OPT_NOROTATE;
+        self
+    }
+
     /// Set the EDNS packet size.
     pub fn set_ednspsz(&mut self, size: u32) -> &mut Self {
         self.ares_options.ednspsz = size as c_int;

@@ -65,7 +65,7 @@ impl SRVResults {
 
 impl fmt::Display for SRVResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let results = self.iter().format_default("}, {");
+        let results = self.iter().format("}, {");
         try!(write!(fmt, "[{{{}}}]", results));
         Ok(())
     }

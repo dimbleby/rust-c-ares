@@ -64,7 +64,7 @@ impl TXTResults {
 
 impl fmt::Display for TXTResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let results = self.iter().format_default("}, {");
+        let results = self.iter().format("}, {");
         try!(write!(fmt, "[{{{}}}]", results));
         Ok(())
     }

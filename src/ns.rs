@@ -62,7 +62,7 @@ impl NSResults {
 impl fmt::Display for NSResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         try!(write!(fmt, "Hostname: {}, ", self.hostname()));
-        let aliases = self.aliases().format_default(", ");
+        let aliases = self.aliases().format(", ");
         try!(write!(fmt, "Aliases: [{}]", aliases));
         Ok(())
     }

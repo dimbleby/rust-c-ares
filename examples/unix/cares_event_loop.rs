@@ -87,7 +87,7 @@ pub fn main() {
         // Stop listening for things that we no longer care about.
         let unwanted = &tracked_fds - &new_fds;
         for fd in &unwanted {
-            let efd = mio::unix::EventedFd(&fd);
+            let efd = mio::unix::EventedFd(fd);
             poll.deregister(&efd).expect("failed to deregister interest");
         }
         tracked_fds = new_fds;

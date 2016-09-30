@@ -191,7 +191,7 @@ impl Drop for Resolver {
         cvar.notify_one();
 
         // Wait for it to do so.
-        for handle in self.fd_handle.take() {
+        if let Some(handle) = self.fd_handle.take() {
             handle.join().unwrap();
         }
     }

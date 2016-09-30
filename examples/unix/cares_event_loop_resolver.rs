@@ -247,7 +247,7 @@ impl Drop for Resolver {
         self.event_loop_channel
             .send(Message::ShutDown)
             .expect("failed to request event loop to shut down");
-        for handle in self.event_loop_handle.take() {
+        if let Some(handle) = self.event_loop_handle.take() {
            handle.join().expect("failed to shut down event loop");
         }
     }

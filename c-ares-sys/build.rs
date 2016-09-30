@@ -16,7 +16,7 @@ macro_rules! t {
 fn main() {
     // Use the installed libcares if it is available.
     if pkg_config::Config::new()
-        .atleast_version("1.11.0")
+        .atleast_version("1.12.0")
             .find("libcares")
             .is_ok() {
         return

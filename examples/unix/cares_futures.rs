@@ -53,9 +53,10 @@ enum Message {
     ShutDown,
 }
 
-// We also use Token(fd) for file descriptors, so this relies on zero not
-// being a valid file descriptor for c-ares to use.  Zero is stdin, so that's
-// true.
+// A token identifying that the message channel has become available for reading.
+//
+// We use Token(fd) for file descriptors, so this relies on zero not being a
+// valid file descriptor for c-ares to use.  Zero is stdin, so that's true.
 const CHANNEL: mio::Token = mio::Token(0);
 
 impl EventLoop {

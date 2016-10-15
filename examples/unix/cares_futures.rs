@@ -328,20 +328,20 @@ fn print_naptr_results(
 
 pub fn main() {
     // Create a tokio event loop, and a Resolver.  Then make some requests.
-    let mut l = tokio_core::reactor::Core::new().unwrap();
+    let mut event_loop = tokio_core::reactor::Core::new().unwrap();
     let resolver = Resolver::new();
     let query = resolver.query_cname("dimbleby.github.io");
-    let result = l.run(query);
+    let result = event_loop.run(query);
     println!("");
     print_cname_result(&result);
 
     let query = resolver.query_mx("gmail.com");
-    let result = l.run(query);
+    let result = event_loop.run(query);
     println!("");
     print_mx_results(&result);
 
     let query = resolver.query_naptr("apple.com");
-    let result = l.run(query);
+    let result = event_loop.run(query);
     println!("");
     print_naptr_results(&result);
 }

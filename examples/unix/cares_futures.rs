@@ -5,20 +5,40 @@
 // - Have the event loop be run by a `Resolver`, hiding away the event loop
 // details from the writer of `main()`.
 //
-// - Show one way of transforming the asynchronous c-ares interface into
-// a synchronous, blocking interface by using a std::sync::mpsc::channel.
+// - Transform the callback-based c-ares interface into a futures-style.
 extern crate c_ares;
+extern crate futures;
 extern crate mio;
+extern crate tokio_core;
 
 use std::collections::HashSet;
 use std::error::Error;
 use std::sync::{
     Arc,
     Mutex,
-    mpsc,
 };
 use std::thread;
 use std::time::Duration;
+
+use self::futures::Future;
+
+// The EventLoop will set up a mio::Poll and use it to wait for the following:
+//
+// -  messages telling it which file descriptors it should be interested in.
+//    These file descriptors are then registered (or deregistered) with the
+//    mio::Poll as required.
+//
+// -  events telling it that something has happened on one of these file
+//    descriptors.  When this happens, it tells the c_ares::Channel about it.
+//
+// -  a message telling it to shut down.
+struct EventLoop {
+    poll: mio::Poll,
+    msg_channel: mio::channel::Receiver<Message>,
+    tracked_fds: HashSet<c_ares::Socket>,
+    ares_channel: Arc<Mutex<c_ares::Channel>>,
+    quit: bool,
+}
 
 // Messages for the event loop.
 #[derive(Debug)]
@@ -38,14 +58,6 @@ enum Message {
 // true.
 const CHANNEL: mio::Token = mio::Token(0);
 
-struct EventLoop {
-    ares_channel: Arc<Mutex<c_ares::Channel>>,
-    msg_channel: mio::channel::Receiver<Message>,
-    tracked_fds: HashSet<c_ares::Socket>,
-    poll: mio::Poll,
-    quit: bool,
-}
-
 impl EventLoop {
     // Create a new event loop.
     pub fn new(
@@ -56,17 +68,17 @@ impl EventLoop {
             .expect("failed to register channel with poll");
 
         EventLoop {
-            ares_channel: ares_channel,
+            poll: poll,
             msg_channel: rx,
             tracked_fds: HashSet::<c_ares::Socket>::new(),
-            poll: poll,
+            ares_channel: ares_channel,
             quit: false,
         }
     }
 
     // Run the event loop.
     pub fn run(self) -> thread::JoinHandle<()> {
-        thread::spawn(move || { self.event_loop_thread() })
+        thread::spawn(|| self.event_loop_thread())
     }
 
     // Event loop thread - waits for events, and handles them.
@@ -88,12 +100,11 @@ impl EventLoop {
                         c_ares::SOCKET_BAD);
                 },
                 _ => {
-                    // Process events.  One of them might cause us to quit.
+                    // Process events.  One of them might have asked us to quit.
                     for event in &events {
                         self.handle_event(&event);
-                        if self.quit { break }
+                        if self.quit { return }
                     }
-                    if self.quit { break }
                 }
             }
         }
@@ -165,6 +176,7 @@ impl EventLoop {
     }
 }
 
+// The Resolver is the interface by which users make DNS queries.
 struct Resolver {
     ares_channel: Arc<Mutex<c_ares::Channel>>,
     event_loop_channel: mio::channel::Sender<Message>,
@@ -209,35 +221,40 @@ impl Resolver {
         }
     }
 
-    // A blocking CNAME query.  Achieve this by having the callback send the
-    // result to a std::sync::mpsc::channel, and waiting on that channel.
+    // A CNAME query.  Returns a future that will resolve to hold the result.
     pub fn query_cname(&self, name: &str)
-        -> Result<c_ares::CNameResults, c_ares::AresError> {
-        let (tx, rx) = mpsc::channel();
+        -> futures::BoxFuture<c_ares::CNameResults, c_ares::AresError> {
+        let (c, p) = futures::oneshot();
         self.ares_channel.lock().unwrap().query_cname(name, move |result| {
-            tx.send(result).unwrap();
+            c.complete(result);
         });
-        rx.recv().unwrap()
+        p.map_err(|_| c_ares::AresError::ECANCELLED)
+            .and_then(futures::done)
+            .boxed()
     }
 
-    // A blocking MX query.
+    // An MX query.  Returns a future that will resolve to hold the result.
     pub fn query_mx(&self, name: &str)
-        -> Result<c_ares::MXResults, c_ares::AresError> {
-        let (tx, rx) = mpsc::channel();
+        -> futures::BoxFuture<c_ares::MXResults, c_ares::AresError> {
+        let (c, p) = futures::oneshot();
         self.ares_channel.lock().unwrap().query_mx(name, move |result| {
-            tx.send(result).unwrap();
+            c.complete(result);
         });
-        rx.recv().unwrap()
+        p.map_err(|_| c_ares::AresError::ECANCELLED)
+            .and_then(futures::done)
+            .boxed()
     }
 
-    // A blocking NAPTR query.
+    // A NAPTR query.  Returns a future that will resolve to hold the result.
     pub fn query_naptr(&self, name: &str)
-        -> Result<c_ares::NAPTRResults, c_ares::AresError> {
-        let (tx, rx) = mpsc::channel();
+        -> futures::BoxFuture<c_ares::NAPTRResults, c_ares::AresError> {
+        let (c, p) = futures::oneshot();
         self.ares_channel.lock().unwrap().query_naptr(name, move |result| {
-            tx.send(result).unwrap();
+            c.complete(result);
         });
-        rx.recv().unwrap()
+        p.map_err(|_| c_ares::AresError::ECANCELLED)
+            .and_then(futures::done)
+            .boxed()
     }
 }
 
@@ -254,12 +271,12 @@ impl Drop for Resolver {
 }
 
 fn print_cname_result(
-    result: Result<c_ares::CNameResults, c_ares::AresError>) {
-    match result {
-        Err(e) => {
+    result: &Result<c_ares::CNameResults, c_ares::AresError>) {
+    match *result {
+        Err(ref e) => {
             println!("CNAME lookup failed with error '{}'", e.description());
         }
-        Ok(cname_results) => {
+        Ok(ref cname_results) => {
             println!("Successful CNAME lookup...");
             println!("Hostname: {}", cname_results.hostname());
             for alias in cname_results.aliases() {
@@ -269,14 +286,14 @@ fn print_cname_result(
     }
 }
 
-fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
-    match result {
-        Err(e) => {
+fn print_mx_results(result: &Result<c_ares::MXResults, c_ares::AresError>) {
+    match *result {
+        Err(ref e) => {
             println!("MX lookup failed with error '{}'", e.description());
         }
-        Ok(mx_results) => {
+        Ok(ref mx_results) => {
             println!("Successful MX lookup...");
-            for mx_result in &mx_results {
+            for mx_result in mx_results {
                 println!(
                     "host {}, priority {}",
                     mx_result.host(),
@@ -287,14 +304,14 @@ fn print_mx_results(result: Result<c_ares::MXResults, c_ares::AresError>) {
 }
 
 fn print_naptr_results(
-    result: Result<c_ares::NAPTRResults, c_ares::AresError>) {
-    match result {
-        Err(e) => {
+    result: &Result<c_ares::NAPTRResults, c_ares::AresError>) {
+    match *result {
+        Err(ref e) => {
             println!("NAPTR lookup failed with error '{}'", e.description());
         }
-        Ok(naptr_results) => {
+        Ok(ref naptr_results) => {
             println!("Successful NAPTR lookup...");
-            for naptr_result in &naptr_results {
+            for naptr_result in naptr_results {
                 println!("flags: {}", naptr_result.flags());
                 println!("service name: {}", naptr_result.service_name());
                 println!("regular expression: {}", naptr_result.reg_exp());
@@ -309,17 +326,21 @@ fn print_naptr_results(
 }
 
 pub fn main() {
-    // Create a Resolver.  Then make some requests.
+    // Create a tokio event loop, and a Resolver.  Then make some requests.
+    let mut l = tokio_core::reactor::Core::new().unwrap();
     let resolver = Resolver::new();
-    let result = resolver.query_cname("dimbleby.github.io");
+    let query = resolver.query_cname("dimbleby.github.io");
+    let result = l.run(query);
     println!("");
-    print_cname_result(result);
+    print_cname_result(&result);
 
-    let result = resolver.query_mx("gmail.com");
+    let query = resolver.query_mx("gmail.com");
+    let result = l.run(query);
     println!("");
-    print_mx_results(result);
+    print_mx_results(&result);
 
-    let result = resolver.query_naptr("apple.com");
+    let query = resolver.query_naptr("apple.com");
+    let result = l.run(query);
     println!("");
-    print_naptr_results(result);
+    print_naptr_results(&result);
 }

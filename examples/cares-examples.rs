@@ -22,7 +22,7 @@ fn epoll_examples() { }
 #[cfg(unix)]
 fn main() {
     unix::cares_event_loop::main();
-    unix::cares_event_loop_resolver::main();
+    unix::cares_futures::main();
     epoll_examples();
 }
 

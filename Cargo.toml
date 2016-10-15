@@ -19,8 +19,10 @@ c-types = "0.1.4"
 itertools = "0.5.2"
 
 [target.'cfg(unix)'.dev-dependencies]
+futures = "0.1.2"
 mio = "0.6.0"
 nix = "0.7.0"
+tokio-core = "0.1"
 
 [target.'cfg(windows)'.dev-dependencies]
 winapi = "0.2.8"

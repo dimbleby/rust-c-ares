@@ -8,7 +8,7 @@ use c_ares_sys;
 
 /// Error codes that the library might return.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
-pub enum AresError {
+pub enum Error {
     /// DNS server returned answer with no data.
     ENODATA = c_ares_sys::ARES_ENODATA as isize,
 
@@ -85,40 +85,40 @@ pub enum AresError {
     UNKNOWN,
 }
 
-impl fmt::Display for AresError {
+impl fmt::Display for Error {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let text = match *self {
-            AresError::ENODATA => "ENODATA",
-            AresError::EFORMERR => "EFORMERR",
-            AresError::ESERVFAIL => "ESERVFAIL",
-            AresError::ENOTFOUND => "ENOTFOUND",
-            AresError::ENOTIMP => "ENOTIMP",
-            AresError::EREFUSED => "EREFUSED",
-            AresError::EBADQUERY => "EBADQUERY",
-            AresError::EBADNAME => "EBADNAME",
-            AresError::EBADFAMILY => "EBADFAMILY",
-            AresError::EBADRESP => "EBADRESP",
-            AresError::ECONNREFUSED => "ECONNREFUSED",
-            AresError::ETIMEOUT => "ETIMEOUT",
-            AresError::EOF => "EOF",
-            AresError::EFILE => "EFILE",
-            AresError::ENOMEM => "ENOMEM",
-            AresError::EDESTRUCTION => "EDESTRUCTION",
-            AresError::EBADSTR => "EBADSTR",
-            AresError::EBADFLAGS => "EBADFLAGS",
-            AresError::ENONAME => "ENONAME",
-            AresError::EBADHINTS => "EBADHINTS",
-            AresError::ENOTINITIALIZED => "ENOTINITIALIZED",
-            AresError::ELOADIPHLPAPI => "ELOADIPHLPAPI",
-            AresError::EADDRGETNETWORKPARAMS => "EADDRGETNETWORKPARAMS",
-            AresError::ECANCELLED => "ECANCELLED",
-            AresError::UNKNOWN => "UNKNOWN",
+            Error::ENODATA => "ENODATA",
+            Error::EFORMERR => "EFORMERR",
+            Error::ESERVFAIL => "ESERVFAIL",
+            Error::ENOTFOUND => "ENOTFOUND",
+            Error::ENOTIMP => "ENOTIMP",
+            Error::EREFUSED => "EREFUSED",
+            Error::EBADQUERY => "EBADQUERY",
+            Error::EBADNAME => "EBADNAME",
+            Error::EBADFAMILY => "EBADFAMILY",
+            Error::EBADRESP => "EBADRESP",
+            Error::ECONNREFUSED => "ECONNREFUSED",
+            Error::ETIMEOUT => "ETIMEOUT",
+            Error::EOF => "EOF",
+            Error::EFILE => "EFILE",
+            Error::ENOMEM => "ENOMEM",
+            Error::EDESTRUCTION => "EDESTRUCTION",
+            Error::EBADSTR => "EBADSTR",
+            Error::EBADFLAGS => "EBADFLAGS",
+            Error::ENONAME => "ENONAME",
+            Error::EBADHINTS => "EBADHINTS",
+            Error::ENOTINITIALIZED => "ENOTINITIALIZED",
+            Error::ELOADIPHLPAPI => "ELOADIPHLPAPI",
+            Error::EADDRGETNETWORKPARAMS => "EADDRGETNETWORKPARAMS",
+            Error::ECANCELLED => "ECANCELLED",
+            Error::UNKNOWN => "UNKNOWN",
         };
         fmt.write_str(text)
     }
 }
 
-impl error::Error for AresError {
+impl error::Error for Error {
     fn description(&self) -> &str {
         unsafe {
             let ptr = c_ares_sys::ares_strerror(*self as c_int);
@@ -128,35 +128,35 @@ impl error::Error for AresError {
     }
 }
 
-impl From<i32> for AresError {
+impl From<i32> for Error {
     fn from(code: i32) -> Self {
         match code {
-            c_ares_sys::ARES_ENODATA => AresError::ENODATA,
-            c_ares_sys::ARES_EFORMERR => AresError::EFORMERR,
-            c_ares_sys::ARES_ESERVFAIL => AresError::ESERVFAIL,
-            c_ares_sys::ARES_ENOTFOUND => AresError::ENOTFOUND,
-            c_ares_sys::ARES_ENOTIMP => AresError::ENOTIMP,
-            c_ares_sys::ARES_EREFUSED => AresError::EREFUSED,
-            c_ares_sys::ARES_EBADQUERY => AresError::EBADQUERY,
-            c_ares_sys::ARES_EBADNAME => AresError::EBADNAME,
-            c_ares_sys::ARES_EBADFAMILY => AresError::EBADFAMILY,
-            c_ares_sys::ARES_EBADRESP => AresError::EBADRESP,
-            c_ares_sys::ARES_ECONNREFUSED => AresError::ECONNREFUSED,
-            c_ares_sys::ARES_ETIMEOUT => AresError::ETIMEOUT,
-            c_ares_sys::ARES_EOF => AresError::EOF,
-            c_ares_sys::ARES_EFILE => AresError::EFILE,
-            c_ares_sys::ARES_ENOMEM => AresError::ENOMEM,
-            c_ares_sys::ARES_EDESTRUCTION => AresError::EDESTRUCTION,
-            c_ares_sys::ARES_EBADSTR => AresError::EBADSTR,
-            c_ares_sys::ARES_EBADFLAGS => AresError::EBADFLAGS,
-            c_ares_sys::ARES_ENONAME => AresError::ENONAME,
-            c_ares_sys::ARES_EBADHINTS => AresError::EBADHINTS,
-            c_ares_sys::ARES_ENOTINITIALIZED => AresError::ENOTINITIALIZED,
-            c_ares_sys::ARES_ELOADIPHLPAPI => AresError::ELOADIPHLPAPI,
+            c_ares_sys::ARES_ENODATA => Error::ENODATA,
+            c_ares_sys::ARES_EFORMERR => Error::EFORMERR,
+            c_ares_sys::ARES_ESERVFAIL => Error::ESERVFAIL,
+            c_ares_sys::ARES_ENOTFOUND => Error::ENOTFOUND,
+            c_ares_sys::ARES_ENOTIMP => Error::ENOTIMP,
+            c_ares_sys::ARES_EREFUSED => Error::EREFUSED,
+            c_ares_sys::ARES_EBADQUERY => Error::EBADQUERY,
+            c_ares_sys::ARES_EBADNAME => Error::EBADNAME,
+            c_ares_sys::ARES_EBADFAMILY => Error::EBADFAMILY,
+            c_ares_sys::ARES_EBADRESP => Error::EBADRESP,
+            c_ares_sys::ARES_ECONNREFUSED => Error::ECONNREFUSED,
+            c_ares_sys::ARES_ETIMEOUT => Error::ETIMEOUT,
+            c_ares_sys::ARES_EOF => Error::EOF,
+            c_ares_sys::ARES_EFILE => Error::EFILE,
+            c_ares_sys::ARES_ENOMEM => Error::ENOMEM,
+            c_ares_sys::ARES_EDESTRUCTION => Error::EDESTRUCTION,
+            c_ares_sys::ARES_EBADSTR => Error::EBADSTR,
+            c_ares_sys::ARES_EBADFLAGS => Error::EBADFLAGS,
+            c_ares_sys::ARES_ENONAME => Error::ENONAME,
+            c_ares_sys::ARES_EBADHINTS => Error::EBADHINTS,
+            c_ares_sys::ARES_ENOTINITIALIZED => Error::ENOTINITIALIZED,
+            c_ares_sys::ARES_ELOADIPHLPAPI => Error::ELOADIPHLPAPI,
             c_ares_sys::ARES_EADDRGETNETWORKPARAMS =>
-                AresError::EADDRGETNETWORKPARAMS,
-            c_ares_sys::ARES_ECANCELLED => AresError::ECANCELLED,
-            _ => AresError::UNKNOWN,
+                Error::EADDRGETNETWORKPARAMS,
+            c_ares_sys::ARES_ECANCELLED => Error::ECANCELLED,
+            _ => Error::UNKNOWN,
         }
     }
 }

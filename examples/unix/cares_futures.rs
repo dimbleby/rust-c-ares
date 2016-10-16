@@ -224,36 +224,36 @@ impl Resolver {
 
     // A CNAME query.  Returns a future that will resolve to hold the result.
     pub fn query_cname(&self, name: &str)
-        -> futures::BoxFuture<c_ares::CNameResults, c_ares::AresError> {
+        -> futures::BoxFuture<c_ares::CNameResults, c_ares::Error> {
         let (c, p) = futures::oneshot();
         self.ares_channel.lock().unwrap().query_cname(name, move |result| {
             c.complete(result);
         });
-        p.map_err(|_| c_ares::AresError::ECANCELLED)
+        p.map_err(|_| c_ares::Error::ECANCELLED)
             .and_then(futures::done)
             .boxed()
     }
 
     // An MX query.  Returns a future that will resolve to hold the result.
     pub fn query_mx(&self, name: &str)
-        -> futures::BoxFuture<c_ares::MXResults, c_ares::AresError> {
+        -> futures::BoxFuture<c_ares::MXResults, c_ares::Error> {
         let (c, p) = futures::oneshot();
         self.ares_channel.lock().unwrap().query_mx(name, move |result| {
             c.complete(result);
         });
-        p.map_err(|_| c_ares::AresError::ECANCELLED)
+        p.map_err(|_| c_ares::Error::ECANCELLED)
             .and_then(futures::done)
             .boxed()
     }
 
     // A NAPTR query.  Returns a future that will resolve to hold the result.
     pub fn query_naptr(&self, name: &str)
-        -> futures::BoxFuture<c_ares::NAPTRResults, c_ares::AresError> {
+        -> futures::BoxFuture<c_ares::NAPTRResults, c_ares::Error> {
         let (c, p) = futures::oneshot();
         self.ares_channel.lock().unwrap().query_naptr(name, move |result| {
             c.complete(result);
         });
-        p.map_err(|_| c_ares::AresError::ECANCELLED)
+        p.map_err(|_| c_ares::Error::ECANCELLED)
             .and_then(futures::done)
             .boxed()
     }
@@ -272,7 +272,7 @@ impl Drop for Resolver {
 }
 
 fn print_cname_result(
-    result: &Result<c_ares::CNameResults, c_ares::AresError>) {
+    result: &Result<c_ares::CNameResults, c_ares::Error>) {
     match *result {
         Err(ref e) => {
             println!("CNAME lookup failed with error '{}'", e.description());
@@ -287,7 +287,7 @@ fn print_cname_result(
     }
 }
 
-fn print_mx_results(result: &Result<c_ares::MXResults, c_ares::AresError>) {
+fn print_mx_results(result: &Result<c_ares::MXResults, c_ares::Error>) {
     match *result {
         Err(ref e) => {
             println!("MX lookup failed with error '{}'", e.description());
@@ -305,7 +305,7 @@ fn print_mx_results(result: &Result<c_ares::MXResults, c_ares::AresError>) {
 }
 
 fn print_naptr_results(
-    result: &Result<c_ares::NAPTRResults, c_ares::AresError>) {
+    result: &Result<c_ares::NAPTRResults, c_ares::Error>) {
     match *result {
         Err(ref e) => {
             println!("NAPTR lookup failed with error '{}'", e.description());

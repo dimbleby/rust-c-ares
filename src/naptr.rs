@@ -14,7 +14,7 @@ use std::slice;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::AresError;
+use error::Error;
 
 /// The result of a successful NAPTR lookup.
 #[derive(Debug)]
@@ -31,7 +31,7 @@ pub struct NAPTRResult<'a> {
 
 impl NAPTRResults {
     /// Obtain a `NAPTRResults` from the response to a NAPTR lookup.
-    pub fn parse_from(data: &[u8]) -> Result<NAPTRResults, AresError> {
+    pub fn parse_from(data: &[u8]) -> Result<NAPTRResults, Error> {
         let mut naptr_reply: *mut c_ares_sys::ares_naptr_reply =
             ptr::null_mut();
         let parse_status = unsafe {
@@ -44,7 +44,7 @@ impl NAPTRResults {
             let naptr_result = NAPTRResults::new(naptr_reply);
             Ok(naptr_result)
         } else {
-            Err(AresError::from(parse_status))
+            Err(Error::from(parse_status))
         }
     }
 
@@ -184,12 +184,12 @@ pub unsafe extern "C" fn query_naptr_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<NAPTRResults, AresError>) + Send + 'static {
+    where F: FnOnce(Result<NAPTRResults, Error>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         NAPTRResults::parse_from(data)
     } else {
-        Err(AresError::from(status))
+        Err(Error::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

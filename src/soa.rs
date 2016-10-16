@@ -12,7 +12,7 @@ use std::str;
 
 use c_ares_sys;
 
-use error::AresError;
+use error::Error;
 
 /// The result of a successful SOA lookup.
 #[derive(Debug)]
@@ -23,7 +23,7 @@ pub struct SOAResult {
 
 impl SOAResult {
     /// Obtain an `SOAResult` from the response to an SOA lookup.
-    pub fn parse_from(data: &[u8]) -> Result<SOAResult, AresError> {
+    pub fn parse_from(data: &[u8]) -> Result<SOAResult, Error> {
         let mut soa_reply: *mut c_ares_sys::ares_soa_reply =
             ptr::null_mut();
         let parse_status = unsafe {
@@ -36,7 +36,7 @@ impl SOAResult {
             let result = SOAResult::new(soa_reply);
             Ok(result)
         } else {
-            Err(AresError::from(parse_status))
+            Err(Error::from(parse_status))
         }
     }
 
@@ -119,12 +119,12 @@ pub unsafe extern "C" fn query_soa_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<SOAResult, AresError>) + Send + 'static {
+    where F: FnOnce(Result<SOAResult, Error>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         SOAResult::parse_from(data)
     } else {
-        Err(AresError::from(status))
+        Err(Error::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

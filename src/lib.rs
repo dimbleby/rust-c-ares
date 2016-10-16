@@ -75,7 +75,7 @@ pub use channel::{
     Options,
 };
 pub use cname::CNameResults;
-pub use error::AresError;
+pub use error::Error;
 pub use host::HostResults;
 pub use hostent::{
     HostAddressResultsIter,

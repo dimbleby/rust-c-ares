@@ -9,7 +9,7 @@ use std::str;
 
 use c_ares_sys;
 
-use error::AresError;
+use error::Error;
 
 /// The result of a successful name-info lookup.
 #[derive(Clone, Copy, Debug)]
@@ -68,14 +68,14 @@ pub unsafe extern "C" fn get_name_info_callback<F>(
     _timeouts: c_int,
     node: *mut c_char,
     service: *mut c_char)
-    where F: FnOnce(Result<NameInfoResult, AresError>) + Send + 'static {
+    where F: FnOnce(Result<NameInfoResult, Error>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let name_info_result = NameInfoResult::new(
             node.as_ref(),
             service.as_ref());
         Ok(name_info_result)
     } else {
-        Err(AresError::from(status))
+        Err(Error::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

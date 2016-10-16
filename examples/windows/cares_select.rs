@@ -25,7 +25,7 @@ use std::net::{
 };
 use std::ptr;
 
-fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
+fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::Error>) {
     match result {
         Err(e) => {
             println!("SOA lookup failed with error '{}'", e.description());
@@ -43,7 +43,7 @@ fn print_soa_result(result: Result<c_ares::SOAResult, c_ares::AresError>) {
 }
 
 fn print_name_info_result(
-    result: Result<c_ares::NameInfoResult, c_ares::AresError>) {
+    result: Result<c_ares::NameInfoResult, c_ares::Error>) {
     match result {
         Err(e) => {
             println!(

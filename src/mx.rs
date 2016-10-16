@@ -13,7 +13,7 @@ use std::str;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::AresError;
+use error::Error;
 
 /// The result of a successful MX lookup.
 #[derive(Debug)]
@@ -30,7 +30,7 @@ pub struct MXResult<'a> {
 
 impl MXResults {
     /// Obtain an `MXResults` from the response to an MX lookup.
-    pub fn parse_from(data: &[u8]) -> Result<MXResults, AresError> {
+    pub fn parse_from(data: &[u8]) -> Result<MXResults, Error> {
         let mut mx_reply: *mut c_ares_sys::ares_mx_reply =
             ptr::null_mut();
         let parse_status = unsafe {
@@ -43,7 +43,7 @@ impl MXResults {
             let result = MXResults::new(mx_reply);
             Ok(result)
         } else {
-            Err(AresError::from(parse_status))
+            Err(Error::from(parse_status))
         }
     }
 
@@ -141,12 +141,12 @@ pub unsafe extern "C" fn query_mx_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<MXResults, AresError>) + Send + 'static {
+    where F: FnOnce(Result<MXResults, Error>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         MXResults::parse_from(data)
     } else {
-        Err(AresError::from(status))
+        Err(Error::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

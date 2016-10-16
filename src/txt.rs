@@ -13,7 +13,7 @@ use std::str;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::AresError;
+use error::Error;
 
 /// The result of a successful TXT lookup.
 #[derive(Debug)]
@@ -30,7 +30,7 @@ pub struct TXTResult<'a> {
 
 impl TXTResults {
     /// Obtain a `TXTResults` from the response to a TXT lookup.
-    pub fn parse_from(data: &[u8]) -> Result<TXTResults, AresError> {
+    pub fn parse_from(data: &[u8]) -> Result<TXTResults, Error> {
         let mut txt_reply: *mut c_ares_sys::ares_txt_ext =
             ptr::null_mut();
         let parse_status = unsafe {
@@ -43,7 +43,7 @@ impl TXTResults {
             let result = TXTResults::new(txt_reply);
             Ok(result)
         } else {
-            Err(AresError::from(parse_status))
+            Err(Error::from(parse_status))
         }
     }
 
@@ -146,12 +146,12 @@ pub unsafe extern "C" fn query_txt_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<TXTResults, AresError>) + Send + 'static {
+    where F: FnOnce(Result<TXTResults, Error>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         TXTResults::parse_from(data)
     } else {
-        Err(AresError::from(status))
+        Err(Error::from(status))
     };
     let handler = Box::from_raw(arg as *mut F);
     handler(result);

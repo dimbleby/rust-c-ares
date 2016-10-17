@@ -507,6 +507,24 @@ impl Channel {
         }
     }
 
+    /// Look up the SOA records associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn query_soa<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<SOAResult, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::SOA as c_int,
+                Some(query_soa_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
     /// Look up the SRV records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
@@ -539,24 +557,6 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::TXT as c_int,
                 Some(query_txt_callback::<F>),
-                c_arg as *mut c_void);
-        }
-    }
-
-    /// Look up the SOA records associated with `name`.
-    ///
-    /// On completion, `handler` is called with the result.
-    pub fn query_soa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SOAResult, Error>) + Send + 'static {
-        let c_name = CString::new(name).unwrap();
-        let c_arg = Box::into_raw(Box::new(handler));
-        unsafe {
-            c_ares_sys::ares_query(
-                self.ares_channel,
-                c_name.as_ptr(),
-                DnsClass::IN as c_int,
-                QueryType::SOA as c_int,
-                Some(query_soa_callback::<F>),
                 c_arg as *mut c_void);
         }
     }

@@ -10,9 +10,9 @@
 //! -  This likely requires you to have an event loop or similar with which to
 //!    integrate.
 //!
-//! -  If that sounds a bit too much like hard work, you should probably prefer
-//!    the [`c-ares-resolver`](https://crates.io/crates/c-ares-resolver) crate,
-//!    which takes care of all that stuff and presents a much simpler API.
+//! If that sounds a bit too much like hard work, you should probably prefer
+//! the [`c-ares-resolver`](https://crates.io/crates/c-ares-resolver) crate,
+//! which takes care of all that stuff for you and presents a much simpler API.
 //!
 //! Still here?  Usage of this crate is as follows:
 //!

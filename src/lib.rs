@@ -68,9 +68,6 @@ mod utils;
 #[cfg(test)]
 mod tests;
 
-// Re-export types from other crates that are on our interface.
-pub use c_types::fd_set;
-
 // Re-export public interfaces.
 pub use a::{
     AResult,

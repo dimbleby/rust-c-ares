@@ -14,6 +14,7 @@ use std::os::raw::{
     c_void,
 };
 use std::ptr;
+use std::sync::Arc;
 
 use c_ares_sys;
 use c_types;
@@ -90,7 +91,7 @@ pub struct Options {
     optmask: c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
-    socket_state_callback: Option<Box<FnMut(Socket, bool, bool) + Send + 'static>>,
+    socket_state_callback: Option<Arc<FnMut(Socket, bool, bool) + Send + 'static>>,
 }
 
 impl Options {
@@ -181,7 +182,7 @@ impl Options {
     /// -  `write` is set to true if the socket should listen for write events.
     pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
         where F: FnMut(Socket, bool, bool) + Send + 'static {
-        let boxed_callback = Box::new(callback);
+        let boxed_callback = Arc::new(callback);
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
         self.ares_options.sock_state_cb_data =
             &*boxed_callback as *const _ as *mut c_void;
@@ -230,8 +231,7 @@ pub struct Channel {
     phantom: PhantomData<c_ares_sys::ares_channeldata>,
 
     // For ownership only.
-    #[allow(dead_code)]
-    socket_state_callback: Option<Box<FnMut(Socket, bool, bool) + Send + 'static>>,
+    _socket_state_callback: Option<Arc<FnMut(Socket, bool, bool) + Send + 'static>>,
 }
 
 impl Channel {
@@ -276,7 +276,26 @@ impl Channel {
         let channel = Channel {
             ares_channel: ares_channel,
             phantom: PhantomData,
-            socket_state_callback: options.socket_state_callback,
+            _socket_state_callback: options.socket_state_callback,
+        };
+        Ok(channel)
+    }
+
+    /// Duplicate a channel.
+    pub fn try_clone(&self) -> Result<Channel, Error> {
+        let mut ares_channel = ptr::null_mut();
+        let rc = unsafe {
+            c_ares_sys::ares_dup(&mut ares_channel, self.ares_channel)
+        };
+        if rc != c_ares_sys::ARES_SUCCESS {
+            return Err(Error::from(rc))
+        }
+
+        let callback = self._socket_state_callback.as_ref().cloned();
+        let channel = Channel {
+            ares_channel: ares_channel,
+            phantom: PhantomData,
+            _socket_state_callback: callback,
         };
         Ok(channel)
     }

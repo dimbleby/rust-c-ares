@@ -16,11 +16,11 @@ keywords = ["DNS", "c-ares"]
 bitflags = "0.7.0"
 c-ares-sys = { version = "0.13.0", path = "c-ares-sys" }
 c-types = "0.1.4"
-itertools = "0.5.2"
+itertools = "0.5.5"
 
 [target.'cfg(unix)'.dev-dependencies]
 futures = "0.1.2"
-mio = "0.6.0"
+mio = "0.6.1"
 nix = "0.7.0"
 tokio-core = "0.1"
 

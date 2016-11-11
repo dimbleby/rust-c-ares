@@ -52,9 +52,9 @@ impl<'a> NameInfoResult<'a> {
 impl<'a> fmt::Display for NameInfoResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let node = self.node().unwrap_or("<None>");
-        try!(write!(fmt, "Node: {}, ", node));
+        write!(fmt, "Node: {}, ", node)?;
         let service = self.service().unwrap_or("<None>");
-        try!(write!(fmt, "Service: {}", service));
+        write!(fmt, "Service: {}", service)?;
         Ok(())
     }
 }

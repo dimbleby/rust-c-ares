@@ -65,7 +65,7 @@ impl TXTResults {
 impl fmt::Display for TXTResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        try!(write!(fmt, "[{{{}}}]", results));
+        write!(fmt, "[{{{}}}]", results)?;
         Ok(())
     }
 }
@@ -130,12 +130,12 @@ impl<'a> TXTResult<'a> {
 
 impl<'a> fmt::Display for TXTResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(
-            write!(
-                fmt,
-                "Record start: {}, Text: {}",
-                self.record_start(),
-                self.text()));
+        write!(
+            fmt,
+            "Record start: {}, Text: {}",
+            self.record_start(),
+            self.text()
+        )?;
         Ok(())
     }
 }

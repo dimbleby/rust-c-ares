@@ -60,7 +60,7 @@ impl AResults {
 impl fmt::Display for AResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        try!(write!(fmt, "[{{{}}}]", results));
+        write!(fmt, "[{{{}}}]", results)?;
         Ok(())
     }
 }
@@ -101,8 +101,8 @@ impl<'a> AResult<'a> {
 
 impl<'a> fmt::Display for AResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "IPv4: {}, ", self.ipv4()));
-        try!(write!(fmt, "TTL: {}", self.ttl()));
+        write!(fmt, "IPv4: {}, ", self.ipv4())?;
+        write!(fmt, "TTL: {}", self.ttl())?;
         Ok(())
     }
 }

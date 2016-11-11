@@ -82,11 +82,11 @@ pub trait HasHostent {
     }
 
     fn display(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "Hostname: {}, ", self.hostname()));
+        write!(fmt, "Hostname: {}, ", self.hostname())?;
         let addresses = self.addresses().format(", ");
-        try!(write!(fmt, "Addresses: [{}]", addresses));
+        write!(fmt, "Addresses: [{}]", addresses)?;
         let aliases = self.aliases().format(", ");
-        try!(write!(fmt, "Aliases: [{}]", aliases));
+        write!(fmt, "Aliases: [{}]", aliases)?;
         Ok(())
     }
 }

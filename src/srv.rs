@@ -66,7 +66,7 @@ impl SRVResults {
 impl fmt::Display for SRVResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        try!(write!(fmt, "[{{{}}}]", results));
+        write!(fmt, "[{{{}}}]", results)?;
         Ok(())
     }
 }
@@ -141,10 +141,10 @@ impl<'a> SRVResult<'a> {
 
 impl<'a> fmt::Display for SRVResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "Host: {}, ", self.host()));
-        try!(write!(fmt, "Port: {}, ", self.port()));
-        try!(write!(fmt, "Priority: {}, ", self.priority()));
-        try!(write!(fmt, "Weight: {}", self.weight()));
+        write!(fmt, "Host: {}, ", self.host())?;
+        write!(fmt, "Port: {}, ", self.port())?;
+        write!(fmt, "Priority: {}, ", self.priority())?;
+        write!(fmt, "Weight: {}", self.weight())?;
         Ok(())
     }
 }

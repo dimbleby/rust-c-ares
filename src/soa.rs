@@ -91,13 +91,13 @@ impl SOAResult {
 
 impl fmt::Display for SOAResult {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "Name server: {}, ", self.name_server()));
-        try!(write!(fmt, "Hostmaster: {}, ", self.hostmaster()));
-        try!(write!(fmt, "Serial: {}, ", self.serial()));
-        try!(write!(fmt, "Refresh: {}, ", self.refresh()));
-        try!(write!(fmt, "Retry: {}, ", self.retry()));
-        try!(write!(fmt, "Expire: {}, ", self.expire()));
-        try!(write!(fmt, "Minimum time-to-live: {}", self.min_ttl()));
+        write!(fmt, "Name server: {}, ", self.name_server())?;
+        write!(fmt, "Hostmaster: {}, ", self.hostmaster())?;
+        write!(fmt, "Serial: {}, ", self.serial())?;
+        write!(fmt, "Refresh: {}, ", self.refresh())?;
+        write!(fmt, "Retry: {}, ", self.retry())?;
+        write!(fmt, "Expire: {}, ", self.expire())?;
+        write!(fmt, "Minimum time-to-live: {}", self.min_ttl())?;
         Ok(())
     }
 }

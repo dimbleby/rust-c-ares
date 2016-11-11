@@ -68,7 +68,7 @@ impl NAPTRResults {
 impl fmt::Display for NAPTRResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        try!(write!(fmt, "[{{{}}}]", results));
+        write!(fmt, "[{{{}}}]", results)?;
         Ok(())
     }
 }
@@ -165,15 +165,16 @@ impl<'a> NAPTRResult<'a> {
 
 impl<'a> fmt::Display for NAPTRResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        try!(write!(fmt, "Flags: {}, ", self.flags()));
-        try!(write!(fmt, "Service name: {}, ", self.service_name()));
-        try!(write!(fmt, "Regular expression: {}, ", self.reg_exp()));
-        try!(write!(
-                fmt,
-                "Replacement pattern: {}, ",
-                self.replacement_pattern()));
-        try!(write!(fmt, "Order: {}, ", self.order()));
-        try!(write!(fmt, "Preference: {}", self.preference()));
+        write!(fmt, "Flags: {}, ", self.flags())?;
+        write!(fmt, "Service name: {}, ", self.service_name())?;
+        write!(fmt, "Regular expression: {}, ", self.reg_exp())?;
+        write!(
+            fmt,
+            "Replacement pattern: {}, ",
+            self.replacement_pattern()
+        )?;
+        write!(fmt, "Order: {}, ", self.order())?;
+        write!(fmt, "Preference: {}", self.preference())?;
         Ok(())
     }
 }

@@ -400,7 +400,8 @@ impl Channel {
         self
     }
 
-    /// Look up the A records associated with `name`.
+    /// Initiate a single-question DNS query for the A records associated with
+    /// `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_a<F>(&mut self, name: &str, handler: F)
@@ -418,7 +419,27 @@ impl Channel {
         }
     }
 
-    /// Look up the AAAA records associated with `name`.
+    /// Initiate a series of single-question DNS queries for the A records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_a<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<AResults, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::A as c_int,
+                Some(query_a_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a single-question DNS query for the AAAA records associated
+    /// with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)
@@ -436,7 +457,27 @@ impl Channel {
         }
     }
 
-    /// Look up the CNAME record associated with `name`.
+    /// Initiate a series of single-question DNS queries for the AAAA records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_aaaa<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<AAAAResults, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::AAAA as c_int,
+                Some(query_aaaa_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a single-question DNS query for the CNAME records associated
+    /// with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_cname<F>(&mut self, name: &str, handler: F)
@@ -454,7 +495,27 @@ impl Channel {
         }
     }
 
-    /// Look up the MX records associated with `name`.
+    /// Initiate a series of single-question DNS queries for the CNAME records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_cname<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<CNameResults, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::CNAME as c_int,
+                Some(query_cname_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a single-question DNS query for the MX records associated
+    /// with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_mx<F>(&mut self, name: &str, handler: F)
@@ -472,7 +533,27 @@ impl Channel {
         }
     }
 
-    /// Look up the NAPTR records associated with `name`.
+    /// Initiate a series of single-question DNS queries for the MX records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_mx<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<MXResults, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::MX as c_int,
+                Some(query_mx_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a single-question DNS query for the NAPTR records associated
+    /// with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_naptr<F>(&mut self, name: &str, handler: F)
@@ -490,7 +571,27 @@ impl Channel {
         }
     }
 
-    /// Look up the NS records associated with `name`.
+    /// Initiate a series of single-question DNS queries for the NAPTR records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_naptr<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<NAPTRResults, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::NAPTR as c_int,
+                Some(query_naptr_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a single-question DNS query for the NS records associated
+    /// with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ns<F>(&mut self, name: &str, handler: F)
@@ -508,7 +609,27 @@ impl Channel {
         }
     }
 
-    /// Look up the PTR records associated with `name`.
+    /// Initiate a series of single-question DNS queries for the NS records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_ns<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<NSResults, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::NS as c_int,
+                Some(query_ns_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a single-question DNS query for the PTR records associated
+    /// with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ptr<F>(&mut self, name: &str, handler: F)
@@ -526,7 +647,27 @@ impl Channel {
         }
     }
 
-    /// Look up the SOA records associated with `name`.
+    /// Initiate a series of single-question DNS queries for the PTR records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_ptr<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<PTRResults, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::PTR as c_int,
+                Some(query_ptr_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a single-question DNS query for the SOA records associated
+    /// with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_soa<F>(&mut self, name: &str, handler: F)
@@ -544,7 +685,27 @@ impl Channel {
         }
     }
 
-    /// Look up the SRV records associated with `name`.
+    /// Initiate a series of single-question DNS queries for the SOA records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_soa<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<SOAResult, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::SOA as c_int,
+                Some(query_soa_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a single-question DNS query for the SRV records associated
+    /// with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_srv<F>(&mut self, name: &str, handler: F)
@@ -562,7 +723,27 @@ impl Channel {
         }
     }
 
-    /// Look up the TXT records associated with `name`.
+    /// Initiate a series of single-question DNS queries for the SRV records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_srv<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<SRVResults, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::SRV as c_int,
+                Some(query_srv_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a single-question DNS query for the TXT records associated
+    /// with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_txt<F>(&mut self, name: &str, handler: F)
@@ -571,6 +752,25 @@ impl Channel {
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
             c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                DnsClass::IN as c_int,
+                QueryType::TXT as c_int,
+                Some(query_txt_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a series of single-question DNS queries for the TXT records
+    /// associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_txt<F>(&mut self, name: &str, handler: F)
+        where F: FnOnce(Result<TXTResults, Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
                 self.ares_channel,
                 c_name.as_ptr(),
                 DnsClass::IN as c_int,
@@ -679,8 +879,8 @@ impl Channel {
         }
     }
 
-    /// Perform a DNS query for `name`.  The class and type of the query are
-    /// per the provided parameters, taking values as defined in
+    /// Initiate a single-question DNS query for `name`.  The class and type of
+    /// the query are per the provided parameters, taking values as defined in
     /// `arpa/nameser.h`.
     ///
     /// On completion, `handler` is called with the result.
@@ -700,6 +900,36 @@ impl Channel {
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
             c_ares_sys::ares_query(
+                self.ares_channel,
+                c_name.as_ptr(),
+                dns_class as c_int,
+                query_type as c_int,
+                Some(query_callback::<F>),
+                c_arg as *mut c_void);
+        }
+    }
+
+    /// Initiate a series of single-question DNS queries for `name`.  The class
+    /// and type of the query are per the provided parameters, taking values as
+    /// defined in `arpa/nameser.h`.
+    ///
+    /// On completion, `handler` is called with the result.
+    ///
+    /// This method is provided so that users can query DNS types for which
+    /// `c-ares` does not provide a parser.  This is expected to be a last
+    /// resort; if a suitable `search_xxx()` is available, that should be
+    /// preferred.
+    pub fn search<F>(
+        &mut self,
+        name: &str,
+        dns_class: u16,
+        query_type: u16,
+        handler: F)
+        where F: FnOnce(Result<&[u8], Error>) + Send + 'static {
+        let c_name = CString::new(name).unwrap();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_search(
                 self.ares_channel,
                 c_name.as_ptr(),
                 dns_class as c_int,

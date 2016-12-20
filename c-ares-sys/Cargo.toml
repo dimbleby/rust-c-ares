@@ -17,7 +17,7 @@ pkg-config = "0.3"
 
 [dependencies]
 libc = "0.2"
-c-types = "0.1"
+c-types = "1.0"
 
 [target.'cfg(windows)'.dependencies]
 winapi = "0.2"

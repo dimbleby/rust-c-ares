@@ -12,12 +12,12 @@ readme = "README.md"
 keywords = ["DNS", "c-ares"]
 
 [build-dependencies]
-gcc = "0.3.39"
-pkg-config = "0.3.8"
+gcc = "0.3"
+pkg-config = "0.3"
 
 [dependencies]
-libc = "0.2.18"
-c-types = "0.1.4"
+libc = "0.2"
+c-types = "0.1"
 
 [target.'cfg(windows)'.dependencies]
-winapi = "0.2.8"
+winapi = "0.2"

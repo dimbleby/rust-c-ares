@@ -1,5 +1,5 @@
 extern crate gcc;
-extern crate pkg_config;
+extern crate metadeps;
 
 use std::env;
 use std::fs;
@@ -15,10 +15,7 @@ macro_rules! t {
 
 fn main() {
     // Use the installed libcares if it is available.
-    if pkg_config::Config::new()
-        .atleast_version("1.12.0")
-            .find("libcares")
-            .is_ok() {
+    if metadeps::probe().is_ok() {
         return
     }
 

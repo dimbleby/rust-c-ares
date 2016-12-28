@@ -13,7 +13,7 @@ keywords = ["DNS", "c-ares"]
 
 [build-dependencies]
 gcc = "0.3"
-pkg-config = "0.3"
+metadeps = "1"
 
 [dependencies]
 libc = "0.2"
@@ -21,3 +21,6 @@ c-types = "1.0"
 
 [target.'cfg(windows)'.dependencies]
 winapi = "0.2"
+
+[package.metadata.pkg-config]
+libcares = "1.12.0"

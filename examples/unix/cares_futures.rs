@@ -155,10 +155,10 @@ impl EventLoop {
                         if writable { interest.insert(mio::Ready::writable()) }
                         let register_result = if !self.tracked_fds.insert(fd) {
                             self.poll
-                                .reregister(&efd, token, interest, mio::PollOpt::edge())
+                                .reregister(&efd, token, interest, mio::PollOpt::level())
                         } else {
                             self.poll
-                                .register(&efd, token, interest, mio::PollOpt::edge())
+                                .register(&efd, token, interest, mio::PollOpt::level())
                         };
                         register_result.expect("failed to register interest");
                     }

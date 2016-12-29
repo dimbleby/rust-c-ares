@@ -77,9 +77,9 @@ pub fn main() {
             if readable { interest.insert(mio::Ready::readable()) }
             if writable { interest.insert(mio::Ready::writable()) }
             let register_result = if tracked_fds.contains(&fd) {
-                poll.reregister(&efd, token, interest, mio::PollOpt::edge())
+                poll.reregister(&efd, token, interest, mio::PollOpt::level())
             } else {
-                poll.register(&efd, token, interest, mio::PollOpt::edge())
+                poll.register(&efd, token, interest, mio::PollOpt::level())
             };
             register_result.expect("failed to register interest");
         }

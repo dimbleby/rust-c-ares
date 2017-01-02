@@ -158,7 +158,7 @@ pub fn socket_addrv6_as_sockaddr_in6(
     }
 }
 
-/// Get the version number of the underlying c-ares library.
+/// Get the version number of the underlying `c-ares` library.
 ///
 /// The version is returned as both a string and an integer.  The integer is
 /// built up as 24bit number, with 8 separate bits used for major number, minor

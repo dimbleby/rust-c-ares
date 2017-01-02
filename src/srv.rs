@@ -13,7 +13,10 @@ use std::slice;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::Error;
+use error::{
+    Error,
+    Result,
+};
 
 /// The result of a successful SRV lookup.
 #[derive(Debug)]
@@ -31,7 +34,7 @@ pub struct SRVResult<'a> {
 
 impl SRVResults {
     /// Obtain an `SRVResults` from the response to an SRV lookup.
-    pub fn parse_from(data: &[u8]) -> Result<SRVResults, Error> {
+    pub fn parse_from(data: &[u8]) -> Result<SRVResults> {
         let mut srv_reply: *mut c_ares_sys::ares_srv_reply =
             ptr::null_mut();
         let parse_status = unsafe {
@@ -155,7 +158,7 @@ pub unsafe extern "C" fn query_srv_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<SRVResults, Error>) + Send + 'static {
+    where F: FnOnce(Result<SRVResults>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         SRVResults::parse_from(data)

@@ -7,7 +7,10 @@ use std::os::raw::{
 use c_ares_sys;
 use c_types;
 
-use error::Error;
+use error::{
+    Error,
+    Result,
+};
 use hostent::{
     HasHostent,
     HostAddressResultsIter,
@@ -55,7 +58,7 @@ pub unsafe extern "C" fn get_host_callback<F>(
     status: c_int,
     _timeouts: c_int,
     hostent: *mut c_ares_sys::hostent)
-    where F: FnOnce(Result<HostResults, Error>) + Send + 'static {
+    where F: FnOnce(Result<HostResults>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let host_results = HostResults::new(
             &*(hostent as *const c_types::hostent));

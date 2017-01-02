@@ -147,8 +147,7 @@ impl Resolver {
 
     // A blocking NS query.  Achieve this by having the callback send the
     // result to a std::sync::mpsc::channel, and waiting on that channel.
-    pub fn query_ns(&self, name: &str)
-        -> Result<c_ares::NSResults, c_ares::Error> {
+    pub fn query_ns(&self, name: &str) -> c_ares::Result<c_ares::NSResults> {
         let (tx, rx) = mpsc::channel();
         self.ares_channel.lock().unwrap().query_ns(name, move |result| {
             tx.send(result).unwrap();
@@ -158,8 +157,7 @@ impl Resolver {
     }
 
     // A blocking PTR query.
-    pub fn query_ptr(&self, name: &str)
-        -> Result<c_ares::PTRResults, c_ares::Error> {
+    pub fn query_ptr(&self, name: &str) -> c_ares::Result<c_ares::PTRResults> {
         let (tx, rx) = mpsc::channel();
         self.ares_channel.lock().unwrap().query_ptr(name, move |result| {
             tx.send(result).unwrap();
@@ -169,8 +167,7 @@ impl Resolver {
     }
 
     // A blocking TXT query.
-    pub fn query_txt(&self, name: &str)
-        -> Result<c_ares::TXTResults, c_ares::Error> {
+    pub fn query_txt(&self, name: &str) -> c_ares::Result<c_ares::TXTResults> {
         let (tx, rx) = mpsc::channel();
         self.ares_channel.lock().unwrap().query_txt(name, move |result| {
             tx.send(result).unwrap();
@@ -197,7 +194,7 @@ impl Drop for Resolver {
     }
 }
 
-fn print_ns_results(result: Result<c_ares::NSResults, c_ares::Error>) {
+fn print_ns_results(result: c_ares::Result<c_ares::NSResults>) {
     match result {
         Err(e) => {
             println!("NS lookup failed with error '{}'", e.description());
@@ -211,9 +208,7 @@ fn print_ns_results(result: Result<c_ares::NSResults, c_ares::Error>) {
     }
 }
 
-fn print_ptr_results(
-    result: Result<c_ares::PTRResults,
-    c_ares::Error>) {
+fn print_ptr_results(result: c_ares::Result<c_ares::PTRResults>) {
     match result {
         Err(e) => {
             println!("PTR lookup failed with error '{}'", e.description());
@@ -227,9 +222,7 @@ fn print_ptr_results(
     }
 }
 
-fn print_txt_results(
-    result: Result<c_ares::TXTResults,
-    c_ares::Error>) {
+fn print_txt_results(result: c_ares::Result<c_ares::TXTResults>) {
     match result {
         Err(e) => {
             println!("TXT lookup failed with error '{}'", e.description());

@@ -7,7 +7,7 @@ use std::error::Error;
 use std::net::IpAddr;
 use std::time::Duration;
 
-fn print_host_results(result: Result<c_ares::HostResults, c_ares::Error>) {
+fn print_host_results(result: c_ares::Result<c_ares::HostResults>) {
     match result {
         Err(e) => {
             println!("Host lookup failed with error '{}'", e.description());

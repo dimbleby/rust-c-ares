@@ -31,7 +31,10 @@ use cname::{
     CNameResults,
     query_cname_callback,
 };
-use error::Error;
+use error::{
+    Error,
+    Result,
+};
 use flags::Flags;
 use host::{
     HostResults,
@@ -236,7 +239,7 @@ pub struct Channel {
 
 impl Channel {
     /// Create a new channel for name service lookups.
-    pub fn new(mut options: Options) -> Result<Channel, Error> {
+    pub fn new(mut options: Options) -> Result<Channel> {
         // Initialize the library.
         let lib_rc = unsafe {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
@@ -282,7 +285,7 @@ impl Channel {
     }
 
     /// Duplicate a channel.
-    pub fn try_clone(&self) -> Result<Channel, Error> {
+    pub fn try_clone(&self) -> Result<Channel> {
         let mut ares_channel = ptr::null_mut();
         let rc = unsafe {
             c_ares_sys::ares_dup(&mut ares_channel, self.ares_channel)
@@ -355,7 +358,7 @@ impl Channel {
     /// square brackets eg `[2001:4860:4860::8888]:53`.
     pub fn set_servers(
         &mut self,
-        servers: &[&str]) -> Result<&mut Self, Error> {
+        servers: &[&str]) -> Result<&mut Self> {
         let servers_csv = servers.join(",");
         let c_servers = CString::new(servers_csv).unwrap();
         let ares_rc = unsafe {
@@ -405,7 +408,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_a<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<AResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -424,7 +427,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_a<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<AResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -443,7 +446,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AAAAResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<AAAAResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -462,7 +465,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_aaaa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AAAAResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<AAAAResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -481,7 +484,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_cname<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<CNameResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<CNameResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -500,7 +503,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_cname<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<CNameResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<CNameResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -519,7 +522,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_mx<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<MXResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<MXResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -538,7 +541,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_mx<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<MXResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<MXResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -557,7 +560,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_naptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NAPTRResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<NAPTRResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -576,7 +579,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_naptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NAPTRResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<NAPTRResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -595,7 +598,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ns<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NSResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<NSResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -614,7 +617,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_ns<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NSResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<NSResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -633,7 +636,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<PTRResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<PTRResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -652,7 +655,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_ptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<PTRResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<PTRResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -671,7 +674,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_soa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SOAResult, Error>) + Send + 'static {
+        where F: FnOnce(Result<SOAResult>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -690,7 +693,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_soa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SOAResult, Error>) + Send + 'static {
+        where F: FnOnce(Result<SOAResult>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -709,7 +712,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_srv<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SRVResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<SRVResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -728,7 +731,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_srv<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SRVResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<SRVResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -747,7 +750,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_txt<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<TXTResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<TXTResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -766,7 +769,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_txt<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<TXTResults, Error>) + Send + 'static {
+        where F: FnOnce(Result<TXTResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -786,7 +789,7 @@ impl Channel {
     pub fn get_host_by_address<F>(
         &mut self,
         address: &IpAddr,
-        handler: F) where F: FnOnce(Result<HostResults, Error>) + Send + 'static {
+        handler: F) where F: FnOnce(Result<HostResults>) + Send + 'static {
         let in_addr: c_types::in_addr;
         let in6_addr: c_types::in6_addr;
         let c_addr = match *address {
@@ -826,7 +829,7 @@ impl Channel {
         &mut self,
         name: &str,
         family: AddressFamily,
-        handler: F) where F: FnOnce(Result<HostResults, Error>) + Send + 'static {
+        handler: F) where F: FnOnce(Result<HostResults>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -850,7 +853,7 @@ impl Channel {
         address: &SocketAddr,
         flags: NIFlags,
         handler: F)
-        where F: FnOnce(Result<NameInfoResult, Error>) + Send + 'static {
+        where F: FnOnce(Result<NameInfoResult>) + Send + 'static {
         let sockaddr_in: c_types::sockaddr_in;
         let sockaddr_in6: c_types::sockaddr_in6;
         let c_addr = match *address {
@@ -895,7 +898,7 @@ impl Channel {
         dns_class: u16,
         query_type: u16,
         handler: F)
-        where F: FnOnce(Result<&[u8], Error>) + Send + 'static {
+        where F: FnOnce(Result<&[u8]>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -925,7 +928,7 @@ impl Channel {
         dns_class: u16,
         query_type: u16,
         handler: F)
-        where F: FnOnce(Result<&[u8], Error>) + Send + 'static {
+        where F: FnOnce(Result<&[u8]>) + Send + 'static {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {

@@ -12,7 +12,10 @@ use std::slice;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::Error;
+use error::{
+    Error,
+    Result,
+};
 use types::MAX_ADDRTTLS;
 
 /// The result of a successful AAAA lookup.
@@ -30,7 +33,7 @@ pub struct AAAAResult<'a> {
 
 impl AAAAResults {
     /// Obtain an `AAAAResults` from the response to an AAAA lookup.
-    pub fn parse_from(data: &[u8]) -> Result<AAAAResults, Error> {
+    pub fn parse_from(data: &[u8]) -> Result<AAAAResults> {
         let mut results: AAAAResults = AAAAResults {
             naddr6ttls: MAX_ADDRTTLS,
             addr6ttls: unsafe { mem::uninitialized() },
@@ -116,7 +119,7 @@ pub unsafe extern "C" fn query_aaaa_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<AAAAResults, Error>) + Send + 'static {
+    where F: FnOnce(Result<AAAAResults>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         AAAAResults::parse_from(data)

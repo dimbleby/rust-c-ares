@@ -11,7 +11,10 @@ use c_ares_sys;
 use c_types;
 use itertools::Itertools;
 
-use error::Error;
+use error::{
+    Error,
+    Result,
+};
 use hostent::{
     HasHostent,
     HostAliasResultsIter,
@@ -26,7 +29,7 @@ pub struct PTRResults {
 
 impl PTRResults {
     /// Obtain a `PTRResults` from the response to a PTR lookup.
-    pub fn parse_from(data: &[u8]) -> Result<PTRResults, Error> {
+    pub fn parse_from(data: &[u8]) -> Result<PTRResults> {
         let mut hostent: *mut c_types::hostent = ptr::null_mut();
         let dummy_ip = [0,0,0,0];
         let parse_status = unsafe {
@@ -78,7 +81,7 @@ pub unsafe extern "C" fn query_ptr_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<PTRResults, Error>) + Send + 'static {
+    where F: FnOnce(Result<PTRResults>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         PTRResults::parse_from(data)

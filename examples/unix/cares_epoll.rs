@@ -16,7 +16,7 @@ use self::nix::sys::epoll::{
 use std::collections::HashSet;
 use std::error::Error;
 
-fn print_a_results(result: Result<c_ares::AResults, c_ares::Error>) {
+fn print_a_results(result: c_ares::Result<c_ares::AResults>) {
     match result {
         Err(e) => {
             println!("A lookup failed with error '{}'", e.description());
@@ -31,9 +31,7 @@ fn print_a_results(result: Result<c_ares::AResults, c_ares::Error>) {
     }
 }
 
-fn print_aaaa_results(
-    result: Result<c_ares::AAAAResults,
-    c_ares::Error>) {
+fn print_aaaa_results(result: c_ares::Result<c_ares::AAAAResults>) {
     match result {
         Err(e) => {
             println!("AAAA lookup failed with error '{}'", e.description());
@@ -48,9 +46,7 @@ fn print_aaaa_results(
     }
 }
 
-fn print_srv_results(
-    result: Result<c_ares::SRVResults,
-    c_ares::Error>) {
+fn print_srv_results(result: c_ares::Result<c_ares::SRVResults>) {
     match result {
         Err(e) => {
             println!("SRV lookup failed with error '{}'", e.description());

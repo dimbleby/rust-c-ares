@@ -13,7 +13,10 @@ use std::str;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::Error;
+use error::{
+    Error,
+    Result,
+};
 
 /// The result of a successful TXT lookup.
 #[derive(Debug)]
@@ -30,7 +33,7 @@ pub struct TXTResult<'a> {
 
 impl TXTResults {
     /// Obtain a `TXTResults` from the response to a TXT lookup.
-    pub fn parse_from(data: &[u8]) -> Result<TXTResults, Error> {
+    pub fn parse_from(data: &[u8]) -> Result<TXTResults> {
         let mut txt_reply: *mut c_ares_sys::ares_txt_ext =
             ptr::null_mut();
         let parse_status = unsafe {
@@ -146,7 +149,7 @@ pub unsafe extern "C" fn query_txt_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<TXTResults, Error>) + Send + 'static {
+    where F: FnOnce(Result<TXTResults>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         TXTResults::parse_from(data)

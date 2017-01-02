@@ -7,7 +7,10 @@ use std::slice;
 
 use c_ares_sys;
 
-use error::Error;
+use error::{
+    Error,
+    Result,
+};
 
 pub unsafe extern "C" fn query_callback<F>(
     arg: *mut c_void,
@@ -15,7 +18,7 @@ pub unsafe extern "C" fn query_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<&[u8], Error>) + Send + 'static {
+    where F: FnOnce(Result<&[u8]>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         Ok(data)

@@ -12,7 +12,10 @@ use std::slice;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::Error;
+use error::{
+    Error,
+    Result,
+};
 use types::MAX_ADDRTTLS;
 use utils:: ipv4_from_in_addr;
 
@@ -31,7 +34,7 @@ pub struct AResult<'a> {
 
 impl AResults {
     /// Obtain an `AResults` from the response to an A lookup.
-    pub fn parse_from(data: &[u8]) -> Result<AResults, Error> {
+    pub fn parse_from(data: &[u8]) -> Result<AResults> {
         let mut results: AResults = AResults {
             naddrttls: MAX_ADDRTTLS,
             addrttls: unsafe { mem::uninitialized() },
@@ -113,7 +116,7 @@ pub unsafe extern "C" fn query_a_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<AResults, Error>) + Send + 'static {
+    where F: FnOnce(Result<AResults>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         AResults::parse_from(data)

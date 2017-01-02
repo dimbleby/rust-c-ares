@@ -86,7 +86,10 @@ pub use channel::{
     Options,
 };
 pub use cname::CNameResults;
-pub use error::Error;
+pub use error::{
+    Error,
+    Result
+};
 pub use host::HostResults;
 pub use hostent::{
     HostAddressResultsIter,

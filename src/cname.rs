@@ -10,7 +10,10 @@ use std::slice;
 use c_ares_sys;
 use c_types;
 
-use error::Error;
+use error::{
+    Error,
+    Result,
+};
 use hostent::{
     HasHostent,
     HostAddressResultsIter,
@@ -26,7 +29,7 @@ pub struct CNameResults {
 
 impl CNameResults {
     /// Obtain a `CNameResults` from the response to a CNAME lookup.
-    pub fn parse_from(data: &[u8]) -> Result<CNameResults, Error> {
+    pub fn parse_from(data: &[u8]) -> Result<CNameResults> {
         let mut hostent: *mut c_types::hostent = ptr::null_mut();
         let parse_status = unsafe {
             c_ares_sys::ares_parse_a_reply(
@@ -78,7 +81,7 @@ pub unsafe extern "C" fn query_cname_callback<F>(
     _timeouts: c_int,
     abuf: *mut c_uchar,
     alen: c_int)
-    where F: FnOnce(Result<CNameResults, Error>) + Send + 'static {
+    where F: FnOnce(Result<CNameResults>) + Send + 'static {
     let result = if status == c_ares_sys::ARES_SUCCESS {
         let data = slice::from_raw_parts(abuf, alen as usize);
         CNameResults::parse_from(data)

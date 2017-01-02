@@ -2,6 +2,7 @@ use std::error;
 use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::c_int;
+use std::result;
 use std::str;
 
 use c_ares_sys;
@@ -86,7 +87,7 @@ pub enum Error {
 }
 
 impl fmt::Display for Error {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
         let text = match *self {
             Error::ENODATA => "ENODATA",
             Error::EFORMERR => "EFORMERR",
@@ -160,3 +161,6 @@ impl From<i32> for Error {
         }
     }
 }
+
+/// The type used by this library for methods that might fail.
+pub type Result<T> = result::Result<T, Error>;

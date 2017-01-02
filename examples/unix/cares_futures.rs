@@ -271,8 +271,7 @@ impl Drop for Resolver {
     }
 }
 
-fn print_cname_result(
-    result: &Result<c_ares::CNameResults, c_ares::Error>) {
+fn print_cname_result(result: &c_ares::Result<c_ares::CNameResults>) {
     match *result {
         Err(ref e) => {
             println!("CNAME lookup failed with error '{}'", e.description());
@@ -287,7 +286,7 @@ fn print_cname_result(
     }
 }
 
-fn print_mx_results(result: &Result<c_ares::MXResults, c_ares::Error>) {
+fn print_mx_results(result: &c_ares::Result<c_ares::MXResults>) {
     match *result {
         Err(ref e) => {
             println!("MX lookup failed with error '{}'", e.description());
@@ -304,8 +303,7 @@ fn print_mx_results(result: &Result<c_ares::MXResults, c_ares::Error>) {
     }
 }
 
-fn print_naptr_results(
-    result: &Result<c_ares::NAPTRResults, c_ares::Error>) {
+fn print_naptr_results(result: &c_ares::Result<c_ares::NAPTRResults>) {
     match *result {
         Err(ref e) => {
             println!("NAPTR lookup failed with error '{}'", e.description());

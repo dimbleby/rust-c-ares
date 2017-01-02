@@ -4,6 +4,8 @@ mod unix;
 #[cfg(windows)]
 mod windows;
 
+extern crate c_ares;
+
 #[cfg(windows)]
 extern crate winapi;
 
@@ -21,6 +23,9 @@ fn epoll_examples() { }
 
 #[cfg(unix)]
 fn main() {
+    let (vstr, vint) = c_ares::version();
+    println!("Version {:x} ({})", vint, vstr);
+
     unix::cares_event_loop::main();
     unix::cares_futures::main();
     epoll_examples();
@@ -28,5 +33,8 @@ fn main() {
 
 #[cfg(windows)]
 fn main() {
+    let (vstr, vint) = c_ares::version();
+    println!("Version {:x} ({})", vint, vstr);
+
     windows::cares_select::main();
 }

@@ -1,6 +1,8 @@
 use c_types;
+use c_ares_sys;
 
 use types::AddressFamily;
+use std::ffi::CStr;
 use std::mem;
 use std::os::raw::c_int;
 use std::net::{
@@ -9,6 +11,7 @@ use std::net::{
     SocketAddrV4,
     SocketAddrV6,
 };
+use std::str;
 
 // Convert an address family into a more strongly typed AddressFamily.
 pub fn address_family(family: c_int) -> Option<AddressFamily> {
@@ -153,4 +156,20 @@ pub fn socket_addrv6_as_sockaddr_in6(
         sin6_flowinfo: sock_v6.flowinfo(),
         sin6_scope_id: sock_v6.scope_id(),
     }
+}
+
+/// Get the version number of the underlying c-ares library.
+///
+/// The version is returned as both a string and an integer.  The integer is
+/// built up as 24bit number, with 8 separate bits used for major number, minor
+/// number and patch number.  For example, the version string "1.2.3" is
+/// returned as hexadecimal number 0x010203 (decimal 66051).
+pub fn version() -> (&'static str, u32) {
+    let mut int_version: c_int = 0;
+    let str_version = unsafe {
+        let ptr = c_ares_sys::ares_version(&mut int_version);
+        let buf = CStr::from_ptr(ptr).to_bytes();
+        str::from_utf8_unchecked(buf)
+    };
+    (str_version, int_version as u32)
 }

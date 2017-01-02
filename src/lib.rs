@@ -121,3 +121,4 @@ pub use types::{
     Socket,
     SOCKET_BAD,
 };
+pub use utils::version;

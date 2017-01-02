@@ -9,6 +9,11 @@ pub fn channel_is_send() {
 }
 
 #[test]
+pub fn error_is_send() {
+    assert_send::<Error>();
+}
+
+#[test]
 pub fn options_is_send() {
     assert_send::<Options>();
 }
@@ -146,6 +151,11 @@ pub fn txt_results_iter_is_send() {
 #[test]
 pub fn channel_is_sync() {
     assert_sync::<Channel>();
+}
+
+#[test]
+pub fn error_is_sync() {
+    assert_sync::<Error>();
 }
 
 #[test]

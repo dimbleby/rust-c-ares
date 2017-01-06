@@ -27,7 +27,7 @@ fn main() {
     }
 
     // Set up compiler options.
-    let mut cflags = env::var("CFLAGS").unwrap_or_else(|_| String::new());
+    let mut cflags = env::var("CFLAGS").unwrap_or(String::new());
     if target.contains("i686") {
         cflags.push_str(" -m32");
     } else if target.contains("x86_64") {
@@ -49,20 +49,31 @@ fn main() {
 
     // Prepare.
     let src = env::current_dir().unwrap();
-    run(Command::new("sh")
-                .current_dir(&src.join("c-ares"))
-                .arg("buildconf"));
-    run(Command::new("sh")
-                .env("CFLAGS", &cflags)
-                .current_dir(&build)
-                .arg("-c")
-                .arg(&format!("{} {}", src.join("c-ares/configure").display(),
-                              config_opts.join(" "))));
+    run(
+        Command::new("sh")
+            .current_dir(&src.join("c-ares"))
+            .arg("buildconf")
+    );
+    run(
+        Command::new("sh")
+            .env("CFLAGS", &cflags)
+            .current_dir(&build)
+            .arg("-c")
+            .arg(
+                format!(
+                    "{} {}",
+                    src.join("c-ares/configure").display(),
+                    config_opts.join(" ")
+                )
+            )
+    );
 
     // Compile.
-    run(Command::new(make())
-                .arg(&format!("-j{}", env::var("NUM_JOBS").unwrap()))
-                .current_dir(&build));
+    run(
+        Command::new(make())
+            .arg(format!("-j{}", env::var("NUM_JOBS").unwrap()))
+            .current_dir(&build)
+    );
 
     // Link to compiled library.
     println!("cargo:rustc-link-search={}/.libs", build.display());
@@ -82,10 +93,12 @@ fn build_msvc(target: &str) {
     // Prepare.
     let src = env::current_dir().unwrap();
     let c_ares_dir = &src.join("c-ares");
-    run(Command::new("cmd")
-                .current_dir(c_ares_dir)
-                .arg("/c")
-                .arg("buildconf.bat"));
+    run(
+        Command::new("cmd")
+            .current_dir(c_ares_dir)
+            .arg("/c")
+            .arg("buildconf.bat")
+    );
 
     // Compile.
     let mut cmd = gcc::windows_registry::find(target, "nmake.exe").unwrap();

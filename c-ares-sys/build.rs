@@ -27,7 +27,7 @@ fn main() {
     }
 
     // Set up compiler options.
-    let mut cflags = env::var("CFLAGS").unwrap_or(String::new());
+    let mut cflags = env::var("CFLAGS").unwrap_or_else(|_| String::new());
     if target.contains("i686") {
         cflags.push_str(" -m32");
     } else if target.contains("x86_64") {

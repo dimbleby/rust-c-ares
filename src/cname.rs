@@ -35,7 +35,7 @@ impl CNameResults {
             c_ares_sys::ares_parse_a_reply(
                 data.as_ptr(),
                 data.len() as c_int,
-                &mut hostent as *mut _ as *mut *mut c_ares_sys::hostent,
+                &mut hostent,
                 ptr::null_mut(),
                 ptr::null_mut())
         };

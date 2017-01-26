@@ -46,13 +46,7 @@ pub type ares_sock_state_cb =
                                                writable:
                                                    ::std::os::raw::c_int)>;
 #[repr(C)]
-#[derive(Debug, Copy)]
-pub struct apattern {
-    pub _address: u8,
-}
-impl Clone for apattern {
-    fn clone(&self) -> Self { *self }
-}
+pub struct apattern([u8; 0]);
 #[repr(C)]
 #[derive(Debug, Copy)]
 pub struct ares_options {
@@ -82,13 +76,7 @@ impl Default for ares_options {
     fn default() -> Self { unsafe { ::std::mem::zeroed() } }
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
-pub struct ares_channeldata {
-    pub _address: u8,
-}
-impl Clone for ares_channeldata {
-    fn clone(&self) -> Self { *self }
-}
+pub struct ares_channeldata([u8; 0]);
 pub type ares_channel = *mut ares_channeldata;
 pub type ares_callback =
     ::std::option::Option<unsafe extern "C" fn(arg:

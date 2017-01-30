@@ -210,12 +210,14 @@ impl Options {
 
     /// Configure round robin selection of nameservers.
     pub fn set_rotate(&mut self) -> &mut Self {
+        self.optmask &= !c_ares_sys::ARES_OPT_NOROTATE;
         self.optmask |= c_ares_sys::ARES_OPT_ROTATE;
         self
     }
 
     /// Prevent round robin selection of nameservers.
     pub fn set_no_rotate(&mut self) -> &mut Self {
+        self.optmask &= !c_ares_sys::ARES_OPT_ROTATE;
         self.optmask |= c_ares_sys::ARES_OPT_NOROTATE;
         self
     }

@@ -261,14 +261,12 @@ impl Channel {
             .iter()
             .map(|s| s.as_ptr())
             .collect();
-        options.ares_options.domains =
-            domains.as_ptr() as *mut *mut c_char;
+        options.ares_options.domains = domains.as_ptr() as *mut *mut c_char;
         options.ares_options.ndomains = domains.len() as c_int;
 
         // Likewise for lookups.
         for c_lookup in &options.lookups {
-            options.ares_options.lookups =
-                c_lookup.as_ptr() as *mut c_char;
+            options.ares_options.lookups = c_lookup.as_ptr() as *mut c_char;
         }
 
         // Initialize the channel.

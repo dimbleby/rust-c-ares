@@ -238,8 +238,14 @@ pub struct Channel {
 }
 
 impl Channel {
-    /// Create a new channel for name service lookups.
-    pub fn new(mut options: Options) -> Result<Channel> {
+    /// Create a new channel for name service lookups, with default `Options`.
+    pub fn new() -> Result<Channel> {
+        let options = Options::default();
+        Self::with_options(options)
+    }
+
+    /// Create a new channel for name service lookups, with the given `Options`.
+    pub fn with_options(mut options: Options) -> Result<Channel> {
         // Initialize the library.
         let lib_rc = unsafe {
             c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)

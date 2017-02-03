@@ -3,9 +3,9 @@
 use c_types::fd_set;
 use c_types::hostent;
 use c_types::in_addr;
+use c_types::iovec;
 use c_types::sockaddr;
 use c_types::socklen_t;
-use libc::iovec;
 use libc::timeval;
 
 #[repr(C)]

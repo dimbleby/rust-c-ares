@@ -18,7 +18,7 @@ metadeps = "1"
 
 [dependencies]
 libc = "0.2"
-c-types = "1"
+c-types = "1.1"
 
 [target.'cfg(windows)'.dependencies]
 winapi = "0.2"

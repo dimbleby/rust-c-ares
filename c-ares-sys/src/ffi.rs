@@ -5,6 +5,7 @@ use c_types::hostent;
 use c_types::in_addr;
 use c_types::sockaddr;
 use c_types::socklen_t;
+use libc::iovec;
 use libc::timeval;
 
 #[repr(C)]
@@ -207,6 +208,62 @@ extern "C" {
     pub fn ares_set_sortlist(channel: ares_channel,
                              sortstr: *const ::std::os::raw::c_char)
      -> ::std::os::raw::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy)]
+pub struct ares_socket_functions {
+    pub asocket: ::std::option::Option<unsafe extern "C" fn(arg1:
+                                                                ::std::os::raw::c_int,
+                                                            arg2:
+                                                                ::std::os::raw::c_int,
+                                                            arg3:
+                                                                ::std::os::raw::c_int,
+                                                            arg4:
+                                                                *mut ::std::os::raw::c_void)
+                                           -> ::std::os::raw::c_int>,
+    pub aclose: ::std::option::Option<unsafe extern "C" fn(arg1:
+                                                               ares_socket_t,
+                                                           arg2:
+                                                               *mut ::std::os::raw::c_void)
+                                          -> ::std::os::raw::c_int>,
+    pub aconnect: ::std::option::Option<unsafe extern "C" fn(arg1:
+                                                                 ares_socket_t,
+                                                             arg2:
+                                                                 *const sockaddr,
+                                                             arg3: socklen_t,
+                                                             arg4:
+                                                                 *mut ::std::os::raw::c_void)
+                                            -> ::std::os::raw::c_int>,
+    pub arecvfrom: ::std::option::Option<unsafe extern "C" fn(arg1:
+                                                                  ares_socket_t,
+                                                              arg2:
+                                                                  *mut ::std::os::raw::c_void,
+                                                              arg3: usize,
+                                                              arg4:
+                                                                  ::std::os::raw::c_int,
+                                                              arg5:
+                                                                  *mut sockaddr,
+                                                              arg6:
+                                                                  *mut socklen_t,
+                                                              arg7:
+                                                                  *mut ::std::os::raw::c_void)
+                                             -> ::std::os::raw::c_long>,
+    pub asendv: ::std::option::Option<unsafe extern "C" fn(arg1:
+                                                               ares_socket_t,
+                                                           arg2: *const iovec,
+                                                           arg3:
+                                                               ::std::os::raw::c_int,
+                                                           arg4:
+                                                               *mut ::std::os::raw::c_void)
+                                          -> ::std::os::raw::c_long>,
+}
+impl Clone for ares_socket_functions {
+    fn clone(&self) -> Self { *self }
+}
+extern "C" {
+    pub fn ares_set_socket_functions(channel: ares_channel,
+                                     funcs: *const ares_socket_functions,
+                                     user_data: *mut ::std::os::raw::c_void);
 }
 extern "C" {
     pub fn ares_send(channel: ares_channel,

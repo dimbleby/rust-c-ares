@@ -24,4 +24,4 @@ c-types = "1.1"
 winapi = "0.2"
 
 [package.metadata.pkg-config]
-libcares = "1.12.0"
+libcares = "1.13.0"

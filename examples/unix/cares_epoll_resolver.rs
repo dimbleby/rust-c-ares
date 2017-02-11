@@ -126,6 +126,7 @@ impl Resolver {
         let locked_channel = Arc::new(Mutex::new(ares_channel));
 
         // Create a thread to handle file descriptors.
+        #[allow(mutex_atomic)]
         let keep_going = Arc::new((Mutex::new(true), Condvar::new()));
         let channel_clone = locked_channel.clone();
         let keep_going_clone = keep_going.clone();

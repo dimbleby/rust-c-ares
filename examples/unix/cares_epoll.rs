@@ -8,7 +8,7 @@ use self::nix::sys::epoll::{
     epoll_ctl,
     epoll_wait,
     EpollEvent,
-    EpollEventKind,
+    EpollFlags,
     EpollOp,
     EPOLLIN,
     EPOLLOUT,
@@ -99,28 +99,22 @@ pub fn main() {
         // those requests onto the epoll file descriptor.
         let mut active = false;
         for (fd, readable, writable) in &ares_channel.get_sock() {
-            let mut interest = EpollEventKind::empty();
+            let mut interest = EpollFlags::empty();
             if readable { interest = interest | EPOLLIN; }
             if writable { interest = interest | EPOLLOUT; }
-            let event = EpollEvent {
-                events: interest,
-                data: fd as u64,
-            };
+            let mut event = EpollEvent::new(interest, fd as u64);
             let op = if tracked_fds.insert(fd) {
                 EpollOp::EpollCtlAdd
             } else {
                 EpollOp::EpollCtlMod
             };
-            epoll_ctl(epoll, op, fd, &event).expect("epoll_ctl failed");
+            epoll_ctl(epoll, op, fd, &mut event).expect("epoll_ctl failed");
             active = true;
         }
         if !active { break }
 
         // Wait for something to happen.
-        let empty_event = EpollEvent {
-            events: EpollEventKind::empty(),
-            data: 0,
-        };
+        let empty_event = EpollEvent::new(EpollFlags::empty(), 0);
         let mut events = [empty_event; 2];
         let results = epoll_wait(epoll, &mut events, 500)
             .expect("epoll_wait failed");
@@ -136,13 +130,13 @@ pub fn main() {
             n => {
                 // Sockets became readable or writable.  Tell c-ares.
                 for event in &events[0..n] {
-                    let active_fd = event.data as c_ares::Socket;
-                    let rfd = if (event.events & EPOLLIN).is_empty() {
+                    let active_fd = event.data() as c_ares::Socket;
+                    let rfd = if (event.events() & EPOLLIN).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
                         active_fd
                     };
-                    let wfd = if (event.events & EPOLLOUT).is_empty() {
+                    let wfd = if (event.events() & EPOLLOUT).is_empty() {
                         c_ares::SOCKET_BAD
                     } else {
                         active_fd

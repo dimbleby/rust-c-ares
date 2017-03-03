@@ -100,8 +100,8 @@ pub fn main() {
         let mut active = false;
         for (fd, readable, writable) in &ares_channel.get_sock() {
             let mut interest = EpollFlags::empty();
-            if readable { interest = interest | EPOLLIN; }
-            if writable { interest = interest | EPOLLOUT; }
+            if readable { interest |= EPOLLIN; }
+            if writable { interest |= EPOLLOUT; }
             let mut event = EpollEvent::new(interest, fd as u64);
             let op = if tracked_fds.insert(fd) {
                 EpollOp::EpollCtlAdd

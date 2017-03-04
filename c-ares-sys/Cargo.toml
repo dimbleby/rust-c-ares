@@ -6,7 +6,6 @@ authors = ["David Hotham"]
 build = "build.rs"
 links = "cares"
 description = "Low-level bindings to the c-ares library"
-homepage = "https://github.com/dimbleby/rust-c-ares"
 repository = "https://github.com/dimbleby/rust-c-ares"
 readme = "README.md"
 keywords = ["DNS", "c-ares"]

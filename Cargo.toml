@@ -6,7 +6,6 @@ authors = ["David Hotham"]
 description = """
 A Rust wrapper for the c-ares library, for asynchronous DNS requests.
 """
-homepage = "https://github.com/dimbleby/rust-c-ares"
 repository = "https://github.com/dimbleby/rust-c-ares"
 documentation = "http://dimbleby.github.io/rust-c-ares"
 readme = "README.md"

@@ -220,7 +220,7 @@ pub struct ares_socket_functions {
                                                                 ::std::os::raw::c_int,
                                                             arg4:
                                                                 *mut ::std::os::raw::c_void)
-                                           -> ::std::os::raw::c_int>,
+                                           -> ares_socket_t>,
     pub aclose: ::std::option::Option<unsafe extern "C" fn(arg1:
                                                                ares_socket_t,
                                                            arg2:
@@ -247,7 +247,7 @@ pub struct ares_socket_functions {
                                                                   *mut socklen_t,
                                                               arg7:
                                                                   *mut ::std::os::raw::c_void)
-                                             -> ::std::os::raw::c_long>,
+                                             -> isize>,
     pub asendv: ::std::option::Option<unsafe extern "C" fn(arg1:
                                                                ares_socket_t,
                                                            arg2: *const iovec,
@@ -255,7 +255,7 @@ pub struct ares_socket_functions {
                                                                ::std::os::raw::c_int,
                                                            arg4:
                                                                *mut ::std::os::raw::c_void)
-                                          -> ::std::os::raw::c_long>,
+                                          -> isize>,
 }
 impl Clone for ares_socket_functions {
     fn clone(&self) -> Self { *self }

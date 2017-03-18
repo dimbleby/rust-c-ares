@@ -73,7 +73,7 @@ pub fn main() {
             new_fds.insert(fd);
             let efd = mio::unix::EventedFd(&fd);
             let token = mio::Token(fd as usize);
-            let mut interest = mio::Ready::none();
+            let mut interest = mio::Ready::empty();
             if readable { interest.insert(mio::Ready::readable()) }
             if writable { interest.insert(mio::Ready::writable()) }
             let register_result = if tracked_fds.contains(&fd) {
@@ -112,12 +112,12 @@ pub fn main() {
                 // Sockets became readable or writable.  Tell c-ares.
                 for event in &events {
                     let mio::Token(active_fd) = event.token();
-                    let rfd = if event.kind().is_readable() {
+                    let rfd = if event.readiness().is_readable() {
                         active_fd as c_ares::Socket
                     } else {
                         c_ares::SOCKET_BAD
                     };
-                    let wfd = if event.kind().is_writable() {
+                    let wfd = if event.readiness().is_writable() {
                         active_fd as c_ares::Socket
                     } else {
                         c_ares::SOCKET_BAD

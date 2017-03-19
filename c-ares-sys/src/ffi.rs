@@ -33,11 +33,11 @@ impl <T> ::std::fmt::Debug for __BindgenUnionField<T> {
     }
 }
 pub type ares_socklen_t = socklen_t;
+pub type ares_ssize_t = isize;
 #[cfg(windows)]
 pub type ares_socket_t = ::std::os::windows::io::RawSocket;
 #[cfg(unix)]
 pub type ares_socket_t = ::std::os::unix::io::RawFd;
-
 pub type ares_sock_state_cb =
     ::std::option::Option<unsafe extern "C" fn(data:
                                                    *mut ::std::os::raw::c_void,
@@ -230,7 +230,8 @@ pub struct ares_socket_functions {
                                                                  ares_socket_t,
                                                              arg2:
                                                                  *const sockaddr,
-                                                             arg3: socklen_t,
+                                                             arg3:
+                                                                 ares_socklen_t,
                                                              arg4:
                                                                  *mut ::std::os::raw::c_void)
                                             -> ::std::os::raw::c_int>,
@@ -244,10 +245,10 @@ pub struct ares_socket_functions {
                                                               arg5:
                                                                   *mut sockaddr,
                                                               arg6:
-                                                                  *mut socklen_t,
+                                                                  *mut ares_socklen_t,
                                                               arg7:
                                                                   *mut ::std::os::raw::c_void)
-                                             -> isize>,
+                                             -> ares_ssize_t>,
     pub asendv: ::std::option::Option<unsafe extern "C" fn(arg1:
                                                                ares_socket_t,
                                                            arg2: *const iovec,
@@ -255,7 +256,7 @@ pub struct ares_socket_functions {
                                                                ::std::os::raw::c_int,
                                                            arg4:
                                                                *mut ::std::os::raw::c_void)
-                                          -> isize>,
+                                          -> ares_ssize_t>,
 }
 impl Clone for ares_socket_functions {
     fn clone(&self) -> Self { *self }

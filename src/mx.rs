@@ -91,6 +91,7 @@ impl<'a> Iterator for MXResultsIter<'a> {
         })
     }
 }
+
 impl<'a> IntoIterator for &'a MXResults {
     type Item = MXResult<'a>;
     type IntoIter = MXResultsIter<'a>;

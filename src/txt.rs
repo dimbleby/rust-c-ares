@@ -91,6 +91,7 @@ impl<'a> Iterator for TXTResultsIter<'a> {
         })
     }
 }
+
 impl<'a> IntoIterator for &'a TXTResults {
     type Item = TXTResult<'a>;
     type IntoIter = TXTResultsIter<'a>;

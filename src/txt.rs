@@ -2,6 +2,7 @@ use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{
+    c_char,
     c_int,
     c_uchar,
     c_void,
@@ -126,7 +127,7 @@ impl<'a> TXTResult<'a> {
     /// Returns the text in this `TXTResult`.
     pub fn text(&self) -> &str {
         unsafe {
-            let c_str = CStr::from_ptr(self.txt_reply.txt as *const i8);
+            let c_str = CStr::from_ptr(self.txt_reply.txt as *const c_char);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }

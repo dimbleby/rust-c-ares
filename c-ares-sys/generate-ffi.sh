@@ -8,7 +8,7 @@ fi
 
 # Prepare for bindgen, and do it.
 (cd c-ares && ./buildconf && ./configure)
-bindgen --whitelist-function="ares.*" --whitelist-type="ares.*" --whitelist-type="apattern" --no-recursive-whitelist --no-unstable-rust --output=src/ffi.rs c-ares/ares.h
+bindgen --whitelist-function="ares.*" --whitelist-type="ares.*" --whitelist-type="apattern" --no-recursive-whitelist --no-layout-tests --no-unstable-rust --output=src/ffi.rs c-ares/ares.h
 
 # Apply manual patches.
 patch -p0 < ffi.patch

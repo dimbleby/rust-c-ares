@@ -75,9 +75,6 @@ pub struct ares_options {
 impl Clone for ares_options {
     fn clone(&self) -> Self { *self }
 }
-impl Default for ares_options {
-    fn default() -> Self { unsafe { ::std::mem::zeroed() } }
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_channeldata([u8; 0]);

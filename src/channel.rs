@@ -88,13 +88,24 @@ use utils::{
 };
 
 /// Used to configure the behaviour of the name resolver.
-#[derive(Default)]
 pub struct Options {
     ares_options: c_ares_sys::ares_options,
     optmask: c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
     socket_state_callback: Option<Arc<FnMut(Socket, bool, bool) + Send + 'static>>,
+}
+
+impl Default for Options {
+    fn default() -> Self {
+        Self {
+            ares_options: unsafe { mem::uninitialized() },
+            optmask: 0,
+            domains: vec!(),
+            lookups: None,
+            socket_state_callback: None,
+        }
+    }
 }
 
 impl Options {

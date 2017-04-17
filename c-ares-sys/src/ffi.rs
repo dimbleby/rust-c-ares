@@ -8,6 +8,11 @@ use c_types::sockaddr;
 use c_types::socklen_t;
 use libc::timeval;
 
+#[cfg(windows)]
+pub type ares_socket_t = ::std::os::windows::io::RawSocket;
+#[cfg(unix)]
+pub type ares_socket_t = ::std::os::unix::io::RawFd;
+
 #[repr(C)]
 pub struct __BindgenUnionField<T>(::std::marker::PhantomData<T>);
 impl <T> __BindgenUnionField<T> {
@@ -34,10 +39,6 @@ impl <T> ::std::fmt::Debug for __BindgenUnionField<T> {
 }
 pub type ares_socklen_t = socklen_t;
 pub type ares_ssize_t = isize;
-#[cfg(windows)]
-pub type ares_socket_t = ::std::os::windows::io::RawSocket;
-#[cfg(unix)]
-pub type ares_socket_t = ::std::os::unix::io::RawFd;
 pub type ares_sock_state_cb =
     ::std::option::Option<unsafe extern "C" fn(data:
                                                    *mut ::std::os::raw::c_void,

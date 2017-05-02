@@ -49,7 +49,9 @@ pub type ares_sock_state_cb =
                                                    ::std::os::raw::c_int)>;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct apattern([u8; 0]);
+pub struct apattern {
+    _unused: [u8; 0],
+}
 #[repr(C)]
 #[derive(Debug, Copy)]
 pub struct ares_options {
@@ -77,7 +79,9 @@ impl Clone for ares_options {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct ares_channeldata([u8; 0]);
+pub struct ares_channeldata {
+    _unused: [u8; 0],
+}
 pub type ares_channel = *mut ares_channeldata;
 pub type ares_callback =
     ::std::option::Option<unsafe extern "C" fn(arg:

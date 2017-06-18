@@ -89,6 +89,15 @@ fn make() -> &'static str {
     if cfg!(target_os = "freebsd") {"gmake"} else {"make"}
 }
 
+fn nmake(target: &str) -> Command {
+    // cargo messes with the environment in a way that nmake does not like -
+    // see https://github.com/rust-lang/cargo/issues/4156.  Explicitly remove
+    // the unwanted variables.
+    let mut cmd = gcc::windows_registry::find(target, "nmake.exe").unwrap();
+    cmd.env_remove("MAKEFLAGS").env_remove("MFLAGS");
+    cmd
+}
+
 fn build_msvc(target: &str) {
     // Prepare.
     let src = env::current_dir().unwrap();
@@ -101,7 +110,7 @@ fn build_msvc(target: &str) {
     );
 
     // Compile.
-    let mut cmd = gcc::windows_registry::find(target, "nmake.exe").unwrap();
+    let mut cmd = nmake(target);
     cmd.current_dir(c_ares_dir);
     cmd.args(&["/f", "Makefile.msvc", "CFG=lib-release", "c-ares"]);
     run(&mut cmd);
@@ -109,7 +118,7 @@ fn build_msvc(target: &str) {
     // Install library.
     let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
     let build = dst.join("build");
-    let mut cmd = gcc::windows_registry::find(target, "nmake.exe").unwrap();
+    let mut cmd = nmake(target);
     cmd.current_dir(c_ares_dir);
     cmd.args(&["/f", "Makefile.msvc", "/a", "CFG=lib-release", "install"]);
     cmd.env("INSTALL_DIR", format!("{}", build.display()));

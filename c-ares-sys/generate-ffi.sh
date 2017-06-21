@@ -14,7 +14,6 @@ bindgen --blacklist-type="ares_socket_t" \
         --whitelist-type="apattern" \
         --no-recursive-whitelist \
         --no-layout-tests \
-        --no-unstable-rust \
         --output=src/ffi.rs \
         c-ares/ares.h
 

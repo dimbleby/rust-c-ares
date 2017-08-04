@@ -13,30 +13,6 @@ pub type ares_socket_t = ::std::os::windows::io::RawSocket;
 #[cfg(unix)]
 pub type ares_socket_t = ::std::os::unix::io::RawFd;
 
-#[repr(C)]
-pub struct __BindgenUnionField<T>(::std::marker::PhantomData<T>);
-impl <T> __BindgenUnionField<T> {
-    #[inline]
-    pub fn new() -> Self { __BindgenUnionField(::std::marker::PhantomData) }
-    #[inline]
-    pub unsafe fn as_ref(&self) -> &T { ::std::mem::transmute(self) }
-    #[inline]
-    pub unsafe fn as_mut(&mut self) -> &mut T { ::std::mem::transmute(self) }
-}
-impl <T> ::std::default::Default for __BindgenUnionField<T> {
-    #[inline]
-    fn default() -> Self { Self::new() }
-}
-impl <T> ::std::clone::Clone for __BindgenUnionField<T> {
-    #[inline]
-    fn clone(&self) -> Self { Self::new() }
-}
-impl <T> ::std::marker::Copy for __BindgenUnionField<T> { }
-impl <T> ::std::fmt::Debug for __BindgenUnionField<T> {
-    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        fmt.write_str("__BindgenUnionField")
-    }
-}
 pub type ares_socklen_t = socklen_t;
 pub type ares_ssize_t = isize;
 pub type ares_sock_state_cb =
@@ -377,15 +353,14 @@ extern "C" {
      -> ::std::os::raw::c_int;
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Copy)]
 pub struct ares_in6_addr {
     pub _S6_un: ares_in6_addr__bindgen_ty_1,
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
-pub struct ares_in6_addr__bindgen_ty_1 {
-    pub _S6_u8: __BindgenUnionField<[::std::os::raw::c_uchar; 16usize]>,
-    pub bindgen_union_field: [u8; 16usize],
+#[derive(Copy)]
+pub union ares_in6_addr__bindgen_ty_1 {
+    pub _S6_u8: [::std::os::raw::c_uchar; 16usize],
 }
 impl Clone for ares_in6_addr__bindgen_ty_1 {
     fn clone(&self) -> Self { *self }
@@ -403,7 +378,7 @@ impl Clone for ares_addrttl {
     fn clone(&self) -> Self { *self }
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Copy)]
 pub struct ares_addr6ttl {
     pub ip6addr: ares_in6_addr,
     pub ttl: ::std::os::raw::c_int,
@@ -563,18 +538,17 @@ extern "C" {
      -> *const ::std::os::raw::c_char;
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Copy)]
 pub struct ares_addr_node {
     pub next: *mut ares_addr_node,
     pub family: ::std::os::raw::c_int,
     pub addr: ares_addr_node__bindgen_ty_1,
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
-pub struct ares_addr_node__bindgen_ty_1 {
-    pub addr4: __BindgenUnionField<in_addr>,
-    pub addr6: __BindgenUnionField<ares_in6_addr>,
-    pub bindgen_union_field: [u32; 4usize],
+#[derive(Copy)]
+pub union ares_addr_node__bindgen_ty_1 {
+    pub addr4: in_addr,
+    pub addr6: ares_in6_addr,
 }
 impl Clone for ares_addr_node__bindgen_ty_1 {
     fn clone(&self) -> Self { *self }
@@ -583,7 +557,7 @@ impl Clone for ares_addr_node {
     fn clone(&self) -> Self { *self }
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Copy)]
 pub struct ares_addr_port_node {
     pub next: *mut ares_addr_port_node,
     pub family: ::std::os::raw::c_int,
@@ -592,11 +566,10 @@ pub struct ares_addr_port_node {
     pub tcp_port: ::std::os::raw::c_int,
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
-pub struct ares_addr_port_node__bindgen_ty_1 {
-    pub addr4: __BindgenUnionField<in_addr>,
-    pub addr6: __BindgenUnionField<ares_in6_addr>,
-    pub bindgen_union_field: [u32; 4usize],
+#[derive(Copy)]
+pub union ares_addr_port_node__bindgen_ty_1 {
+    pub addr4: in_addr,
+    pub addr6: ares_in6_addr,
 }
 impl Clone for ares_addr_port_node__bindgen_ty_1 {
     fn clone(&self) -> Self { *self }

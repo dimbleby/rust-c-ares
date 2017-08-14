@@ -361,6 +361,7 @@ pub struct ares_in6_addr {
 #[derive(Copy)]
 pub union ares_in6_addr__bindgen_ty_1 {
     pub _S6_u8: [::std::os::raw::c_uchar; 16usize],
+    _bindgen_union_align: [u8; 16usize],
 }
 impl Clone for ares_in6_addr__bindgen_ty_1 {
     fn clone(&self) -> Self { *self }
@@ -549,6 +550,7 @@ pub struct ares_addr_node {
 pub union ares_addr_node__bindgen_ty_1 {
     pub addr4: in_addr,
     pub addr6: ares_in6_addr,
+    _bindgen_union_align: [u32; 4usize],
 }
 impl Clone for ares_addr_node__bindgen_ty_1 {
     fn clone(&self) -> Self { *self }
@@ -570,6 +572,7 @@ pub struct ares_addr_port_node {
 pub union ares_addr_port_node__bindgen_ty_1 {
     pub addr4: in_addr,
     pub addr6: ares_in6_addr,
+    _bindgen_union_align: [u32; 4usize],
 }
 impl Clone for ares_addr_port_node__bindgen_ty_1 {
     fn clone(&self) -> Self { *self }

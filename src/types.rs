@@ -17,6 +17,9 @@ pub enum AddressFamily {
 
     /// IPv6.
     INET6 = c_types::AF_INET6 as isize,
+
+    /// Unspecified.
+    UNSPEC = c_types::AF_UNSPEC as isize,
 }
 
 // See arpa/nameser.h

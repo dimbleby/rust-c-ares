@@ -18,6 +18,7 @@ pub fn address_family(family: c_int) -> Option<AddressFamily> {
     match family {
         c_types::AF_INET => Some(AddressFamily::INET),
         c_types::AF_INET6 => Some(AddressFamily::INET6),
+        c_types::AF_UNSPEC => Some(AddressFamily::UNSPEC),
         _ => None,
     }
 }

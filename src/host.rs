@@ -17,6 +17,7 @@ use hostent::{
     HostAliasResultsIter,
     HostentBorrowed,
 };
+use panic;
 
 /// The result of a successful host lookup.
 #[derive(Clone, Copy)]
@@ -59,13 +60,15 @@ pub unsafe extern "C" fn get_host_callback<F>(
     _timeouts: c_int,
     hostent: *mut c_types::hostent)
     where F: FnOnce(Result<HostResults>) + Send + 'static {
-    let result = if status == c_ares_sys::ARES_SUCCESS {
-        let host_results = HostResults::new(
-            &*(hostent as *const c_types::hostent));
-        Ok(host_results)
-    } else {
-        Err(Error::from(status))
-    };
-    let handler = Box::from_raw(arg as *mut F);
-    handler(result);
+    panic::catch(|| {
+        let result = if status == c_ares_sys::ARES_SUCCESS {
+            let host_results = HostResults::new(
+                &*(hostent as *const c_types::hostent));
+            Ok(host_results)
+        } else {
+            Err(Error::from(status))
+        };
+        let handler = Box::from_raw(arg as *mut F);
+        handler(result);
+    });
 }

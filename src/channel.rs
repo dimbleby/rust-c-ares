@@ -57,6 +57,7 @@ use ns::{
     NSResults,
     query_ns_callback,
 };
+use panic;
 use ptr::{
     PTRResults,
     query_ptr_callback,
@@ -330,6 +331,7 @@ impl Channel {
         unsafe {
             c_ares_sys::ares_process_fd(self.ares_channel, read_fd, write_fd);
         }
+        panic::propagate();
     }
 
     /// Handle input and output events associated with the specified file
@@ -342,6 +344,7 @@ impl Channel {
         unsafe {
             c_ares_sys::ares_process(self.ares_channel, read_fds, write_fds);
         }
+        panic::propagate();
     }
 
     /// Retrieve the set of socket descriptors which the calling application
@@ -437,6 +440,7 @@ impl Channel {
                 Some(query_a_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the A records
@@ -456,6 +460,7 @@ impl Channel {
                 Some(query_a_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for the AAAA records associated
@@ -475,6 +480,7 @@ impl Channel {
                 Some(query_aaaa_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the AAAA records
@@ -494,6 +500,7 @@ impl Channel {
                 Some(query_aaaa_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for the CNAME records associated
@@ -513,6 +520,7 @@ impl Channel {
                 Some(query_cname_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the CNAME records
@@ -532,6 +540,7 @@ impl Channel {
                 Some(query_cname_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for the MX records associated
@@ -551,6 +560,7 @@ impl Channel {
                 Some(query_mx_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the MX records
@@ -570,6 +580,7 @@ impl Channel {
                 Some(query_mx_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for the NAPTR records associated
@@ -589,6 +600,7 @@ impl Channel {
                 Some(query_naptr_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the NAPTR records
@@ -608,6 +620,7 @@ impl Channel {
                 Some(query_naptr_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for the NS records associated
@@ -627,6 +640,7 @@ impl Channel {
                 Some(query_ns_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the NS records
@@ -646,6 +660,7 @@ impl Channel {
                 Some(query_ns_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for the PTR records associated
@@ -665,6 +680,7 @@ impl Channel {
                 Some(query_ptr_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the PTR records
@@ -684,6 +700,7 @@ impl Channel {
                 Some(query_ptr_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for the SOA records associated
@@ -703,6 +720,7 @@ impl Channel {
                 Some(query_soa_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the SOA records
@@ -722,6 +740,7 @@ impl Channel {
                 Some(query_soa_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for the SRV records associated
@@ -741,6 +760,7 @@ impl Channel {
                 Some(query_srv_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the SRV records
@@ -760,6 +780,7 @@ impl Channel {
                 Some(query_srv_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for the TXT records associated
@@ -779,6 +800,7 @@ impl Channel {
                 Some(query_txt_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for the TXT records
@@ -798,6 +820,7 @@ impl Channel {
                 Some(query_txt_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Perform a host query by address.
@@ -837,6 +860,7 @@ impl Channel {
                 Some(get_host_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Perform a host query by name.
@@ -857,6 +881,7 @@ impl Channel {
                 Some(get_host_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Address-to-nodename translation in protocol-independent manner.
@@ -897,6 +922,7 @@ impl Channel {
                 Some(get_name_info_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for `name`.  The class and type of
@@ -927,6 +953,7 @@ impl Channel {
                 Some(query_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Initiate a series of single-question DNS queries for `name`.  The class
@@ -957,6 +984,7 @@ impl Channel {
                 Some(query_callback::<F>),
                 c_arg as *mut c_void);
         }
+        panic::propagate();
     }
 
     /// Cancel all requests made on this `Channel`.
@@ -965,6 +993,7 @@ impl Channel {
     /// `Err(Error::ECANCELLED)`.
     pub fn cancel(&mut self) {
         unsafe { c_ares_sys::ares_cancel(self.ares_channel); }
+        panic::propagate();
     }
 }
 
@@ -974,6 +1003,7 @@ impl Drop for Channel {
             c_ares_sys::ares_destroy(self.ares_channel);
             c_ares_sys::ares_library_cleanup();
         }
+        panic::propagate();
     }
 }
 
@@ -988,8 +1018,10 @@ pub unsafe extern "C" fn socket_state_callback<F>(
     readable: c_int,
     writable: c_int)
     where F: FnMut(Socket, bool, bool) + Send + 'static {
-    let handler = data as *mut F;
-    (*handler)(socket_fd, readable != 0, writable != 0);
+    panic::catch(|| {
+        let handler = data as *mut F;
+        (*handler)(socket_fd, readable != 0, writable != 0);
+    });
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as

@@ -16,6 +16,7 @@ use error::{
     Error,
     Result,
 };
+use panic;
 
 /// The result of a successful SOA lookup.
 #[derive(Debug)]
@@ -123,12 +124,14 @@ pub unsafe extern "C" fn query_soa_callback<F>(
     abuf: *mut c_uchar,
     alen: c_int)
     where F: FnOnce(Result<SOAResult>) + Send + 'static {
-    let result = if status == c_ares_sys::ARES_SUCCESS {
-        let data = slice::from_raw_parts(abuf, alen as usize);
-        SOAResult::parse_from(data)
-    } else {
-        Err(Error::from(status))
-    };
-    let handler = Box::from_raw(arg as *mut F);
-    handler(result);
+    panic::catch(|| {
+        let result = if status == c_ares_sys::ARES_SUCCESS {
+            let data = slice::from_raw_parts(abuf, alen as usize);
+            SOAResult::parse_from(data)
+        } else {
+            Err(Error::from(status))
+        };
+        let handler = Box::from_raw(arg as *mut F);
+        handler(result);
+    });
 }

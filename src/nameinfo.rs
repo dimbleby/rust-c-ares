@@ -13,6 +13,7 @@ use error::{
     Error,
     Result,
 };
+use panic;
 
 /// The result of a successful name-info lookup.
 #[derive(Clone, Copy, Debug)]
@@ -72,14 +73,16 @@ pub unsafe extern "C" fn get_name_info_callback<F>(
     node: *mut c_char,
     service: *mut c_char)
     where F: FnOnce(Result<NameInfoResult>) + Send + 'static {
-    let result = if status == c_ares_sys::ARES_SUCCESS {
-        let name_info_result = NameInfoResult::new(
-            node.as_ref(),
-            service.as_ref());
-        Ok(name_info_result)
-    } else {
-        Err(Error::from(status))
-    };
-    let handler = Box::from_raw(arg as *mut F);
-    handler(result);
+    panic::catch(|| {
+        let result = if status == c_ares_sys::ARES_SUCCESS {
+            let name_info_result = NameInfoResult::new(
+                node.as_ref(),
+                service.as_ref());
+            Ok(name_info_result)
+        } else {
+            Err(Error::from(status))
+        };
+        let handler = Box::from_raw(arg as *mut F);
+        handler(result);
+    });
 }

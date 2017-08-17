@@ -17,6 +17,7 @@ use error::{
     Error,
     Result,
 };
+use panic;
 
 /// The result of a successful MX lookup.
 #[derive(Debug)]
@@ -146,12 +147,14 @@ pub unsafe extern "C" fn query_mx_callback<F>(
     abuf: *mut c_uchar,
     alen: c_int)
     where F: FnOnce(Result<MXResults>) + Send + 'static {
-    let result = if status == c_ares_sys::ARES_SUCCESS {
-        let data = slice::from_raw_parts(abuf, alen as usize);
-        MXResults::parse_from(data)
-    } else {
-        Err(Error::from(status))
-    };
-    let handler = Box::from_raw(arg as *mut F);
-    handler(result);
+    panic::catch(|| {
+        let result = if status == c_ares_sys::ARES_SUCCESS {
+            let data = slice::from_raw_parts(abuf, alen as usize);
+            MXResults::parse_from(data)
+        } else {
+            Err(Error::from(status))
+        };
+        let handler = Box::from_raw(arg as *mut F);
+        handler(result);
+    });
 }

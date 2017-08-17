@@ -60,6 +60,7 @@ mod nameinfo;
 mod naptr;
 pub mod ni_flags;
 mod ns;
+mod panic;
 mod ptr;
 mod query;
 mod srv;

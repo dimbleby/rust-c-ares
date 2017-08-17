@@ -29,6 +29,5 @@ pub fn propagate() {
     if let Some(t) = LAST_ERROR.with(|slot| slot.borrow_mut().take()) {
         UNWINDING.with(|slot| *slot.borrow_mut() = true);
         panic::resume_unwind(t);
-        UNWINDING.with(|slot| *slot.borrow_mut() = false);
     }
 }

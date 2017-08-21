@@ -13,21 +13,6 @@ Most users should likely prefer [`c-ares-resolver`](https://github.com/dimbleby/
 - API documentation is [here](http://dimbleby.github.io/rust-c-ares).
 - There are some example programs [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 
-## Installation ##
-
-To use `c-ares`, add this to your `Cargo.toml`:
-
-```toml
-[dependencies]
-c-ares = "*"
-```
-
-And add this to your crate root:
-
-```rust
-extern crate c_ares;
-```
-
 ## Contributing ##
 
 Contributions are welcome.  Please send pull requests!

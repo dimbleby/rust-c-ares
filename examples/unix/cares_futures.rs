@@ -225,38 +225,41 @@ impl Resolver {
 
     // A CNAME query.  Returns a future that will resolve to hold the result.
     pub fn query_cname(&self, name: &str)
-        -> futures::BoxFuture<c_ares::CNameResults, c_ares::Error> {
+        -> Box<futures::Future<Item=c_ares::CNameResults, Error=c_ares::Error>> {
         let (c, p) = futures::oneshot();
         self.ares_channel.lock().unwrap().query_cname(name, move |result| {
             let _ = c.send(result);
         });
-        p.map_err(|_| c_ares::Error::ECANCELLED)
-            .and_then(futures::done)
-            .boxed()
+        Box::new(
+            p.map_err(|_| c_ares::Error::ECANCELLED)
+                .and_then(futures::done)
+        )
     }
 
     // An MX query.  Returns a future that will resolve to hold the result.
     pub fn query_mx(&self, name: &str)
-        -> futures::BoxFuture<c_ares::MXResults, c_ares::Error> {
+        -> Box<futures::Future<Item=c_ares::MXResults, Error=c_ares::Error>> {
         let (c, p) = futures::oneshot();
         self.ares_channel.lock().unwrap().query_mx(name, move |result| {
             let _ = c.send(result);
         });
-        p.map_err(|_| c_ares::Error::ECANCELLED)
-            .and_then(futures::done)
-            .boxed()
+        Box::new(
+            p.map_err(|_| c_ares::Error::ECANCELLED)
+                .and_then(futures::done)
+        )
     }
 
     // A NAPTR query.  Returns a future that will resolve to hold the result.
     pub fn query_naptr(&self, name: &str)
-        -> futures::BoxFuture<c_ares::NAPTRResults, c_ares::Error> {
+        -> Box<futures::Future<Item=c_ares::NAPTRResults, Error=c_ares::Error>> {
         let (c, p) = futures::oneshot();
         self.ares_channel.lock().unwrap().query_naptr(name, move |result| {
             let _ = c.send(result);
         });
-        p.map_err(|_| c_ares::Error::ECANCELLED)
-            .and_then(futures::done)
-            .boxed()
+        Box::new(
+            p.map_err(|_| c_ares::Error::ECANCELLED)
+                .and_then(futures::done)
+        )
     }
 }
 

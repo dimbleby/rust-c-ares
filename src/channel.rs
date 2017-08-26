@@ -88,13 +88,15 @@ use utils::{
   socket_addrv6_as_sockaddr_in6,
 };
 
+type SocketStateCallback = FnMut(Socket, bool, bool) + Send + 'static;
+
 /// Used to configure the behaviour of the name resolver.
 pub struct Options {
     ares_options: c_ares_sys::ares_options,
     optmask: c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
-    socket_state_callback: Option<Arc<FnMut(Socket, bool, bool) + Send + 'static>>,
+    socket_state_callback: Option<Arc<SocketStateCallback>>,
 }
 
 impl Default for Options {
@@ -248,7 +250,7 @@ pub struct Channel {
     phantom: PhantomData<c_ares_sys::ares_channeldata>,
 
     // For ownership only.
-    _socket_state_callback: Option<Arc<FnMut(Socket, bool, bool) + Send + 'static>>,
+    _socket_state_callback: Option<Arc<SocketStateCallback>>,
 }
 
 impl Channel {

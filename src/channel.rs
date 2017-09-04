@@ -950,8 +950,8 @@ impl Channel {
             c_ares_sys::ares_query(
                 self.ares_channel,
                 c_name.as_ptr(),
-                dns_class as c_int,
-                query_type as c_int,
+                c_int::from(dns_class),
+                c_int::from(query_type),
                 Some(query_callback::<F>),
                 c_arg as *mut c_void);
         }
@@ -981,8 +981,8 @@ impl Channel {
             c_ares_sys::ares_search(
                 self.ares_channel,
                 c_name.as_ptr(),
-                dns_class as c_int,
-                query_type as c_int,
+                c_int::from(dns_class),
+                c_int::from(query_type),
                 Some(query_callback::<F>),
                 c_arg as *mut c_void);
         }

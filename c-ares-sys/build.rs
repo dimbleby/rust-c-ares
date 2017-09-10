@@ -16,14 +16,14 @@ macro_rules! t {
 fn main() {
     // Use the installed libcares if it is available.
     if metadeps::probe().is_ok() {
-        return
+        return;
     }
 
     // MSVC builds are different.
     let target = env::var("TARGET").unwrap();
     if target.contains("msvc") {
         build_msvc(&target);
-        return
+        return;
     }
 
     // Set up compiler options.
@@ -52,27 +52,25 @@ fn main() {
     run(
         Command::new("sh")
             .current_dir(&src.join("c-ares"))
-            .arg("buildconf")
+            .arg("buildconf"),
     );
     run(
         Command::new("sh")
             .env("CFLAGS", &cflags)
             .current_dir(&build)
             .arg("-c")
-            .arg(
-                format!(
-                    "{} {}",
-                    src.join("c-ares/configure").display(),
-                    config_opts.join(" ")
-                )
-            )
+            .arg(format!(
+                "{} {}",
+                src.join("c-ares/configure").display(),
+                config_opts.join(" ")
+            )),
     );
 
     // Compile.
     run(
         Command::new(make())
             .arg(format!("-j{}", env::var("NUM_JOBS").unwrap()))
-            .current_dir(&build)
+            .current_dir(&build),
     );
 
     // Link to compiled library.
@@ -86,7 +84,11 @@ fn run(cmd: &mut Command) {
 }
 
 fn make() -> &'static str {
-    if cfg!(target_os = "freebsd") {"gmake"} else {"make"}
+    if cfg!(target_os = "freebsd") {
+        "gmake"
+    } else {
+        "make"
+    }
 }
 
 fn nmake(target: &str) -> Command {
@@ -106,7 +108,7 @@ fn build_msvc(target: &str) {
         Command::new("cmd")
             .current_dir(c_ares_dir)
             .arg("/c")
-            .arg("buildconf.bat")
+            .arg("buildconf.bat"),
     );
 
     // Compile.

@@ -40,7 +40,7 @@ fn fd_handling_thread(
     let (ref lock, ref cvar) = *keep_going;
     let mut carry_on = lock.lock().unwrap();
     while *carry_on {
-        process_ares_fds(ares_channel.clone());
+        process_ares_fds(Arc::clone(&ares_channel));
         carry_on = cvar.wait(carry_on).unwrap();
     }
 }
@@ -122,10 +122,10 @@ impl Resolver {
         // Create a thread to handle file descriptors.
         #[allow(mutex_atomic)]
         let keep_going = Arc::new((Mutex::new(true), Condvar::new()));
-        let channel_clone = locked_channel.clone();
-        let keep_going_clone = keep_going.clone();
-        let fd_handle = thread::spawn(move || {
-            fd_handling_thread(channel_clone, keep_going_clone)
+        let fd_handle = thread::spawn({
+            let locked_channel = Arc::clone(&locked_channel);
+            let keep_going = Arc::clone(&keep_going);
+            move || fd_handling_thread(locked_channel, keep_going)
         });
 
         Resolver {

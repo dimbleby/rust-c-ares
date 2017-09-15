@@ -211,7 +211,7 @@ impl Resolver {
         let locked_channel = Arc::new(Mutex::new(ares_channel));
 
         // Create and run the event loop.
-        let channel_clone = locked_channel.clone();
+        let channel_clone = Arc::clone(&locked_channel);
         let event_loop = EventLoop::new(channel_clone, rx);
         let handle = event_loop.run();
 

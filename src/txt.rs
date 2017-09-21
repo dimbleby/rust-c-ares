@@ -130,10 +130,10 @@ impl<'a> TXTResult<'a> {
     /// Although text is usual here, any binary data is legal - which is why we
     /// return `&[u8]` rather than `&str`.
     pub fn text(&self) -> &[u8] {
-        unsafe {
-            let c_str = CStr::from_ptr(self.txt_reply.txt as *const c_char);
-            c_str.to_bytes()
-        }
+        let c_str = unsafe {
+            CStr::from_ptr(self.txt_reply.txt as *const c_char)
+        };
+        c_str.to_bytes()
     }
 }
 

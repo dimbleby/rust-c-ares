@@ -18,6 +18,7 @@ use self::nix::sys::epoll::{
 };
 use std::collections::HashSet;
 use std::error::Error;
+use std::str;
 use std::sync::{
     Arc,
     Condvar,
@@ -225,10 +226,12 @@ fn print_txt_results(result: c_ares::Result<c_ares::TXTResults>) {
         Ok(txt_results) => {
             println!("Successful TXT lookup...");
             for txt_result in &txt_results {
+                let text = str::from_utf8(txt_result.text())
+                    .unwrap_or("<binary>");
                 println!(
                     "record start: {}, text: {}",
                     txt_result.record_start(),
-                    txt_result.text());
+                    text);
             }
         }
     }

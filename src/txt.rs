@@ -126,22 +126,21 @@ impl<'a> TXTResult<'a> {
     }
 
     /// Returns the text in this `TXTResult`.
-    pub fn text(&self) -> &str {
+    ///
+    /// Although text is usual here, any binary data is legal - which is why we
+    /// return `&[u8]` rather than `&str`.
+    pub fn text(&self) -> &[u8] {
         unsafe {
             let c_str = CStr::from_ptr(self.txt_reply.txt as *const c_char);
-            str::from_utf8_unchecked(c_str.to_bytes())
+            c_str.to_bytes()
         }
     }
 }
 
 impl<'a> fmt::Display for TXTResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "Record start: {}, Text: {}",
-            self.record_start(),
-            self.text()
-        )?;
+        let text = str::from_utf8(self.text()).unwrap_or("<binary>");
+        write!(fmt, "Record start: {}, Text: {}", self.record_start(), text)?;
         Ok(())
     }
 }

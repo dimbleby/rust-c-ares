@@ -19,6 +19,9 @@ fn main() {
         return;
     }
 
+    // Rerun if the c-ares source code has changed.
+    println!("cargo:rerun-if-changed=c-ares");
+
     // MSVC builds are different.
     let target = env::var("TARGET").unwrap();
     if target.contains("msvc") {

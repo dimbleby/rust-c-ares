@@ -32,7 +32,7 @@ pub fn main() {
     // Create a c_ares::Channel.
     let mut options = c_ares::Options::new();
     options
-        .set_flags(c_ares::flags::STAYOPEN | c_ares::flags::EDNS)
+        .set_flags(c_ares::Flags::STAYOPEN | c_ares::Flags::EDNS)
         .set_timeout(500)
         .set_tries(3);
     let mut ares_channel = c_ares::Channel::with_options(options)

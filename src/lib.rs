@@ -52,7 +52,7 @@ mod aaaa;
 mod channel;
 mod cname;
 mod error;
-pub mod flags;
+mod flags;
 mod host;
 mod hostent;
 mod mx;
@@ -94,6 +94,7 @@ pub use error::{
     Error,
     Result
 };
+pub use flags::Flags;
 pub use host::HostResults;
 pub use hostent::{
     HostAddressResultsIter,

@@ -35,7 +35,7 @@ use error::{
     Error,
     Result,
 };
-use flags::Flags;
+use Flags;
 use host::{
     HostResults,
     get_host_callback,

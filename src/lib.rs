@@ -58,7 +58,7 @@ mod hostent;
 mod mx;
 mod nameinfo;
 mod naptr;
-pub mod ni_flags;
+mod ni_flags;
 mod ns;
 mod panic;
 mod ptr;
@@ -111,6 +111,7 @@ pub use naptr::{
     NAPTRResults,
     NAPTRResultsIter,
 };
+pub use ni_flags::NIFlags;
 pub use ns::NSResults;
 pub use ptr::PTRResults;
 pub use soa::SOAResult;

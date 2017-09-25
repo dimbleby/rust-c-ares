@@ -87,7 +87,7 @@ pub fn main() {
     let sock = SocketAddr::V4(SocketAddrV4::new(ipv4, 80));
     ares_channel.get_name_info(
         &sock,
-        c_ares::ni_flags::LOOKUPHOST | c_ares::ni_flags::LOOKUPSERVICE,
+        c_ares::NIFlags::LOOKUPHOST | c_ares::NIFlags::LOOKUPSERVICE,
         move |result| {
             println!("");
             print_name_info_result(result);
@@ -98,7 +98,7 @@ pub fn main() {
     let sock = SocketAddr::V6(SocketAddrV6::new(ipv6, 80, 0, 0));
     ares_channel.get_name_info(
         &sock,
-        c_ares::ni_flags::LOOKUPHOST | c_ares::ni_flags::LOOKUPSERVICE,
+        c_ares::NIFlags::LOOKUPHOST | c_ares::NIFlags::LOOKUPSERVICE,
         move |result| {
             println!("");
             print_name_info_result(result);

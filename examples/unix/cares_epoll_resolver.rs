@@ -121,7 +121,7 @@ impl Resolver {
         let locked_channel = Arc::new(Mutex::new(ares_channel));
 
         // Create a thread to handle file descriptors.
-        #[allow(mutex_atomic)]
+        #[cfg_attr(feature="cargo-clippy", allow(mutex_atomic))]
         let keep_going = Arc::new((Mutex::new(true), Condvar::new()));
         let fd_handle = thread::spawn({
             let locked_channel = Arc::clone(&locked_channel);

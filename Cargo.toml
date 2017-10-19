@@ -16,7 +16,7 @@ categories = ["api-bindings", "asynchronous", "network-programming"]
 bitflags = "1"
 c-ares-sys = { version = "3", path = "c-ares-sys" }
 c-types = "1.2"
-itertools = "0.6"
+itertools = "0.7"
 
 [target.'cfg(unix)'.dev-dependencies]
 futures = "0.1"

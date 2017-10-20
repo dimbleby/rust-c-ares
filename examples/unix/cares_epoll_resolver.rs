@@ -36,18 +36,18 @@ struct Resolver {
 // A thread that keeps going processing file descriptors for c-ares, until it
 // is asked to stop.
 fn fd_handling_thread(
-    ares_channel: Arc<Mutex<c_ares::Channel>>,
-    keep_going: Arc<(Mutex<bool>, Condvar)>) {
+    ares_channel: &Mutex<c_ares::Channel>,
+    keep_going: &(Mutex<bool>, Condvar)) {
     let (ref lock, ref cvar) = *keep_going;
     let mut carry_on = lock.lock().unwrap();
     while *carry_on {
-        process_ares_fds(Arc::clone(&ares_channel));
+        process_ares_fds(ares_channel);
         carry_on = cvar.wait(carry_on).unwrap();
     }
 }
 
 // Process file descriptors for c-ares, while it wants us to do so.
-fn process_ares_fds(ares_channel: Arc<Mutex<c_ares::Channel>>) {
+fn process_ares_fds(ares_channel: &Mutex<c_ares::Channel>) {
     // Create an epoll file descriptor so that we can listen for events.
     let epoll = epoll_create().expect("Failed to create epoll");
     let mut tracked_fds = HashSet::<c_ares::Socket>::new();
@@ -126,7 +126,7 @@ impl Resolver {
         let fd_handle = thread::spawn({
             let locked_channel = Arc::clone(&locked_channel);
             let keep_going = Arc::clone(&keep_going);
-            move || fd_handling_thread(locked_channel, keep_going)
+            move || fd_handling_thread(&*locked_channel, &*keep_going)
         });
 
         Resolver {

@@ -964,7 +964,7 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     ///
-    /// This method is provided so that users can query DNS types for which
+    /// This method is provided so that users can search DNS types for which
     /// `c-ares` does not provide a parser.  This is expected to be a last
     /// resort; if a suitable `search_xxx()` is available, that should be
     /// preferred.

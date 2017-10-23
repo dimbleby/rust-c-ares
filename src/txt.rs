@@ -1,8 +1,6 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{
-    c_char,
     c_int,
     c_uchar,
     c_void,
@@ -130,10 +128,9 @@ impl<'a> TXTResult<'a> {
     /// Although text is usual here, any binary data is legal - which is why we
     /// return `&[u8]` rather than `&str`.
     pub fn text(&self) -> &[u8] {
-        let c_str = unsafe {
-            CStr::from_ptr(self.txt_reply.txt as *const c_char)
-        };
-        c_str.to_bytes()
+        unsafe {
+            slice::from_raw_parts(self.txt_reply.txt, self.txt_reply.length)
+        }
     }
 }
 

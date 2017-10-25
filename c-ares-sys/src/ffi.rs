@@ -29,7 +29,7 @@ pub struct apattern {
     _unused: [u8; 0],
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_options {
     pub flags: ::std::os::raw::c_int,
     pub timeout: ::std::os::raw::c_int,
@@ -49,11 +49,6 @@ pub struct ares_options {
     pub sortlist: *mut apattern,
     pub nsort: ::std::os::raw::c_int,
     pub ednspsz: ::std::os::raw::c_int,
-}
-impl Clone for ares_options {
-    fn clone(&self) -> Self {
-        *self
-    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -186,7 +181,7 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_socket_functions {
     pub asocket: ::std::option::Option<
         unsafe extern "C" fn(
@@ -227,11 +222,6 @@ pub struct ares_socket_functions {
             arg4: *mut ::std::os::raw::c_void,
         ) -> ares_ssize_t,
     >,
-}
-impl Clone for ares_socket_functions {
-    fn clone(&self) -> Self {
-        *self
-    }
 }
 extern "C" {
     pub fn ares_set_socket_functions(
@@ -375,50 +365,30 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct ares_in6_addr {
     pub _S6_un: ares_in6_addr__bindgen_ty_1,
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub union ares_in6_addr__bindgen_ty_1 {
     pub _S6_u8: [::std::os::raw::c_uchar; 16usize],
     _bindgen_union_align: [u8; 16usize],
 }
-impl Clone for ares_in6_addr__bindgen_ty_1 {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
-impl Clone for ares_in6_addr {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct ares_addrttl {
     pub ipaddr: in_addr,
     pub ttl: ::std::os::raw::c_int,
 }
-impl Clone for ares_addrttl {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct ares_addr6ttl {
     pub ip6addr: ares_in6_addr,
     pub ttl: ::std::os::raw::c_int,
 }
-impl Clone for ares_addr6ttl {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_srv_reply {
     pub next: *mut ares_srv_reply,
     pub host: *mut ::std::os::raw::c_char,
@@ -426,50 +396,30 @@ pub struct ares_srv_reply {
     pub weight: ::std::os::raw::c_ushort,
     pub port: ::std::os::raw::c_ushort,
 }
-impl Clone for ares_srv_reply {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_mx_reply {
     pub next: *mut ares_mx_reply,
     pub host: *mut ::std::os::raw::c_char,
     pub priority: ::std::os::raw::c_ushort,
 }
-impl Clone for ares_mx_reply {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_txt_reply {
     pub next: *mut ares_txt_reply,
     pub txt: *mut ::std::os::raw::c_uchar,
     pub length: usize,
 }
-impl Clone for ares_txt_reply {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_txt_ext {
     pub next: *mut ares_txt_ext,
     pub txt: *mut ::std::os::raw::c_uchar,
     pub length: usize,
     pub record_start: ::std::os::raw::c_uchar,
 }
-impl Clone for ares_txt_ext {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_naptr_reply {
     pub next: *mut ares_naptr_reply,
     pub flags: *mut ::std::os::raw::c_uchar,
@@ -479,13 +429,8 @@ pub struct ares_naptr_reply {
     pub order: ::std::os::raw::c_ushort,
     pub preference: ::std::os::raw::c_ushort,
 }
-impl Clone for ares_naptr_reply {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_soa_reply {
     pub nsname: *mut ::std::os::raw::c_char,
     pub hostmaster: *mut ::std::os::raw::c_char,
@@ -494,11 +439,6 @@ pub struct ares_soa_reply {
     pub retry: ::std::os::raw::c_uint,
     pub expire: ::std::os::raw::c_uint,
     pub minttl: ::std::os::raw::c_uint,
-}
-impl Clone for ares_soa_reply {
-    fn clone(&self) -> Self {
-        *self
-    }
 }
 extern "C" {
     pub fn ares_parse_a_reply(
@@ -590,31 +530,21 @@ extern "C" {
     pub fn ares_strerror(code: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct ares_addr_node {
     pub next: *mut ares_addr_node,
     pub family: ::std::os::raw::c_int,
     pub addr: ares_addr_node__bindgen_ty_1,
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub union ares_addr_node__bindgen_ty_1 {
     pub addr4: in_addr,
     pub addr6: ares_in6_addr,
     _bindgen_union_align: [u32; 4usize],
 }
-impl Clone for ares_addr_node__bindgen_ty_1 {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
-impl Clone for ares_addr_node {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct ares_addr_port_node {
     pub next: *mut ares_addr_port_node,
     pub family: ::std::os::raw::c_int,
@@ -623,21 +553,11 @@ pub struct ares_addr_port_node {
     pub tcp_port: ::std::os::raw::c_int,
 }
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub union ares_addr_port_node__bindgen_ty_1 {
     pub addr4: in_addr,
     pub addr6: ares_in6_addr,
     _bindgen_union_align: [u32; 4usize],
-}
-impl Clone for ares_addr_port_node__bindgen_ty_1 {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
-impl Clone for ares_addr_port_node {
-    fn clone(&self) -> Self {
-        *self
-    }
 }
 extern "C" {
     pub fn ares_set_servers(

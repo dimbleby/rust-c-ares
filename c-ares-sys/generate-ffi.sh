@@ -24,7 +24,6 @@ bindgen --blacklist-type="__.*" \
         --no-layout-tests \
         --output=src/ffi.rs \
         c-ares/ares.h
-cargo +nightly fmt
 
 # Apply manual patches.
 patch -p0 < ffi.patch

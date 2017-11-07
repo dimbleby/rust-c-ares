@@ -1,7 +1,8 @@
-extern crate gcc;
+extern crate cc;
 extern crate metadeps;
 
 use std::env;
+use std::ffi::OsString;
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
@@ -29,17 +30,6 @@ fn main() {
         return;
     }
 
-    // Set up compiler options.
-    let mut cflags = env::var("CFLAGS").unwrap_or_else(|_| String::new());
-    if target.contains("i686") {
-        cflags.push_str(" -m32");
-    } else if target.contains("x86_64") {
-        cflags.push_str(" -m64");
-    }
-    if !target.contains("i686") {
-        cflags.push_str(" -fPIC");
-    }
-
     let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
     let build = dst.join("build");
     let _ = fs::create_dir(&build);
@@ -53,15 +43,42 @@ fn main() {
     );
 
     // Configure.
+    let cfg = cc::Build::new();
+    let compiler = cfg.get_compiler();
+    let mut cflags = OsString::new();
+    for arg in compiler.args() {
+        cflags.push(arg);
+        cflags.push(" ");
+    }
+
     let mut cmd = Command::new("sh");
     cmd.env("CFLAGS", &cflags)
+        .env("CC", compiler.path())
         .current_dir(&build)
-        .arg("-c")
         .arg(format!("{}", src.join("c-ares/configure").display()))
         .arg("--enable-static=yes")
         .arg("--enable-shared=no")
         .arg("--enable-optimize")
         .arg(format!("--prefix={}", dst.display()));
+
+    let host = env::var("HOST").unwrap();
+    if target != host &&
+       (!target.contains("windows") || !host.contains("windows")) {
+        // NOTE GNU terminology
+        // BUILD = machine where we are (cross) compiling curl
+        // HOST = machine where the compiled curl will be used
+        // TARGET = only relevant when compiling compilers
+        if target.contains("windows") {
+            // curl's configure can't parse `-windows-` triples when used
+            // as `--host`s. In those cases we use this combination of
+            // `host` and `target` that appears to do the right thing.
+            cmd.arg(format!("--host={}", host));
+            cmd.arg(format!("--target={}", target));
+        } else {
+            cmd.arg(format!("--build={}", host));
+            cmd.arg(format!("--host={}", target));
+        }
+    }
     run(&mut cmd);
 
     // Compile.
@@ -93,7 +110,7 @@ fn nmake(target: &str) -> Command {
     // cargo messes with the environment in a way that nmake does not like -
     // see https://github.com/rust-lang/cargo/issues/4156.  Explicitly remove
     // the unwanted variables.
-    let mut cmd = gcc::windows_registry::find(target, "nmake.exe").unwrap();
+    let mut cmd = cc::windows_registry::find(target, "nmake.exe").unwrap();
     cmd.env_remove("MAKEFLAGS").env_remove("MFLAGS");
     cmd
 }

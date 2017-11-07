@@ -44,12 +44,6 @@ fn main() {
     let build = dst.join("build");
     let _ = fs::create_dir(&build);
 
-    let mut config_opts = Vec::new();
-    config_opts.push("--enable-static=yes".to_string());
-    config_opts.push("--enable-shared=no".to_string());
-    config_opts.push("--enable-optimize".to_string());
-    config_opts.push(format!("--prefix={}", dst.display()));
-
     // Prepare.
     let src = env::current_dir().unwrap();
     run(
@@ -57,17 +51,18 @@ fn main() {
             .current_dir(&src.join("c-ares"))
             .arg("buildconf"),
     );
-    run(
-        Command::new("sh")
-            .env("CFLAGS", &cflags)
-            .current_dir(&build)
-            .arg("-c")
-            .arg(format!(
-                "{} {}",
-                src.join("c-ares/configure").display(),
-                config_opts.join(" ")
-            )),
-    );
+
+    // Configure.
+    let mut cmd = Command::new("sh");
+    cmd.env("CFLAGS", &cflags)
+        .current_dir(&build)
+        .arg("-c")
+        .arg(format!("{}", src.join("c-ares/configure").display()))
+        .arg("--enable-static=yes")
+        .arg("--enable-shared=no")
+        .arg("--enable-optimize")
+        .arg(format!("--prefix={}", dst.display()));
+    run(&mut cmd);
 
     // Compile.
     run(

@@ -70,8 +70,7 @@ fn main() {
     // HOST = machine where the compiled binary will be used
     // TARGET = only relevant when compiling compilers
     let host = env::var("HOST").unwrap();
-    if target != host &&
-       (!target.contains("windows") || !host.contains("windows")) {
+    if target != host && (!target.contains("windows") || !host.contains("windows")) {
         if target.contains("windows") {
             cmd.arg(format!("--host={}", host));
             cmd.arg(format!("--target={}", target));

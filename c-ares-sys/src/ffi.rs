@@ -8,6 +8,9 @@ use c_types::sockaddr;
 use c_types::socklen_t;
 use libc::timeval;
 
+#[cfg(target_os = "android")]
+use jni_sys;
+
 #[cfg(windows)]
 pub type ares_socket_t = ::std::os::windows::io::RawSocket;
 #[cfg(unix)]
@@ -609,4 +612,18 @@ extern "C" {
         src: *const ::std::os::raw::c_char,
         dst: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int;
+}
+#[cfg(target_os = "android")]
+extern "C" {
+    pub fn ares_library_init_jvm(jvm: *mut jni_sys::JavaVM);
+}
+#[cfg(target_os = "android")]
+extern "C" {
+    pub fn ares_library_init_android(
+        connectivity_manager: jni_sys::jobject,
+    ) -> ::std::os::raw::c_int;
+}
+#[cfg(target_os = "android")]
+extern "C" {
+    pub fn ares_library_android_initialized() -> ::std::os::raw::c_int;
 }

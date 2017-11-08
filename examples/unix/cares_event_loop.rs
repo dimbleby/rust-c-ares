@@ -44,20 +44,20 @@ pub fn main() {
         "google.com",
         c_ares::AddressFamily::INET,
         move |result| {
-            println!("");
+            println!();
             print_host_results(result);
         }
     );
 
     let ipv4 = "216.58.212.78".parse::<IpAddr>().unwrap();
     ares_channel.get_host_by_address(&ipv4, move |results| {
-        println!("");
+        println!();
         print_host_results(results);
     });
 
     let ipv6 = "2001:4860:4860::8888".parse::<IpAddr>().unwrap();
     ares_channel.get_host_by_address(&ipv6, move |results| {
-        println!("");
+        println!();
         print_host_results(results);
     });
 

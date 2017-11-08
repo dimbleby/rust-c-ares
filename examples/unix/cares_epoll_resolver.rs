@@ -241,14 +241,14 @@ pub fn main() {
     // Create a Resolver.  Then make some requests.
     let resolver = Resolver::new();
     let result = resolver.query_ns("google.com");
-    println!("");
+    println!();
     print_ns_results(result);
 
     let result = resolver.query_ptr("14.210.58.216.in-addr.arpa");
-    println!("");
+    println!();
     print_ptr_results(result);
 
     let result = resolver.query_txt("google.com");
-    println!("");
+    println!();
     print_txt_results(result);
 }

@@ -334,16 +334,16 @@ pub fn main() {
     let resolver = Resolver::new();
     let query = resolver.query_cname("dimbleby.github.io");
     let result = event_loop.run(query);
-    println!("");
+    println!();
     print_cname_result(&result);
 
     let query = resolver.query_mx("gmail.com");
     let result = event_loop.run(query);
-    println!("");
+    println!();
     print_mx_results(&result);
 
     let query = resolver.query_naptr("apple.com");
     let result = event_loop.run(query);
-    println!("");
+    println!();
     print_naptr_results(&result);
 }

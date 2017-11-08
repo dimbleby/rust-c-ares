@@ -77,17 +77,17 @@ pub fn main() {
 
     // Set up some queries.
     ares_channel.query_a("apple.com", move |result| {
-        println!("");
+        println!();
         print_a_results(result);
     });
 
     ares_channel.query_aaaa("google.com", move |result| {
-        println!("");
+        println!();
         print_aaaa_results(result);
     });
 
     ares_channel.query_srv("_xmpp-server._tcp.gmail.com", move |result| {
-        println!("");
+        println!();
         print_srv_results(result);
     });
 

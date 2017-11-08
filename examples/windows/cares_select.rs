@@ -79,7 +79,7 @@ pub fn main() {
 
     // Set up some queries.
     ares_channel.query_soa("google.com", move |result| {
-        println!("");
+        println!();
         print_soa_result(result);
     });
 
@@ -89,7 +89,7 @@ pub fn main() {
         &sock,
         c_ares::NIFlags::LOOKUPHOST | c_ares::NIFlags::LOOKUPSERVICE,
         move |result| {
-            println!("");
+            println!();
             print_name_info_result(result);
         }
     );
@@ -100,7 +100,7 @@ pub fn main() {
         &sock,
         c_ares::NIFlags::LOOKUPHOST | c_ares::NIFlags::LOOKUPSERVICE,
         move |result| {
-            println!("");
+            println!();
             print_name_info_result(result);
         }
     );

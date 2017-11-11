@@ -42,7 +42,8 @@
 //! Complete examples showing how to use the library can be found
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 #![deny(missing_docs)]
-#[macro_use] extern crate bitflags;
+#[macro_use]
+extern crate bitflags;
 extern crate c_ares_sys;
 extern crate c_types;
 extern crate itertools;
@@ -73,61 +74,22 @@ mod utils;
 mod tests;
 
 // Re-export public interfaces.
-pub use a::{
-    AResult,
-    AResults,
-    AResultsIter,
-};
-pub use aaaa::{
-    AAAAResult,
-    AAAAResults,
-    AAAAResultsIter,
-};
-pub use channel::{
-    Channel,
-    GetSock,
-    GetSockIter,
-    Options,
-};
+pub use a::{AResult, AResults, AResultsIter};
+pub use aaaa::{AAAAResult, AAAAResults, AAAAResultsIter};
+pub use channel::{Channel, GetSock, GetSockIter, Options};
 pub use cname::CNameResults;
-pub use error::{
-    Error,
-    Result
-};
+pub use error::{Error, Result};
 pub use flags::Flags;
 pub use host::HostResults;
-pub use hostent::{
-    HostAddressResultsIter,
-    HostAliasResultsIter,
-};
-pub use mx::{
-    MXResult,
-    MXResults,
-    MXResultsIter,
-};
+pub use hostent::{HostAddressResultsIter, HostAliasResultsIter};
+pub use mx::{MXResult, MXResults, MXResultsIter};
 pub use nameinfo::NameInfoResult;
-pub use naptr::{
-    NAPTRResult,
-    NAPTRResults,
-    NAPTRResultsIter,
-};
+pub use naptr::{NAPTRResult, NAPTRResults, NAPTRResultsIter};
 pub use ni_flags::NIFlags;
 pub use ns::NSResults;
 pub use ptr::PTRResults;
 pub use soa::SOAResult;
-pub use srv::{
-    SRVResult,
-    SRVResults,
-    SRVResultsIter,
-};
-pub use txt::{
-    TXTResult,
-    TXTResults,
-    TXTResultsIter,
-};
-pub use types::{
-    AddressFamily,
-    Socket,
-    SOCKET_BAD,
-};
+pub use srv::{SRVResult, SRVResults, SRVResultsIter};
+pub use txt::{TXTResult, TXTResults, TXTResultsIter};
+pub use types::{AddressFamily, Socket, SOCKET_BAD};
 pub use utils::version;

@@ -1,16 +1,9 @@
-use std::os::raw::{
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::slice;
 
 use c_ares_sys;
 
-use error::{
-    Error,
-    Result,
-};
+use error::{Error, Result};
 use panic;
 
 pub unsafe extern "C" fn query_callback<F>(
@@ -18,8 +11,10 @@ pub unsafe extern "C" fn query_callback<F>(
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<&[u8]>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<&[u8]>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

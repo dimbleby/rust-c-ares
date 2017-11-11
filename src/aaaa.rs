@@ -1,21 +1,14 @@
 use std::fmt;
 use std::mem;
 use std::net::Ipv6Addr;
-use std::os::raw::{
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::{
-    Error,
-    Result,
-};
+use error::{Error, Result};
 use panic;
 use types::MAX_ADDRTTLS;
 
@@ -45,7 +38,8 @@ impl AAAAResults {
                 data.len() as c_int,
                 ptr::null_mut(),
                 results.addr6ttls.as_mut_ptr(),
-                &mut results.naddr6ttls as *mut _ as *mut c_int)
+                &mut results.naddr6ttls as *mut _ as *mut c_int,
+            )
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             Ok(results)
@@ -57,7 +51,7 @@ impl AAAAResults {
     /// Returns an iterator over the `AAAAResult` values in this `AAAAResults`.
     pub fn iter(&self) -> AAAAResultsIter {
         AAAAResultsIter {
-            addr6ttls: self.addr6ttls[0 .. self.naddr6ttls].iter()
+            addr6ttls: self.addr6ttls[0..self.naddr6ttls].iter(),
         }
     }
 }
@@ -79,7 +73,9 @@ pub struct AAAAResultsIter<'a> {
 impl<'a> Iterator for AAAAResultsIter<'a> {
     type Item = AAAAResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        self.addr6ttls.next().map(|addr6ttl| AAAAResult { addr6ttl: addr6ttl })
+        self.addr6ttls
+            .next()
+            .map(|addr6ttl| AAAAResult { addr6ttl: addr6ttl })
     }
 }
 
@@ -118,8 +114,10 @@ pub unsafe extern "C" fn query_aaaa_callback<F>(
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<AAAAResults>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<AAAAResults>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

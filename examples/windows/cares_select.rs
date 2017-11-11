@@ -2,27 +2,11 @@
 // wants us to listen on, and uses select() to satisfy those requirements.
 extern crate c_ares;
 
-use winapi::winsock2::{
-    fd_set,
-    FD_SETSIZE,
-    SOCKET_ERROR,
-    timeval,
-    WSADATA,
-};
-use ws2_32::{
-    select,
-    WSACleanup,
-    WSAStartup,
-};
+use winapi::winsock2::{fd_set, timeval, FD_SETSIZE, SOCKET_ERROR, WSADATA};
+use ws2_32::{select, WSACleanup, WSAStartup};
 use std::error::Error;
 use std::mem;
-use std::net::{
-    Ipv4Addr,
-    Ipv6Addr,
-    SocketAddr,
-    SocketAddrV4,
-    SocketAddrV6,
-};
+use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 use std::ptr;
 
 fn print_soa_result(result: c_ares::Result<c_ares::SOAResult>) {
@@ -45,16 +29,15 @@ fn print_soa_result(result: c_ares::Result<c_ares::SOAResult>) {
 fn print_name_info_result(result: c_ares::Result<c_ares::NameInfoResult>) {
     match result {
         Err(e) => {
-            println!(
-                "Name info lookup failed with error '{}'",
-                e.description());
+            println!("Name info lookup failed with error '{}'", e.description());
         }
         Ok(name_info_result) => {
             println!("Successful name info lookup...");
             println!("Node: {}", name_info_result.node().unwrap_or("<None>"));
             println!(
                 "Service: {}",
-                name_info_result.service().unwrap_or("<None>"));
+                name_info_result.service().unwrap_or("<None>")
+            );
         }
     }
 }
@@ -73,9 +56,11 @@ pub fn main() {
         .set_flags(c_ares::Flags::STAYOPEN)
         .set_timeout(500)
         .set_tries(3);
-    let mut ares_channel = c_ares::Channel::with_options(options)
-        .expect("Failed to create channel");
-    ares_channel.set_servers(&["8.8.8.8"]).expect("Failed to set servers");
+    let mut ares_channel =
+        c_ares::Channel::with_options(options).expect("Failed to create channel");
+    ares_channel
+        .set_servers(&["8.8.8.8"])
+        .expect("Failed to set servers");
 
     // Set up some queries.
     ares_channel.query_soa("google.com", move |result| {
@@ -91,7 +76,7 @@ pub fn main() {
         move |result| {
             println!();
             print_name_info_result(result);
-        }
+        },
     );
 
     let ipv6 = "2a00:1450:4009:80a::200e".parse::<Ipv6Addr>().unwrap();
@@ -102,7 +87,7 @@ pub fn main() {
         move |result| {
             println!();
             print_name_info_result(result);
-        }
+        },
     );
 
     // While c-ares wants us to listen for events, do so..
@@ -116,16 +101,17 @@ pub fn main() {
             fd_array: [c_ares::SOCKET_BAD; FD_SETSIZE],
         };
         let count = ares_channel.fds(&mut read_fds, &mut write_fds);
-        if count == 0 { break }
+        if count == 0 {
+            break;
+        }
 
         // Wait for something to happen.
         let timeout = timeval {
             tv_sec: 0,
             tv_usec: 500000,
         };
-        let results = unsafe {
-            select(0, &mut read_fds, &mut write_fds, ptr::null_mut(), &timeout)
-        };
+        let results =
+            unsafe { select(0, &mut read_fds, &mut write_fds, ptr::null_mut(), &timeout) };
 
         // Process whatever happened.
         match results {
@@ -133,5 +119,7 @@ pub fn main() {
             _ => ares_channel.process(&mut read_fds, &mut write_fds),
         }
     }
-    unsafe { WSACleanup(); }
+    unsafe {
+        WSACleanup();
+    }
 }

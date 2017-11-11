@@ -40,7 +40,7 @@ pub enum QueryType {
 // See arpa/nameser.h
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub enum DnsClass {
-   IN = 1,
+    IN = 1,
 }
 
 pub const MAX_ADDRTTLS: usize = 32;

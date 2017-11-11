@@ -1,10 +1,6 @@
 use std::fmt;
 use std::marker::PhantomData;
-use std::os::raw::{
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 use std::str;
@@ -12,10 +8,7 @@ use std::str;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::{
-    Error,
-    Result,
-};
+use error::{Error, Result};
 use panic;
 
 /// The result of a successful TXT lookup.
@@ -34,13 +27,9 @@ pub struct TXTResult<'a> {
 impl TXTResults {
     /// Obtain a `TXTResults` from the response to a TXT lookup.
     pub fn parse_from(data: &[u8]) -> Result<TXTResults> {
-        let mut txt_reply: *mut c_ares_sys::ares_txt_ext =
-            ptr::null_mut();
+        let mut txt_reply: *mut c_ares_sys::ares_txt_ext = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_txt_reply_ext(
-                data.as_ptr(),
-                data.len() as c_int,
-                &mut txt_reply)
+            c_ares_sys::ares_parse_txt_reply_ext(data.as_ptr(), data.len() as c_int, &mut txt_reply)
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             let result = TXTResults::new(txt_reply);
@@ -84,11 +73,7 @@ impl<'a> Iterator for TXTResultsIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let opt_reply = self.next;
         self.next = opt_reply.and_then(|reply| unsafe { reply.next.as_ref() });
-        opt_reply.map(|reply| {
-            TXTResult {
-                txt_reply: reply,
-            }
-        })
+        opt_reply.map(|reply| TXTResult { txt_reply: reply })
     }
 }
 
@@ -109,12 +94,12 @@ impl Drop for TXTResults {
     }
 }
 
-unsafe impl<'a> Send for TXTResult<'a> { }
-unsafe impl<'a> Sync for TXTResult<'a> { }
-unsafe impl Send for TXTResults { }
-unsafe impl Sync for TXTResults { }
-unsafe impl<'a> Send for TXTResultsIter<'a> { }
-unsafe impl<'a> Sync for TXTResultsIter<'a> { }
+unsafe impl<'a> Send for TXTResult<'a> {}
+unsafe impl<'a> Sync for TXTResult<'a> {}
+unsafe impl Send for TXTResults {}
+unsafe impl Sync for TXTResults {}
+unsafe impl<'a> Send for TXTResultsIter<'a> {}
+unsafe impl<'a> Sync for TXTResultsIter<'a> {}
 
 impl<'a> TXTResult<'a> {
     /// Is this the start of a text record, or the continuation of a previous
@@ -128,9 +113,7 @@ impl<'a> TXTResult<'a> {
     /// Although text is usual here, any binary data is legal - which is why we
     /// return `&[u8]` rather than `&str`.
     pub fn text(&self) -> &[u8] {
-        unsafe {
-            slice::from_raw_parts(self.txt_reply.txt, self.txt_reply.length)
-        }
+        unsafe { slice::from_raw_parts(self.txt_reply.txt, self.txt_reply.length) }
     }
 }
 
@@ -147,8 +130,10 @@ pub unsafe extern "C" fn query_txt_callback<F>(
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<TXTResults>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<TXTResults>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

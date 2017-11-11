@@ -1,12 +1,7 @@
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::os::raw::{
-    c_char,
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_char, c_int, c_uchar, c_void};
 use std::str;
 use std::ptr;
 use std::slice;
@@ -14,10 +9,7 @@ use std::slice;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::{
-    Error,
-    Result,
-};
+use error::{Error, Result};
 use panic;
 
 /// The result of a successful NAPTR lookup.
@@ -36,13 +28,9 @@ pub struct NAPTRResult<'a> {
 impl NAPTRResults {
     /// Obtain a `NAPTRResults` from the response to a NAPTR lookup.
     pub fn parse_from(data: &[u8]) -> Result<NAPTRResults> {
-        let mut naptr_reply: *mut c_ares_sys::ares_naptr_reply =
-            ptr::null_mut();
+        let mut naptr_reply: *mut c_ares_sys::ares_naptr_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_naptr_reply(
-                data.as_ptr(),
-                data.len() as c_int,
-                &mut naptr_reply)
+            c_ares_sys::ares_parse_naptr_reply(data.as_ptr(), data.len() as c_int, &mut naptr_reply)
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             let naptr_result = NAPTRResults::new(naptr_reply);
@@ -52,8 +40,7 @@ impl NAPTRResults {
         }
     }
 
-    fn new(
-        reply: *mut c_ares_sys::ares_naptr_reply) -> NAPTRResults {
+    fn new(reply: *mut c_ares_sys::ares_naptr_reply) -> NAPTRResults {
         NAPTRResults {
             naptr_reply: reply,
             phantom: PhantomData,
@@ -88,11 +75,7 @@ impl<'a> Iterator for NAPTRResultsIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let opt_reply = self.next;
         self.next = opt_reply.and_then(|reply| unsafe { reply.next.as_ref() });
-        opt_reply.map(|reply| {
-            NAPTRResult {
-                naptr_reply: reply,
-            }
-        })
+        opt_reply.map(|reply| NAPTRResult { naptr_reply: reply })
     }
 }
 
@@ -113,19 +96,18 @@ impl Drop for NAPTRResults {
     }
 }
 
-unsafe impl Send for NAPTRResults { }
-unsafe impl Sync for NAPTRResults { }
-unsafe impl<'a> Send for NAPTRResult<'a> { }
-unsafe impl<'a> Sync for NAPTRResult<'a> { }
-unsafe impl<'a> Send for NAPTRResultsIter<'a> { }
-unsafe impl<'a> Sync for NAPTRResultsIter<'a> { }
+unsafe impl Send for NAPTRResults {}
+unsafe impl Sync for NAPTRResults {}
+unsafe impl<'a> Send for NAPTRResult<'a> {}
+unsafe impl<'a> Sync for NAPTRResult<'a> {}
+unsafe impl<'a> Send for NAPTRResultsIter<'a> {}
+unsafe impl<'a> Sync for NAPTRResultsIter<'a> {}
 
 impl<'a> NAPTRResult<'a> {
     /// Returns the flags in this `NAPTRResult`.
     pub fn flags(&self) -> &str {
         unsafe {
-            let c_str = CStr::from_ptr(
-                self.naptr_reply.flags as *const c_char);
+            let c_str = CStr::from_ptr(self.naptr_reply.flags as *const c_char);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
@@ -133,8 +115,7 @@ impl<'a> NAPTRResult<'a> {
     /// Returns the service name in this `NAPTRResult`.
     pub fn service_name(&self) -> &str {
         unsafe {
-            let c_str = CStr::from_ptr(
-                self.naptr_reply.service as *const c_char);
+            let c_str = CStr::from_ptr(self.naptr_reply.service as *const c_char);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
@@ -142,8 +123,7 @@ impl<'a> NAPTRResult<'a> {
     /// Returns the regular expression in this `NAPTRResult`.
     pub fn reg_exp(&self) -> &str {
         unsafe {
-            let c_str = CStr::from_ptr(
-                self.naptr_reply.regexp as *const c_char);
+            let c_str = CStr::from_ptr(self.naptr_reply.regexp as *const c_char);
             str::from_utf8_unchecked(c_str.to_bytes())
         }
     }
@@ -172,11 +152,7 @@ impl<'a> fmt::Display for NAPTRResult<'a> {
         write!(fmt, "Flags: {}, ", self.flags())?;
         write!(fmt, "Service name: {}, ", self.service_name())?;
         write!(fmt, "Regular expression: {}, ", self.reg_exp())?;
-        write!(
-            fmt,
-            "Replacement pattern: {}, ",
-            self.replacement_pattern()
-        )?;
+        write!(fmt, "Replacement pattern: {}, ", self.replacement_pattern())?;
         write!(fmt, "Order: {}, ", self.order())?;
         write!(fmt, "Preference: {}", self.preference())?;
         Ok(())
@@ -188,8 +164,10 @@ pub unsafe extern "C" fn query_naptr_callback<F>(
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<NAPTRResults>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<NAPTRResults>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

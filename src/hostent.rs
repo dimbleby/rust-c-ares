@@ -2,15 +2,8 @@ use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
-use std::net::{
-    IpAddr,
-    Ipv4Addr,
-    Ipv6Addr,
-};
-use std::os::raw::{
-    c_char,
-    c_int,
-};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::os::raw::{c_char, c_int};
 use std::slice;
 use std::str;
 
@@ -51,9 +44,7 @@ pub struct HostentBorrowed<'a> {
 
 impl<'a> HostentBorrowed<'a> {
     pub fn new(hostent: &'a c_types::hostent) -> HostentBorrowed<'a> {
-        HostentBorrowed {
-            inner: hostent,
-        }
+        HostentBorrowed { inner: hostent }
     }
 }
 
@@ -102,11 +93,11 @@ impl<'a> HasHostent for HostentBorrowed<'a> {
     }
 }
 
-unsafe impl Send for HostentOwned { }
-unsafe impl Sync for HostentOwned { }
+unsafe impl Send for HostentOwned {}
+unsafe impl Sync for HostentOwned {}
 
-unsafe impl<'a> Send for HostentBorrowed<'a> { }
-unsafe impl<'a> Sync for HostentBorrowed<'a> { }
+unsafe impl<'a> Send for HostentBorrowed<'a> {}
+unsafe impl<'a> Sync for HostentBorrowed<'a> {}
 
 /// Iterator of `IpAddr`s.
 #[derive(Clone, Copy, Debug)]
@@ -116,9 +107,7 @@ pub struct HostAddressResultsIter<'a> {
 }
 
 // Get an IpAddr from a family and an array of bytes, as found in a `hostent`.
-unsafe fn ip_address_from_bytes(
-    family: AddressFamily,
-    h_addr: *const u8) -> Option<IpAddr> {
+unsafe fn ip_address_from_bytes(family: AddressFamily, h_addr: *const u8) -> Option<IpAddr> {
     match family {
         AddressFamily::INET => {
             let source = slice::from_raw_parts(h_addr, 4);
@@ -126,14 +115,14 @@ unsafe fn ip_address_from_bytes(
             bytes.copy_from_slice(source);
             let ipv4 = Ipv4Addr::from(bytes);
             Some(IpAddr::V4(ipv4))
-        },
+        }
         AddressFamily::INET6 => {
             let source = slice::from_raw_parts(h_addr, 16);
             let mut bytes: [u8; 16] = mem::uninitialized();
             bytes.copy_from_slice(source);
             let ipv6 = Ipv6Addr::from(bytes);
             Some(IpAddr::V6(ipv6))
-        },
+        }
         _ => None,
     }
 }
@@ -147,16 +136,15 @@ impl<'a> Iterator for HostAddressResultsIter<'a> {
         } else {
             unsafe {
                 self.next = &*(self.next as *const _).offset(1);
-                self.family.and_then(|family| {
-                    ip_address_from_bytes(family, h_addr as *const u8)
-                })
+                self.family
+                    .and_then(|family| ip_address_from_bytes(family, h_addr as *const u8))
             }
         }
     }
 }
 
-unsafe impl<'a> Send for HostAddressResultsIter<'a> { }
-unsafe impl<'a> Sync for HostAddressResultsIter<'a> { }
+unsafe impl<'a> Send for HostAddressResultsIter<'a> {}
+unsafe impl<'a> Sync for HostAddressResultsIter<'a> {}
 
 /// Iterator of `&'a str`s.
 #[derive(Clone, Copy, Debug)]
@@ -180,5 +168,5 @@ impl<'a> Iterator for HostAliasResultsIter<'a> {
     }
 }
 
-unsafe impl<'a> Send for HostAliasResultsIter<'a> { }
-unsafe impl<'a> Sync for HostAliasResultsIter<'a> { }
+unsafe impl<'a> Send for HostAliasResultsIter<'a> {}
+unsafe impl<'a> Sync for HostAliasResultsIter<'a> {}

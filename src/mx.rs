@@ -1,11 +1,7 @@
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::os::raw::{
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 use std::str;
@@ -13,10 +9,7 @@ use std::str;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::{
-    Error,
-    Result,
-};
+use error::{Error, Result};
 use panic;
 
 /// The result of a successful MX lookup.
@@ -35,13 +28,9 @@ pub struct MXResult<'a> {
 impl MXResults {
     /// Obtain an `MXResults` from the response to an MX lookup.
     pub fn parse_from(data: &[u8]) -> Result<MXResults> {
-        let mut mx_reply: *mut c_ares_sys::ares_mx_reply =
-            ptr::null_mut();
+        let mut mx_reply: *mut c_ares_sys::ares_mx_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_mx_reply(
-                data.as_ptr(),
-                data.len() as c_int,
-                &mut mx_reply)
+            c_ares_sys::ares_parse_mx_reply(data.as_ptr(), data.len() as c_int, &mut mx_reply)
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             let result = MXResults::new(mx_reply);
@@ -85,11 +74,7 @@ impl<'a> Iterator for MXResultsIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let opt_reply = self.next;
         self.next = opt_reply.and_then(|reply| unsafe { reply.next.as_ref() });
-        opt_reply.map(|reply| {
-            MXResult {
-                mx_reply: reply,
-            }
-        })
+        opt_reply.map(|reply| MXResult { mx_reply: reply })
     }
 }
 
@@ -110,12 +95,12 @@ impl Drop for MXResults {
     }
 }
 
-unsafe impl Send for MXResults { }
-unsafe impl Sync for MXResults { }
-unsafe impl<'a> Send for MXResult<'a> { }
-unsafe impl<'a> Sync for MXResult<'a> { }
-unsafe impl<'a> Send for MXResultsIter<'a> { }
-unsafe impl<'a> Sync for MXResultsIter<'a> { }
+unsafe impl Send for MXResults {}
+unsafe impl Sync for MXResults {}
+unsafe impl<'a> Send for MXResult<'a> {}
+unsafe impl<'a> Sync for MXResult<'a> {}
+unsafe impl<'a> Send for MXResultsIter<'a> {}
+unsafe impl<'a> Sync for MXResultsIter<'a> {}
 
 impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.
@@ -145,8 +130,10 @@ pub unsafe extern "C" fn query_mx_callback<F>(
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<MXResults>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<MXResults>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

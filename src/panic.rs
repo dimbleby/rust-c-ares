@@ -9,11 +9,11 @@ thread_local! {
 
 pub fn catch<T, F: FnOnce() -> T>(f: F) -> Option<T> {
     if LAST_ERROR.with(|slot| slot.borrow().is_some()) {
-        return None
+        return None;
     }
 
     if UNWINDING.with(|slot| *slot.borrow()) {
-        return None
+        return None;
     }
 
     match panic::catch_unwind(AssertUnwindSafe(f)) {

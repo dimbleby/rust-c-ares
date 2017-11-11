@@ -6,25 +6,12 @@
 extern crate c_ares;
 extern crate nix;
 
-use self::nix::sys::epoll::{
-    epoll_create,
-    epoll_ctl,
-    epoll_wait,
-    EpollEvent,
-    EpollFlags,
-    EpollOp,
-    EPOLLIN,
-    EPOLLOUT,
-};
+use self::nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp,
+                            EPOLLIN, EPOLLOUT};
 use std::collections::HashSet;
 use std::error::Error;
 use std::str;
-use std::sync::{
-    Arc,
-    Condvar,
-    Mutex,
-    mpsc,
-};
+use std::sync::{mpsc, Arc, Condvar, Mutex};
 use std::thread;
 
 struct Resolver {
@@ -35,9 +22,7 @@ struct Resolver {
 
 // A thread that keeps going processing file descriptors for c-ares, until it
 // is asked to stop.
-fn fd_handling_thread(
-    ares_channel: &Mutex<c_ares::Channel>,
-    keep_going: &(Mutex<bool>, Condvar)) {
+fn fd_handling_thread(ares_channel: &Mutex<c_ares::Channel>, keep_going: &(Mutex<bool>, Condvar)) {
     let (ref lock, ref cvar) = *keep_going;
     let mut carry_on = lock.lock().unwrap();
     while *carry_on {
@@ -58,8 +43,12 @@ fn process_ares_fds(ares_channel: &Mutex<c_ares::Channel>) {
         let sockets = ares_channel.lock().unwrap().get_sock();
         for (fd, readable, writable) in &sockets {
             let mut interest = EpollFlags::empty();
-            if readable { interest |= EPOLLIN; }
-            if writable { interest |= EPOLLOUT; }
+            if readable {
+                interest |= EPOLLIN;
+            }
+            if writable {
+                interest |= EPOLLOUT;
+            }
             let mut event = EpollEvent::new(interest, fd as u64);
             let op = if tracked_fds.insert(fd) {
                 EpollOp::EpollCtlAdd
@@ -69,22 +58,24 @@ fn process_ares_fds(ares_channel: &Mutex<c_ares::Channel>) {
             epoll_ctl(epoll, op, fd, &mut event).expect("epoll_ctl failed");
             active = true;
         }
-        if !active { break }
+        if !active {
+            break;
+        }
 
         // Wait for something to happen.
         let empty_event = EpollEvent::new(EpollFlags::empty(), 0);
         let mut events = [empty_event; 2];
-        let results = epoll_wait(epoll, &mut events, 500)
-            .expect("epoll_wait failed");
+        let results = epoll_wait(epoll, &mut events, 500).expect("epoll_wait failed");
 
         // Process whatever happened.
         match results {
             0 => {
                 // No events - must be a timeout.  Tell c-ares about it.
-                ares_channel.lock().unwrap().process_fd(
-                    c_ares::SOCKET_BAD,
-                    c_ares::SOCKET_BAD);
-            },
+                ares_channel
+                    .lock()
+                    .unwrap()
+                    .process_fd(c_ares::SOCKET_BAD, c_ares::SOCKET_BAD);
+            }
             n => {
                 // Sockets became readable or writable.  Tell c-ares.
                 for event in &events[0..n] {
@@ -115,13 +106,15 @@ impl Resolver {
             .set_flags(c_ares::Flags::STAYOPEN)
             .set_timeout(500)
             .set_tries(3);
-        let mut ares_channel = c_ares::Channel::with_options(options)
-            .expect("Failed to create channel");
-        ares_channel.set_servers(&["8.8.8.8"]).expect("Failed to set servers");
+        let mut ares_channel =
+            c_ares::Channel::with_options(options).expect("Failed to create channel");
+        ares_channel
+            .set_servers(&["8.8.8.8"])
+            .expect("Failed to set servers");
         let locked_channel = Arc::new(Mutex::new(ares_channel));
 
         // Create a thread to handle file descriptors.
-        #[cfg_attr(feature="cargo-clippy", allow(mutex_atomic))]
+        #[cfg_attr(feature = "cargo-clippy", allow(mutex_atomic))]
         let keep_going = Arc::new((Mutex::new(true), Condvar::new()));
         let fd_handle = thread::spawn({
             let locked_channel = Arc::clone(&locked_channel);
@@ -145,9 +138,12 @@ impl Resolver {
     // result to a std::sync::mpsc::channel, and waiting on that channel.
     pub fn query_ns(&self, name: &str) -> c_ares::Result<c_ares::NSResults> {
         let (tx, rx) = mpsc::channel();
-        self.ares_channel.lock().unwrap().query_ns(name, move |result| {
-            tx.send(result).unwrap();
-        });
+        self.ares_channel
+            .lock()
+            .unwrap()
+            .query_ns(name, move |result| {
+                tx.send(result).unwrap();
+            });
         self.wake_fd_thread();
         rx.recv().unwrap()
     }
@@ -155,9 +151,12 @@ impl Resolver {
     // A blocking PTR query.
     pub fn query_ptr(&self, name: &str) -> c_ares::Result<c_ares::PTRResults> {
         let (tx, rx) = mpsc::channel();
-        self.ares_channel.lock().unwrap().query_ptr(name, move |result| {
-            tx.send(result).unwrap();
-        });
+        self.ares_channel
+            .lock()
+            .unwrap()
+            .query_ptr(name, move |result| {
+                tx.send(result).unwrap();
+            });
         self.wake_fd_thread();
         rx.recv().unwrap()
     }
@@ -165,9 +164,12 @@ impl Resolver {
     // A blocking TXT query.
     pub fn query_txt(&self, name: &str) -> c_ares::Result<c_ares::TXTResults> {
         let (tx, rx) = mpsc::channel();
-        self.ares_channel.lock().unwrap().query_txt(name, move |result| {
-            tx.send(result).unwrap();
-        });
+        self.ares_channel
+            .lock()
+            .unwrap()
+            .query_txt(name, move |result| {
+                tx.send(result).unwrap();
+            });
         self.wake_fd_thread();
         rx.recv().unwrap()
     }
@@ -226,12 +228,12 @@ fn print_txt_results(result: c_ares::Result<c_ares::TXTResults>) {
         Ok(txt_results) => {
             println!("Successful TXT lookup...");
             for txt_result in &txt_results {
-                let text = str::from_utf8(txt_result.text())
-                    .unwrap_or("<binary>");
+                let text = str::from_utf8(txt_result.text()).unwrap_or("<binary>");
                 println!(
                     "record start: {}, text: {}",
                     txt_result.record_start(),
-                    text);
+                    text
+                );
             }
         }
     }

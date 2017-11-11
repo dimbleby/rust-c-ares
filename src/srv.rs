@@ -1,11 +1,7 @@
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::os::raw::{
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::str;
 use std::ptr;
 use std::slice;
@@ -13,10 +9,7 @@ use std::slice;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::{
-    Error,
-    Result,
-};
+use error::{Error, Result};
 use panic;
 
 /// The result of a successful SRV lookup.
@@ -36,13 +29,9 @@ pub struct SRVResult<'a> {
 impl SRVResults {
     /// Obtain an `SRVResults` from the response to an SRV lookup.
     pub fn parse_from(data: &[u8]) -> Result<SRVResults> {
-        let mut srv_reply: *mut c_ares_sys::ares_srv_reply =
-            ptr::null_mut();
+        let mut srv_reply: *mut c_ares_sys::ares_srv_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_srv_reply(
-                data.as_ptr(),
-                data.len() as c_int,
-                &mut srv_reply)
+            c_ares_sys::ares_parse_srv_reply(data.as_ptr(), data.len() as c_int, &mut srv_reply)
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             let srv_result = SRVResults::new(srv_reply);
@@ -86,11 +75,7 @@ impl<'a> Iterator for SRVResultsIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         let opt_reply = self.next;
         self.next = opt_reply.and_then(|reply| unsafe { reply.next.as_ref() });
-        opt_reply.map(|reply| {
-            SRVResult {
-                srv_reply: reply,
-            }
-        })
+        opt_reply.map(|reply| SRVResult { srv_reply: reply })
     }
 }
 
@@ -111,12 +96,12 @@ impl Drop for SRVResults {
     }
 }
 
-unsafe impl Send for SRVResults { }
-unsafe impl Sync for SRVResults { }
-unsafe impl<'a> Send for SRVResult<'a> { }
-unsafe impl<'a> Sync for SRVResult<'a> { }
-unsafe impl<'a> Send for SRVResultsIter<'a> { }
-unsafe impl<'a> Sync for SRVResultsIter<'a> { }
+unsafe impl Send for SRVResults {}
+unsafe impl Sync for SRVResults {}
+unsafe impl<'a> Send for SRVResult<'a> {}
+unsafe impl<'a> Sync for SRVResult<'a> {}
+unsafe impl<'a> Send for SRVResultsIter<'a> {}
+unsafe impl<'a> Sync for SRVResultsIter<'a> {}
 
 impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
@@ -158,8 +143,10 @@ pub unsafe extern "C" fn query_srv_callback<F>(
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<SRVResults>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<SRVResults>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

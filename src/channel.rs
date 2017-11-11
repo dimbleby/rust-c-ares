@@ -1,92 +1,34 @@
 use std::ffi::CString;
 use std::marker::PhantomData;
 use std::mem;
-use std::net::{
-    IpAddr,
-    Ipv4Addr,
-    Ipv6Addr,
-    SocketAddr,
-};
-use std::os::raw::{
-    c_char,
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::os::raw::{c_char, c_int, c_uchar, c_void};
 use std::ptr;
 use std::sync::Arc;
 
 use c_ares_sys;
 use c_types;
 
-use a::{
-    AResults,
-    query_a_callback,
-};
-use aaaa::{
-    AAAAResults,
-    query_aaaa_callback,
-};
-use cname::{
-    CNameResults,
-    query_cname_callback,
-};
-use error::{
-    Error,
-    Result,
-};
+use a::{query_a_callback, AResults};
+use aaaa::{query_aaaa_callback, AAAAResults};
+use cname::{query_cname_callback, CNameResults};
+use error::{Error, Result};
 use Flags;
-use host::{
-    HostResults,
-    get_host_callback,
-};
-use mx::{
-    MXResults,
-    query_mx_callback,
-};
-use nameinfo::{
-    NameInfoResult,
-    get_name_info_callback,
-};
-use naptr::{
-    NAPTRResults,
-    query_naptr_callback,
-};
+use host::{get_host_callback, HostResults};
+use mx::{query_mx_callback, MXResults};
+use nameinfo::{get_name_info_callback, NameInfoResult};
+use naptr::{query_naptr_callback, NAPTRResults};
 use ni_flags::NIFlags;
-use ns::{
-    NSResults,
-    query_ns_callback,
-};
+use ns::{query_ns_callback, NSResults};
 use panic;
-use ptr::{
-    PTRResults,
-    query_ptr_callback,
-};
+use ptr::{query_ptr_callback, PTRResults};
 use query::query_callback;
-use soa::{
-    SOAResult,
-    query_soa_callback,
-};
-use srv::{
-    SRVResults,
-    query_srv_callback,
-};
-use txt::{
-    TXTResults,
-    query_txt_callback,
-};
-use types::{
-    AddressFamily,
-    DnsClass,
-    QueryType,
-    Socket,
-};
-use utils::{
-  ipv4_as_in_addr,
-  ipv6_as_in6_addr,
-  socket_addrv4_as_sockaddr_in,
-  socket_addrv6_as_sockaddr_in6,
-};
+use soa::{query_soa_callback, SOAResult};
+use srv::{query_srv_callback, SRVResults};
+use txt::{query_txt_callback, TXTResults};
+use types::{AddressFamily, DnsClass, QueryType, Socket};
+use utils::{ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in,
+            socket_addrv6_as_sockaddr_in6};
 
 type SocketStateCallback = FnMut(Socket, bool, bool) + Send + 'static;
 
@@ -104,7 +46,7 @@ impl Default for Options {
         Self {
             ares_options: unsafe { mem::uninitialized() },
             optmask: 0,
-            domains: vec!(),
+            domains: vec![],
             lookups: None,
             socket_state_callback: None,
         }
@@ -172,10 +114,7 @@ impl Options {
     /// Set the domains to search, instead of the domains specified in
     /// resolv.conf or the domain derived from the kernel hostname variable.
     pub fn set_domains(&mut self, domains: &[&str]) -> &mut Self {
-        self.domains = domains
-            .iter()
-            .map(|&s| CString::new(s).unwrap())
-            .collect();
+        self.domains = domains.iter().map(|&s| CString::new(s).unwrap()).collect();
         self.optmask |= c_ares_sys::ARES_OPT_DOMAINS;
         self
     }
@@ -198,11 +137,12 @@ impl Options {
     /// -  `read` is set to true if the socket should listen for read events
     /// -  `write` is set to true if the socket should listen for write events.
     pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
-        where F: FnMut(Socket, bool, bool) + Send + 'static {
+    where
+        F: FnMut(Socket, bool, bool) + Send + 'static,
+    {
         let boxed_callback = Arc::new(callback);
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
-        self.ares_options.sock_state_cb_data =
-            &*boxed_callback as *const _ as *mut c_void;
+        self.ares_options.sock_state_cb_data = &*boxed_callback as *const _ as *mut c_void;
         self.socket_state_callback = Some(boxed_callback);
         self.optmask |= c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         self
@@ -263,18 +203,13 @@ impl Channel {
     /// Create a new channel for name service lookups, with the given `Options`.
     pub fn with_options(mut options: Options) -> Result<Channel> {
         // Initialize the library.
-        let lib_rc = unsafe {
-            c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL)
-        };
+        let lib_rc = unsafe { c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL) };
         if lib_rc != c_ares_sys::ARES_SUCCESS {
-            return Err(Error::from(lib_rc))
+            return Err(Error::from(lib_rc));
         }
 
         // We deferred setting up domains in the options - do it now.
-        let domains: Vec<_> = options.domains
-            .iter()
-            .map(|s| s.as_ptr())
-            .collect();
+        let domains: Vec<_> = options.domains.iter().map(|s| s.as_ptr()).collect();
         options.ares_options.domains = domains.as_ptr() as *mut *mut c_char;
         options.ares_options.ndomains = domains.len() as c_int;
 
@@ -289,11 +224,14 @@ impl Channel {
             c_ares_sys::ares_init_options(
                 &mut ares_channel,
                 &mut options.ares_options,
-                options.optmask)
+                options.optmask,
+            )
         };
         if channel_rc != c_ares_sys::ARES_SUCCESS {
-            unsafe { c_ares_sys::ares_library_cleanup(); }
-            return Err(Error::from(channel_rc))
+            unsafe {
+                c_ares_sys::ares_library_cleanup();
+            }
+            return Err(Error::from(channel_rc));
         }
 
         let channel = Channel {
@@ -307,11 +245,9 @@ impl Channel {
     /// Duplicate a channel.
     pub fn try_clone(&self) -> Result<Channel> {
         let mut ares_channel = ptr::null_mut();
-        let rc = unsafe {
-            c_ares_sys::ares_dup(&mut ares_channel, self.ares_channel)
-        };
+        let rc = unsafe { c_ares_sys::ares_dup(&mut ares_channel, self.ares_channel) };
         if rc != c_ares_sys::ARES_SUCCESS {
-            return Err(Error::from(rc))
+            return Err(Error::from(rc));
         }
 
         let callback = self._socket_state_callback.as_ref().cloned();
@@ -339,10 +275,7 @@ impl Channel {
     /// Handle input and output events associated with the specified file
     /// descriptors (sockets).  Also handles timeouts associated with the
     /// `Channel`.
-    pub fn process(
-        &mut self,
-        read_fds: &mut c_types::fd_set,
-        write_fds: &mut c_types::fd_set) {
+    pub fn process(&mut self, read_fds: &mut c_types::fd_set, write_fds: &mut c_types::fd_set) {
         unsafe {
             c_ares_sys::ares_process(self.ares_channel, read_fds, write_fds);
         }
@@ -357,20 +290,16 @@ impl Channel {
             c_ares_sys::ares_getsock(
                 self.ares_channel,
                 socks.as_mut_ptr(),
-                c_ares_sys::ARES_GETSOCK_MAXNUM as c_int)
+                c_ares_sys::ARES_GETSOCK_MAXNUM as c_int,
+            )
         };
         GetSock::new(socks, bitmask as u32)
     }
 
     /// Retrieve the set of socket descriptors which the calling application
     /// should wait on for reading and / or writing.
-    pub fn fds(
-        &self,
-        read_fds: &mut c_types::fd_set,
-        write_fds: &mut c_types::fd_set) -> u32 {
-        unsafe {
-            c_ares_sys::ares_fds(self.ares_channel, read_fds, write_fds) as u32
-        }
+    pub fn fds(&self, read_fds: &mut c_types::fd_set, write_fds: &mut c_types::fd_set) -> u32 {
+        unsafe { c_ares_sys::ares_fds(self.ares_channel, read_fds, write_fds) as u32 }
     }
 
     /// Set the list of servers to contact, instead of the servers specified
@@ -378,15 +307,11 @@ impl Channel {
     ///
     /// String format is `host[:port]`.  IPv6 addresses with ports require
     /// square brackets eg `[2001:4860:4860::8888]:53`.
-    pub fn set_servers(
-        &mut self,
-        servers: &[&str]) -> Result<&mut Self> {
+    pub fn set_servers(&mut self, servers: &[&str]) -> Result<&mut Self> {
         let servers_csv = servers.join(",");
         let c_servers = CString::new(servers_csv).unwrap();
         let ares_rc = unsafe {
-            c_ares_sys::ares_set_servers_ports_csv(
-                self.ares_channel,
-                c_servers.as_ptr())
+            c_ares_sys::ares_set_servers_ports_csv(self.ares_channel, c_servers.as_ptr())
         };
         if ares_rc == c_ares_sys::ARES_SUCCESS {
             Ok(self)
@@ -398,9 +323,7 @@ impl Channel {
     /// Set the local IPv4 address from which to make queries.
     pub fn set_local_ipv4(&mut self, ipv4: &Ipv4Addr) -> &mut Self {
         unsafe {
-            c_ares_sys::ares_set_local_ip4(
-                self.ares_channel,
-                u32::from(*ipv4));
+            c_ares_sys::ares_set_local_ip4(self.ares_channel, u32::from(*ipv4));
         }
         self
     }
@@ -411,7 +334,8 @@ impl Channel {
         unsafe {
             c_ares_sys::ares_set_local_ip6(
                 self.ares_channel,
-                &in6_addr as *const _ as *const c_uchar);
+                &in6_addr as *const _ as *const c_uchar,
+            );
         }
         self
     }
@@ -430,7 +354,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_a<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<AResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -440,7 +366,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::A as c_int,
                 Some(query_a_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -450,7 +377,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_a<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<AResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -460,7 +389,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::A as c_int,
                 Some(query_a_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -470,7 +400,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AAAAResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<AAAAResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -480,7 +412,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::AAAA as c_int,
                 Some(query_aaaa_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -490,7 +423,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_aaaa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<AAAAResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<AAAAResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -500,7 +435,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::AAAA as c_int,
                 Some(query_aaaa_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -510,7 +446,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_cname<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<CNameResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<CNameResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -520,7 +458,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::CNAME as c_int,
                 Some(query_cname_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -530,7 +469,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_cname<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<CNameResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<CNameResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -540,7 +481,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::CNAME as c_int,
                 Some(query_cname_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -550,7 +492,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_mx<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<MXResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<MXResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -560,7 +504,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::MX as c_int,
                 Some(query_mx_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -570,7 +515,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_mx<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<MXResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<MXResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -580,7 +527,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::MX as c_int,
                 Some(query_mx_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -590,7 +538,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_naptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NAPTRResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<NAPTRResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -600,7 +550,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::NAPTR as c_int,
                 Some(query_naptr_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -610,7 +561,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_naptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NAPTRResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<NAPTRResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -620,7 +573,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::NAPTR as c_int,
                 Some(query_naptr_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -630,7 +584,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ns<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NSResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<NSResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -640,7 +596,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::NS as c_int,
                 Some(query_ns_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -650,7 +607,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_ns<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<NSResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<NSResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -660,7 +619,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::NS as c_int,
                 Some(query_ns_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -670,7 +630,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<PTRResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<PTRResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -680,7 +642,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::PTR as c_int,
                 Some(query_ptr_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -690,7 +653,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_ptr<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<PTRResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<PTRResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -700,7 +665,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::PTR as c_int,
                 Some(query_ptr_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -710,7 +676,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_soa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SOAResult>) + Send + 'static {
+    where
+        F: FnOnce(Result<SOAResult>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -720,7 +688,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::SOA as c_int,
                 Some(query_soa_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -730,7 +699,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_soa<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SOAResult>) + Send + 'static {
+    where
+        F: FnOnce(Result<SOAResult>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -740,7 +711,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::SOA as c_int,
                 Some(query_soa_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -750,7 +722,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_srv<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SRVResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<SRVResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -760,7 +734,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::SRV as c_int,
                 Some(query_srv_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -770,7 +745,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_srv<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<SRVResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<SRVResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -780,7 +757,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::SRV as c_int,
                 Some(query_srv_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -790,7 +768,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_txt<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<TXTResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<TXTResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -800,7 +780,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::TXT as c_int,
                 Some(query_txt_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -810,7 +791,9 @@ impl Channel {
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_txt<F>(&mut self, name: &str, handler: F)
-        where F: FnOnce(Result<TXTResults>) + Send + 'static {
+    where
+        F: FnOnce(Result<TXTResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -820,7 +803,8 @@ impl Channel {
                 DnsClass::IN as c_int,
                 QueryType::TXT as c_int,
                 Some(query_txt_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -828,29 +812,25 @@ impl Channel {
     /// Perform a host query by address.
     ///
     /// On completion, `handler` is called with the result.
-    pub fn get_host_by_address<F>(
-        &mut self,
-        address: &IpAddr,
-        handler: F) where F: FnOnce(Result<HostResults>) + Send + 'static {
+    pub fn get_host_by_address<F>(&mut self, address: &IpAddr, handler: F)
+    where
+        F: FnOnce(Result<HostResults>) + Send + 'static,
+    {
         let in_addr: c_types::in_addr;
         let in6_addr: c_types::in6_addr;
         let c_addr = match *address {
             IpAddr::V4(ref v4) => {
                 in_addr = ipv4_as_in_addr(v4);
                 &in_addr as *const _ as *const c_void
-            },
+            }
             IpAddr::V6(ref v6) => {
                 in6_addr = ipv6_as_in6_addr(v6);
                 &in6_addr as *const _ as *const c_void
-            },
+            }
         };
         let (family, length) = match *address {
-            IpAddr::V4(_) => {
-                (AddressFamily::INET, mem::size_of::<c_types::in_addr>())
-            },
-            IpAddr::V6(_) => {
-                (AddressFamily::INET6, mem::size_of::<c_types::in6_addr>())
-            },
+            IpAddr::V4(_) => (AddressFamily::INET, mem::size_of::<c_types::in_addr>()),
+            IpAddr::V6(_) => (AddressFamily::INET6, mem::size_of::<c_types::in6_addr>()),
         };
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -860,7 +840,8 @@ impl Channel {
                 length as c_int,
                 family as c_int,
                 Some(get_host_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -868,11 +849,10 @@ impl Channel {
     /// Perform a host query by name.
     ///
     /// On completion, `handler` is called with the result.
-    pub fn get_host_by_name<F>(
-        &mut self,
-        name: &str,
-        family: AddressFamily,
-        handler: F) where F: FnOnce(Result<HostResults>) + Send + 'static {
+    pub fn get_host_by_name<F>(&mut self, name: &str, family: AddressFamily, handler: F)
+    where
+        F: FnOnce(Result<HostResults>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -881,7 +861,8 @@ impl Channel {
                 c_name.as_ptr(),
                 family as c_int,
                 Some(get_host_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -892,23 +873,21 @@ impl Channel {
     /// [here](ni_flags/index.html).
     ///
     /// On completion, `handler` is called with the result.
-    pub fn get_name_info<F>(
-        &mut self,
-        address: &SocketAddr,
-        flags: NIFlags,
-        handler: F)
-        where F: FnOnce(Result<NameInfoResult>) + Send + 'static {
+    pub fn get_name_info<F>(&mut self, address: &SocketAddr, flags: NIFlags, handler: F)
+    where
+        F: FnOnce(Result<NameInfoResult>) + Send + 'static,
+    {
         let sockaddr_in: c_types::sockaddr_in;
         let sockaddr_in6: c_types::sockaddr_in6;
         let c_addr = match *address {
             SocketAddr::V4(ref v4) => {
                 sockaddr_in = socket_addrv4_as_sockaddr_in(v4);
                 &sockaddr_in as *const _ as *const c_types::sockaddr
-            },
+            }
             SocketAddr::V6(ref v6) => {
                 sockaddr_in6 = socket_addrv6_as_sockaddr_in6(v6);
                 &sockaddr_in6 as *const _ as *const c_types::sockaddr
-            },
+            }
         };
         let length = match *address {
             SocketAddr::V4(_) => mem::size_of::<c_types::sockaddr_in>(),
@@ -922,7 +901,8 @@ impl Channel {
                 length as c_ares_sys::ares_socklen_t,
                 flags.bits(),
                 Some(get_name_info_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -937,13 +917,10 @@ impl Channel {
     /// `c-ares` does not provide a parser.  This is expected to be a last
     /// resort; if a suitable `query_xxx()` is available, that should be
     /// preferred.
-    pub fn query<F>(
-        &mut self,
-        name: &str,
-        dns_class: u16,
-        query_type: u16,
-        handler: F)
-        where F: FnOnce(Result<&[u8]>) + Send + 'static {
+    pub fn query<F>(&mut self, name: &str, dns_class: u16, query_type: u16, handler: F)
+    where
+        F: FnOnce(Result<&[u8]>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -953,7 +930,8 @@ impl Channel {
                 c_int::from(dns_class),
                 c_int::from(query_type),
                 Some(query_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -968,13 +946,10 @@ impl Channel {
     /// `c-ares` does not provide a parser.  This is expected to be a last
     /// resort; if a suitable `search_xxx()` is available, that should be
     /// preferred.
-    pub fn search<F>(
-        &mut self,
-        name: &str,
-        dns_class: u16,
-        query_type: u16,
-        handler: F)
-        where F: FnOnce(Result<&[u8]>) + Send + 'static {
+    pub fn search<F>(&mut self, name: &str, dns_class: u16, query_type: u16, handler: F)
+    where
+        F: FnOnce(Result<&[u8]>) + Send + 'static,
+    {
         let c_name = CString::new(name).unwrap();
         let c_arg = Box::into_raw(Box::new(handler));
         unsafe {
@@ -984,7 +959,8 @@ impl Channel {
                 c_int::from(dns_class),
                 c_int::from(query_type),
                 Some(query_callback::<F>),
-                c_arg as *mut c_void);
+                c_arg as *mut c_void,
+            );
         }
         panic::propagate();
     }
@@ -994,7 +970,9 @@ impl Channel {
     /// Callbacks will be invoked for each pending query, passing a result
     /// `Err(Error::ECANCELLED)`.
     pub fn cancel(&mut self) {
-        unsafe { c_ares_sys::ares_cancel(self.ares_channel); }
+        unsafe {
+            c_ares_sys::ares_cancel(self.ares_channel);
+        }
         panic::propagate();
     }
 }
@@ -1009,17 +987,19 @@ impl Drop for Channel {
     }
 }
 
-unsafe impl Send for Channel { }
-unsafe impl Sync for Channel { }
-unsafe impl Send for Options { }
-unsafe impl Sync for Options { }
+unsafe impl Send for Channel {}
+unsafe impl Sync for Channel {}
+unsafe impl Send for Options {}
+unsafe impl Sync for Options {}
 
 pub unsafe extern "C" fn socket_state_callback<F>(
     data: *mut c_void,
     socket_fd: c_ares_sys::ares_socket_t,
     readable: c_int,
-    writable: c_int)
-    where F: FnMut(Socket, bool, bool) + Send + 'static {
+    writable: c_int,
+) where
+    F: FnMut(Socket, bool, bool) + Send + 'static,
+{
     panic::catch(|| {
         let handler = data as *mut F;
         (*handler)(socket_fd, readable != 0, writable != 0);
@@ -1037,7 +1017,8 @@ pub struct GetSock {
 impl GetSock {
     fn new(
         socks: [c_ares_sys::ares_socket_t; c_ares_sys::ARES_GETSOCK_MAXNUM],
-        bitmask: u32) -> GetSock {
+        bitmask: u32,
+    ) -> GetSock {
         GetSock {
             socks: socks,
             bitmask: bitmask,

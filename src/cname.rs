@@ -1,25 +1,13 @@
 use std::fmt;
-use std::os::raw::{
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 
 use c_ares_sys;
 use c_types;
 
-use error::{
-    Error,
-    Result,
-};
-use hostent::{
-    HasHostent,
-    HostAddressResultsIter,
-    HostAliasResultsIter,
-    HostentOwned,
-};
+use error::{Error, Result};
+use hostent::{HasHostent, HostAddressResultsIter, HostAliasResultsIter, HostentOwned};
 use panic;
 
 /// The result of a successful CNAME lookup.
@@ -38,7 +26,8 @@ impl CNameResults {
                 data.len() as c_int,
                 &mut hostent,
                 ptr::null_mut(),
-                ptr::null_mut())
+                ptr::null_mut(),
+            )
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             let result = CNameResults::new(hostent);
@@ -81,8 +70,10 @@ pub unsafe extern "C" fn query_cname_callback<F>(
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<CNameResults>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<CNameResults>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

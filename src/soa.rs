@@ -1,21 +1,14 @@
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::os::raw::{
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 use std::str;
 
 use c_ares_sys;
 
-use error::{
-    Error,
-    Result,
-};
+use error::{Error, Result};
 use panic;
 
 /// The result of a successful SOA lookup.
@@ -28,13 +21,9 @@ pub struct SOAResult {
 impl SOAResult {
     /// Obtain an `SOAResult` from the response to an SOA lookup.
     pub fn parse_from(data: &[u8]) -> Result<SOAResult> {
-        let mut soa_reply: *mut c_ares_sys::ares_soa_reply =
-            ptr::null_mut();
+        let mut soa_reply: *mut c_ares_sys::ares_soa_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_soa_reply(
-                data.as_ptr(),
-                data.len() as c_int,
-                &mut soa_reply)
+            c_ares_sys::ares_parse_soa_reply(data.as_ptr(), data.len() as c_int, &mut soa_reply)
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             let result = SOAResult::new(soa_reply);
@@ -114,16 +103,18 @@ impl Drop for SOAResult {
     }
 }
 
-unsafe impl Send for SOAResult { }
-unsafe impl Sync for SOAResult { }
+unsafe impl Send for SOAResult {}
+unsafe impl Sync for SOAResult {}
 
 pub unsafe extern "C" fn query_soa_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<SOAResult>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<SOAResult>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

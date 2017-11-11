@@ -14,10 +14,7 @@ extern crate tokio_core;
 
 use std::collections::HashSet;
 use std::error::Error;
-use std::sync::{
-    Arc,
-    Mutex,
-};
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -64,7 +61,8 @@ impl EventLoop {
     // Create a new event loop.
     pub fn new(
         ares_channel: Arc<Mutex<c_ares::Channel>>,
-        rx: mio_more::channel::Receiver<Message>) -> EventLoop {
+        rx: mio_more::channel::Receiver<Message>,
+    ) -> EventLoop {
         let poll = mio::Poll::new().expect("Failed to create poll");
         poll.register(&rx, CHANNEL, mio::Ready::readable(), mio::PollOpt::edge())
             .expect("failed to register channel with poll");
@@ -97,15 +95,18 @@ impl EventLoop {
             match results {
                 0 => {
                     // No events - must be a timeout.  Tell c-ares about it.
-                    self.ares_channel.lock().unwrap().process_fd(
-                        c_ares::SOCKET_BAD,
-                        c_ares::SOCKET_BAD);
-                },
+                    self.ares_channel
+                        .lock()
+                        .unwrap()
+                        .process_fd(c_ares::SOCKET_BAD, c_ares::SOCKET_BAD);
+                }
                 _ => {
                     // Process events.  One of them might have asked us to quit.
                     for event in &events {
                         self.handle_event(&event);
-                        if self.quit { return }
+                        if self.quit {
+                            return;
+                        }
                     }
                 }
             }
@@ -118,7 +119,7 @@ impl EventLoop {
             CHANNEL => {
                 // The channel is readable.
                 self.handle_messages()
-            },
+            }
 
             mio::Token(fd) => {
                 // Sockets became readable or writable - tell c-ares.
@@ -152,8 +153,12 @@ impl EventLoop {
                     } else {
                         let token = mio::Token(fd as usize);
                         let mut interest = mio::Ready::empty();
-                        if readable { interest.insert(mio::Ready::readable()) }
-                        if writable { interest.insert(mio::Ready::writable()) }
+                        if readable {
+                            interest.insert(mio::Ready::readable())
+                        }
+                        if writable {
+                            interest.insert(mio::Ready::writable())
+                        }
                         let register_result = if !self.tracked_fds.insert(fd) {
                             self.poll
                                 .reregister(&efd, token, interest, mio::PollOpt::level())
@@ -163,13 +168,13 @@ impl EventLoop {
                         };
                         register_result.expect("failed to register interest");
                     }
-                },
+                }
 
                 Ok(Message::ShutDown) => {
                     // Instruction to shut down.
                     self.quit = true;
-                    break
-                },
+                    break;
+                }
 
                 // No more instructions.
                 Err(_) => break,
@@ -192,11 +197,9 @@ impl Resolver {
         // send that request along, in a message to the event loop thread.
         let (tx, rx) = mio_more::channel::channel();
         let tx_clone = tx.clone();
-        let sock_callback =
-            move |fd: c_ares::Socket, readable: bool, writable: bool| {
-                let _ = tx_clone.send(
-                    Message::RegisterInterest(fd, readable, writable));
-            };
+        let sock_callback = move |fd: c_ares::Socket, readable: bool, writable: bool| {
+            let _ = tx_clone.send(Message::RegisterInterest(fd, readable, writable));
+        };
 
         // Create a c_ares::Channel.
         let mut options = c_ares::Options::new();
@@ -205,9 +208,11 @@ impl Resolver {
             .set_flags(c_ares::Flags::STAYOPEN | c_ares::Flags::EDNS)
             .set_timeout(500)
             .set_tries(3);
-        let mut ares_channel = c_ares::Channel::with_options(options)
-            .expect("Failed to create channel");
-        ares_channel.set_servers(&["8.8.8.8"]).expect("Failed to set servers");
+        let mut ares_channel =
+            c_ares::Channel::with_options(options).expect("Failed to create channel");
+        ares_channel
+            .set_servers(&["8.8.8.8"])
+            .expect("Failed to set servers");
         let locked_channel = Arc::new(Mutex::new(ares_channel));
 
         // Create and run the event loop.
@@ -224,41 +229,56 @@ impl Resolver {
     }
 
     // A CNAME query.  Returns a future that will resolve to hold the result.
-    pub fn query_cname(&self, name: &str)
-        -> Box<futures::Future<Item=c_ares::CNameResults, Error=c_ares::Error>> {
+    pub fn query_cname(
+        &self,
+        name: &str,
+    ) -> Box<futures::Future<Item = c_ares::CNameResults, Error = c_ares::Error>> {
         let (c, p) = futures::oneshot();
-        self.ares_channel.lock().unwrap().query_cname(name, move |result| {
-            let _ = c.send(result);
-        });
+        self.ares_channel
+            .lock()
+            .unwrap()
+            .query_cname(name, move |result| {
+                let _ = c.send(result);
+            });
         Box::new(
             p.map_err(|_| c_ares::Error::ECANCELLED)
-                .and_then(futures::done)
+                .and_then(futures::done),
         )
     }
 
     // An MX query.  Returns a future that will resolve to hold the result.
-    pub fn query_mx(&self, name: &str)
-        -> Box<futures::Future<Item=c_ares::MXResults, Error=c_ares::Error>> {
+    pub fn query_mx(
+        &self,
+        name: &str,
+    ) -> Box<futures::Future<Item = c_ares::MXResults, Error = c_ares::Error>> {
         let (c, p) = futures::oneshot();
-        self.ares_channel.lock().unwrap().query_mx(name, move |result| {
-            let _ = c.send(result);
-        });
+        self.ares_channel
+            .lock()
+            .unwrap()
+            .query_mx(name, move |result| {
+                let _ = c.send(result);
+            });
         Box::new(
             p.map_err(|_| c_ares::Error::ECANCELLED)
-                .and_then(futures::done)
+                .and_then(futures::done),
         )
     }
 
     // A NAPTR query.  Returns a future that will resolve to hold the result.
-    pub fn query_naptr(&self, name: &str)
-        -> Box<futures::Future<Item=c_ares::NAPTRResults, Error=c_ares::Error>> {
+    pub fn query_naptr(
+        &self,
+        name: &str,
+    ) -> Box<futures::Future<Item = c_ares::NAPTRResults, Error = c_ares::Error>> {
         let (c, p) = futures::oneshot();
-        self.ares_channel.lock().unwrap().query_naptr(name, move |result| {
-            let _ = c.send(result);
-        });
+        self.ares_channel
+            .lock()
+            .unwrap()
+            .query_naptr(name, move |result| {
+                let _ = c.send(result);
+            });
         Box::new(
             p.map_err(|_| c_ares::Error::ECANCELLED)
-                .and_then(futures::done)
+                .and_then(futures::done),
         )
     }
 }
@@ -270,7 +290,7 @@ impl Drop for Resolver {
             .send(Message::ShutDown)
             .expect("failed to request event loop to shut down");
         if let Some(handle) = self.event_loop_handle.take() {
-           handle.join().expect("failed to shut down event loop");
+            handle.join().expect("failed to shut down event loop");
         }
     }
 }
@@ -301,7 +321,8 @@ fn print_mx_results(result: &c_ares::Result<c_ares::MXResults>) {
                 println!(
                     "host {}, priority {}",
                     mx_result.host(),
-                    mx_result.priority());
+                    mx_result.priority()
+                );
             }
         }
     }
@@ -320,7 +341,8 @@ fn print_naptr_results(result: &c_ares::Result<c_ares::NAPTRResults>) {
                 println!("regular expression: {}", naptr_result.reg_exp());
                 println!(
                     "replacement pattern: {}",
-                    naptr_result.replacement_pattern());
+                    naptr_result.replacement_pattern()
+                );
                 println!("order: {}", naptr_result.order());
                 println!("preference: {}", naptr_result.preference());
             }

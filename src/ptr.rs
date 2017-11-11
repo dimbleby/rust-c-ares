@@ -1,9 +1,5 @@
 use std::fmt;
-use std::os::raw::{
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 
@@ -11,15 +7,8 @@ use c_ares_sys;
 use c_types;
 use itertools::Itertools;
 
-use error::{
-    Error,
-    Result,
-};
-use hostent::{
-    HasHostent,
-    HostAliasResultsIter,
-    HostentOwned,
-};
+use error::{Error, Result};
+use hostent::{HasHostent, HostAliasResultsIter, HostentOwned};
 use panic;
 
 /// The result of a successful PTR lookup.
@@ -32,7 +21,7 @@ impl PTRResults {
     /// Obtain a `PTRResults` from the response to a PTR lookup.
     pub fn parse_from(data: &[u8]) -> Result<PTRResults> {
         let mut hostent: *mut c_types::hostent = ptr::null_mut();
-        let dummy_ip = [0,0,0,0];
+        let dummy_ip = [0, 0, 0, 0];
         let parse_status = unsafe {
             c_ares_sys::ares_parse_ptr_reply(
                 data.as_ptr(),
@@ -40,7 +29,8 @@ impl PTRResults {
                 dummy_ip.as_ptr() as *const c_void,
                 dummy_ip.len() as c_int,
                 c_types::AF_INET,
-                &mut hostent)
+                &mut hostent,
+            )
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             let result = PTRResults::new(hostent);
@@ -81,8 +71,10 @@ pub unsafe extern "C" fn query_ptr_callback<F>(
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<PTRResults>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<PTRResults>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

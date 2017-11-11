@@ -3,16 +3,8 @@
 extern crate c_ares;
 extern crate nix;
 
-use self::nix::sys::epoll::{
-    epoll_create,
-    epoll_ctl,
-    epoll_wait,
-    EpollEvent,
-    EpollFlags,
-    EpollOp,
-    EPOLLIN,
-    EPOLLOUT,
-};
+use self::nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp,
+                            EPOLLIN, EPOLLOUT};
 use std::collections::HashSet;
 use std::error::Error;
 
@@ -54,11 +46,13 @@ fn print_srv_results(result: c_ares::Result<c_ares::SRVResults>) {
         Ok(srv_results) => {
             println!("Successful SRV lookup...");
             for srv_result in &srv_results {
-                println!("host: {} (port: {}), priority: {} weight: {}",
-                         srv_result.host(),
-                         srv_result.port(),
-                         srv_result.priority(),
-                         srv_result.weight());
+                println!(
+                    "host: {} (port: {}), priority: {} weight: {}",
+                    srv_result.host(),
+                    srv_result.port(),
+                    srv_result.priority(),
+                    srv_result.weight()
+                );
             }
         }
     }
@@ -71,9 +65,11 @@ pub fn main() {
         .set_flags(c_ares::Flags::STAYOPEN)
         .set_timeout(500)
         .set_tries(3);
-    let mut ares_channel = c_ares::Channel::with_options(options)
-        .expect("Failed to create channel");
-    ares_channel.set_servers(&["8.8.8.8"]).expect("Failed to set servers");
+    let mut ares_channel =
+        c_ares::Channel::with_options(options).expect("Failed to create channel");
+    ares_channel
+        .set_servers(&["8.8.8.8"])
+        .expect("Failed to set servers");
 
     // Set up some queries.
     ares_channel.query_a("apple.com", move |result| {
@@ -100,8 +96,12 @@ pub fn main() {
         let mut active = false;
         for (fd, readable, writable) in &ares_channel.get_sock() {
             let mut interest = EpollFlags::empty();
-            if readable { interest |= EPOLLIN; }
-            if writable { interest |= EPOLLOUT; }
+            if readable {
+                interest |= EPOLLIN;
+            }
+            if writable {
+                interest |= EPOLLOUT;
+            }
             let mut event = EpollEvent::new(interest, fd as u64);
             let op = if tracked_fds.insert(fd) {
                 EpollOp::EpollCtlAdd
@@ -111,22 +111,21 @@ pub fn main() {
             epoll_ctl(epoll, op, fd, &mut event).expect("epoll_ctl failed");
             active = true;
         }
-        if !active { break }
+        if !active {
+            break;
+        }
 
         // Wait for something to happen.
         let empty_event = EpollEvent::new(EpollFlags::empty(), 0);
         let mut events = [empty_event; 2];
-        let results = epoll_wait(epoll, &mut events, 500)
-            .expect("epoll_wait failed");
+        let results = epoll_wait(epoll, &mut events, 500).expect("epoll_wait failed");
 
         // Process whatever happened.
         match results {
             0 => {
                 // No events - must be a timeout.  Tell c-ares about it.
-                ares_channel.process_fd(
-                    c_ares::SOCKET_BAD,
-                    c_ares::SOCKET_BAD);
-            },
+                ares_channel.process_fd(c_ares::SOCKET_BAD, c_ares::SOCKET_BAD);
+            }
             n => {
                 // Sockets became readable or writable.  Tell c-ares.
                 for event in &events[0..n] {

@@ -14,7 +14,7 @@ pub enum Error {
     ENODATA = c_ares_sys::ARES_ENODATA as isize,
 
     /// DNS server claims query was misformatted.
-    EFORMERR = c_ares_sys::ARES_EFORMERR  as isize,
+    EFORMERR = c_ares_sys::ARES_EFORMERR as isize,
 
     /// DNS server returned general failure.
     ESERVFAIL = c_ares_sys::ARES_ESERVFAIL as isize,
@@ -154,8 +154,7 @@ impl From<i32> for Error {
             c_ares_sys::ARES_EBADHINTS => Error::EBADHINTS,
             c_ares_sys::ARES_ENOTINITIALIZED => Error::ENOTINITIALIZED,
             c_ares_sys::ARES_ELOADIPHLPAPI => Error::ELOADIPHLPAPI,
-            c_ares_sys::ARES_EADDRGETNETWORKPARAMS =>
-                Error::EADDRGETNETWORKPARAMS,
+            c_ares_sys::ARES_EADDRGETNETWORKPARAMS => Error::EADDRGETNETWORKPARAMS,
             c_ares_sys::ARES_ECANCELLED => Error::ECANCELLED,
             _ => Error::UNKNOWN,
         }

@@ -19,7 +19,7 @@ fn epoll_examples() {
 }
 
 #[cfg(all(unix, not(any(target_os = "linux", target_os = "android"))))]
-fn epoll_examples() { }
+fn epoll_examples() {}
 
 #[cfg(unix)]
 fn main() {

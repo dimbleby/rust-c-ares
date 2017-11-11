@@ -1,24 +1,17 @@
 use std::fmt;
 use std::mem;
 use std::net::Ipv4Addr;
-use std::os::raw::{
-    c_int,
-    c_uchar,
-    c_void,
-};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::{
-    Error,
-    Result,
-};
+use error::{Error, Result};
 use panic;
 use types::MAX_ADDRTTLS;
-use utils:: ipv4_from_in_addr;
+use utils::ipv4_from_in_addr;
 
 /// The result of a successful A lookup.
 #[derive(Clone, Copy)]
@@ -46,7 +39,8 @@ impl AResults {
                 data.len() as c_int,
                 ptr::null_mut(),
                 results.addrttls.as_mut_ptr(),
-                &mut results.naddrttls as *mut _ as *mut c_int)
+                &mut results.naddrttls as *mut _ as *mut c_int,
+            )
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
             Ok(results)
@@ -57,7 +51,9 @@ impl AResults {
 
     /// Returns an iterator over the `AResult` values in this `AResults`.
     pub fn iter(&self) -> AResultsIter {
-        AResultsIter { addrttls: self.addrttls[0 .. self.naddrttls].iter() }
+        AResultsIter {
+            addrttls: self.addrttls[0..self.naddrttls].iter(),
+        }
     }
 }
 
@@ -78,7 +74,9 @@ pub struct AResultsIter<'a> {
 impl<'a> Iterator for AResultsIter<'a> {
     type Item = AResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        self.addrttls.next().map(|addrttl| AResult { addrttl: addrttl })
+        self.addrttls
+            .next()
+            .map(|addrttl| AResult { addrttl: addrttl })
     }
 }
 
@@ -116,8 +114,10 @@ pub unsafe extern "C" fn query_a_callback<F>(
     status: c_int,
     _timeouts: c_int,
     abuf: *mut c_uchar,
-    alen: c_int)
-    where F: FnOnce(Result<AResults>) + Send + 'static {
+    alen: c_int,
+) where
+    F: FnOnce(Result<AResults>) + Send + 'static,
+{
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
             let data = slice::from_raw_parts(abuf, alen as usize);

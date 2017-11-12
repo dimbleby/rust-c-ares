@@ -48,6 +48,8 @@ extern crate c_ares_sys;
 extern crate c_types;
 extern crate itertools;
 
+#[macro_use]
+mod macros;
 mod a;
 mod aaaa;
 mod channel;

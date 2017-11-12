@@ -74,14 +74,5 @@ pub unsafe extern "C" fn query_cname_callback<F>(
 ) where
     F: FnOnce(Result<CNameResults>) + Send + 'static,
 {
-    panic::catch(|| {
-        let result = if status == c_ares_sys::ARES_SUCCESS {
-            let data = slice::from_raw_parts(abuf, alen as usize);
-            CNameResults::parse_from(data)
-        } else {
-            Err(Error::from(status))
-        };
-        let handler = Box::from_raw(arg as *mut F);
-        handler(result);
-    });
+    ares_callback!(arg as *mut F, status, abuf, alen, CNameResults::parse_from);
 }

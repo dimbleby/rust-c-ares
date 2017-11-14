@@ -90,8 +90,7 @@ impl fmt::Display for SOAResult {
         write!(fmt, "Refresh: {}, ", self.refresh())?;
         write!(fmt, "Retry: {}, ", self.retry())?;
         write!(fmt, "Expire: {}, ", self.expire())?;
-        write!(fmt, "Minimum time-to-live: {}", self.min_ttl())?;
-        Ok(())
+        write!(fmt, "Minimum time-to-live: {}", self.min_ttl())
     }
 }
 

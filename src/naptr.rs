@@ -59,8 +59,7 @@ impl NAPTRResults {
 impl fmt::Display for NAPTRResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        write!(fmt, "[{{{}}}]", results)?;
-        Ok(())
+        write!(fmt, "[{{{}}}]", results)
     }
 }
 
@@ -154,8 +153,7 @@ impl<'a> fmt::Display for NAPTRResult<'a> {
         write!(fmt, "Regular expression: {}, ", self.reg_exp())?;
         write!(fmt, "Replacement pattern: {}, ", self.replacement_pattern())?;
         write!(fmt, "Order: {}, ", self.order())?;
-        write!(fmt, "Preference: {}", self.preference())?;
-        Ok(())
+        write!(fmt, "Preference: {}", self.preference())
     }
 }
 

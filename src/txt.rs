@@ -57,8 +57,7 @@ impl TXTResults {
 impl fmt::Display for TXTResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        write!(fmt, "[{{{}}}]", results)?;
-        Ok(())
+        write!(fmt, "[{{{}}}]", results)
     }
 }
 
@@ -120,8 +119,7 @@ impl<'a> TXTResult<'a> {
 impl<'a> fmt::Display for TXTResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let text = str::from_utf8(self.text()).unwrap_or("<binary>");
-        write!(fmt, "Record start: {}, Text: {}", self.record_start(), text)?;
-        Ok(())
+        write!(fmt, "Record start: {}, Text: {}", self.record_start(), text)
     }
 }
 

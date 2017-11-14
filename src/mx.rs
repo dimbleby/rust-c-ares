@@ -58,8 +58,7 @@ impl MXResults {
 impl fmt::Display for MXResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        write!(fmt, "[{{{}}}]", results)?;
-        Ok(())
+        write!(fmt, "[{{{}}}]", results)
     }
 }
 
@@ -120,8 +119,7 @@ impl<'a> MXResult<'a> {
 impl<'a> fmt::Display for MXResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "Hostname: {}, ", self.host())?;
-        write!(fmt, "Priority: {}", self.priority())?;
-        Ok(())
+        write!(fmt, "Priority: {}", self.priority())
     }
 }
 

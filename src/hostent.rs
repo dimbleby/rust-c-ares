@@ -76,8 +76,7 @@ pub trait HasHostent {
         let addresses = self.addresses().format(", ");
         write!(fmt, "Addresses: [{}]", addresses)?;
         let aliases = self.aliases().format(", ");
-        write!(fmt, "Aliases: [{}]", aliases)?;
-        Ok(())
+        write!(fmt, "Aliases: [{}]", aliases)
     }
 }
 

@@ -45,8 +45,7 @@ impl<'a> fmt::Display for NameInfoResult<'a> {
         let node = self.node().unwrap_or("<None>");
         write!(fmt, "Node: {}, ", node)?;
         let service = self.service().unwrap_or("<None>");
-        write!(fmt, "Service: {}", service)?;
-        Ok(())
+        write!(fmt, "Service: {}", service)
     }
 }
 

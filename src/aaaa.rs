@@ -59,8 +59,7 @@ impl AAAAResults {
 impl fmt::Display for AAAAResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        write!(fmt, "[{{{}}}]", results)?;
-        Ok(())
+        write!(fmt, "[{{{}}}]", results)
     }
 }
 
@@ -104,8 +103,7 @@ impl<'a> AAAAResult<'a> {
 impl<'a> fmt::Display for AAAAResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "IPv6: {}, ", self.ipv6())?;
-        write!(fmt, "TTL: {}", self.ttl())?;
-        Ok(())
+        write!(fmt, "TTL: {}", self.ttl())
     }
 }
 

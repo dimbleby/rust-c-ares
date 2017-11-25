@@ -106,8 +106,7 @@ extern "C" {
     pub fn ares_library_init_mem(
         flags: ::std::os::raw::c_int,
         amalloc: ::std::option::Option<
-            unsafe extern "C" fn(size: usize)
-                -> *mut ::std::os::raw::c_void,
+            unsafe extern "C" fn(size: usize) -> *mut ::std::os::raw::c_void,
         >,
         afree: ::std::option::Option<unsafe extern "C" fn(ptr: *mut ::std::os::raw::c_void)>,
         arealloc: ::std::option::Option<

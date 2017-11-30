@@ -86,7 +86,7 @@ pub fn main() {
         c_ares::NIFlags::LOOKUPHOST | c_ares::NIFlags::LOOKUPSERVICE,
         move |result| {
             println!();
-            print_name_info_result(result);
+            print_name_info_result(&result);
         },
     );
 

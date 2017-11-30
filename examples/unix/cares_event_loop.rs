@@ -7,9 +7,9 @@ use std::error::Error;
 use std::net::IpAddr;
 use std::time::Duration;
 
-fn print_host_results(result: c_ares::Result<c_ares::HostResults>) {
-    match result {
-        Err(e) => {
+fn print_host_results(result: &c_ares::Result<c_ares::HostResults>) {
+    match *result {
+        Err(ref e) => {
             println!("Host lookup failed with error '{}'", e.description());
         }
         Ok(host_results) => {
@@ -44,19 +44,19 @@ pub fn main() {
     // Set up some queries.
     ares_channel.get_host_by_name("google.com", c_ares::AddressFamily::INET, move |result| {
         println!();
-        print_host_results(result);
+        print_host_results(&result);
     });
 
     let ipv4 = "216.58.212.78".parse::<IpAddr>().unwrap();
     ares_channel.get_host_by_address(&ipv4, move |results| {
         println!();
-        print_host_results(results);
+        print_host_results(&results);
     });
 
     let ipv6 = "2001:4860:4860::8888".parse::<IpAddr>().unwrap();
     ares_channel.get_host_by_address(&ipv6, move |results| {
         println!();
-        print_host_results(results);
+        print_host_results(&results);
     });
 
     // Create a poll.

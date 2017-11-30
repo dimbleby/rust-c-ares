@@ -8,14 +8,14 @@ use self::nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, Epo
 use std::collections::HashSet;
 use std::error::Error;
 
-fn print_a_results(result: c_ares::Result<c_ares::AResults>) {
-    match result {
-        Err(e) => {
+fn print_a_results(result: &c_ares::Result<c_ares::AResults>) {
+    match *result {
+        Err(ref e) => {
             println!("A lookup failed with error '{}'", e.description());
         }
-        Ok(a_results) => {
+        Ok(ref a_results) => {
             println!("Successful A lookup...");
-            for a_result in &a_results {
+            for a_result in a_results {
                 println!("IPv4: {}", a_result.ipv4());
                 println!("TTL: {}", a_result.ttl());
             }
@@ -23,14 +23,14 @@ fn print_a_results(result: c_ares::Result<c_ares::AResults>) {
     }
 }
 
-fn print_aaaa_results(result: c_ares::Result<c_ares::AAAAResults>) {
-    match result {
-        Err(e) => {
+fn print_aaaa_results(result: &c_ares::Result<c_ares::AAAAResults>) {
+    match *result {
+        Err(ref e) => {
             println!("AAAA lookup failed with error '{}'", e.description());
         }
-        Ok(aaaa_results) => {
+        Ok(ref aaaa_results) => {
             println!("Successful AAAA lookup...");
-            for aaaa_result in &aaaa_results {
+            for aaaa_result in aaaa_results {
                 println!("IPv6: {}", aaaa_result.ipv6());
                 println!("TTL: {}", aaaa_result.ttl());
             }
@@ -38,14 +38,14 @@ fn print_aaaa_results(result: c_ares::Result<c_ares::AAAAResults>) {
     }
 }
 
-fn print_srv_results(result: c_ares::Result<c_ares::SRVResults>) {
-    match result {
-        Err(e) => {
+fn print_srv_results(result: &c_ares::Result<c_ares::SRVResults>) {
+    match *result {
+        Err(ref e) => {
             println!("SRV lookup failed with error '{}'", e.description());
         }
-        Ok(srv_results) => {
+        Ok(ref srv_results) => {
             println!("Successful SRV lookup...");
-            for srv_result in &srv_results {
+            for srv_result in srv_results {
                 println!(
                     "host: {} (port: {}), priority: {} weight: {}",
                     srv_result.host(),
@@ -74,17 +74,17 @@ pub fn main() {
     // Set up some queries.
     ares_channel.query_a("apple.com", move |result| {
         println!();
-        print_a_results(result);
+        print_a_results(&result);
     });
 
     ares_channel.query_aaaa("google.com", move |result| {
         println!();
-        print_aaaa_results(result);
+        print_aaaa_results(&result);
     });
 
     ares_channel.query_srv("_xmpp-server._tcp.gmail.com", move |result| {
         println!();
-        print_srv_results(result);
+        print_srv_results(&result);
     });
 
     // Create an epoll file descriptor so that we can listen for events.

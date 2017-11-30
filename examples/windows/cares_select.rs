@@ -9,12 +9,12 @@ use std::mem;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
 use std::ptr;
 
-fn print_soa_result(result: c_ares::Result<c_ares::SOAResult>) {
-    match result {
-        Err(e) => {
+fn print_soa_result(result: &c_ares::Result<c_ares::SOAResult>) {
+    match *result {
+        Err(ref e) => {
             println!("SOA lookup failed with error '{}'", e.description());
         }
-        Ok(soa_result) => {
+        Ok(ref soa_result) => {
             println!("Successful SOA lookup...");
             println!("Name server: {}", soa_result.name_server());
             println!("Hostmaster: {}", soa_result.hostmaster());
@@ -26,12 +26,12 @@ fn print_soa_result(result: c_ares::Result<c_ares::SOAResult>) {
     }
 }
 
-fn print_name_info_result(result: c_ares::Result<c_ares::NameInfoResult>) {
-    match result {
-        Err(e) => {
+fn print_name_info_result(result: &c_ares::Result<c_ares::NameInfoResult>) {
+    match *result {
+        Err(ref e) => {
             println!("Name info lookup failed with error '{}'", e.description());
         }
-        Ok(name_info_result) => {
+        Ok(ref name_info_result) => {
             println!("Successful name info lookup...");
             println!("Node: {}", name_info_result.node().unwrap_or("<None>"));
             println!(
@@ -65,7 +65,7 @@ pub fn main() {
     // Set up some queries.
     ares_channel.query_soa("google.com", move |result| {
         println!();
-        print_soa_result(result);
+        print_soa_result(&result);
     });
 
     let ipv4 = "216.58.210.14".parse::<Ipv4Addr>().unwrap();
@@ -75,7 +75,7 @@ pub fn main() {
         c_ares::NIFlags::LOOKUPHOST | c_ares::NIFlags::LOOKUPSERVICE,
         move |result| {
             println!();
-            print_name_info_result(result);
+            print_name_info_result(&result);
         },
     );
 

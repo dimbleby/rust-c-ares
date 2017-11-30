@@ -192,12 +192,12 @@ impl Drop for Resolver {
     }
 }
 
-fn print_ns_results(result: c_ares::Result<c_ares::NSResults>) {
-    match result {
-        Err(e) => {
+fn print_ns_results(result: &c_ares::Result<c_ares::NSResults>) {
+    match *result {
+        Err(ref e) => {
             println!("NS lookup failed with error '{}'", e.description());
         }
-        Ok(ns_results) => {
+        Ok(ref ns_results) => {
             println!("Successful NS lookup...");
             for ns_result in ns_results.aliases() {
                 println!("{}", ns_result);
@@ -206,12 +206,12 @@ fn print_ns_results(result: c_ares::Result<c_ares::NSResults>) {
     }
 }
 
-fn print_ptr_results(result: c_ares::Result<c_ares::PTRResults>) {
-    match result {
-        Err(e) => {
+fn print_ptr_results(result: &c_ares::Result<c_ares::PTRResults>) {
+    match *result {
+        Err(ref e) => {
             println!("PTR lookup failed with error '{}'", e.description());
         }
-        Ok(ptr_results) => {
+        Ok(ref ptr_results) => {
             println!("Successful PTR lookup...");
             for ptr_result in ptr_results.aliases() {
                 println!("{}", ptr_result);
@@ -220,14 +220,14 @@ fn print_ptr_results(result: c_ares::Result<c_ares::PTRResults>) {
     }
 }
 
-fn print_txt_results(result: c_ares::Result<c_ares::TXTResults>) {
-    match result {
-        Err(e) => {
+fn print_txt_results(result: &c_ares::Result<c_ares::TXTResults>) {
+    match *result {
+        Err(ref e) => {
             println!("TXT lookup failed with error '{}'", e.description());
         }
-        Ok(txt_results) => {
+        Ok(ref txt_results) => {
             println!("Successful TXT lookup...");
-            for txt_result in &txt_results {
+            for txt_result in txt_results {
                 let text = str::from_utf8(txt_result.text()).unwrap_or("<binary>");
                 println!(
                     "record start: {}, text: {}",
@@ -244,13 +244,13 @@ pub fn main() {
     let resolver = Resolver::new();
     let result = resolver.query_ns("google.com");
     println!();
-    print_ns_results(result);
+    print_ns_results(&result);
 
     let result = resolver.query_ptr("14.210.58.216.in-addr.arpa");
     println!();
-    print_ptr_results(result);
+    print_ptr_results(&result);
 
     let result = resolver.query_txt("google.com");
     println!();
-    print_txt_results(result);
+    print_txt_results(&result);
 }

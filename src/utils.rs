@@ -53,6 +53,15 @@ pub fn ipv4_from_in_addr(in_addr: &c_types::in_addr) -> Ipv4Addr {
 }
 
 // Get an in6_addr from an Ipv6Addr.
+#[cfg(unix)]
+pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
+    let octets = ipv6.octets();
+    let mut in6_addr: c_types::in6_addr = unsafe { mem::uninitialized() };
+    in6_addr.s6_addr.copy_from_slice(&octets);
+    in6_addr
+}
+
+#[cfg(windows)]
 pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
     let octets = ipv6.octets();
     let mut in6_addr: c_types::in6_addr = unsafe { mem::uninitialized() };

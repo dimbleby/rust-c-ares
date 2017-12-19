@@ -12,7 +12,7 @@ use libc::timeval;
 use jni_sys;
 
 #[cfg(windows)]
-pub type ares_socket_t = ::std::os::windows::io::RawSocket;
+pub type ares_socket_t = ::winapi::um::winsock2::SOCKET;
 #[cfg(unix)]
 pub type ares_socket_t = ::std::os::unix::io::RawFd;
 

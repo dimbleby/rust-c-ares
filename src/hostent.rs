@@ -60,7 +60,7 @@ pub trait HasHostent {
 
     fn addresses(&self) -> HostAddressResultsIter {
         HostAddressResultsIter {
-            family: address_family(self.hostent().h_addrtype as c_int),
+            family: address_family(c_int::from(self.hostent().h_addrtype)),
             next: unsafe { &*(self.hostent().h_addr_list as *const _) },
         }
     }

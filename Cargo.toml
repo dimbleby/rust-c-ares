@@ -21,7 +21,7 @@ itertools = "0.7"
 [target.'cfg(unix)'.dev-dependencies]
 futures = "0.1"
 mio = "0.6"
-mio-extras = "1"
+mio-extras = "2"
 nix = "0.9"
 tokio-core = "0.1"
 

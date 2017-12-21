@@ -9,7 +9,7 @@
 extern crate c_ares;
 extern crate futures;
 extern crate mio;
-extern crate mio_more;
+extern crate mio_extras;
 extern crate tokio_core;
 
 use std::collections::HashSet;
@@ -32,7 +32,7 @@ use self::futures::Future;
 // -  a message telling it to shut down.
 struct EventLoop {
     poll: mio::Poll,
-    msg_channel: mio_more::channel::Receiver<Message>,
+    msg_channel: mio_extras::channel::Receiver<Message>,
     tracked_fds: HashSet<c_ares::Socket>,
     ares_channel: Arc<Mutex<c_ares::Channel>>,
     quit: bool,
@@ -61,7 +61,7 @@ impl EventLoop {
     // Create a new event loop.
     pub fn new(
         ares_channel: Arc<Mutex<c_ares::Channel>>,
-        rx: mio_more::channel::Receiver<Message>,
+        rx: mio_extras::channel::Receiver<Message>,
     ) -> EventLoop {
         let poll = mio::Poll::new().expect("Failed to create poll");
         poll.register(&rx, CHANNEL, mio::Ready::readable(), mio::PollOpt::edge())
@@ -186,7 +186,7 @@ impl EventLoop {
 // The Resolver is the interface by which users make DNS queries.
 struct Resolver {
     ares_channel: Arc<Mutex<c_ares::Channel>>,
-    event_loop_channel: mio_more::channel::Sender<Message>,
+    event_loop_channel: mio_extras::channel::Sender<Message>,
     event_loop_handle: Option<thread::JoinHandle<()>>,
 }
 
@@ -195,7 +195,7 @@ impl Resolver {
     pub fn new() -> Resolver {
         // Whenever c-ares tells us what to do with a file descriptor, we'll
         // send that request along, in a message to the event loop thread.
-        let (tx, rx) = mio_more::channel::channel();
+        let (tx, rx) = mio_extras::channel::channel();
         let tx_clone = tx.clone();
         let sock_callback = move |fd: c_ares::Socket, readable: bool, writable: bool| {
             let _ = tx_clone.send(Message::RegisterInterest(fd, readable, writable));

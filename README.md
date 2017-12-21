@@ -10,7 +10,7 @@ Most users should likely prefer [`c-ares-resolver`](https://github.com/dimbleby/
 
 ## Documentation ##
 
-- API documentation is [here](http://dimbleby.github.io/rust-c-ares).
+- API documentation is [here](https://docs.rs/c-ares).
 - There are some example programs [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 
 ## Contributing ##

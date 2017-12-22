@@ -1,6 +1,11 @@
 // This example uses fds() to find out which file descriptors c-ares
 // wants us to listen on, and uses select() to satisfy those requirements.
 #[cfg(windows)]
+extern crate winapi;
+#[cfg(windows)]
+extern crate ws2_32;
+
+#[cfg(windows)]
 mod example {
     extern crate c_ares;
 

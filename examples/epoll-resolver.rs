@@ -1,4 +1,4 @@
-// A variation on cares-epoll.rs
+// A variation on epoll.rs
 //
 // Here we hide the use of epoll() behind a `Resolver` object.  We also
 // transform the asynchronous c-ares interface into a synchronous one, by

@@ -1,4 +1,4 @@
-// A variation on cares-event-loop.rs.
+// A variation on event-loop.rs.
 //
 // Here we:
 //

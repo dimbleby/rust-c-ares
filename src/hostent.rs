@@ -134,7 +134,7 @@ impl<'a> Iterator for HostAddressResultsIter<'a> {
             None
         } else {
             unsafe {
-                self.next = &*(self.next as *const _).offset(1);
+                self.next = &*(self.next as *const *const c_char).offset(1);
                 self.family
                     .and_then(|family| ip_address_from_bytes(family, h_addr as *const u8))
             }
@@ -159,7 +159,7 @@ impl<'a> Iterator for HostAliasResultsIter<'a> {
             None
         } else {
             unsafe {
-                self.next = &*(self.next as *const _).offset(1);
+                self.next = &*(self.next as *const *const c_char).offset(1);
                 let c_str = CStr::from_ptr(h_alias);
                 Some(str::from_utf8_unchecked(c_str.to_bytes()))
             }

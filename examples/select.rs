@@ -1,11 +1,14 @@
 // This example uses fds() to find out which file descriptors c-ares
 // wants us to listen on, and uses select() to satisfy those requirements.
 #[cfg(windows)]
+extern crate winapi;
+
+#[cfg(windows)]
 mod example {
     extern crate c_ares;
 
-    use winapi::winsock2::{fd_set, timeval, FD_SETSIZE, SOCKET_ERROR, WSADATA};
-    use ws2_32::{select, WSACleanup, WSAStartup};
+    use winapi::um::winsock2::{fd_set, select, timeval, WSACleanup, WSAStartup, FD_SETSIZE,
+                               SOCKET_ERROR, WSADATA};
     use std::error::Error;
     use std::mem;
     use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
@@ -110,10 +113,11 @@ mod example {
             // Wait for something to happen.
             let timeout = timeval {
                 tv_sec: 0,
-                tv_usec: 500000,
+                tv_usec: 500_000,
             };
-            let results =
-                unsafe { select(0, &mut read_fds, &mut write_fds, ptr::null_mut(), &timeout) };
+            let results = unsafe {
+                select(0, &mut read_fds, &mut write_fds, ptr::null_mut(), &timeout)
+            };
 
             // Process whatever happened.
             match results {

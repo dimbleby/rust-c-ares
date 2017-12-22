@@ -115,9 +115,8 @@ mod example {
                 tv_sec: 0,
                 tv_usec: 500_000,
             };
-            let results = unsafe {
-                select(0, &mut read_fds, &mut write_fds, ptr::null_mut(), &timeout)
-            };
+            let results =
+                unsafe { select(0, &mut read_fds, &mut write_fds, ptr::null_mut(), &timeout) };
 
             // Process whatever happened.
             match results {

@@ -7,7 +7,7 @@ description = """
 A Rust wrapper for the c-ares library, for asynchronous DNS requests.
 """
 repository = "https://github.com/dimbleby/rust-c-ares"
-documentation = "http://dimbleby.github.io/rust-c-ares"
+documentation = "https://docs.rs/c-ares"
 readme = "README.md"
 keywords = ["DNS", "c-ares"]
 categories = ["api-bindings", "asynchronous", "network-programming"]

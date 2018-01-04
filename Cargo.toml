@@ -1,7 +1,7 @@
 [package]
 name = "c-ares"
 license = "MIT"
-version = "4.0.3"
+version = "5.0.0"
 authors = ["David Hotham"]
 description = """
 A Rust wrapper for the c-ares library, for asynchronous DNS requests.
@@ -14,8 +14,8 @@ categories = ["api-bindings", "asynchronous", "network-programming"]
 
 [dependencies]
 bitflags = "1"
-c-ares-sys = { version = "3", path = "c-ares-sys" }
-c-types = "1.2"
+c-ares-sys = { version = "4", path = "c-ares-sys" }
+c-types = "2"
 itertools = "0.7"
 
 [target.'cfg(unix)'.dev-dependencies]
@@ -26,7 +26,6 @@ nix = "0.9"
 tokio-core = "0.1"
 
 [target.'cfg(windows)'.dev-dependencies]
-winapi = "0.2"
-ws2_32-sys = "0.2"
+winapi = { version = "0.3", features = ["winsock2"] }
 
 [workspace]

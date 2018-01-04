@@ -59,8 +59,12 @@ pub trait HasHostent {
     }
 
     fn addresses(&self) -> HostAddressResultsIter {
+        // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to
+        // allow the identity conversion in the latter case.
+        #[cfg_attr(feature = "cargo-clippy", allow(identity_conversion))]
+        let addrtype = c_int::from(self.hostent().h_addrtype);
         HostAddressResultsIter {
-            family: address_family(self.hostent().h_addrtype as c_int),
+            family: address_family(addrtype),
             next: unsafe { &*(self.hostent().h_addr_list as *const _) },
         }
     }

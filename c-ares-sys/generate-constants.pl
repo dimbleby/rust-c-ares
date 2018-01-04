@@ -59,7 +59,7 @@ print_values("ARES_NI_", @lines);
 print "\n";
 print "// A non-existent file descriptor\n";
 print "#[cfg(windows)]\n";
-print "pub const ARES_SOCKET_BAD: ares_socket_t = ::winapi::winsock2::INVALID_SOCKET;\n";
+print "pub const ARES_SOCKET_BAD: ares_socket_t = ::winapi::um::winsock2::INVALID_SOCKET;\n";
 print "#[cfg(unix)]\n";
 print "pub const ARES_SOCKET_BAD: ares_socket_t = -1;\n";
 

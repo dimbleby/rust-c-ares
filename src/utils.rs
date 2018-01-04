@@ -28,9 +28,16 @@ pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
 
 #[cfg(windows)]
 pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
-    c_types::in_addr {
-        S_un: u32::from(*ipv4).to_be(),
+    let octets = ipv4.octets();
+    let mut in_addr: c_types::in_addr = unsafe { mem::zeroed() };
+    {
+        let bytes = unsafe { in_addr.S_un.S_un_b_mut() };
+        bytes.s_b1 = octets[0];
+        bytes.s_b2 = octets[1];
+        bytes.s_b3 = octets[2];
+        bytes.s_b4 = octets[3];
     }
+    in_addr
 }
 
 // Get an Ipv4Addr from an in_addr.
@@ -41,29 +48,27 @@ pub fn ipv4_from_in_addr(in_addr: &c_types::in_addr) -> Ipv4Addr {
 
 #[cfg(windows)]
 pub fn ipv4_from_in_addr(in_addr: &c_types::in_addr) -> Ipv4Addr {
-    Ipv4Addr::from(u32::from_be(in_addr.S_un))
+    let bytes = unsafe { in_addr.S_un.S_un_b() };
+    Ipv4Addr::new(bytes.s_b1, bytes.s_b2, bytes.s_b3, bytes.s_b4)
 }
 
 // Get an in6_addr from an Ipv6Addr.
+#[cfg(unix)]
 pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
-    let segments = ipv6.segments();
-    let mut in6_addr: c_types::in6_addr = unsafe { mem::uninitialized() };
-    in6_addr.s6_addr[0] = (segments[0] >> 8) as u8;
-    in6_addr.s6_addr[1] = segments[0] as u8;
-    in6_addr.s6_addr[2] = (segments[1] >> 8) as u8;
-    in6_addr.s6_addr[3] = segments[1] as u8;
-    in6_addr.s6_addr[4] = (segments[2] >> 8) as u8;
-    in6_addr.s6_addr[5] = segments[2] as u8;
-    in6_addr.s6_addr[6] = (segments[3] >> 8) as u8;
-    in6_addr.s6_addr[7] = segments[3] as u8;
-    in6_addr.s6_addr[8] = (segments[4] >> 8) as u8;
-    in6_addr.s6_addr[9] = segments[4] as u8;
-    in6_addr.s6_addr[10] = (segments[5] >> 8) as u8;
-    in6_addr.s6_addr[11] = segments[5] as u8;
-    in6_addr.s6_addr[12] = (segments[6] >> 8) as u8;
-    in6_addr.s6_addr[13] = segments[6] as u8;
-    in6_addr.s6_addr[14] = (segments[7] >> 8) as u8;
-    in6_addr.s6_addr[15] = segments[7] as u8;
+    let octets = ipv6.octets();
+    let mut in6_addr: c_types::in6_addr = unsafe { mem::zeroed() };
+    in6_addr.s6_addr.copy_from_slice(&octets);
+    in6_addr
+}
+
+#[cfg(windows)]
+pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
+    let octets = ipv6.octets();
+    let mut in6_addr: c_types::in6_addr = unsafe { mem::zeroed() };
+    {
+        let bytes = unsafe { in6_addr.u.Byte_mut() };
+        bytes.copy_from_slice(&octets);
+    }
     in6_addr
 }
 
@@ -128,14 +133,16 @@ pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockadd
 
 #[cfg(windows)]
 pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockaddr_in6 {
-    let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
-    c_types::sockaddr_in6 {
-        sin6_family: c_types::AF_INET6 as i16,
-        sin6_port: sock_v6.port().to_be(),
-        sin6_addr: in6_addr,
-        sin6_flowinfo: sock_v6.flowinfo(),
-        sin6_scope_id: sock_v6.scope_id(),
+    let mut sockaddr_in6: c_types::sockaddr_in6 = unsafe { mem::zeroed() };
+    sockaddr_in6.sin6_family = c_types::AF_INET6 as c_types::sa_family_t;
+    sockaddr_in6.sin6_port = sock_v6.port().to_be();
+    sockaddr_in6.sin6_addr = ipv6_as_in6_addr(sock_v6.ip());
+    sockaddr_in6.sin6_flowinfo = sock_v6.flowinfo();
+    {
+        let scope_id = unsafe { sockaddr_in6.u.sin6_scope_id_mut() };
+        *scope_id = sock_v6.scope_id();
     }
+    sockaddr_in6
 }
 
 /// Get the version number of the underlying `c-ares` library.

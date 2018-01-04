@@ -1,3 +1,7 @@
+## 5.0.1 (4 Jan 2018)
+
+* spurious republish (failed attempt to fix c-ares-resolver build errors)
+
 ## 5.0.0 (4 Jan 2018)
 
 * winapi 0.3.3

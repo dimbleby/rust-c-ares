@@ -1,4 +1,4 @@
-## 5.0.0 (4 Jan 2017)
+## 5.0.0 (4 Jan 2018)
 
 * winapi 0.3.3
 * fix docs link in Cargo.toml

@@ -1,4 +1,4 @@
-//! A safe wrapper for the [`c-ares`](http://c-ares.haxx.se) library.
+//! A safe wrapper for the [`c-ares`](https://c-ares.haxx.se) library.
 //!
 //! This crate is a fairly faithful wrapper of `c-ares`; which is to say that
 //! it preserves some of the complication of using the underlying library:

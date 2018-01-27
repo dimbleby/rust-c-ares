@@ -36,9 +36,11 @@ fn main() {
 
     // Prepare.
     let src = env::current_dir().unwrap();
-    run(Command::new("sh")
-        .current_dir(&src.join("c-ares"))
-        .arg("buildconf"));
+    run(
+        Command::new("sh")
+            .current_dir(&src.join("c-ares"))
+            .arg("buildconf"),
+    );
 
     // Configure.
     let cfg = cc::Build::new();
@@ -80,9 +82,11 @@ fn main() {
     run(&mut cmd);
 
     // Compile.
-    run(Command::new(make())
-        .arg(format!("-j{}", env::var("NUM_JOBS").unwrap()))
-        .current_dir(&build));
+    run(
+        Command::new(make())
+            .arg(format!("-j{}", env::var("NUM_JOBS").unwrap()))
+            .current_dir(&build),
+    );
 
     // Link to compiled library.
     println!("cargo:rustc-link-search={}/.libs", build.display());
@@ -115,10 +119,12 @@ fn build_msvc(target: &str) {
     // Prepare.
     let src = env::current_dir().unwrap();
     let c_ares_dir = &src.join("c-ares");
-    run(Command::new("cmd")
-        .current_dir(c_ares_dir)
-        .arg("/c")
-        .arg("buildconf.bat"));
+    run(
+        Command::new("cmd")
+            .current_dir(c_ares_dir)
+            .arg("/c")
+            .arg("buildconf.bat"),
+    );
 
     // Compile.
     let mut cmd = nmake(target);

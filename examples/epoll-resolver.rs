@@ -10,8 +10,7 @@ extern crate nix;
 mod example {
     extern crate c_ares;
 
-    use nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp,
-                          EPOLLIN, EPOLLOUT};
+    use nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp};
     use std::collections::HashSet;
     use std::error::Error;
     use std::str;
@@ -51,10 +50,10 @@ mod example {
             for (fd, readable, writable) in &sockets {
                 let mut interest = EpollFlags::empty();
                 if readable {
-                    interest |= EPOLLIN;
+                    interest |= EpollFlags::EPOLLIN;
                 }
                 if writable {
-                    interest |= EPOLLOUT;
+                    interest |= EpollFlags::EPOLLOUT;
                 }
                 let mut event = EpollEvent::new(interest, fd as u64);
                 let op = if tracked_fds.insert(fd) {
@@ -87,12 +86,12 @@ mod example {
                     // Sockets became readable or writable.  Tell c-ares.
                     for event in &events[0..n] {
                         let active_fd = event.data() as c_ares::Socket;
-                        let rfd = if (event.events() & EPOLLIN).is_empty() {
+                        let rfd = if (event.events() & EpollFlags::EPOLLIN).is_empty() {
                             c_ares::SOCKET_BAD
                         } else {
                             active_fd
                         };
-                        let wfd = if (event.events() & EPOLLOUT).is_empty() {
+                        let wfd = if (event.events() & EpollFlags::EPOLLOUT).is_empty() {
                             c_ares::SOCKET_BAD
                         } else {
                             active_fd

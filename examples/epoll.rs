@@ -9,8 +9,7 @@ mod example {
     extern crate c_ares;
     use std::collections::HashSet;
     use std::error::Error;
-    use nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp,
-                          EPOLLIN, EPOLLOUT};
+    use nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp};
 
     fn print_a_results(result: &c_ares::Result<c_ares::AResults>) {
         match *result {
@@ -101,10 +100,10 @@ mod example {
             for (fd, readable, writable) in &ares_channel.get_sock() {
                 let mut interest = EpollFlags::empty();
                 if readable {
-                    interest |= EPOLLIN;
+                    interest |= EpollFlags::EPOLLIN;
                 }
                 if writable {
-                    interest |= EPOLLOUT;
+                    interest |= EpollFlags::EPOLLOUT;
                 }
                 let mut event = EpollEvent::new(interest, fd as u64);
                 let op = if tracked_fds.insert(fd) {
@@ -134,12 +133,12 @@ mod example {
                     // Sockets became readable or writable.  Tell c-ares.
                     for event in &events[0..n] {
                         let active_fd = event.data() as c_ares::Socket;
-                        let rfd = if (event.events() & EPOLLIN).is_empty() {
+                        let rfd = if (event.events() & EpollFlags::EPOLLIN).is_empty() {
                             c_ares::SOCKET_BAD
                         } else {
                             active_fd
                         };
-                        let wfd = if (event.events() & EPOLLOUT).is_empty() {
+                        let wfd = if (event.events() & EpollFlags::EPOLLOUT).is_empty() {
                             c_ares::SOCKET_BAD
                         } else {
                             active_fd

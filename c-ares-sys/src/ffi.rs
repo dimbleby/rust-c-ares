@@ -136,7 +136,7 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_save_options(
-        channel: ares_channel,
+        channel: *const ares_channeldata,
         options: *mut ares_options,
         optmask: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
@@ -145,7 +145,8 @@ extern "C" {
     pub fn ares_destroy_options(options: *mut ares_options);
 }
 extern "C" {
-    pub fn ares_dup(dest: *mut ares_channel, src: ares_channel) -> ::std::os::raw::c_int;
+    pub fn ares_dup(dest: *mut ares_channel, src: *const ares_channeldata)
+        -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_destroy(channel: ares_channel);
@@ -314,7 +315,7 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_timeout(
-        channel: ares_channel,
+        channel: *const ares_channeldata,
         maxtv: *mut timeval,
         tv: *mut timeval,
     ) -> *mut timeval;
@@ -587,13 +588,13 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_get_servers(
-        channel: ares_channel,
+        channel: *const ares_channeldata,
         servers: *mut *mut ares_addr_node,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_get_servers_ports(
-        channel: ares_channel,
+        channel: *const ares_channeldata,
         servers: *mut *mut ares_addr_port_node,
     ) -> ::std::os::raw::c_int;
 }

@@ -75,7 +75,7 @@ impl<'a> Iterator for AResultsIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         self.addrttls
             .next()
-            .map(|addrttl| AResult { addrttl: addrttl })
+            .map(|addrttl| AResult { addrttl })
     }
 }
 

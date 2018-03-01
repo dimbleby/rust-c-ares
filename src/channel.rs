@@ -235,7 +235,7 @@ impl Channel {
         }
 
         let channel = Channel {
-            ares_channel: ares_channel,
+            ares_channel,
             phantom: PhantomData,
             _socket_state_callback: options.socket_state_callback,
         };
@@ -252,7 +252,7 @@ impl Channel {
 
         let callback = self._socket_state_callback.as_ref().cloned();
         let channel = Channel {
-            ares_channel: ares_channel,
+            ares_channel,
             phantom: PhantomData,
             _socket_state_callback: callback,
         };
@@ -910,8 +910,8 @@ impl GetSock {
         bitmask: u32,
     ) -> GetSock {
         GetSock {
-            socks: socks,
-            bitmask: bitmask,
+            socks,
+            bitmask,
         }
     }
 

@@ -42,7 +42,7 @@ impl MXResults {
 
     fn new(mx_reply: *mut c_ares_sys::ares_mx_reply) -> MXResults {
         MXResults {
-            mx_reply: mx_reply,
+            mx_reply,
             phantom: PhantomData,
         }
     }

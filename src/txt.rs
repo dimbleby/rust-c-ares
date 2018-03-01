@@ -41,7 +41,7 @@ impl TXTResults {
 
     fn new(txt_reply: *mut c_ares_sys::ares_txt_ext) -> TXTResults {
         TXTResults {
-            txt_reply: txt_reply,
+            txt_reply,
             phantom: PhantomData,
         }
     }

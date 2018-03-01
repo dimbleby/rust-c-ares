@@ -35,7 +35,7 @@ impl SOAResult {
 
     fn new(soa_reply: *mut c_ares_sys::ares_soa_reply) -> SOAResult {
         SOAResult {
-            soa_reply: soa_reply,
+            soa_reply,
             phantom: PhantomData,
         }
     }

@@ -18,8 +18,8 @@ pub struct NameInfoResult<'a> {
 impl<'a> NameInfoResult<'a> {
     fn new(node: Option<&'a c_char>, service: Option<&'a c_char>) -> NameInfoResult<'a> {
         NameInfoResult {
-            node: node,
-            service: service,
+            node,
+            service,
         }
     }
 

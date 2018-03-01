@@ -130,7 +130,7 @@ mod example {
 
             Resolver {
                 ares_channel: locked_channel,
-                keep_going: keep_going,
+                keep_going,
                 fd_handle: Some(fd_handle),
             }
         }

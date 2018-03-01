@@ -74,7 +74,7 @@ impl<'a> Iterator for AAAAResultsIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         self.addr6ttls
             .next()
-            .map(|addr6ttl| AAAAResult { addr6ttl: addr6ttl })
+            .map(|addr6ttl| AAAAResult { addr6ttl })
     }
 }
 

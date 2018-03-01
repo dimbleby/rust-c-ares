@@ -70,10 +70,10 @@ mod example {
                 .expect("failed to register channel with poll");
 
             EventLoop {
-                poll: poll,
+                poll,
                 msg_channel: rx,
                 tracked_fds: HashSet::<c_ares::Socket>::new(),
-                ares_channel: ares_channel,
+                ares_channel,
                 quit: false,
             }
         }

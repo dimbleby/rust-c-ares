@@ -6,6 +6,9 @@
 // details from the writer of `main()`.
 //
 // - Transform the callback-based c-ares interface into a futures-style.
+//
+// This example is fleshed out in the
+// [c-ares-resolver](https://github.com/dimbleby/c-ares-resolver) crate.
 #[cfg(unix)]
 mod example {
     extern crate c_ares;

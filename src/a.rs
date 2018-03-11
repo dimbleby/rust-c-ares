@@ -73,9 +73,7 @@ pub struct AResultsIter<'a> {
 impl<'a> Iterator for AResultsIter<'a> {
     type Item = AResult<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        self.addrttls
-            .next()
-            .map(|addrttl| AResult { addrttl })
+        self.addrttls.next().map(|addrttl| AResult { addrttl })
     }
 }
 

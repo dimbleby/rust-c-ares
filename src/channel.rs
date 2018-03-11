@@ -909,10 +909,7 @@ impl GetSock {
         socks: [c_ares_sys::ares_socket_t; c_ares_sys::ARES_GETSOCK_MAXNUM],
         bitmask: u32,
     ) -> GetSock {
-        GetSock {
-            socks,
-            bitmask,
-        }
+        GetSock { socks, bitmask }
     }
 
     /// Returns an iterator over the sockets that `c-ares` is interested in.

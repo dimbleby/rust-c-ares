@@ -39,3 +39,5 @@ build: false
 
 test_script:
   - cargo test -j1
+  - if [%channel%]==[nightly] (cargo update -Z minimal-versions)
+  - if [%channel%]==[nightly] (cargo build)

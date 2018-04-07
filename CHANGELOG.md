@@ -1,3 +1,7 @@
+## 5.0.2 (7 Apr 2018)
+
+* Bump metadeps dependency (fixes minimal-versions build)
+
 ## 5.0.1 (4 Jan 2018)
 
 * spurious republish (failed attempt to fix c-ares-resolver build errors)

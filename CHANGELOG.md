@@ -1,3 +1,7 @@
+## 5.0.4 (7 Apr 2018)
+
+* Bump more dependencies (fixes minimal-versions build on OSX)
+
 ## 5.0.3 (7 Apr 2018)
 
 * Bump c-ares-sys dependency (really fixes minimal-versions build)

@@ -1,3 +1,7 @@
+## 4.1.1 (7 Apr 2018)
+
+* Bump metadeps dependency (fixes minimal-versions build)
+
 ## 4.1.0 (16 Feb 2018)
 
 * pull upstream c-ares - their release 1.14.0

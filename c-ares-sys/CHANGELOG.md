@@ -1,3 +1,7 @@
+## 4.1.2 (7 Apr 2018)
+
+* Bump c-types dependency (fixes minimal-versions build on OSX)
+
 ## 4.1.1 (7 Apr 2018)
 
 * Bump metadeps dependency (fixes minimal-versions build)

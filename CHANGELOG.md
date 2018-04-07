@@ -1,3 +1,7 @@
+## 5.0.3 (7 Apr 2018)
+
+* Bump c-ares-sys dependency (really fixes minimal-versions build)
+
 ## 5.0.2 (7 Apr 2018)
 
 * Bump metadeps dependency (fixes minimal-versions build)

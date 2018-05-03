@@ -1,4 +1,5 @@
 extern crate cc;
+extern crate fs_extra;
 extern crate metadeps;
 
 use std::env;
@@ -21,7 +22,22 @@ fn main() {
     }
 
     // Rerun if the c-ares source code has changed.
+    println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=c-ares");
+
+    // Clean up previous build, if any.
+    let outdir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let build = outdir.join("build");
+    let _ = fs::remove_dir_all(&build);
+    fs::create_dir(&build).unwrap();
+
+    // Copy the c-ares source code into $OUT_DIR, where it's safe for the build
+    // process to modify it.
+    let c_ares_dir = outdir.join("c-ares");
+    let _ = fs::remove_dir_all(&c_ares_dir);
+    let copy_options = fs_extra::dir::CopyOptions::new();
+    let src = env::current_dir().unwrap().join("c-ares");
+    fs_extra::dir::copy(&src, &outdir, &copy_options).unwrap();
 
     // MSVC builds are different.
     let target = env::var("TARGET").unwrap();
@@ -30,14 +46,9 @@ fn main() {
         return;
     }
 
-    let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-    let build = dst.join("build");
-    let _ = fs::create_dir(&build);
-
     // Prepare.
-    let src = env::current_dir().unwrap();
     run(Command::new("sh")
-        .current_dir(&src.join("c-ares"))
+        .current_dir(&c_ares_dir)
         .arg("buildconf"));
 
     // Configure.
@@ -53,11 +64,11 @@ fn main() {
     cmd.env("CFLAGS", &cflags)
         .env("CC", compiler.path())
         .current_dir(&build)
-        .arg(format!("{}", src.join("c-ares/configure").display()))
+        .arg(format!("{}", c_ares_dir.join("configure").display()))
         .arg("--enable-static=yes")
         .arg("--enable-shared=no")
         .arg("--enable-optimize")
-        .arg(format!("--prefix={}", dst.display()));
+        .arg(format!("--prefix={}", outdir.display()));
 
     // This code fragment copied from curl-rust... c-ares and curl come from
     // the same developer so are usually pretty similar, and this seems to
@@ -112,25 +123,25 @@ fn nmake(target: &str) -> Command {
 }
 
 fn build_msvc(target: &str) {
-    // Prepare.
-    let src = env::current_dir().unwrap();
-    let c_ares_dir = &src.join("c-ares");
+    // Prepare.  We've already copied the c-ares source code into the output
+    // directory.
+    let outdir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let c_ares_dir = outdir.join("c-ares");
     run(Command::new("cmd")
-        .current_dir(c_ares_dir)
+        .current_dir(&c_ares_dir)
         .arg("/c")
         .arg("buildconf.bat"));
 
     // Compile.
     let mut cmd = nmake(target);
-    cmd.current_dir(c_ares_dir);
+    cmd.current_dir(&c_ares_dir);
     cmd.args(&["/f", "Makefile.msvc", "CFG=lib-release", "c-ares"]);
     run(&mut cmd);
 
     // Install library.
-    let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-    let build = dst.join("build");
+    let build = outdir.join("build");
     let mut cmd = nmake(target);
-    cmd.current_dir(c_ares_dir);
+    cmd.current_dir(&c_ares_dir);
     cmd.args(&["/f", "Makefile.msvc", "/a", "CFG=lib-release", "install"]);
     cmd.env("INSTALL_DIR", format!("{}", build.display()));
     run(&mut cmd);

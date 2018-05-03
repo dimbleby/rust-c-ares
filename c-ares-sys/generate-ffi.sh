@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if ! which bindgen > /dev/null 2>&1
+if ! command -v bindgen > /dev/null 2>&1
 then
   echo "bindgen is not in the path"
   exit 1

@@ -47,9 +47,7 @@ fn main() {
     }
 
     // Prepare.
-    run(Command::new("sh")
-        .current_dir(&c_ares_dir)
-        .arg("buildconf"));
+    run(Command::new("sh").current_dir(&c_ares_dir).arg("buildconf"));
 
     // Configure.
     let cfg = cc::Build::new();

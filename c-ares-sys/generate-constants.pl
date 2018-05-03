@@ -20,9 +20,9 @@ sub print_values {
     }
 }
 
-open(ARES_H, 'c-ares/ares.h');
-my @lines = <ARES_H>;
-close(ARES_H);
+open(my $ARES_H, '<', 'c-ares/ares.h');
+my @lines = <$ARES_H>;
+close($ARES_H);
 
 # Remove line comments.  In principle this is a bit fragile - what about
 # quotations that contain text that looks like a comment?  But it's good

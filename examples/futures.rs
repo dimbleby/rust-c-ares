@@ -191,7 +191,7 @@ mod example {
     }
 
     // The type of future returned by methods on the Resolver.
-    pub struct CAresFuture<T> {
+    struct CAresFuture<T> {
         inner: futures::sync::oneshot::Receiver<c_ares::Result<T>>,
     }
 
@@ -263,7 +263,10 @@ mod example {
         }
 
         // A CNAME query.  Returns a future that will resolve to hold the result.
-        pub fn query_cname(&self, name: &str) -> CAresFuture<c_ares::CNameResults> {
+        pub fn query_cname(
+            &self,
+            name: &str,
+        ) -> impl Future<Item = c_ares::CNameResults, Error = c_ares::Error> {
             let (c, p) = futures::oneshot();
             self.ares_channel
                 .lock()
@@ -275,7 +278,10 @@ mod example {
         }
 
         // An MX query.  Returns a future that will resolve to hold the result.
-        pub fn query_mx(&self, name: &str) -> CAresFuture<c_ares::MXResults> {
+        pub fn query_mx(
+            &self,
+            name: &str,
+        ) -> impl Future<Item = c_ares::MXResults, Error = c_ares::Error> {
             let (c, p) = futures::oneshot();
             self.ares_channel
                 .lock()
@@ -287,7 +293,10 @@ mod example {
         }
 
         // A NAPTR query.  Returns a future that will resolve to hold the result.
-        pub fn query_naptr(&self, name: &str) -> CAresFuture<c_ares::NAPTRResults> {
+        pub fn query_naptr(
+            &self,
+            name: &str,
+        ) -> impl Future<Item = c_ares::NAPTRResults, Error = c_ares::Error> {
             let (c, p) = futures::oneshot();
             self.ares_channel
                 .lock()

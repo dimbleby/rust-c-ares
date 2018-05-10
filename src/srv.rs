@@ -2,9 +2,9 @@ use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
-use std::str;
 use std::ptr;
 use std::slice;
+use std::str;
 
 use c_ares_sys;
 use itertools::Itertools;

@@ -7,9 +7,9 @@ extern crate nix;
 #[cfg(all(unix, any(target_os = "linux", target_os = "android")))]
 mod example {
     extern crate c_ares;
+    use nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp};
     use std::collections::HashSet;
     use std::error::Error;
-    use nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp};
 
     fn print_a_results(result: &c_ares::Result<c_ares::AResults>) {
         match *result {

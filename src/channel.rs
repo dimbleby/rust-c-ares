@@ -9,11 +9,11 @@ use std::sync::Arc;
 use c_ares_sys;
 use c_types;
 
+use Flags;
 use a::{query_a_callback, AResults};
 use aaaa::{query_aaaa_callback, AAAAResults};
 use cname::{query_cname_callback, CNameResults};
 use error::{Error, Result};
-use Flags;
 use host::{get_host_callback, HostResults};
 use mx::{query_mx_callback, MXResults};
 use nameinfo::{get_name_info_callback, NameInfoResult};

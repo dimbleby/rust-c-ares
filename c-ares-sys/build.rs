@@ -9,10 +9,12 @@ use std::path::PathBuf;
 use std::process::Command;
 
 macro_rules! t {
-    ($e:expr) => (match $e {
-        Ok(t) => t,
-        Err(e) => panic!("{} return the error {}", stringify!($e), e),
-    })
+    ($e:expr) => {
+        match $e {
+            Ok(t) => t,
+            Err(e) => panic!("{} return the error {}", stringify!($e), e),
+        }
+    };
 }
 
 fn main() {

@@ -66,10 +66,10 @@ mod ns;
 mod panic;
 mod ptr;
 mod query;
-mod srv;
-mod types;
-mod txt;
 mod soa;
+mod srv;
+mod txt;
+mod types;
 mod utils;
 
 #[cfg(test)]

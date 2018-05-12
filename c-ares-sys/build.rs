@@ -18,16 +18,16 @@ macro_rules! t {
 }
 
 fn main() {
+    // Rerun if the c-ares source code has changed.
+    println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=c-ares");
+
     // Use the installed libcares if it is available.
     if metadeps::probe().is_ok() {
         return;
     }
 
-    // Rerun if the c-ares source code has changed.
-    println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=c-ares");
-
-    // Clean up previous build, if any.
+    // We'll compile from source.  Clean up previous build, if any.
     let outdir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
     let build = outdir.join("build");
     let _ = fs::remove_dir_all(&build);

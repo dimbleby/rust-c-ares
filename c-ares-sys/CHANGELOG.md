@@ -1,3 +1,7 @@
+## 4.1.3 (12 May 2018)
+
+* Arrange that build output all goes to `$OUT_DIR`
+
 ## 4.1.2 (7 Apr 2018)
 
 * Bump c-types dependency (fixes minimal-versions build on OSX)

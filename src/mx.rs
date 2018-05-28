@@ -4,7 +4,6 @@ use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
-use std::str;
 
 use c_ares_sys;
 use itertools::Itertools;
@@ -103,11 +102,12 @@ unsafe impl<'a> Sync for MXResultsIter<'a> {}
 
 impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.
-    pub fn host(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr(self.mx_reply.host);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn host(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.mx_reply.host) }
     }
 
     /// Returns the priority from this `MXResult`.
@@ -118,7 +118,11 @@ impl<'a> MXResult<'a> {
 
 impl<'a> fmt::Display for MXResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "Hostname: {}, ", self.host())?;
+        write!(
+            fmt,
+            "Hostname: {}, ",
+            self.host().to_str().unwrap_or("<not utf8>")
+        )?;
         write!(fmt, "Priority: {}", self.priority())
     }
 }

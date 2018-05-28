@@ -110,7 +110,7 @@ impl<'a> TXTResult<'a> {
     /// Returns the text in this `TXTResult`.
     ///
     /// Although text is usual here, any binary data is legal - which is why we
-    /// return `&[u8]` rather than `&str`.
+    /// return `&[u8]`.
     pub fn text(&self) -> &[u8] {
         unsafe { slice::from_raw_parts(self.txt_reply.txt, self.txt_reply.length) }
     }

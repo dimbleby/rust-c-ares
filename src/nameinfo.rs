@@ -1,7 +1,6 @@
 use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::{c_char, c_int, c_void};
-use std::str;
 
 use c_ares_sys;
 
@@ -21,27 +20,33 @@ impl<'a> NameInfoResult<'a> {
     }
 
     /// Returns the node from this `NameInfoResult`.
-    pub fn node(&self) -> Option<&str> {
-        self.node.map(|string| unsafe {
-            let c_str = CStr::from_ptr(string);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        })
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn node(&self) -> Option<&CStr> {
+        self.node.map(|string| unsafe { CStr::from_ptr(string) })
     }
 
     /// Returns the service from this `NameInfoResult`.
-    pub fn service(&self) -> Option<&str> {
-        self.service.map(|string| unsafe {
-            let c_str = CStr::from_ptr(string);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        })
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn service(&self) -> Option<&CStr> {
+        self.service.map(|string| unsafe { CStr::from_ptr(string) })
     }
 }
 
 impl<'a> fmt::Display for NameInfoResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let node = self.node().unwrap_or("<None>");
+        let node = self.node()
+            .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
+            .unwrap_or("<None>");
         write!(fmt, "Node: {}, ", node)?;
-        let service = self.service().unwrap_or("<None>");
+        let service = self.service()
+            .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
+            .unwrap_or("<None>");
         write!(fmt, "Service: {}", service)
     }
 }

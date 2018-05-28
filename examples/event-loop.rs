@@ -16,9 +16,9 @@ mod example {
             }
             Ok(host_results) => {
                 println!("Successful host lookup...");
-                println!("Hostname: {}", host_results.hostname());
+                println!("Hostname: {}", host_results.hostname().to_string_lossy());
                 for alias in host_results.aliases() {
-                    println!("Alias: {}", alias);
+                    println!("Alias: {}", alias.to_string_lossy());
                 }
                 for address in host_results.addresses() {
                     match address {

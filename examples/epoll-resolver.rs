@@ -205,8 +205,8 @@ mod example {
             }
             Ok(ref ns_results) => {
                 println!("Successful NS lookup...");
-                for ns_result in ns_results.aliases() {
-                    println!("{}", ns_result);
+                for alias in ns_results.aliases() {
+                    println!("{}", alias.to_string_lossy());
                 }
             }
         }
@@ -219,8 +219,8 @@ mod example {
             }
             Ok(ref ptr_results) => {
                 println!("Successful PTR lookup...");
-                for ptr_result in ptr_results.aliases() {
-                    println!("{}", ptr_result);
+                for alias in ptr_results.aliases() {
+                    println!("{}", alias.to_string_lossy());
                 }
             }
         }

@@ -4,7 +4,6 @@ use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
-use std::str;
 
 use c_ares_sys;
 
@@ -41,19 +40,21 @@ impl SOAResult {
     }
 
     /// Returns the name server from this `SOAResult`.
-    pub fn name_server(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr((*self.soa_reply).nsname);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn name_server(&self) -> &CStr {
+        unsafe { CStr::from_ptr((*self.soa_reply).nsname) }
     }
 
     /// Returns the hostmaster from this `SOAResult`.
-    pub fn hostmaster(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr((*self.soa_reply).hostmaster);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn hostmaster(&self) -> &CStr {
+        unsafe { CStr::from_ptr((*self.soa_reply).hostmaster) }
     }
 
     /// Returns the serial number from this `SOAResult`.
@@ -84,8 +85,16 @@ impl SOAResult {
 
 impl fmt::Display for SOAResult {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "Name server: {}, ", self.name_server())?;
-        write!(fmt, "Hostmaster: {}, ", self.hostmaster())?;
+        write!(
+            fmt,
+            "Name server: {}, ",
+            self.name_server().to_str().unwrap_or("<not utf8>")
+        )?;
+        write!(
+            fmt,
+            "Hostmaster: {}, ",
+            self.hostmaster().to_str().unwrap_or("<not utf8>")
+        )?;
         write!(fmt, "Serial: {}, ", self.serial())?;
         write!(fmt, "Refresh: {}, ", self.refresh())?;
         write!(fmt, "Retry: {}, ", self.retry())?;

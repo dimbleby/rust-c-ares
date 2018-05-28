@@ -329,9 +329,9 @@ mod example {
             .map(|results| {
                 println!();
                 println!("Successful CNAME lookup...");
-                println!("Hostname: {}", results.hostname());
+                println!("Hostname: {}", results.hostname().to_string_lossy());
                 for alias in results.aliases() {
-                    println!("Alias: {}", alias);
+                    println!("Alias: {}", alias.to_string_lossy());
                 }
                 println!();
             });
@@ -343,7 +343,11 @@ mod example {
                 println!();
                 println!("Successful MX lookup...");
                 for result in &results {
-                    println!("host {}, priority {}", result.host(), result.priority());
+                    println!(
+                        "host {}, priority {}",
+                        result.host().to_string_lossy(),
+                        result.priority()
+                    );
                 }
                 println!();
             });
@@ -355,10 +359,13 @@ mod example {
                 println!();
                 println!("Successful NAPTR lookup...");
                 for result in &results {
-                    println!("flags: {}", result.flags());
-                    println!("service name: {}", result.service_name());
-                    println!("regular expression: {}", result.reg_exp());
-                    println!("replacement pattern: {}", result.replacement_pattern());
+                    println!("flags: {}", result.flags().to_string_lossy());
+                    println!("service name: {}", result.service_name().to_string_lossy());
+                    println!("regular expression: {}", result.reg_exp().to_string_lossy());
+                    println!(
+                        "replacement pattern: {}",
+                        result.replacement_pattern().to_string_lossy()
+                    );
                     println!("order: {}", result.order());
                     println!("preference: {}", result.preference());
                 }

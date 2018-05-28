@@ -4,7 +4,6 @@ use std::marker::PhantomData;
 use std::os::raw::{c_char, c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
-use std::str;
 
 use c_ares_sys;
 use itertools::Itertools;
@@ -104,35 +103,39 @@ unsafe impl<'a> Sync for NAPTRResultsIter<'a> {}
 
 impl<'a> NAPTRResult<'a> {
     /// Returns the flags in this `NAPTRResult`.
-    pub fn flags(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr(self.naptr_reply.flags as *const c_char);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn flags(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.naptr_reply.flags as *const c_char) }
     }
 
     /// Returns the service name in this `NAPTRResult`.
-    pub fn service_name(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr(self.naptr_reply.service as *const c_char);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn service_name(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.naptr_reply.service as *const c_char) }
     }
 
     /// Returns the regular expression in this `NAPTRResult`.
-    pub fn reg_exp(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr(self.naptr_reply.regexp as *const c_char);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn reg_exp(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.naptr_reply.regexp as *const c_char) }
     }
 
     /// Returns the replacement pattern in this `NAPTRResult`.
-    pub fn replacement_pattern(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr(self.naptr_reply.replacement);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn replacement_pattern(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.naptr_reply.replacement) }
     }
 
     /// Returns the order value in this `NAPTRResult`.
@@ -148,10 +151,26 @@ impl<'a> NAPTRResult<'a> {
 
 impl<'a> fmt::Display for NAPTRResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "Flags: {}, ", self.flags())?;
-        write!(fmt, "Service name: {}, ", self.service_name())?;
-        write!(fmt, "Regular expression: {}, ", self.reg_exp())?;
-        write!(fmt, "Replacement pattern: {}, ", self.replacement_pattern())?;
+        write!(
+            fmt,
+            "Flags: {}, ",
+            self.flags().to_str().unwrap_or("<not utf8>")
+        )?;
+        write!(
+            fmt,
+            "Service name: {}, ",
+            self.service_name().to_str().unwrap_or("<not utf8>")
+        )?;
+        write!(
+            fmt,
+            "Regular expression: {}, ",
+            self.reg_exp().to_str().unwrap_or("<not utf8>")
+        )?;
+        write!(
+            fmt,
+            "Replacement pattern: {}, ",
+            self.replacement_pattern().to_str().unwrap_or("<not utf8>")
+        )?;
         write!(fmt, "Order: {}, ", self.order())?;
         write!(fmt, "Preference: {}", self.preference())
     }

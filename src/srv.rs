@@ -4,7 +4,6 @@ use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
-use std::str;
 
 use c_ares_sys;
 use itertools::Itertools;
@@ -104,11 +103,12 @@ unsafe impl<'a> Sync for SRVResultsIter<'a> {}
 
 impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
-    pub fn host(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr(self.srv_reply.host);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
+    ///
+    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
+    /// fallible conversion, a lossy conversion, or something else altogether.
+    pub fn host(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.srv_reply.host) }
     }
 
     /// Returns the weight in this `SRVResult`.
@@ -129,7 +129,11 @@ impl<'a> SRVResult<'a> {
 
 impl<'a> fmt::Display for SRVResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "Host: {}, ", self.host())?;
+        write!(
+            fmt,
+            "Host: {}, ",
+            self.host().to_str().unwrap_or("<not utf8>")
+        )?;
         write!(fmt, "Port: {}, ", self.port())?;
         write!(fmt, "Priority: {}, ", self.priority())?;
         write!(fmt, "Weight: {}", self.weight())

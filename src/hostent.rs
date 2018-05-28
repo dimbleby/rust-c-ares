@@ -5,7 +5,6 @@ use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::raw::{c_char, c_int};
 use std::slice;
-use std::str;
 
 use c_ares_sys;
 use c_types;
@@ -51,11 +50,8 @@ impl<'a> HostentBorrowed<'a> {
 pub trait HasHostent {
     fn hostent(&self) -> &c_types::hostent;
 
-    fn hostname(&self) -> &str {
-        unsafe {
-            let c_str = CStr::from_ptr(self.hostent().h_name);
-            str::from_utf8_unchecked(c_str.to_bytes())
-        }
+    fn hostname(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.hostent().h_name) }
     }
 
     fn addresses(&self) -> HostAddressResultsIter {
@@ -76,10 +72,16 @@ pub trait HasHostent {
     }
 
     fn display(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "Hostname: {}, ", self.hostname())?;
+        write!(
+            fmt,
+            "Hostname: {}, ",
+            self.hostname().to_str().unwrap_or("<not utf8>")
+        )?;
         let addresses = self.addresses().format(", ");
         write!(fmt, "Addresses: [{}]", addresses)?;
-        let aliases = self.aliases().format(", ");
+        let aliases = self.aliases()
+            .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
+            .format(", ");
         write!(fmt, "Aliases: [{}]", aliases)
     }
 }
@@ -149,14 +151,18 @@ impl<'a> Iterator for HostAddressResultsIter<'a> {
 unsafe impl<'a> Send for HostAddressResultsIter<'a> {}
 unsafe impl<'a> Sync for HostAddressResultsIter<'a> {}
 
-/// Iterator of `&'a str`s.
+/// Iterator of `&'a CStr`s.
+///
+/// Each item is very likely to be a valid UTF-8 string, but the underlying `c-ares` library does
+/// not guarantee this - so we leave it to users to decide whether they prefer a fallible
+/// conversion, a lossy conversion, or something else altogether.
 #[derive(Clone, Copy, Debug)]
 pub struct HostAliasResultsIter<'a> {
     next: &'a *const c_char,
 }
 
 impl<'a> Iterator for HostAliasResultsIter<'a> {
-    type Item = &'a str;
+    type Item = &'a CStr;
     fn next(&mut self) -> Option<Self::Item> {
         let h_alias = *self.next;
         if h_alias.is_null() {
@@ -165,7 +171,7 @@ impl<'a> Iterator for HostAliasResultsIter<'a> {
             unsafe {
                 self.next = &*(self.next as *const *const c_char).offset(1);
                 let c_str = CStr::from_ptr(h_alias);
-                Some(str::from_utf8_unchecked(c_str.to_bytes()))
+                Some(c_str)
             }
         }
     }

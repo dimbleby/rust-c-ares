@@ -1,3 +1,7 @@
+## 6.0.0 (28 May 2018)
+
+* Return `&CStr` mostly, rather than `&str`.  The unchecked conversion in previous releases was not safe, so we let users decide how to deal with that.
+
 ## 5.0.4 (7 Apr 2018)
 
 * Bump more dependencies (fixes minimal-versions build on OSX)

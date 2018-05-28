@@ -41,20 +41,12 @@ mod example {
             }
             Ok(ref name_info_result) => {
                 println!("Successful name info lookup...");
-                println!(
-                    "Node: {}",
-                    name_info_result
-                        .node()
-                        .map(|cstr| cstr.to_string_lossy())
-                        .unwrap_or("<None>")
-                );
-                println!(
-                    "Service: {}",
-                    name_info_result
-                        .service()
-                        .map(|cstr| cstr.to_string_lossy())
-                        .unwrap_or("<None>")
-                );
+                if let Some(node) = name_info_result.node() {
+                    println!("Node: {}", node.to_string_lossy());
+                }
+                if let Some(service) = name_info_result.service() {
+                    println!("Service: {}", service.to_string_lossy());
+                }
             }
         }
     }

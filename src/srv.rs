@@ -104,7 +104,7 @@ unsafe impl<'a> Sync for SRVResultsIter<'a> {}
 impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
     ///
-    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn host(&self) -> &CStr {

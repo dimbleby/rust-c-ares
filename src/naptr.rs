@@ -104,7 +104,7 @@ unsafe impl<'a> Sync for NAPTRResultsIter<'a> {}
 impl<'a> NAPTRResult<'a> {
     /// Returns the flags in this `NAPTRResult`.
     ///
-    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn flags(&self) -> &CStr {
@@ -113,7 +113,7 @@ impl<'a> NAPTRResult<'a> {
 
     /// Returns the service name in this `NAPTRResult`.
     ///
-    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn service_name(&self) -> &CStr {
@@ -122,7 +122,7 @@ impl<'a> NAPTRResult<'a> {
 
     /// Returns the regular expression in this `NAPTRResult`.
     ///
-    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn reg_exp(&self) -> &CStr {
@@ -131,7 +131,7 @@ impl<'a> NAPTRResult<'a> {
 
     /// Returns the replacement pattern in this `NAPTRResult`.
     ///
-    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn replacement_pattern(&self) -> &CStr {

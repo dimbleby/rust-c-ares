@@ -41,7 +41,7 @@ impl SOAResult {
 
     /// Returns the name server from this `SOAResult`.
     ///
-    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn name_server(&self) -> &CStr {
@@ -50,7 +50,7 @@ impl SOAResult {
 
     /// Returns the hostmaster from this `SOAResult`.
     ///
-    /// In practice, this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
+    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn hostmaster(&self) -> &CStr {

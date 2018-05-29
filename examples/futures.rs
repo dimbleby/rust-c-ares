@@ -23,8 +23,8 @@ mod example {
     use std::thread;
     use std::time::Duration;
 
-    use self::futures::Future;
     use self::futures::future::lazy;
+    use self::futures::Future;
     use self::tokio::executor::current_thread;
 
     // The EventLoop will set up a mio::Poll and use it to wait for the following:

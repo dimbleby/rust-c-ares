@@ -9,7 +9,6 @@ use std::sync::Arc;
 use c_ares_sys;
 use c_types;
 
-use Flags;
 use a::{query_a_callback, AResults};
 use aaaa::{query_aaaa_callback, AAAAResults};
 use cname::{query_cname_callback, CNameResults};
@@ -29,6 +28,7 @@ use txt::{query_txt_callback, TXTResults};
 use types::{AddressFamily, DnsClass, QueryType, Socket};
 use utils::{ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in,
             socket_addrv6_as_sockaddr_in6};
+use Flags;
 
 type SocketStateCallback = FnMut(Socket, bool, bool) + Send + 'static;
 

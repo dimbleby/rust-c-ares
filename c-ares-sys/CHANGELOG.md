@@ -1,3 +1,8 @@
+## 4.1.4 (30 May 2018(
+
+* pull upstream c-ares
+  * in particular, their [#191](https://github.com/c-ares/c-ares/pull/191)
+
 ## 4.1.3 (12 May 2018)
 
 * Arrange that build output all goes to `$OUT_DIR`

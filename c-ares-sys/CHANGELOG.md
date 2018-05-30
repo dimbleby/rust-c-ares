@@ -1,4 +1,4 @@
-## 4.1.4 (30 May 2018(
+## 4.1.4 (30 May 2018)
 
 * pull upstream c-ares
   * in particular, their [#191](https://github.com/c-ares/c-ares/pull/191)

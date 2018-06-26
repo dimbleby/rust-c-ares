@@ -8,7 +8,7 @@ use c_ares_sys;
 use c_types;
 
 use error::{Error, Result};
-use hostent::{HasHostent, HostAddressResultsIter, HostAliasResultsIter, HostentOwned};
+use hostent::{HasHostent, HostAliasResultsIter, HostentOwned};
 use panic;
 
 /// The result of a successful CNAME lookup.
@@ -51,11 +51,6 @@ impl CNameResults {
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn hostname(&self) -> &CStr {
         self.hostent.hostname()
-    }
-
-    /// Returns an iterator over the `IpAddr` values in this `CNameResults`.
-    pub fn addresses(&self) -> HostAddressResultsIter {
-        self.hostent.addresses()
     }
 
     /// Returns an iterator over the host aliases in this `CNameResults`.

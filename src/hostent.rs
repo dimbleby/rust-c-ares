@@ -13,41 +13,6 @@ use itertools::Itertools;
 use types::AddressFamily;
 use utils::address_family;
 
-pub fn hostname(hostent: &c_types::hostent) -> &CStr {
-    unsafe { CStr::from_ptr(hostent.h_name) }
-}
-
-pub fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
-    // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to
-    // allow the identity conversion in the latter case.
-    #[cfg_attr(feature = "cargo-clippy", allow(identity_conversion))]
-    let addrtype = c_int::from(hostent.h_addrtype);
-    HostAddressResultsIter {
-        family: address_family(addrtype),
-        next: unsafe { &*(hostent.h_addr_list as *const _) },
-    }
-}
-
-pub fn aliases(hostent: &c_types::hostent) -> HostAliasResultsIter {
-    HostAliasResultsIter {
-        next: unsafe { &*(hostent.h_aliases as *const _) },
-    }
-}
-
-pub fn display(hostent: &c_types::hostent, fmt: &mut fmt::Formatter) -> fmt::Result {
-    write!(
-        fmt,
-        "Hostname: {}, ",
-        hostname(hostent).to_str().unwrap_or("<not utf8>")
-    )?;
-    let addresses = addresses(hostent).format(", ");
-    write!(fmt, "Addresses: [{}]", addresses)?;
-    let aliases = aliases(hostent)
-        .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
-        .format(", ");
-    write!(fmt, "Aliases: [{}]", aliases)
-}
-
 #[derive(Debug)]
 pub struct HostentOwned {
     inner: *mut c_types::hostent,
@@ -62,8 +27,22 @@ impl HostentOwned {
         }
     }
 
-    pub fn hostent(&self) -> &c_types::hostent {
-        unsafe { &*self.inner }
+    pub fn hostname(&self) -> &CStr {
+        HostentBorrowed::from(self).hostname()
+    }
+
+    pub fn addresses(&self) -> HostAddressResultsIter {
+        HostentBorrowed::from(self).addresses()
+    }
+
+    pub fn aliases(&self) -> HostAliasResultsIter {
+        HostentBorrowed::from(self).aliases()
+    }
+}
+
+impl fmt::Display for HostentOwned {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        HostentBorrowed::from(self).fmt(fmt)
     }
 }
 
@@ -75,6 +54,9 @@ impl Drop for HostentOwned {
     }
 }
 
+unsafe impl Send for HostentOwned {}
+unsafe impl Sync for HostentOwned {}
+
 #[derive(Clone, Copy)]
 pub struct HostentBorrowed<'a> {
     inner: &'a c_types::hostent,
@@ -85,23 +67,53 @@ impl<'a> HostentBorrowed<'a> {
         HostentBorrowed { inner: hostent }
     }
 
-    pub fn hostent(self) -> &'a c_types::hostent {
-        self.inner
+    pub fn hostname(self) -> &'a CStr {
+        unsafe { CStr::from_ptr(self.inner.h_name) }
+    }
+
+    pub fn addresses(self) -> HostAddressResultsIter<'a> {
+        // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to
+        // allow the identity conversion in the latter case.
+        #[cfg_attr(feature = "cargo-clippy", allow(identity_conversion))]
+        let addrtype = c_int::from(self.inner.h_addrtype);
+        HostAddressResultsIter {
+            family: address_family(addrtype),
+            next: unsafe { &*(self.inner.h_addr_list as *const _) },
+        }
+    }
+
+    pub fn aliases(self) -> HostAliasResultsIter<'a> {
+        HostAliasResultsIter {
+            next: unsafe { &*(self.inner.h_aliases as *const _) },
+        }
     }
 }
 
-unsafe impl Send for HostentOwned {}
-unsafe impl Sync for HostentOwned {}
+impl <'a> From<&'a HostentOwned> for HostentBorrowed<'a> {
+    fn from(owned: &HostentOwned) -> HostentBorrowed {
+        let hostent = unsafe { &*owned.inner };
+        HostentBorrowed::new(hostent)
+    }
+}
+
+impl<'a> fmt::Display for HostentBorrowed<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            fmt,
+            "Hostname: {}, ",
+            self.hostname().to_str().unwrap_or("<not utf8>")
+        )?;
+        let addresses = self.addresses().format(", ");
+        write!(fmt, "Addresses: [{}]", addresses)?;
+        let aliases = self.aliases()
+            .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
+            .format(", ");
+        write!(fmt, "Aliases: [{}]", aliases)
+    }
+}
 
 unsafe impl<'a> Send for HostentBorrowed<'a> {}
 unsafe impl<'a> Sync for HostentBorrowed<'a> {}
-
-/// Iterator of `IpAddr`s.
-#[derive(Clone, Copy, Debug)]
-pub struct HostAddressResultsIter<'a> {
-    family: Option<AddressFamily>,
-    next: &'a *const c_char,
-}
 
 // Get an IpAddr from a family and an array of bytes, as found in a `hostent`.
 unsafe fn ip_address_from_bytes(family: AddressFamily, h_addr: *const u8) -> Option<IpAddr> {
@@ -122,6 +134,13 @@ unsafe fn ip_address_from_bytes(family: AddressFamily, h_addr: *const u8) -> Opt
         }
         _ => None,
     }
+}
+
+/// Iterator of `IpAddr`s.
+#[derive(Clone, Copy, Debug)]
+pub struct HostAddressResultsIter<'a> {
+    family: Option<AddressFamily>,
+    next: &'a *const c_char,
 }
 
 impl<'a> Iterator for HostAddressResultsIter<'a> {

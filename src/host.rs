@@ -6,7 +6,6 @@ use c_ares_sys;
 use c_types;
 
 use error::{Error, Result};
-use hostent;
 use hostent::{HostAddressResultsIter, HostAliasResultsIter, HostentBorrowed};
 use panic;
 
@@ -29,23 +28,23 @@ impl<'a> HostResults<'a> {
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn hostname(self) -> &'a CStr {
-        hostent::hostname(self.hostent.hostent())
+        self.hostent.hostname()
     }
 
     /// Returns an iterator over the `IpAddr` values in this `HostResults`.
     pub fn addresses(self) -> HostAddressResultsIter<'a> {
-        hostent::addresses(self.hostent.hostent())
+        self.hostent.addresses()
     }
 
     /// Returns an iterator over the host aliases in this `HostResults`.
     pub fn aliases(self) -> HostAliasResultsIter<'a> {
-        hostent::aliases(self.hostent.hostent())
+        self.hostent.aliases()
     }
 }
 
 impl<'a> fmt::Display for HostResults<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        hostent::display(self.hostent.hostent(), fmt)
+        self.hostent.fmt(fmt)
     }
 }
 

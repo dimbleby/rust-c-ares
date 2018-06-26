@@ -9,7 +9,6 @@ use c_types;
 use itertools::Itertools;
 
 use error::{Error, Result};
-use hostent;
 use hostent::{HostAliasResultsIter, HostentOwned};
 use panic;
 
@@ -46,12 +45,12 @@ impl NSResults {
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn hostname(&self) -> &CStr {
-        hostent::hostname(self.hostent.hostent())
+        self.hostent.hostname()
     }
 
     /// Returns an iterator over the host aliases in this `NSResults`.
     pub fn aliases(&self) -> HostAliasResultsIter {
-        hostent::aliases(self.hostent.hostent())
+        self.hostent.aliases()
     }
 }
 

@@ -8,7 +8,7 @@ use c_ares_sys;
 use c_types;
 
 use error::{Error, Result};
-use hostent::{HostAddressResultsIter, HostAliasResultsIter, HostentOwned};
+use hostent::{HasHostent, HostAddressResultsIter, HostAliasResultsIter, HostentOwned};
 use panic;
 
 /// The result of a successful CNAME lookup.

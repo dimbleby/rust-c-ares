@@ -9,7 +9,7 @@ use c_types;
 use itertools::Itertools;
 
 use error::{Error, Result};
-use hostent::{HostAliasResultsIter, HostentOwned};
+use hostent::{HasHostent, HostAliasResultsIter, HostentOwned};
 use panic;
 
 /// The result of a successful NS lookup.

@@ -6,7 +6,7 @@ use c_ares_sys;
 use c_types;
 
 use error::{Error, Result};
-use hostent::{HostAddressResultsIter, HostAliasResultsIter, HostentBorrowed};
+use hostent::{HasHostent, HostAddressResultsIter, HostAliasResultsIter, HostentBorrowed};
 use panic;
 
 /// The result of a successful host lookup.

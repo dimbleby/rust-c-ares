@@ -13,6 +13,62 @@ use itertools::Itertools;
 use types::AddressFamily;
 use utils::address_family;
 
+fn hostname(hostent: &c_types::hostent) -> &CStr {
+    unsafe { CStr::from_ptr(hostent.h_name) }
+}
+
+fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
+    // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to
+    // allow the identity conversion in the latter case.
+    #[cfg_attr(feature = "cargo-clippy", allow(identity_conversion))]
+    let addrtype = c_int::from(hostent.h_addrtype);
+    HostAddressResultsIter {
+        family: address_family(addrtype),
+        next: unsafe { &*(hostent.h_addr_list as *const _) },
+    }
+}
+
+fn aliases(hostent: &c_types::hostent) -> HostAliasResultsIter {
+    HostAliasResultsIter {
+        next: unsafe { &*(hostent.h_aliases as *const _) },
+    }
+}
+
+fn display(hostent: &c_types::hostent, fmt: &mut fmt::Formatter) -> fmt::Result {
+    write!(
+        fmt,
+        "Hostname: {}, ",
+        hostname(hostent).to_str().unwrap_or("<not utf8>")
+    )?;
+    let addresses = addresses(hostent).format(", ");
+    write!(fmt, "Addresses: [{}]", addresses)?;
+    let aliases = aliases(hostent)
+        .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
+        .format(", ");
+    write!(fmt, "Aliases: [{}]", aliases)
+}
+
+pub trait HasHostent<'a>: Sized {
+    fn hostent(self) -> &'a c_types::hostent;
+
+    fn hostname(self) -> &'a CStr {
+        let hostent = self.hostent();
+        hostname(hostent)
+    }
+
+    fn addresses(self) -> HostAddressResultsIter<'a> {
+        let hostent = self.hostent();
+        addresses(hostent)
+    }
+
+    fn aliases(self) -> HostAliasResultsIter<'a> {
+        let hostent = self.hostent();
+        HostAliasResultsIter {
+            next: unsafe { &*(hostent.h_aliases as *const _) },
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct HostentOwned {
     inner: *mut c_types::hostent,
@@ -26,23 +82,18 @@ impl HostentOwned {
             phantom: PhantomData,
         }
     }
+}
 
-    pub fn hostname(&self) -> &CStr {
-        HostentBorrowed::from(self).hostname()
-    }
-
-    pub fn addresses(&self) -> HostAddressResultsIter {
-        HostentBorrowed::from(self).addresses()
-    }
-
-    pub fn aliases(&self) -> HostAliasResultsIter {
-        HostentBorrowed::from(self).aliases()
+impl<'a> HasHostent<'a> for &'a HostentOwned {
+    fn hostent(self) -> &'a c_types::hostent {
+        unsafe { &*self.inner }
     }
 }
 
 impl fmt::Display for HostentOwned {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        HostentBorrowed::from(self).fmt(fmt)
+        let hostent = self.hostent();
+        display(hostent, fmt)
     }
 }
 
@@ -66,49 +117,18 @@ impl<'a> HostentBorrowed<'a> {
     pub fn new(hostent: &'a c_types::hostent) -> HostentBorrowed<'a> {
         HostentBorrowed { inner: hostent }
     }
-
-    pub fn hostname(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.inner.h_name) }
-    }
-
-    pub fn addresses(self) -> HostAddressResultsIter<'a> {
-        // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to
-        // allow the identity conversion in the latter case.
-        #[cfg_attr(feature = "cargo-clippy", allow(identity_conversion))]
-        let addrtype = c_int::from(self.inner.h_addrtype);
-        HostAddressResultsIter {
-            family: address_family(addrtype),
-            next: unsafe { &*(self.inner.h_addr_list as *const _) },
-        }
-    }
-
-    pub fn aliases(self) -> HostAliasResultsIter<'a> {
-        HostAliasResultsIter {
-            next: unsafe { &*(self.inner.h_aliases as *const _) },
-        }
-    }
 }
 
-impl <'a> From<&'a HostentOwned> for HostentBorrowed<'a> {
-    fn from(owned: &HostentOwned) -> HostentBorrowed {
-        let hostent = unsafe { &*owned.inner };
-        HostentBorrowed::new(hostent)
+impl<'a> HasHostent<'a> for HostentBorrowed<'a> {
+    fn hostent(self) -> &'a c_types::hostent {
+        self.inner
     }
 }
 
 impl<'a> fmt::Display for HostentBorrowed<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "Hostname: {}, ",
-            self.hostname().to_str().unwrap_or("<not utf8>")
-        )?;
-        let addresses = self.addresses().format(", ");
-        write!(fmt, "Addresses: [{}]", addresses)?;
-        let aliases = self.aliases()
-            .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
-            .format(", ");
-        write!(fmt, "Aliases: [{}]", aliases)
+        let hostent = self.hostent();
+        display(hostent, fmt)
     }
 }
 

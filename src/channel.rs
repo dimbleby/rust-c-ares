@@ -26,8 +26,9 @@ use soa::{query_soa_callback, SOAResult};
 use srv::{query_srv_callback, SRVResults};
 use txt::{query_txt_callback, TXTResults};
 use types::{AddressFamily, DnsClass, QueryType, Socket};
-use utils::{ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in,
-            socket_addrv6_as_sockaddr_in6};
+use utils::{
+    ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in, socket_addrv6_as_sockaddr_in6,
+};
 use Flags;
 
 type SocketStateCallback = FnMut(Socket, bool, bool) + Send + 'static;
@@ -321,9 +322,9 @@ impl Channel {
     }
 
     /// Set the local IPv4 address from which to make queries.
-    pub fn set_local_ipv4(&mut self, ipv4: &Ipv4Addr) -> &mut Self {
+    pub fn set_local_ipv4(&mut self, ipv4: Ipv4Addr) -> &mut Self {
         unsafe {
-            c_ares_sys::ares_set_local_ip4(self.ares_channel, u32::from(*ipv4));
+            c_ares_sys::ares_set_local_ip4(self.ares_channel, u32::from(ipv4));
         }
         self
     }
@@ -719,7 +720,7 @@ impl Channel {
         let in_addr: c_types::in_addr;
         let in6_addr: c_types::in6_addr;
         let c_addr = match *address {
-            IpAddr::V4(ref v4) => {
+            IpAddr::V4(v4) => {
                 in_addr = ipv4_as_in_addr(v4);
                 &in_addr as *const _ as *const c_void
             }

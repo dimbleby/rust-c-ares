@@ -107,7 +107,7 @@ impl<'a> NAPTRResult<'a> {
     /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn flags(&self) -> &CStr {
+    pub fn flags(self) -> &'a CStr {
         unsafe { CStr::from_ptr(self.naptr_reply.flags as *const c_char) }
     }
 
@@ -116,7 +116,7 @@ impl<'a> NAPTRResult<'a> {
     /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn service_name(&self) -> &CStr {
+    pub fn service_name(self) -> &'a CStr {
         unsafe { CStr::from_ptr(self.naptr_reply.service as *const c_char) }
     }
 
@@ -125,7 +125,7 @@ impl<'a> NAPTRResult<'a> {
     /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn reg_exp(&self) -> &CStr {
+    pub fn reg_exp(self) -> &'a CStr {
         unsafe { CStr::from_ptr(self.naptr_reply.regexp as *const c_char) }
     }
 
@@ -134,17 +134,17 @@ impl<'a> NAPTRResult<'a> {
     /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn replacement_pattern(&self) -> &CStr {
+    pub fn replacement_pattern(self) -> &'a CStr {
         unsafe { CStr::from_ptr(self.naptr_reply.replacement) }
     }
 
     /// Returns the order value in this `NAPTRResult`.
-    pub fn order(&self) -> u16 {
+    pub fn order(self) -> u16 {
         self.naptr_reply.order
     }
 
     /// Returns the preference value in this `NAPTRResult`.
-    pub fn preference(&self) -> u16 {
+    pub fn preference(self) -> u16 {
         self.naptr_reply.preference
     }
 }

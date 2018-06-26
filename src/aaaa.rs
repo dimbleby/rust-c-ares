@@ -89,13 +89,13 @@ impl<'a> IntoIterator for &'a AAAAResults {
 
 impl<'a> AAAAResult<'a> {
     /// Returns the IPv6 address in this `AAAAResult`.
-    pub fn ipv6(&self) -> Ipv6Addr {
+    pub fn ipv6(self) -> Ipv6Addr {
         let bytes = unsafe { self.addr6ttl.ip6addr._S6_un._S6_u8 };
         Ipv6Addr::from(bytes)
     }
 
     /// Returns the time-to-live in this `AAAAResult`.
-    pub fn ttl(&self) -> i32 {
+    pub fn ttl(self) -> i32 {
         self.addr6ttl.ttl as i32
     }
 }

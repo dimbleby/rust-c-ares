@@ -106,12 +106,12 @@ impl<'a> MXResult<'a> {
     /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn host(&self) -> &CStr {
+    pub fn host(self) -> &'a CStr {
         unsafe { CStr::from_ptr(self.mx_reply.host) }
     }
 
     /// Returns the priority from this `MXResult`.
-    pub fn priority(&self) -> u16 {
+    pub fn priority(self) -> u16 {
         self.mx_reply.priority
     }
 }

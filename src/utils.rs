@@ -20,14 +20,14 @@ pub fn address_family(family: c_int) -> Option<AddressFamily> {
 
 // Get an in_addr from an Ipv4Addr.
 #[cfg(unix)]
-pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
+pub fn ipv4_as_in_addr(ipv4: Ipv4Addr) -> c_types::in_addr {
     c_types::in_addr {
-        s_addr: u32::from(*ipv4).to_be(),
+        s_addr: u32::from(ipv4).to_be(),
     }
 }
 
 #[cfg(windows)]
-pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
+pub fn ipv4_as_in_addr(ipv4: Ipv4Addr) -> c_types::in_addr {
     let octets = ipv4.octets();
     let mut in_addr: c_types::in_addr = unsafe { mem::zeroed() };
     {
@@ -42,12 +42,12 @@ pub fn ipv4_as_in_addr(ipv4: &Ipv4Addr) -> c_types::in_addr {
 
 // Get an Ipv4Addr from an in_addr.
 #[cfg(unix)]
-pub fn ipv4_from_in_addr(in_addr: &c_types::in_addr) -> Ipv4Addr {
+pub fn ipv4_from_in_addr(in_addr: c_types::in_addr) -> Ipv4Addr {
     Ipv4Addr::from(u32::from_be(in_addr.s_addr))
 }
 
 #[cfg(windows)]
-pub fn ipv4_from_in_addr(in_addr: &c_types::in_addr) -> Ipv4Addr {
+pub fn ipv4_from_in_addr(in_addr: c_types::in_addr) -> Ipv4Addr {
     let bytes = unsafe { in_addr.S_un.S_un_b() };
     Ipv4Addr::new(bytes.s_b1, bytes.s_b2, bytes.s_b3, bytes.s_b4)
 }
@@ -85,7 +85,7 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
     )
 )]
 pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr_in {
-    let in_addr = ipv4_as_in_addr(sock_v4.ip());
+    let in_addr = ipv4_as_in_addr(*sock_v4.ip());
     c_types::sockaddr_in {
         sin_len: mem::size_of::<c_types::sockaddr_in>() as u8,
         sin_family: c_types::AF_INET as c_types::sa_family_t,
@@ -109,7 +109,7 @@ pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr
     )
 )]
 pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr_in {
-    let in_addr = ipv4_as_in_addr(sock_v4.ip());
+    let in_addr = ipv4_as_in_addr(*sock_v4.ip());
     c_types::sockaddr_in {
         sin_family: c_types::AF_INET as c_types::sa_family_t,
         sin_port: sock_v4.port().to_be(),

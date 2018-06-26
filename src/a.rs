@@ -88,12 +88,12 @@ impl<'a> IntoIterator for &'a AResults {
 
 impl<'a> AResult<'a> {
     /// Returns the IPv4 address in this `AResult`.
-    pub fn ipv4(&self) -> Ipv4Addr {
-        ipv4_from_in_addr(&self.addrttl.ipaddr)
+    pub fn ipv4(self) -> Ipv4Addr {
+        ipv4_from_in_addr(self.addrttl.ipaddr)
     }
 
     /// Returns the time-to-live in this `AResult`.
-    pub fn ttl(&self) -> i32 {
+    pub fn ttl(self) -> i32 {
         self.addrttl.ttl as i32
     }
 }

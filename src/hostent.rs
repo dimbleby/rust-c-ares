@@ -13,6 +13,41 @@ use itertools::Itertools;
 use types::AddressFamily;
 use utils::address_family;
 
+pub fn hostname(hostent: &c_types::hostent) -> &CStr {
+    unsafe { CStr::from_ptr(hostent.h_name) }
+}
+
+pub fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
+    // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to
+    // allow the identity conversion in the latter case.
+    #[cfg_attr(feature = "cargo-clippy", allow(identity_conversion))]
+    let addrtype = c_int::from(hostent.h_addrtype);
+    HostAddressResultsIter {
+        family: address_family(addrtype),
+        next: unsafe { &*(hostent.h_addr_list as *const _) },
+    }
+}
+
+pub fn aliases(hostent: &c_types::hostent) -> HostAliasResultsIter {
+    HostAliasResultsIter {
+        next: unsafe { &*(hostent.h_aliases as *const _) },
+    }
+}
+
+pub fn display(hostent: &c_types::hostent, fmt: &mut fmt::Formatter) -> fmt::Result {
+    write!(
+        fmt,
+        "Hostname: {}, ",
+        hostname(hostent).to_str().unwrap_or("<not utf8>")
+    )?;
+    let addresses = addresses(hostent).format(", ");
+    write!(fmt, "Addresses: [{}]", addresses)?;
+    let aliases = aliases(hostent)
+        .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
+        .format(", ");
+    write!(fmt, "Aliases: [{}]", aliases)
+}
+
 #[derive(Debug)]
 pub struct HostentOwned {
     inner: *mut c_types::hostent,
@@ -25,6 +60,10 @@ impl HostentOwned {
             inner: hostent,
             phantom: PhantomData,
         }
+    }
+
+    pub fn hostent(&self) -> &c_types::hostent {
+        unsafe { &*self.inner }
     }
 }
 
@@ -45,55 +84,8 @@ impl<'a> HostentBorrowed<'a> {
     pub fn new(hostent: &'a c_types::hostent) -> HostentBorrowed<'a> {
         HostentBorrowed { inner: hostent }
     }
-}
 
-pub trait HasHostent {
-    fn hostent(&self) -> &c_types::hostent;
-
-    fn hostname(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.hostent().h_name) }
-    }
-
-    fn addresses(&self) -> HostAddressResultsIter {
-        // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to
-        // allow the identity conversion in the latter case.
-        #[cfg_attr(feature = "cargo-clippy", allow(identity_conversion))]
-        let addrtype = c_int::from(self.hostent().h_addrtype);
-        HostAddressResultsIter {
-            family: address_family(addrtype),
-            next: unsafe { &*(self.hostent().h_addr_list as *const _) },
-        }
-    }
-
-    fn aliases(&self) -> HostAliasResultsIter {
-        HostAliasResultsIter {
-            next: unsafe { &*(self.hostent().h_aliases as *const _) },
-        }
-    }
-
-    fn display(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "Hostname: {}, ",
-            self.hostname().to_str().unwrap_or("<not utf8>")
-        )?;
-        let addresses = self.addresses().format(", ");
-        write!(fmt, "Addresses: [{}]", addresses)?;
-        let aliases = self.aliases()
-            .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
-            .format(", ");
-        write!(fmt, "Aliases: [{}]", aliases)
-    }
-}
-
-impl HasHostent for HostentOwned {
-    fn hostent(&self) -> &c_types::hostent {
-        unsafe { &*self.inner }
-    }
-}
-
-impl<'a> HasHostent for HostentBorrowed<'a> {
-    fn hostent(&self) -> &c_types::hostent {
+    pub fn hostent(self) -> &'a c_types::hostent {
         self.inner
     }
 }

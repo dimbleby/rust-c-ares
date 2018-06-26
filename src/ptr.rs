@@ -9,7 +9,8 @@ use c_types;
 use itertools::Itertools;
 
 use error::{Error, Result};
-use hostent::{HasHostent, HostAliasResultsIter, HostentOwned};
+use hostent;
+use hostent::{HostAliasResultsIter, HostentOwned};
 use panic;
 
 /// The result of a successful PTR lookup.
@@ -53,12 +54,12 @@ impl PTRResults {
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn hostname(&self) -> &CStr {
-        self.hostent.hostname()
+        hostent::hostname(self.hostent.hostent())
     }
 
     /// Returns an iterator over the host aliases in this `PTRResults`.
     pub fn aliases(&self) -> HostAliasResultsIter {
-        self.hostent.aliases()
+        hostent::aliases(self.hostent.hostent())
     }
 }
 

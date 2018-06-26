@@ -107,22 +107,22 @@ impl<'a> SRVResult<'a> {
     /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn host(&self) -> &CStr {
+    pub fn host(self) -> &'a CStr {
         unsafe { CStr::from_ptr(self.srv_reply.host) }
     }
 
     /// Returns the weight in this `SRVResult`.
-    pub fn weight(&self) -> u16 {
+    pub fn weight(self) -> u16 {
         self.srv_reply.weight
     }
 
     /// Returns the priority in this `SRVResult`.
-    pub fn priority(&self) -> u16 {
+    pub fn priority(self) -> u16 {
         self.srv_reply.priority
     }
 
     /// Returns the port in this `SRVResult`.
-    pub fn port(&self) -> u16 {
+    pub fn port(self) -> u16 {
         self.srv_reply.port
     }
 }

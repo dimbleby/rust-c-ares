@@ -11,8 +11,9 @@ mod example {
     use std::mem;
     use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
     use std::ptr;
-    use winapi::um::winsock2::{fd_set, select, timeval, WSACleanup, WSAStartup, FD_SETSIZE,
-                               SOCKET_ERROR, WSADATA};
+    use winapi::um::winsock2::{
+        fd_set, select, timeval, WSACleanup, WSAStartup, FD_SETSIZE, SOCKET_ERROR, WSADATA,
+    };
 
     fn print_soa_result(result: &c_ares::Result<c_ares::SOAResult>) {
         match *result {

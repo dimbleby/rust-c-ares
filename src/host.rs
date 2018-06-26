@@ -6,7 +6,8 @@ use c_ares_sys;
 use c_types;
 
 use error::{Error, Result};
-use hostent::{HasHostent, HostAddressResultsIter, HostAliasResultsIter, HostentBorrowed};
+use hostent;
+use hostent::{HostAddressResultsIter, HostAliasResultsIter, HostentBorrowed};
 use panic;
 
 /// The result of a successful host lookup.
@@ -27,24 +28,24 @@ impl<'a> HostResults<'a> {
     /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn hostname(&self) -> &CStr {
-        self.hostent.hostname()
+    pub fn hostname(self) -> &'a CStr {
+        hostent::hostname(self.hostent.hostent())
     }
 
     /// Returns an iterator over the `IpAddr` values in this `HostResults`.
-    pub fn addresses(&self) -> HostAddressResultsIter {
-        self.hostent.addresses()
+    pub fn addresses(self) -> HostAddressResultsIter<'a> {
+        hostent::addresses(self.hostent.hostent())
     }
 
     /// Returns an iterator over the host aliases in this `HostResults`.
-    pub fn aliases(&self) -> HostAliasResultsIter {
-        self.hostent.aliases()
+    pub fn aliases(self) -> HostAliasResultsIter<'a> {
+        hostent::aliases(self.hostent.hostent())
     }
 }
 
 impl<'a> fmt::Display for HostResults<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.hostent.display(fmt)
+        hostent::display(self.hostent.hostent(), fmt)
     }
 }
 

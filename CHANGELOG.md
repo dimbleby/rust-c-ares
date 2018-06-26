@@ -1,3 +1,7 @@
+## 7.0.0 (unreleased)
+
+* Have several functions take arguments by value, per clippy's `trivially_copy_pass_by_ref`
+
 ## 6.0.0 (28 May 2018)
 
 * Return `&CStr` mostly, rather than `&str`.  The unchecked conversion in previous releases was not safe, so we let users decide how to deal with that.

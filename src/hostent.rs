@@ -63,9 +63,7 @@ pub trait HasHostent<'a>: Sized {
 
     fn aliases(self) -> HostAliasResultsIter<'a> {
         let hostent = self.hostent();
-        HostAliasResultsIter {
-            next: unsafe { &*(hostent.h_aliases as *const _) },
-        }
+        aliases(hostent)
     }
 }
 

@@ -21,6 +21,7 @@ bindgen --blacklist-type="__.*" \
         --whitelist-function="ares.*" \
         --whitelist-type="ares.*" \
         --whitelist-type="apattern" \
+        --opaque-type="in_addr_t" \
         --no-layout-tests \
         --output=src/ffi.rs \
         c-ares/ares.h

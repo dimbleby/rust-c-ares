@@ -1,4 +1,4 @@
-## 7.0.0 (unreleased)
+## 7.0.0 (1 July 2018)
 
 * Have several functions take arguments by value, per clippy's `trivially_copy_pass_by_ref`
 * Remove `addresses()` from `CNameResults` - CNAME queries don't return addresses

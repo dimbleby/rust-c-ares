@@ -61,7 +61,8 @@ impl fmt::Display for NSResults {
             "Hostname: {}, ",
             self.hostname().to_str().unwrap_or("<not utf8>")
         )?;
-        let aliases = self.aliases()
+        let aliases = self
+            .aliases()
             .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
             .format(", ");
         write!(fmt, "Aliases: [{}]", aliases)

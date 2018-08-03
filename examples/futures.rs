@@ -94,7 +94,8 @@ mod example {
             loop {
                 // Wait for something to happen.
                 let timeout = Duration::from_millis(500);
-                let results = self.poll
+                let results = self
+                    .poll
                     .poll(&mut events, Some(timeout))
                     .expect("poll failed");
 

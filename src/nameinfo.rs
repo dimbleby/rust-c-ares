@@ -40,11 +40,13 @@ impl<'a> NameInfoResult<'a> {
 
 impl<'a> fmt::Display for NameInfoResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let node = self.node()
+        let node = self
+            .node()
             .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
             .unwrap_or("<None>");
         write!(fmt, "Node: {}, ", node)?;
-        let service = self.service()
+        let service = self
+            .service()
             .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
             .unwrap_or("<None>");
         write!(fmt, "Service: {}", service)

@@ -23,7 +23,7 @@ futures = "0.1"
 mio = "0.6"
 mio-extras = "2"
 nix = "0.11"
-tokio = "0.1"
+tokio-current-thread = "0.1"
 
 [target.'cfg(windows)'.dev-dependencies]
 winapi = { version = "0.3", features = ["winsock2"] }

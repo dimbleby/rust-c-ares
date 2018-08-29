@@ -15,7 +15,7 @@ mod example {
     extern crate futures;
     extern crate mio;
     extern crate mio_extras;
-    extern crate tokio;
+    extern crate tokio_current_thread as current_thread;
 
     use std::collections::HashSet;
     use std::error::Error;
@@ -25,7 +25,6 @@ mod example {
 
     use self::futures::future::lazy;
     use self::futures::Future;
-    use self::tokio::executor::current_thread;
 
     // The EventLoop will set up a mio::Poll and use it to wait for the following:
     //

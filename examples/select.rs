@@ -1,5 +1,5 @@
-// This example uses fds() to find out which file descriptors c-ares
-// wants us to listen on, and uses select() to satisfy those requirements.
+// This example uses fds() to find out which file descriptors c-ares wants us to listen on, and
+// uses select() to satisfy those requirements.
 #[cfg(windows)]
 extern crate winapi;
 

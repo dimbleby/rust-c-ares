@@ -2,8 +2,8 @@
 //
 // Here we:
 //
-// - Have the event loop be run by a `Resolver`, hiding away the event loop
-// details from the writer of `main()`.
+// - Have the event loop be run by a `Resolver`, hiding away the event loop details from the writer
+// of `main()`.
 //
 // - Transform the callback-based c-ares interface into a futures-style.
 //
@@ -28,14 +28,13 @@ mod example {
 
     // The EventLoop will set up a mio::Poll and use it to wait for the following:
     //
-    // -  messages telling it which file descriptors it should be interested in.
-    //    These file descriptors are then registered (or deregistered) with the
-    //    mio::Poll as required.
+    // - messages telling it which file descriptors it should be interested in.  These file
+    // descriptors are then registered (or deregistered) with the mio::Poll as required.
     //
-    // -  events telling it that something has happened on one of these file
-    //    descriptors.  When this happens, it tells the c_ares::Channel about it.
+    // - events telling it that something has happened on one of these file descriptors.  When
+    // this happens, it tells the c_ares::Channel about it.
     //
-    // -  a message telling it to shut down.
+    // - a message telling it to shut down.
     struct EventLoop {
         poll: mio::Poll,
         msg_channel: mio_extras::channel::Receiver<Message>,
@@ -47,10 +46,9 @@ mod example {
     // Messages for the event loop.
     #[derive(Debug)]
     enum Message {
-        // 'Notify me when this file descriptor becomes readable, or writable'.
-        // The first bool is for 'readable' and the second is for 'writable'.  It's
-        // allowed to set both of these - or neither, meaning 'I am no longer
-        // interested in this file descriptor'.
+        // 'Notify me when this file descriptor becomes readable, or writable'.  The first bool is
+        // for 'readable' and the second is for 'writable'.  It's allowed to set both of these - or
+        // neither, meaning 'I am no longer interested in this file descriptor'.
         RegisterInterest(c_ares::Socket, bool, bool),
 
         // 'Shut down'.
@@ -59,8 +57,8 @@ mod example {
 
     // A token identifying that the message channel has become available for reading.
     //
-    // We use Token(fd) for file descriptors, so this relies on zero not being a
-    // valid file descriptor for c-ares to use.  Zero is stdin, so that's true.
+    // We use Token(fd) for file descriptors, so this relies on zero not being a valid file
+    // descriptor for c-ares to use.  Zero is stdin, so that's true.
     const CHANNEL: mio::Token = mio::Token(0);
 
     impl EventLoop {
@@ -227,8 +225,8 @@ mod example {
     impl Resolver {
         // Create a new Resolver.
         pub fn new() -> Resolver {
-            // Whenever c-ares tells us what to do with a file descriptor, we'll
-            // send that request along, in a message to the event loop thread.
+            // Whenever c-ares tells us what to do with a file descriptor, we'll send that request
+            // along, in a message to the event loop thread.
             let (tx, rx) = mio_extras::channel::channel();
             let tx_clone = tx.clone();
             let sock_callback = move |fd: c_ares::Socket, readable: bool, writable: bool| {

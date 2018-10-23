@@ -1,5 +1,5 @@
-// This example uses get_sock() to find out which file descriptors c-ares
-// wants us to listen on, and uses epoll() to satisfy those requirements.
+// This example uses get_sock() to find out which file descriptors c-ares wants us to listen on,
+// and uses epoll() to satisfy those requirements.
 
 #[cfg(all(unix, any(target_os = "linux", target_os = "android")))]
 extern crate nix;
@@ -94,8 +94,8 @@ mod example {
         let epoll = epoll_create().expect("Failed to create epoll");
         let mut tracked_fds = HashSet::<c_ares::Socket>::new();
         loop {
-            // Ask c-ares what file descriptors we should be listening on, and map
-            // those requests onto the epoll file descriptor.
+            // Ask c-ares what file descriptors we should be listening on, and map those requests
+            // onto the epoll file descriptor.
             let mut active = false;
             for (fd, readable, writable) in &ares_channel.get_sock() {
                 let mut interest = EpollFlags::empty();

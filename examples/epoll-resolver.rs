@@ -1,8 +1,7 @@
 // A variation on epoll.rs
 //
-// Here we hide the use of epoll() behind a `Resolver` object.  We also
-// transform the asynchronous c-ares interface into a synchronous one, by
-// using a std::sync::mpsc::channel.
+// Here we hide the use of epoll() behind a `Resolver` object.  We also transform the asynchronous
+// c-ares interface into a synchronous one, by using a std::sync::mpsc::channel.
 #[cfg(all(unix, any(target_os = "linux", target_os = "android")))]
 extern crate nix;
 
@@ -23,8 +22,7 @@ mod example {
         fd_handle: Option<thread::JoinHandle<()>>,
     }
 
-    // A thread that keeps going processing file descriptors for c-ares, until it
-    // is asked to stop.
+    // A thread that keeps going processing file descriptors for c-ares, until it is asked to stop.
     fn fd_handling_thread(
         ares_channel: &Mutex<c_ares::Channel>,
         keep_going: &(Mutex<bool>, Condvar),
@@ -43,8 +41,8 @@ mod example {
         let epoll = epoll_create().expect("Failed to create epoll");
         let mut tracked_fds = HashSet::<c_ares::Socket>::new();
         loop {
-            // Ask c-ares what file descriptors we should be listening on, and map
-            // those requests onto the epoll file descriptor.
+            // Ask c-ares what file descriptors we should be listening on, and map those requests
+            // onto the epoll file descriptor.
             let mut active = false;
             let sockets = ares_channel.lock().unwrap().get_sock();
             for (fd, readable, writable) in &sockets {
@@ -140,8 +138,8 @@ mod example {
             cvar.notify_one();
         }
 
-        // A blocking NS query.  Achieve this by having the callback send the
-        // result to a std::sync::mpsc::channel, and waiting on that channel.
+        // A blocking NS query.  Achieve this by having the callback send the result to a
+        // std::sync::mpsc::channel, and waiting on that channel.
         pub fn query_ns(&self, name: &str) -> c_ares::Result<c_ares::NSResults> {
             let (tx, rx) = mpsc::channel();
             self.ares_channel

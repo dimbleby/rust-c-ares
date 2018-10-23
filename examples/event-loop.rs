@@ -66,8 +66,8 @@ mod example {
         let mut events = mio::Events::with_capacity(16);
         let mut tracked_fds = HashSet::<c_ares::Socket>::new();
         loop {
-            // Ask c-ares what file descriptors we should be listening on, and
-            // pass that on to the poll.
+            // Ask c-ares what file descriptors we should be listening on, and pass that on to the
+            // poll.
             let mut new_fds = HashSet::<c_ares::Socket>::new();
             for (fd, readable, writable) in &ares_channel.get_sock() {
                 new_fds.insert(fd);

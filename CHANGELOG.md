@@ -1,3 +1,8 @@
+## Unreleased
+
+* Take upstream c-ares 1.15.0
+  * In particular, introduces `Options::set_resolvconf_path()`
+
 ## 7.0.0 (1 July 2018)
 
 * Have several functions take arguments by value, per clippy's `trivially_copy_pass_by_ref`

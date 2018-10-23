@@ -62,6 +62,7 @@ pub const ARES_OPT_TIMEOUTMS: c_int = (1 << 13);
 pub const ARES_OPT_ROTATE: c_int = (1 << 14);
 pub const ARES_OPT_EDNSPSZ: c_int = (1 << 15);
 pub const ARES_OPT_NOROTATE: c_int = (1 << 16);
+pub const ARES_OPT_RESOLVCONF: c_int = (1 << 17);
 
 // Flags for nameinfo queries
 pub const ARES_NI_NOFQDN: c_int = 1;

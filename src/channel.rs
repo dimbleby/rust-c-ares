@@ -39,6 +39,7 @@ pub struct Options {
     optmask: c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
+    resolvconf_path: Option<CString>,
     socket_state_callback: Option<Arc<SocketStateCallback>>,
 }
 
@@ -49,6 +50,7 @@ impl Default for Options {
             optmask: 0,
             domains: vec![],
             lookups: None,
+            resolvconf_path: None,
             socket_state_callback: None,
         }
     }
@@ -127,6 +129,16 @@ impl Options {
         let c_lookups = CString::new(lookups).unwrap();
         self.lookups = Some(c_lookups);
         self.optmask |= c_ares_sys::ARES_OPT_LOOKUPS;
+        self
+    }
+
+    /// The path to use for reading the resolv.conf file. The `resolvconf_path`
+    /// should be set to a path string, and will be honoured on *nix like
+    /// systems. The default is /etc/resolv.conf,
+    pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
+        let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
+        self.resolvconf_path = Some(c_resolvconf_path);
+        self.optmask |= c_ares_sys::ARES_OPT_RESOLVCONF;
         self
     }
 
@@ -217,6 +229,11 @@ impl Channel {
         // Likewise for lookups.
         for c_lookup in &options.lookups {
             options.ares_options.lookups = c_lookup.as_ptr() as *mut c_char;
+        }
+
+        // And the resolvconf_path.
+        for c_resolvconf_path in &options.resolvconf_path {
+            options.ares_options.resolvconf_path = c_resolvconf_path.as_ptr() as *mut c_char;
         }
 
         // Initialize the channel.

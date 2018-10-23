@@ -62,69 +62,67 @@ impl Options {
         Self::default()
     }
 
-    /// Set flags controlling the behaviour of the resolver.  The available
-    /// flags are documented [here](flags/index.html).
+    /// Set flags controlling the behaviour of the resolver.  The available flags are documented
+    /// [here](flags/index.html).
     pub fn set_flags(&mut self, flags: Flags) -> &mut Self {
         self.ares_options.flags = flags.bits();
         self.optmask |= c_ares_sys::ARES_OPT_FLAGS;
         self
     }
 
-    /// Set the number of milliseconds each name server is given to respond to
-    /// a query on the first try.  (After the first try, the timeout algorithm
-    /// becomes more complicated, but scales linearly with the value of
-    /// timeout).  The default is 5000ms.
+    /// Set the number of milliseconds each name server is given to respond to a query on the first
+    /// try.  (After the first try, the timeout algorithm becomes more complicated, but scales
+    /// linearly with the value of timeout).  The default is 5000ms.
     pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
         self.ares_options.timeout = ms as c_int;
         self.optmask |= c_ares_sys::ARES_OPT_TIMEOUTMS;
         self
     }
 
-    /// Set the number of tries the resolver will try contacting each name
-    /// server before giving up.  The default is four tries.
+    /// Set the number of tries the resolver will try contacting each name server before giving up.
+    /// The default is four tries.
     pub fn set_tries(&mut self, tries: u32) -> &mut Self {
         self.ares_options.tries = tries as c_int;
         self.optmask |= c_ares_sys::ARES_OPT_TRIES;
         self
     }
 
-    /// Set the number of dots which must be present in a domain name for it to
-    /// be queried for "as is" prior to querying for it with the default domain
-    /// extensions appended.  The default value is 1 unless set otherwise by
-    /// resolv.conf or the RES_OPTIONS environment variable.
+    /// Set the number of dots which must be present in a domain name for it to be queried for "as
+    /// is" prior to querying for it with the default domain extensions appended.  The default
+    /// value is 1 unless set otherwise by resolv.conf or the RES_OPTIONS environment variable.
     pub fn set_ndots(&mut self, ndots: u32) -> &mut Self {
         self.ares_options.ndots = ndots as c_int;
         self.optmask |= c_ares_sys::ARES_OPT_NDOTS;
         self
     }
 
-    /// Set the UDP port to use for queries.  The default value is 53, the
-    /// standard name service port.
+    /// Set the UDP port to use for queries.  The default value is 53, the standard name service
+    /// port.
     pub fn set_udp_port(&mut self, udp_port: u16) -> &mut Self {
         self.ares_options.udp_port = udp_port;
         self.optmask |= c_ares_sys::ARES_OPT_UDP_PORT;
         self
     }
 
-    /// Set the TCP port to use for queries.  The default value is 53, the
-    /// standard name service port.
+    /// Set the TCP port to use for queries.  The default value is 53, the standard name service
+    /// port.
     pub fn set_tcp_port(&mut self, tcp_port: u16) -> &mut Self {
         self.ares_options.tcp_port = tcp_port;
         self.optmask |= c_ares_sys::ARES_OPT_TCP_PORT;
         self
     }
 
-    /// Set the domains to search, instead of the domains specified in
-    /// resolv.conf or the domain derived from the kernel hostname variable.
+    /// Set the domains to search, instead of the domains specified in resolv.conf or the domain
+    /// derived from the kernel hostname variable.
     pub fn set_domains(&mut self, domains: &[&str]) -> &mut Self {
         self.domains = domains.iter().map(|&s| CString::new(s).unwrap()).collect();
         self.optmask |= c_ares_sys::ARES_OPT_DOMAINS;
         self
     }
 
-    /// Set the lookups to perform for host queries. `lookups` should be set to
-    /// a string of the characters "b" or "f", where "b" indicates a DNS lookup
-    /// and "f" indicates a lookup in the hosts file.
+    /// Set the lookups to perform for host queries. `lookups` should be set to a string of the
+    /// characters "b" or "f", where "b" indicates a DNS lookup and "f" indicates a lookup in the
+    /// hosts file.
     pub fn set_lookups(&mut self, lookups: &str) -> &mut Self {
         let c_lookups = CString::new(lookups).unwrap();
         self.lookups = Some(c_lookups);
@@ -132,9 +130,8 @@ impl Options {
         self
     }
 
-    /// The path to use for reading the resolv.conf file. The `resolvconf_path`
-    /// should be set to a path string, and will be honoured on *nix like
-    /// systems. The default is /etc/resolv.conf,
+    /// The path to use for reading the resolv.conf file.  The `resolvconf_path` should be set to a
+    /// path string, and will be honoured on *nix like systems.  The default is /etc/resolv.conf,
     pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
         let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
         self.resolvconf_path = Some(c_resolvconf_path);
@@ -144,11 +141,10 @@ impl Options {
 
     /// Set the callback function to be invoked when a socket changes state.
     ///
-    /// `callback(socket, read, write)` will be called when a socket changes
-    /// state:
+    /// `callback(socket, read, write)` will be called when a socket changes state:
     ///
-    /// -  `read` is set to true if the socket should listen for read events
-    /// -  `write` is set to true if the socket should listen for write events.
+    /// - `read` is set to true if the socket should listen for read events
+    /// - `write` is set to true if the socket should listen for write events.
     pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
     where
         F: FnMut(Socket, bool, bool) + Send + 'static,
@@ -277,12 +273,12 @@ impl Channel {
         Ok(channel)
     }
 
-    /// Handle input, output, and timeout events associated with the specified
-    /// file descriptors (sockets).
+    /// Handle input, output, and timeout events associated with the specified file descriptors
+    /// (sockets).
     ///
-    /// Providing a value for `read_fd` indicates that the identified socket
-    /// is readable; likewise providing a value for `write_fd` indicates that
-    /// the identified socket is writable.  Use `SOCKET_BAD` for "no action".
+    /// Providing a value for `read_fd` indicates that the identified socket is readable; likewise
+    /// providing a value for `write_fd` indicates that the identified socket is writable.  Use
+    /// `SOCKET_BAD` for "no action".
     pub fn process_fd(&mut self, read_fd: Socket, write_fd: Socket) {
         unsafe {
             c_ares_sys::ares_process_fd(self.ares_channel, read_fd, write_fd);
@@ -290,9 +286,8 @@ impl Channel {
         panic::propagate();
     }
 
-    /// Handle input and output events associated with the specified file
-    /// descriptors (sockets).  Also handles timeouts associated with the
-    /// `Channel`.
+    /// Handle input and output events associated with the specified file descriptors (sockets).
+    /// Also handles timeouts associated with the `Channel`.
     pub fn process(&mut self, read_fds: &mut c_types::fd_set, write_fds: &mut c_types::fd_set) {
         unsafe {
             c_ares_sys::ares_process(self.ares_channel, read_fds, write_fds);
@@ -300,8 +295,8 @@ impl Channel {
         panic::propagate();
     }
 
-    /// Retrieve the set of socket descriptors which the calling application
-    /// should wait on for reading and / or writing.
+    /// Retrieve the set of socket descriptors which the calling application should wait on for
+    /// reading and / or writing.
     pub fn get_sock(&self) -> GetSock {
         let mut socks = [0; c_ares_sys::ARES_GETSOCK_MAXNUM];
         let bitmask = unsafe {
@@ -314,17 +309,17 @@ impl Channel {
         GetSock::new(socks, bitmask as u32)
     }
 
-    /// Retrieve the set of socket descriptors which the calling application
-    /// should wait on for reading and / or writing.
+    /// Retrieve the set of socket descriptors which the calling application should wait on for
+    /// reading and / or writing.
     pub fn fds(&self, read_fds: &mut c_types::fd_set, write_fds: &mut c_types::fd_set) -> u32 {
         unsafe { c_ares_sys::ares_fds(self.ares_channel, read_fds, write_fds) as u32 }
     }
 
-    /// Set the list of servers to contact, instead of the servers specified
-    /// in resolv.conf or the local named.
+    /// Set the list of servers to contact, instead of the servers specified in resolv.conf or the
+    /// local named.
     ///
-    /// String format is `host[:port]`.  IPv6 addresses with ports require
-    /// square brackets eg `[2001:4860:4860::8888]:53`.
+    /// String format is `host[:port]`.  IPv6 addresses with ports require square brackets eg
+    /// `[2001:4860:4860::8888]:53`.
     pub fn set_servers(&mut self, servers: &[&str]) -> Result<&mut Self> {
         let servers_csv = servers.join(",");
         let c_servers = CString::new(servers_csv).unwrap();
@@ -367,8 +362,7 @@ impl Channel {
         self
     }
 
-    /// Initiate a single-question DNS query for the A records associated with
-    /// `name`.
+    /// Initiate a single-question DNS query for the A records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_a<F>(&mut self, name: &str, handler: F)
@@ -385,8 +379,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the A records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the A records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_a<F>(&mut self, name: &str, handler: F)
@@ -403,8 +396,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the AAAA records associated
-    /// with `name`.
+    /// Initiate a single-question DNS query for the AAAA records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_aaaa<F>(&mut self, name: &str, handler: F)
@@ -421,8 +413,8 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the AAAA records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the AAAA records associated with
+    /// `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_aaaa<F>(&mut self, name: &str, handler: F)
@@ -439,8 +431,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the CNAME records associated
-    /// with `name`.
+    /// Initiate a single-question DNS query for the CNAME records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_cname<F>(&mut self, name: &str, handler: F)
@@ -457,8 +448,8 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the CNAME records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the CNAME records associated with
+    /// `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_cname<F>(&mut self, name: &str, handler: F)
@@ -475,8 +466,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the MX records associated
-    /// with `name`.
+    /// Initiate a single-question DNS query for the MX records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_mx<F>(&mut self, name: &str, handler: F)
@@ -493,8 +483,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the MX records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the MX records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_mx<F>(&mut self, name: &str, handler: F)
@@ -511,8 +500,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the NAPTR records associated
-    /// with `name`.
+    /// Initiate a single-question DNS query for the NAPTR records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_naptr<F>(&mut self, name: &str, handler: F)
@@ -529,8 +517,8 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the NAPTR records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the NAPTR records associated with
+    /// `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_naptr<F>(&mut self, name: &str, handler: F)
@@ -547,8 +535,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the NS records associated
-    /// with `name`.
+    /// Initiate a single-question DNS query for the NS records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ns<F>(&mut self, name: &str, handler: F)
@@ -565,8 +552,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the NS records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the NS records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_ns<F>(&mut self, name: &str, handler: F)
@@ -583,8 +569,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the PTR records associated
-    /// with `name`.
+    /// Initiate a single-question DNS query for the PTR records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_ptr<F>(&mut self, name: &str, handler: F)
@@ -601,8 +586,8 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the PTR records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the PTR records associated with
+    /// `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_ptr<F>(&mut self, name: &str, handler: F)
@@ -619,8 +604,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the SOA records associated
-    /// with `name`.
+    /// Initiate a single-question DNS query for the SOA records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_soa<F>(&mut self, name: &str, handler: F)
@@ -637,8 +621,8 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the SOA records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the SOA records associated with
+    /// `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_soa<F>(&mut self, name: &str, handler: F)
@@ -655,8 +639,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the SRV records associated
-    /// with `name`.
+    /// Initiate a single-question DNS query for the SRV records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_srv<F>(&mut self, name: &str, handler: F)
@@ -673,8 +656,8 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the SRV records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the SRV records associated with
+    /// `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_srv<F>(&mut self, name: &str, handler: F)
@@ -691,8 +674,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the TXT records associated
-    /// with `name`.
+    /// Initiate a single-question DNS query for the TXT records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_txt<F>(&mut self, name: &str, handler: F)
@@ -709,8 +691,8 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for the TXT records
-    /// associated with `name`.
+    /// Initiate a series of single-question DNS queries for the TXT records associated with
+    /// `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn search_txt<F>(&mut self, name: &str, handler: F)
@@ -787,8 +769,7 @@ impl Channel {
 
     /// Address-to-nodename translation in protocol-independent manner.
     ///
-    /// The valid values for `flags` are documented
-    /// [here](ni_flags/index.html).
+    /// The valid values for `flags` are documented [here](ni_flags/index.html).
     ///
     /// On completion, `handler` is called with the result.
     pub fn get_name_info<F>(&mut self, address: &SocketAddr, flags: NIFlags, handler: F)
@@ -825,16 +806,14 @@ impl Channel {
         panic::propagate();
     }
 
-    /// Initiate a single-question DNS query for `name`.  The class and type of
-    /// the query are per the provided parameters, taking values as defined in
-    /// `arpa/nameser.h`.
+    /// Initiate a single-question DNS query for `name`.  The class and type of the query are per
+    /// the provided parameters, taking values as defined in `arpa/nameser.h`.
     ///
     /// On completion, `handler` is called with the result.
     ///
-    /// This method is provided so that users can query DNS types for which
-    /// `c-ares` does not provide a parser.  This is expected to be a last
-    /// resort; if a suitable `query_xxx()` is available, that should be
-    /// preferred.
+    /// This method is provided so that users can query DNS types for which `c-ares` does not
+    /// provide a parser.  This is expected to be a last resort; if a suitable `query_xxx()` is
+    /// available, that should be preferred.
     pub fn query<F>(&mut self, name: &str, dns_class: u16, query_type: u16, handler: F)
     where
         F: FnOnce(Result<&[u8]>) + Send + 'static,
@@ -849,16 +828,14 @@ impl Channel {
         );
     }
 
-    /// Initiate a series of single-question DNS queries for `name`.  The class
-    /// and type of the query are per the provided parameters, taking values as
-    /// defined in `arpa/nameser.h`.
+    /// Initiate a series of single-question DNS queries for `name`.  The class and type of the
+    /// query are per the provided parameters, taking values as defined in `arpa/nameser.h`.
     ///
     /// On completion, `handler` is called with the result.
     ///
-    /// This method is provided so that users can search DNS types for which
-    /// `c-ares` does not provide a parser.  This is expected to be a last
-    /// resort; if a suitable `search_xxx()` is available, that should be
-    /// preferred.
+    /// This method is provided so that users can search DNS types for which `c-ares` does not
+    /// provide a parser.  This is expected to be a last resort; if a suitable `search_xxx()` is
+    /// available, that should be preferred.
     pub fn search<F>(&mut self, name: &str, dns_class: u16, query_type: u16, handler: F)
     where
         F: FnOnce(Result<&[u8]>) + Send + 'static,
@@ -914,8 +891,8 @@ pub unsafe extern "C" fn socket_state_callback<F>(
     });
 }
 
-/// Information about the set of sockets that `c-ares` is interested in, as
-/// returned by `get_sock()`.
+/// Information about the set of sockets that `c-ares` is interested in, as returned by
+/// `get_sock()`.
 #[derive(Clone, Copy, Debug)]
 pub struct GetSock {
     socks: [c_ares_sys::ares_socket_t; c_ares_sys::ARES_GETSOCK_MAXNUM],

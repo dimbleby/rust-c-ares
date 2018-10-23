@@ -185,10 +185,9 @@ pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockadd
 
 /// Get the version number of the underlying `c-ares` library.
 ///
-/// The version is returned as both a string and an integer.  The integer is
-/// built up as 24bit number, with 8 separate bits used for major number, minor
-/// number and patch number.  For example, the version string "1.2.3" is
-/// returned as hexadecimal number 0x010203 (decimal 66051).
+/// The version is returned as both a string and an integer.  The integer is built up as 24bit
+/// number, with 8 separate bits used for major number, minor number and patch number.  For
+/// example, the version string "1.2.3" is returned as hexadecimal number 0x010203 (decimal 66051).
 pub fn version() -> (&'static str, u32) {
     let mut int_version: c_int = 0;
     let str_version = unsafe {

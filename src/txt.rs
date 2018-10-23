@@ -101,16 +101,14 @@ unsafe impl<'a> Send for TXTResultsIter<'a> {}
 unsafe impl<'a> Sync for TXTResultsIter<'a> {}
 
 impl<'a> TXTResult<'a> {
-    /// Is this the start of a text record, or the continuation of a previous
-    /// record?
+    /// Is this the start of a text record, or the continuation of a previous record?
     pub fn record_start(self) -> bool {
         self.txt_reply.record_start != 0
     }
 
     /// Returns the text in this `TXTResult`.
     ///
-    /// Although text is usual here, any binary data is legal - which is why we
-    /// return `&[u8]`.
+    /// Although text is usual here, any binary data is legal - which is why we return `&[u8]`.
     pub fn text(self) -> &'a [u8] {
         unsafe { slice::from_raw_parts(self.txt_reply.txt, self.txt_reply.length) }
     }

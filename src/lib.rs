@@ -3,10 +3,10 @@
 //! This crate is a fairly faithful wrapper of `c-ares`; which is to say that it preserves some of
 //! the complication of using the underlying library:
 //!
-//! -  Direct usage of this crate requires you to pay attention to `c-ares` as it tells you which
-//!    file descriptors it cares about, and to poll for activity on those file descriptors.
+//! - Direct usage of this crate requires you to pay attention to `c-ares` as it tells you which
+//! file descriptors it cares about, and to poll for activity on those file descriptors.
 //!
-//! -  This likely requires you to have an event loop or similar with which to integrate.
+//! - This likely requires you to have an event loop or similar with which to integrate.
 //!
 //! If that sounds a bit too much like hard work, you should probably prefer the
 //! [`c-ares-resolver`](https://crates.io/crates/c-ares-resolver) crate, which takes care of all
@@ -14,25 +14,25 @@
 //!
 //! Still here?  Usage of this crate is as follows:
 //!
-//! -  Create a `Channel`.
+//! - Create a `Channel`.
 //!
-//! -  Make queries on the `Channel`.  Queries all take callbacks, which will be called when the
-//!    query completes.
+//! - Make queries on the `Channel`.  Queries all take callbacks, which will be called when the
+//! query completes.
 //!
-//! -  Have `c-ares` tell you what file descriptors to listen on for read and / or write events.
-//!    You can do this either by providing a callback, which is called whenever the set of
-//!    interesting file descriptors changes, or by querying the `Channel` directly either with
-//!    `get_sock()` or with `fds()`.
+//! - Have `c-ares` tell you what file descriptors to listen on for read and / or write events.
+//! You can do this either by providing a callback, which is called whenever the set of interesting
+//! file descriptors changes, or by querying the `Channel` directly either with `get_sock()` or
+//! with `fds()`.
 //!
-//! -  Do as `c-ares` asks.  That is, listen for the events that it requests, on the file
-//!    descriptors that it cares about.
+//! - Do as `c-ares` asks.  That is, listen for the events that it requests, on the file
+//! descriptors that it cares about.
 //!
-//! -  When a file descriptor becomes readable or writable, call either `process_fd()` or
-//!    `process()` on the `Channel` to tell `c-ares` what has happened.
+//! - When a file descriptor becomes readable or writable, call either `process_fd()` or
+//! `process()` on the `Channel` to tell `c-ares` what has happened.
 //!
-//! -  If you have queries pending and don't see events happening, you still need to call either
-//!    `process_fd()` or `process()` at some point anyway - to give `c-ares` an opportunity to
-//!    process any requests that have timed out.
+//! - If you have queries pending and don't see events happening, you still need to call either
+//! `process_fd()` or `process()` at some point anyway - to give `c-ares` an opportunity to process
+//! any requests that have timed out.
 //!
 //! Complete examples showing how to use the library can be found
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).

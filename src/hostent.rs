@@ -18,8 +18,8 @@ fn hostname(hostent: &c_types::hostent) -> &CStr {
 }
 
 fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
-    // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to
-    // allow the identity conversion in the latter case.
+    // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to allow the identity
+    // conversion in the latter case.
     #[cfg_attr(feature = "cargo-clippy", allow(identity_conversion))]
     let addrtype = c_int::from(hostent.h_addrtype);
     HostAddressResultsIter {

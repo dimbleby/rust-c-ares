@@ -33,8 +33,7 @@ macro_rules! ares_search {
     ($($arg:tt)*) => { ares_call!(ares_search, $($arg)*) }
 }
 
-// Most of our `ares_callback` implementations are much the same - macro out
-// the repetition.
+// Most of our `ares_callback` implementations are much the same - macro out the repetition.
 macro_rules! ares_callback {
     ($arg:expr, $status:expr, $abuf:expr, $alen:expr, $parser:expr) => {{
         panic::catch(|| {

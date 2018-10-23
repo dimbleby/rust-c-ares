@@ -46,8 +46,7 @@ impl NAPTRResults {
         }
     }
 
-    /// Returns an iterator over the `NAPTRResult` values in this
-    /// `NAPTRResults`.
+    /// Returns an iterator over the `NAPTRResult` values in this `NAPTRResults`.
     pub fn iter(&self) -> NAPTRResultsIter {
         NAPTRResultsIter {
             next: unsafe { self.naptr_reply.as_ref() },

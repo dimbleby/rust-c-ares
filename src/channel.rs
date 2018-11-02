@@ -131,7 +131,7 @@ impl Options {
     }
 
     /// The path to use for reading the resolv.conf file.  The `resolvconf_path` should be set to a
-    /// path string, and will be honoured on *nix like systems.  The default is /etc/resolv.conf,
+    /// path string, and will be honoured on *nix like systems.  The default is /etc/resolv.conf.
     pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
         let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
         self.resolvconf_path = Some(c_resolvconf_path);

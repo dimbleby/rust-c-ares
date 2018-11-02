@@ -1,8 +1,8 @@
-## Unreleased
+## 4.2.0 (2 Nov 2018)
 
 * pull upstream c-ares - their release 1.15.0
 
-## 4.1.5 (1 July 2018)
+## 4.1.5 (1 Jul 2018)
 
 * pull upstream c-ares
 

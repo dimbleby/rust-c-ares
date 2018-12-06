@@ -8,10 +8,10 @@ use std::slice;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::{Error, Result};
-use panic;
-use types::MAX_ADDRTTLS;
-use utils::ipv4_from_in_addr;
+use crate::error::{Error, Result};
+use crate::panic;
+use crate::types::MAX_ADDRTTLS;
+use crate::utils::ipv4_from_in_addr;
 
 /// The result of a successful A lookup.
 #[derive(Clone, Copy)]

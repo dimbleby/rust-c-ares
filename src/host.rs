@@ -5,9 +5,9 @@ use std::os::raw::{c_int, c_void};
 use c_ares_sys;
 use c_types;
 
-use error::{Error, Result};
-use hostent::{HasHostent, HostAddressResultsIter, HostAliasResultsIter, HostentBorrowed};
-use panic;
+use crate::error::{Error, Result};
+use crate::hostent::{HasHostent, HostAddressResultsIter, HostAliasResultsIter, HostentBorrowed};
+use crate::panic;
 
 /// The result of a successful host lookup.
 #[derive(Clone, Copy)]

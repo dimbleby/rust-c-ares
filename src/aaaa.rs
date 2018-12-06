@@ -8,9 +8,9 @@ use std::slice;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::{Error, Result};
-use panic;
-use types::MAX_ADDRTTLS;
+use crate::error::{Error, Result};
+use crate::panic;
+use crate::types::MAX_ADDRTTLS;
 
 /// The result of a successful AAAA lookup.
 #[derive(Clone, Copy)]

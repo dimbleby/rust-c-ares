@@ -4,8 +4,8 @@ use std::os::raw::{c_char, c_int, c_void};
 
 use c_ares_sys;
 
-use error::{Error, Result};
-use panic;
+use crate::error::{Error, Result};
+use crate::panic;
 
 /// The result of a successful name-info lookup.
 #[derive(Clone, Copy, Debug)]

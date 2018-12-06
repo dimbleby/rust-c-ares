@@ -1,4 +1,4 @@
-use ffi::ares_socket_t;
+use crate::ffi::ares_socket_t;
 use std::os::raw::c_int;
 
 // Library initialization flags

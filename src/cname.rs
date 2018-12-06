@@ -7,9 +7,9 @@ use std::slice;
 use c_ares_sys;
 use c_types;
 
-use error::{Error, Result};
-use hostent::{HasHostent, HostAliasResultsIter, HostentOwned};
-use panic;
+use crate::error::{Error, Result};
+use crate::hostent::{HasHostent, HostAliasResultsIter, HostentOwned};
+use crate::panic;
 
 /// The result of a successful CNAME lookup.
 #[derive(Debug)]

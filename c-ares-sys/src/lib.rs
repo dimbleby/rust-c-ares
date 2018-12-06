@@ -15,5 +15,5 @@ extern crate jni_sys;
 mod constants;
 mod ffi;
 
-pub use constants::*;
-pub use ffi::*;
+pub use crate::constants::*;
+pub use crate::ffi::*;

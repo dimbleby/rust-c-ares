@@ -32,7 +32,7 @@ s#/\*.*?\*/##gs for @lines;
 # Trim trailing whitespace.
 s/\s+$// for @lines;
 
-print "use ffi::ares_socket_t;\n";
+print "use crate::ffi::ares_socket_t;\n";
 print "use std::os::raw::c_int;\n";
 
 print "\n";

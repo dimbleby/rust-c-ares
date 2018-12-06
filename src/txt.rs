@@ -8,8 +8,8 @@ use std::str;
 use c_ares_sys;
 use itertools::Itertools;
 
-use error::{Error, Result};
-use panic;
+use crate::error::{Error, Result};
+use crate::panic;
 
 /// The result of a successful TXT lookup.
 #[derive(Debug)]

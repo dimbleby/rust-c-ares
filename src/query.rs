@@ -3,8 +3,8 @@ use std::slice;
 
 use c_ares_sys;
 
-use error::{Error, Result};
-use panic;
+use crate::error::{Error, Result};
+use crate::panic;
 
 pub unsafe extern "C" fn query_callback<F>(
     arg: *mut c_void,

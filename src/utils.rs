@@ -1,12 +1,12 @@
 use c_ares_sys;
 use c_types;
 
+use crate::types::AddressFamily;
 use std::ffi::CStr;
 use std::mem;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
 use std::os::raw::c_int;
 use std::str;
-use types::AddressFamily;
 
 // Convert an address family into a more strongly typed AddressFamily.
 pub fn address_family(family: c_int) -> Option<AddressFamily> {

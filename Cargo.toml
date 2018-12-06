@@ -11,6 +11,7 @@ documentation = "https://docs.rs/c-ares"
 readme = "README.md"
 keywords = ["DNS", "c-ares"]
 categories = ["api-bindings", "asynchronous", "network-programming"]
+edition = "2018"
 
 [dependencies]
 bitflags = "1"

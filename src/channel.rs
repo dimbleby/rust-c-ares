@@ -9,27 +9,27 @@ use std::sync::Arc;
 use c_ares_sys;
 use c_types;
 
-use a::{query_a_callback, AResults};
-use aaaa::{query_aaaa_callback, AAAAResults};
-use cname::{query_cname_callback, CNameResults};
-use error::{Error, Result};
-use host::{get_host_callback, HostResults};
-use mx::{query_mx_callback, MXResults};
-use nameinfo::{get_name_info_callback, NameInfoResult};
-use naptr::{query_naptr_callback, NAPTRResults};
-use ni_flags::NIFlags;
-use ns::{query_ns_callback, NSResults};
-use panic;
-use ptr::{query_ptr_callback, PTRResults};
-use query::query_callback;
-use soa::{query_soa_callback, SOAResult};
-use srv::{query_srv_callback, SRVResults};
-use txt::{query_txt_callback, TXTResults};
-use types::{AddressFamily, DnsClass, QueryType, Socket};
-use utils::{
+use crate::a::{query_a_callback, AResults};
+use crate::aaaa::{query_aaaa_callback, AAAAResults};
+use crate::cname::{query_cname_callback, CNameResults};
+use crate::error::{Error, Result};
+use crate::host::{get_host_callback, HostResults};
+use crate::mx::{query_mx_callback, MXResults};
+use crate::nameinfo::{get_name_info_callback, NameInfoResult};
+use crate::naptr::{query_naptr_callback, NAPTRResults};
+use crate::ni_flags::NIFlags;
+use crate::ns::{query_ns_callback, NSResults};
+use crate::panic;
+use crate::ptr::{query_ptr_callback, PTRResults};
+use crate::query::query_callback;
+use crate::soa::{query_soa_callback, SOAResult};
+use crate::srv::{query_srv_callback, SRVResults};
+use crate::txt::{query_txt_callback, TXTResults};
+use crate::types::{AddressFamily, DnsClass, QueryType, Socket};
+use crate::utils::{
     ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in, socket_addrv6_as_sockaddr_in6,
 };
-use Flags;
+use crate::Flags;
 
 type SocketStateCallback = FnMut(Socket, bool, bool) + Send + 'static;
 

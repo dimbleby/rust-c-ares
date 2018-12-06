@@ -10,6 +10,7 @@ repository = "https://github.com/dimbleby/rust-c-ares"
 readme = "README.md"
 keywords = ["DNS", "c-ares"]
 categories = ["external-ffi-bindings", "network-programming"]
+edition = "2018"
 
 [build-dependencies]
 cc = "1"

@@ -10,8 +10,8 @@ use c_ares_sys;
 use c_types;
 use itertools::Itertools;
 
-use types::AddressFamily;
-use utils::address_family;
+use crate::types::AddressFamily;
+use crate::utils::address_family;
 
 fn hostname(hostent: &c_types::hostent) -> &CStr {
     unsafe { CStr::from_ptr(hostent.h_name) }

@@ -204,7 +204,7 @@ pub struct Channel {
 
 impl Channel {
     /// Create a new channel for name service lookups, with default `Options`.
-    pub fn new() -> Result<Channel> {
+    pub fn new() -> Result<Self> {
         let options = Options::default();
         Self::with_options(options)
     }
@@ -903,7 +903,7 @@ impl GetSock {
     fn new(
         socks: [c_ares_sys::ares_socket_t; c_ares_sys::ARES_GETSOCK_MAXNUM],
         bitmask: u32,
-    ) -> GetSock {
+    ) -> Self {
         GetSock { socks, bitmask }
     }
 

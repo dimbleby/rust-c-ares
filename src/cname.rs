@@ -38,7 +38,7 @@ impl CNameResults {
         }
     }
 
-    fn new(hostent: *mut c_types::hostent) -> CNameResults {
+    fn new(hostent: *mut c_types::hostent) -> Self {
         CNameResults {
             hostent: HostentOwned::new(hostent),
         }

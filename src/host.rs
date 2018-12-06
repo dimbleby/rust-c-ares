@@ -16,7 +16,7 @@ pub struct HostResults<'a> {
 }
 
 impl<'a> HostResults<'a> {
-    fn new(hostent: &'a c_types::hostent) -> HostResults<'a> {
+    fn new(hostent: &'a c_types::hostent) -> Self {
         HostResults {
             hostent: HostentBorrowed::new(hostent),
         }

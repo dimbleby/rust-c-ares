@@ -103,7 +103,7 @@ mod example {
 
     impl Resolver {
         // Create a new Resolver
-        pub fn new() -> Resolver {
+        pub fn new() -> Self {
             // Create a c_ares::Channel.
             let mut options = c_ares::Options::new();
             options
@@ -118,7 +118,7 @@ mod example {
             let locked_channel = Arc::new(Mutex::new(ares_channel));
 
             // Create a thread to handle file descriptors.
-            #[cfg_attr(feature = "cargo-clippy", allow(mutex_atomic))]
+            #[allow(clippy::mutex_atomic)]
             let keep_going = Arc::new((Mutex::new(true), Condvar::new()));
             let fd_handle = thread::spawn({
                 let locked_channel = Arc::clone(&locked_channel);

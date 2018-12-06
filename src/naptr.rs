@@ -39,7 +39,7 @@ impl NAPTRResults {
         }
     }
 
-    fn new(reply: *mut c_ares_sys::ares_naptr_reply) -> NAPTRResults {
+    fn new(reply: *mut c_ares_sys::ares_naptr_reply) -> Self {
         NAPTRResults {
             naptr_reply: reply,
             phantom: PhantomData,

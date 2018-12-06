@@ -39,7 +39,7 @@ impl TXTResults {
         }
     }
 
-    fn new(txt_reply: *mut c_ares_sys::ares_txt_ext) -> TXTResults {
+    fn new(txt_reply: *mut c_ares_sys::ares_txt_ext) -> Self {
         TXTResults {
             txt_reply,
             phantom: PhantomData,

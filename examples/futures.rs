@@ -66,7 +66,7 @@ mod example {
         pub fn new(
             ares_channel: Arc<Mutex<c_ares::Channel>>,
             rx: mio_extras::channel::Receiver<Message>,
-        ) -> EventLoop {
+        ) -> Self {
             let poll = mio::Poll::new().expect("Failed to create poll");
             poll.register(&rx, CHANNEL, mio::Ready::readable(), mio::PollOpt::edge())
                 .expect("failed to register channel with poll");
@@ -224,7 +224,7 @@ mod example {
 
     impl Resolver {
         // Create a new Resolver.
-        pub fn new() -> Resolver {
+        pub fn new() -> Self {
             // Whenever c-ares tells us what to do with a file descriptor, we'll send that request
             // along, in a message to the event loop thread.
             let (tx, rx) = mio_extras::channel::channel();
@@ -376,7 +376,8 @@ mod example {
             current_thread::spawn(mx_query);
             current_thread::spawn(naptr_query);
             Ok::<(), ()>(())
-        })).unwrap();
+        }))
+        .unwrap();
     }
 }
 

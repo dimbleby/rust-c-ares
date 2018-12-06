@@ -41,7 +41,7 @@ impl PTRResults {
         }
     }
 
-    fn new(hostent: *mut c_types::hostent) -> PTRResults {
+    fn new(hostent: *mut c_types::hostent) -> Self {
         PTRResults {
             hostent: HostentOwned::new(hostent),
         }

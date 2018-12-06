@@ -40,7 +40,7 @@ impl SRVResults {
         }
     }
 
-    fn new(srv_reply: *mut c_ares_sys::ares_srv_reply) -> SRVResults {
+    fn new(srv_reply: *mut c_ares_sys::ares_srv_reply) -> Self {
         SRVResults {
             srv_reply,
             phantom: PhantomData,

@@ -39,7 +39,7 @@ impl MXResults {
         }
     }
 
-    fn new(mx_reply: *mut c_ares_sys::ares_mx_reply) -> MXResults {
+    fn new(mx_reply: *mut c_ares_sys::ares_mx_reply) -> Self {
         MXResults {
             mx_reply,
             phantom: PhantomData,

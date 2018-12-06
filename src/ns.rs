@@ -33,7 +33,7 @@ impl NSResults {
         }
     }
 
-    fn new(hostent: *mut c_types::hostent) -> NSResults {
+    fn new(hostent: *mut c_types::hostent) -> Self {
         NSResults {
             hostent: HostentOwned::new(hostent),
         }

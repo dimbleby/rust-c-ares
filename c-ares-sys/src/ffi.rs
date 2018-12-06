@@ -111,8 +111,10 @@ extern "C" {
         >,
         afree: ::std::option::Option<unsafe extern "C" fn(ptr: *mut ::std::os::raw::c_void)>,
         arealloc: ::std::option::Option<
-            unsafe extern "C" fn(ptr: *mut ::std::os::raw::c_void, size: usize)
-                -> *mut ::std::os::raw::c_void,
+            unsafe extern "C" fn(
+                ptr: *mut ::std::os::raw::c_void,
+                size: usize,
+            ) -> *mut ::std::os::raw::c_void,
         >,
     ) -> ::std::os::raw::c_int;
 }
@@ -196,8 +198,10 @@ pub struct ares_socket_functions {
         ) -> ares_socket_t,
     >,
     pub aclose: ::std::option::Option<
-        unsafe extern "C" fn(arg1: ares_socket_t, arg2: *mut ::std::os::raw::c_void)
-            -> ::std::os::raw::c_int,
+        unsafe extern "C" fn(
+            arg1: ares_socket_t,
+            arg2: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
     >,
     pub aconnect: ::std::option::Option<
         unsafe extern "C" fn(

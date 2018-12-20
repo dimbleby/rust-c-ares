@@ -1,3 +1,7 @@
+## Unreleased
+
+* Update dependencies
+
 ## 7.1.0 (2 Nov 2018)
 
 * Take upstream c-ares 1.15.0

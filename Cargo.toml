@@ -23,7 +23,7 @@ itertools = "0.8"
 futures = "0.1"
 mio = "0.6"
 mio-extras = "2"
-nix = "0.12"
+nix = "0.13"
 tokio-current-thread = "0.1"
 
 [target.'cfg(windows)'.dev-dependencies]

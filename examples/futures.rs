@@ -322,7 +322,7 @@ mod example {
         // Create a Resolver, and some queries.
         let resolver = Resolver::new();
         let cname_query = resolver
-            .query_cname("dimbleby.github.io")
+            .query_cname("dimbleby.github.com")
             .map_err(|e| println!("CNAME lookup failed with error '{}'", e.description()))
             .map(|results| {
                 println!();

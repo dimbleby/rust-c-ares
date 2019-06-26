@@ -31,7 +31,7 @@ use crate::utils::{
 };
 use crate::Flags;
 
-type SocketStateCallback = FnMut(Socket, bool, bool) + Send + 'static;
+type SocketStateCallback = dyn FnMut(Socket, bool, bool) + Send + 'static;
 
 /// Used to configure the behaviour of the name resolver.
 pub struct Options {

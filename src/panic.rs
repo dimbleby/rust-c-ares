@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::panic::{self, AssertUnwindSafe};
 
 thread_local! {
-    static LAST_ERROR: RefCell<Option<Box<Any + Send>>> = RefCell::new(None);
+    static LAST_ERROR: RefCell<Option<Box<dyn Any + Send>>> = RefCell::new(None);
     static UNWINDING: RefCell<bool> = RefCell::new(false);
 }
 

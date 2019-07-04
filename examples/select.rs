@@ -55,8 +55,8 @@ mod example {
     pub fn main() {
         // Windows peculiarities.
         unsafe {
-            let mut wsadata: WSADATA = mem::uninitialized();
-            WSAStartup(0x101, &mut wsadata);
+            let mut wsadata = mem::MaybeUninit::<WSADATA>::uninit();
+            WSAStartup(0x101, wsadata.as_mut_ptr());
         }
 
         // Create the c_ares::Channel.

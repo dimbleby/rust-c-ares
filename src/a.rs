@@ -31,7 +31,7 @@ impl AResults {
     pub fn parse_from(data: &[u8]) -> Result<AResults> {
         let mut results: AResults = AResults {
             naddrttls: MAX_ADDRTTLS,
-            addrttls: unsafe { mem::uninitialized() },
+            addrttls: unsafe { mem::MaybeUninit::zeroed().assume_init() },
         };
         let parse_status = unsafe {
             c_ares_sys::ares_parse_a_reply(

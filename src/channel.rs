@@ -46,7 +46,7 @@ pub struct Options {
 impl Default for Options {
     fn default() -> Self {
         Self {
-            ares_options: unsafe { mem::uninitialized() },
+            ares_options: unsafe { mem::MaybeUninit::zeroed().assume_init() },
             optmask: 0,
             domains: vec![],
             lookups: None,

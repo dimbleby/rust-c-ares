@@ -105,7 +105,7 @@ impl<'a> fmt::Display for AResult<'a> {
     }
 }
 
-pub unsafe extern "C" fn query_a_callback<F>(
+pub(crate) unsafe extern "C" fn query_a_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,

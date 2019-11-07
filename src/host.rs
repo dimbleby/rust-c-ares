@@ -48,7 +48,7 @@ impl<'a> fmt::Display for HostResults<'a> {
     }
 }
 
-pub unsafe extern "C" fn get_host_callback<F>(
+pub(crate) unsafe extern "C" fn get_host_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,

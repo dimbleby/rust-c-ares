@@ -65,7 +65,7 @@ impl fmt::Display for CNameResults {
     }
 }
 
-pub unsafe extern "C" fn query_cname_callback<F>(
+pub(crate) unsafe extern "C" fn query_cname_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,

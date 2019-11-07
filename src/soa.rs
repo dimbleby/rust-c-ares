@@ -114,7 +114,7 @@ impl Drop for SOAResult {
 unsafe impl Send for SOAResult {}
 unsafe impl Sync for SOAResult {}
 
-pub unsafe extern "C" fn query_soa_callback<F>(
+pub(crate) unsafe extern "C" fn query_soa_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,

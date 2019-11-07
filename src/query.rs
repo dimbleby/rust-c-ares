@@ -6,7 +6,7 @@ use c_ares_sys;
 use crate::error::{Error, Result};
 use crate::panic;
 
-pub unsafe extern "C" fn query_callback<F>(
+pub(crate) unsafe extern "C" fn query_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,

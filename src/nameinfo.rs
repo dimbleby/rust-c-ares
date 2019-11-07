@@ -56,7 +56,7 @@ impl<'a> fmt::Display for NameInfoResult<'a> {
 unsafe impl<'a> Send for NameInfoResult<'a> {}
 unsafe impl<'a> Sync for NameInfoResult<'a> {}
 
-pub unsafe extern "C" fn get_name_info_callback<F>(
+pub(crate) unsafe extern "C" fn get_name_info_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,

@@ -877,7 +877,7 @@ unsafe impl Sync for Channel {}
 unsafe impl Send for Options {}
 unsafe impl Sync for Options {}
 
-pub unsafe extern "C" fn socket_state_callback<F>(
+unsafe extern "C" fn socket_state_callback<F>(
     data: *mut c_void,
     socket_fd: c_ares_sys::ares_socket_t,
     readable: c_int,

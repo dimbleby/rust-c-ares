@@ -86,46 +86,16 @@ pub enum Error {
     UNKNOWN,
 }
 
+impl error::Error for Error {}
+
 impl fmt::Display for Error {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
-        let text = match *self {
-            Error::ENODATA => "ENODATA",
-            Error::EFORMERR => "EFORMERR",
-            Error::ESERVFAIL => "ESERVFAIL",
-            Error::ENOTFOUND => "ENOTFOUND",
-            Error::ENOTIMP => "ENOTIMP",
-            Error::EREFUSED => "EREFUSED",
-            Error::EBADQUERY => "EBADQUERY",
-            Error::EBADNAME => "EBADNAME",
-            Error::EBADFAMILY => "EBADFAMILY",
-            Error::EBADRESP => "EBADRESP",
-            Error::ECONNREFUSED => "ECONNREFUSED",
-            Error::ETIMEOUT => "ETIMEOUT",
-            Error::EOF => "EOF",
-            Error::EFILE => "EFILE",
-            Error::ENOMEM => "ENOMEM",
-            Error::EDESTRUCTION => "EDESTRUCTION",
-            Error::EBADSTR => "EBADSTR",
-            Error::EBADFLAGS => "EBADFLAGS",
-            Error::ENONAME => "ENONAME",
-            Error::EBADHINTS => "EBADHINTS",
-            Error::ENOTINITIALIZED => "ENOTINITIALIZED",
-            Error::ELOADIPHLPAPI => "ELOADIPHLPAPI",
-            Error::EADDRGETNETWORKPARAMS => "EADDRGETNETWORKPARAMS",
-            Error::ECANCELLED => "ECANCELLED",
-            Error::UNKNOWN => "UNKNOWN",
-        };
-        fmt.write_str(text)
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        unsafe {
+        let text = unsafe {
             let ptr = c_ares_sys::ares_strerror(*self as c_int);
             let buf = CStr::from_ptr(ptr).to_bytes();
             str::from_utf8_unchecked(buf)
-        }
+        };
+        fmt.write_str(text)
     }
 }
 

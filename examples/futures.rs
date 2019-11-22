@@ -18,7 +18,6 @@ mod example {
     extern crate tokio_current_thread as current_thread;
 
     use std::collections::HashSet;
-    use std::error::Error;
     use std::sync::{Arc, Mutex};
     use std::thread;
     use std::time::Duration;
@@ -323,7 +322,7 @@ mod example {
         let resolver = Resolver::new();
         let cname_query = resolver
             .query_cname("dimbleby.github.com")
-            .map_err(|e| println!("CNAME lookup failed with error '{}'", e.description()))
+            .map_err(|e| println!("CNAME lookup failed with error '{}'", e))
             .map(|results| {
                 println!();
                 println!("Successful CNAME lookup...");
@@ -336,7 +335,7 @@ mod example {
 
         let mx_query = resolver
             .query_mx("gmail.com")
-            .map_err(|e| println!("MX lookup failed with error '{}'", e.description()))
+            .map_err(|e| println!("MX lookup failed with error '{}'", e))
             .map(|results| {
                 println!();
                 println!("Successful MX lookup...");
@@ -352,7 +351,7 @@ mod example {
 
         let naptr_query = resolver
             .query_naptr("apple.com")
-            .map_err(|e| println!("NAPTR lookup failed with error '{}'", e.description()))
+            .map_err(|e| println!("NAPTR lookup failed with error '{}'", e))
             .map(|results| {
                 println!();
                 println!("Successful NAPTR lookup...");

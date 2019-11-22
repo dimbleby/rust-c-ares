@@ -5,14 +5,13 @@ mod example {
     extern crate mio;
 
     use std::collections::HashSet;
-    use std::error::Error;
     use std::net::IpAddr;
     use std::time::Duration;
 
     fn print_host_results(result: &c_ares::Result<c_ares::HostResults>) {
         match *result {
             Err(ref e) => {
-                println!("Host lookup failed with error '{}'", e.description());
+                println!("Host lookup failed with error '{}'", e);
             }
             Ok(host_results) => {
                 println!("Successful host lookup...");

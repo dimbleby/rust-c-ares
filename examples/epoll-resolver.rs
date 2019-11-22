@@ -11,7 +11,6 @@ mod example {
 
     use nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp};
     use std::collections::HashSet;
-    use std::error::Error;
     use std::str;
     use std::sync::{mpsc, Arc, Condvar, Mutex};
     use std::thread;
@@ -199,7 +198,7 @@ mod example {
     fn print_ns_results(result: &c_ares::Result<c_ares::NSResults>) {
         match *result {
             Err(ref e) => {
-                println!("NS lookup failed with error '{}'", e.description());
+                println!("NS lookup failed with error '{}'", e);
             }
             Ok(ref ns_results) => {
                 println!("Successful NS lookup...");
@@ -213,7 +212,7 @@ mod example {
     fn print_ptr_results(result: &c_ares::Result<c_ares::PTRResults>) {
         match *result {
             Err(ref e) => {
-                println!("PTR lookup failed with error '{}'", e.description());
+                println!("PTR lookup failed with error '{}'", e);
             }
             Ok(ref ptr_results) => {
                 println!("Successful PTR lookup...");
@@ -227,7 +226,7 @@ mod example {
     fn print_txt_results(result: &c_ares::Result<c_ares::TXTResults>) {
         match *result {
             Err(ref e) => {
-                println!("TXT lookup failed with error '{}'", e.description());
+                println!("TXT lookup failed with error '{}'", e);
             }
             Ok(ref txt_results) => {
                 println!("Successful TXT lookup...");

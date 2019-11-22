@@ -7,7 +7,6 @@ extern crate winapi;
 mod example {
     extern crate c_ares;
 
-    use std::error::Error;
     use std::mem;
     use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
     use std::ptr;
@@ -18,7 +17,7 @@ mod example {
     fn print_soa_result(result: &c_ares::Result<c_ares::SOAResult>) {
         match *result {
             Err(ref e) => {
-                println!("SOA lookup failed with error '{}'", e.description());
+                println!("SOA lookup failed with error '{}'", e);
             }
             Ok(ref soa_result) => {
                 println!("Successful SOA lookup...");
@@ -38,7 +37,7 @@ mod example {
     fn print_name_info_result(result: &c_ares::Result<c_ares::NameInfoResult>) {
         match *result {
             Err(ref e) => {
-                println!("Name info lookup failed with error '{}'", e.description());
+                println!("Name info lookup failed with error '{}'", e);
             }
             Ok(ref name_info_result) => {
                 println!("Successful name info lookup...");

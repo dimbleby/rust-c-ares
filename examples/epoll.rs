@@ -9,12 +9,11 @@ mod example {
     extern crate c_ares;
     use nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp};
     use std::collections::HashSet;
-    use std::error::Error;
 
     fn print_a_results(result: &c_ares::Result<c_ares::AResults>) {
         match *result {
             Err(ref e) => {
-                println!("A lookup failed with error '{}'", e.description());
+                println!("A lookup failed with error '{}'", e);
             }
             Ok(ref a_results) => {
                 println!("Successful A lookup...");
@@ -29,7 +28,7 @@ mod example {
     fn print_aaaa_results(result: &c_ares::Result<c_ares::AAAAResults>) {
         match *result {
             Err(ref e) => {
-                println!("AAAA lookup failed with error '{}'", e.description());
+                println!("AAAA lookup failed with error '{}'", e);
             }
             Ok(ref aaaa_results) => {
                 println!("Successful AAAA lookup...");
@@ -44,7 +43,7 @@ mod example {
     fn print_srv_results(result: &c_ares::Result<c_ares::SRVResults>) {
         match *result {
             Err(ref e) => {
-                println!("SRV lookup failed with error '{}'", e.description());
+                println!("SRV lookup failed with error '{}'", e);
             }
             Ok(ref srv_results) => {
                 println!("Successful SRV lookup...");

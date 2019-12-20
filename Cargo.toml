@@ -21,7 +21,7 @@ itertools = "0.8"
 
 [target.'cfg(unix)'.dev-dependencies]
 mio = "0.6"
-nix = "0.15"
+nix = "0.16"
 
 [target.'cfg(windows)'.dev-dependencies]
 winapi = { version = "0.3", features = ["winsock2"] }

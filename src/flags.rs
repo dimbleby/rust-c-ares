@@ -1,6 +1,3 @@
-//! Flags that may be passed when initializing a `Channel`.
-use c_ares_sys;
-
 bitflags!(
     /// Flags that may be passed when initializing a `Channel`.
     pub struct Flags: i32 {

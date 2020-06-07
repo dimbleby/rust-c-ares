@@ -6,9 +6,6 @@ use std::os::raw::{c_char, c_int, c_uchar, c_void};
 use std::ptr;
 use std::sync::Arc;
 
-use c_ares_sys;
-use c_types;
-
 use crate::a::{query_a_callback, AResults};
 use crate::aaaa::{query_aaaa_callback, AAAAResults};
 use crate::cname::{query_cname_callback, CNameResults};

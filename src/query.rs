@@ -1,8 +1,6 @@
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::slice;
 
-use c_ares_sys;
-
 use crate::error::{Error, Result};
 use crate::panic;
 

@@ -1,6 +1,3 @@
-use c_ares_sys;
-use c_types;
-
 use crate::types::AddressFamily;
 use std::ffi::CStr;
 use std::mem;

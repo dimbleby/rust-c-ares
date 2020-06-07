@@ -10,6 +10,8 @@ sub print_values {
         if ($line =~ /#define ($prefix\w+)\s+(.*)/) {
             my $flag = $1;
             my $value = $2;
+            $value =~ s/^\(//;
+            $value =~ s/\)$//;
             if ($value =~ /1 << 0/) {
                 # Sidestep clippy's "identity_op" warning
                 print "pub const $flag: c_int = 1;\n";

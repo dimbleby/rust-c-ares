@@ -5,8 +5,6 @@ use std::os::raw::c_int;
 use std::result;
 use std::str;
 
-use c_ares_sys;
-
 /// Error codes that the library might return.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub enum Error {

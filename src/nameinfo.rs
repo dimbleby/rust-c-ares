@@ -2,8 +2,6 @@ use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::{c_char, c_int, c_void};
 
-use c_ares_sys;
-
 use crate::error::{Error, Result};
 use crate::panic;
 

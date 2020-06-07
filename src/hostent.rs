@@ -6,8 +6,6 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::raw::{c_char, c_int};
 use std::slice;
 
-use c_ares_sys;
-use c_types;
 use itertools::Itertools;
 
 use crate::types::AddressFamily;

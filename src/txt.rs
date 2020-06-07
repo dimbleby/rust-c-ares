@@ -5,7 +5,6 @@ use std::ptr;
 use std::slice;
 use std::str;
 
-use c_ares_sys;
 use itertools::Itertools;
 
 use crate::error::{Error, Result};

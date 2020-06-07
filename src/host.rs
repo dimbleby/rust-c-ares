@@ -2,9 +2,6 @@ use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::{c_int, c_void};
 
-use c_ares_sys;
-use c_types;
-
 use crate::error::{Error, Result};
 use crate::hostent::{HasHostent, HostAddressResultsIter, HostAliasResultsIter, HostentBorrowed};
 use crate::panic;

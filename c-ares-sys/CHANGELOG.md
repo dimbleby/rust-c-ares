@@ -1,3 +1,8 @@
+## 5.0.0 (15 Aug 2020)
+
+- pull upstream c-ares - their release 1.16.1
+- switch to using `RawSocket` on windows
+
 ## 4.2.0 (2 Nov 2018)
 
 - pull upstream c-ares - their release 1.15.0

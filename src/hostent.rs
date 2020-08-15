@@ -18,7 +18,7 @@ fn hostname(hostent: &c_types::hostent) -> &CStr {
 fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
     // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to allow the identity
     // conversion in the latter case.
-    #[allow(clippy::identity_conversion)]
+    #[allow(clippy::useless_conversion)]
     let addrtype = c_int::from(hostent.h_addrtype);
     HostAddressResultsIter {
         family: address_family(addrtype),

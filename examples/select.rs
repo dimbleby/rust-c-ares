@@ -103,11 +103,11 @@ mod example {
         loop {
             let mut read_fds = fd_set {
                 fd_count: 0,
-                fd_array: [c_ares::SOCKET_BAD; FD_SETSIZE],
+                fd_array: [c_ares::SOCKET_BAD as usize; FD_SETSIZE],
             };
             let mut write_fds = fd_set {
                 fd_count: 0,
-                fd_array: [c_ares::SOCKET_BAD; FD_SETSIZE],
+                fd_array: [c_ares::SOCKET_BAD as usize; FD_SETSIZE],
             };
             let count = ares_channel.fds(&mut read_fds, &mut write_fds);
             if count == 0 {

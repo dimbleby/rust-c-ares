@@ -83,7 +83,7 @@ pub const ARES_NI_IDN_USE_STD3_ASCII_RULES: c_int = 1 << 12;
 
 // A non-existent file descriptor
 #[cfg(windows)]
-pub const ARES_SOCKET_BAD: ares_socket_t = ::winapi::um::winsock2::INVALID_SOCKET;
+pub const ARES_SOCKET_BAD: ares_socket_t = !0;
 #[cfg(unix)]
 pub const ARES_SOCKET_BAD: ares_socket_t = -1;
 

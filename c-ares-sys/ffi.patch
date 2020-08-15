@@ -15,7 +15,7 @@
 +use jni_sys;
 +
 +#[cfg(windows)]
-+pub type ares_socket_t = ::winapi::um::winsock2::SOCKET;
++pub type ares_socket_t = ::std::os::windows::io::RawSocket;
 +#[cfg(unix)]
 +pub type ares_socket_t = ::std::os::unix::io::RawFd;
  

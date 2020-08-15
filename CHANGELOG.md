@@ -1,4 +1,4 @@
-## Unreleased
+## 7.2.0 (15 Aug 2020)
 
 - Update dependencies
 - Modernize error handling: `description()` is soft-deprecated.

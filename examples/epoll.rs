@@ -95,7 +95,7 @@ mod example {
         loop {
             // Ask c-ares what file descriptors we should be listening on, and map those requests
             // onto the epoll file descriptor.
-            let mut active = false;
+            let mut new_tracked_fds = HashSet::new();
             for (fd, readable, writable) in &ares_channel.get_sock() {
                 let mut interest = EpollFlags::empty();
                 if readable {
@@ -105,15 +105,27 @@ mod example {
                     interest |= EpollFlags::EPOLLOUT;
                 }
                 let mut event = EpollEvent::new(interest, fd as u64);
-                let op = if tracked_fds.insert(fd) {
-                    EpollOp::EpollCtlAdd
-                } else {
+
+                // Anything left over in tracked_fds when we exit the loop is no longer wanted by
+                // c-ares.
+                let op = if tracked_fds.remove(&fd) {
                     EpollOp::EpollCtlMod
+                } else {
+                    EpollOp::EpollCtlAdd
                 };
+                new_tracked_fds.insert(fd);
+
                 epoll_ctl(epoll, op, fd, &mut event).expect("epoll_ctl failed");
-                active = true;
             }
-            if !active {
+
+            // Stop listening for events on file descriptors that c-ares doesn't care about.
+            for fd in &tracked_fds {
+                epoll_ctl(epoll, EpollOp::EpollCtlDel, *fd, None).expect("epoll_ctl failed");
+            }
+            tracked_fds = new_tracked_fds;
+
+            // If c-ares isn't asking us to do anything, we're done.
+            if tracked_fds.is_empty() {
                 break;
             }
 

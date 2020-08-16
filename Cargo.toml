@@ -20,7 +20,6 @@ c-types = "2.0.2"
 itertools = "0.9"
 
 [target.'cfg(unix)'.dev-dependencies]
-mio = "0.6"
 nix = "0.18"
 
 [target.'cfg(windows)'.dev-dependencies]

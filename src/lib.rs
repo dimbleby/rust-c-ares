@@ -1,16 +1,13 @@
 //! A safe wrapper for the [`c-ares`](https://c-ares.haxx.se) library.
 //!
 //! This crate is a fairly faithful wrapper of `c-ares`; which is to say that it preserves some of
-//! the complication of using the underlying library:
+//! the complexity of using the underlying library.  If you just want to make a DNS query, you
+//! should probably prefer the [`c-ares-resolver`](https://crates.io/crates/c-ares-resolver) crate,
+//! which does the hard work for you.
 //!
-//! - Direct usage of this crate requires you to pay attention to `c-ares` as it tells you which
+//! Direct usage of this crate requires you to pay attention to `c-ares` as it tells you which
 //! file descriptors it cares about, and to poll for activity on those file descriptors.
-//!
-//! - This likely requires you to have an event loop or similar with which to integrate.
-//!
-//! If that sounds a bit too much like hard work, you should probably prefer the
-//! [`c-ares-resolver`](https://crates.io/crates/c-ares-resolver) crate, which takes care of all
-//! that stuff for you and presents a much simpler API.
+//! This likely requires you to have an event loop or similar with which to integrate.
 //!
 //! Still here?  Usage of this crate is as follows:
 //!

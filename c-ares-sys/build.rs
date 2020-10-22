@@ -1,6 +1,5 @@
 extern crate cc;
 extern crate fs_extra;
-extern crate metadeps;
 
 use std::env;
 use std::ffi::OsString;
@@ -23,7 +22,7 @@ fn main() {
     println!("cargo:rerun-if-changed=c-ares");
 
     // Use the installed libcares if it is available.
-    if metadeps::probe().is_ok() {
+    if pkg_config::Config::new().atleast_version("1.15.0").probe("libcares").is_ok() {
         return;
     }
 

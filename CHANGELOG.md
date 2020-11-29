@@ -1,3 +1,8 @@
+## Unreleased
+
+- Update dependencies
+- Add support for CAA records
+
 ## 7.2.0 (15 Aug 2020)
 
 - Update dependencies

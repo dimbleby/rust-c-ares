@@ -15,12 +15,12 @@ edition = "2018"
 
 [dependencies]
 bitflags = "1"
-c-ares-sys = { version = "5.0.0", path = "c-ares-sys" }
+c-ares-sys = { version = "5.1.0", path = "c-ares-sys" }
 c-types = "2.0.2"
 itertools = "0.9"
 
 [target.'cfg(unix)'.dev-dependencies]
-nix = "0.18"
+nix = "0.19"
 
 [target.'cfg(windows)'.dev-dependencies]
 winapi = { version = "0.3", features = ["winsock2"] }

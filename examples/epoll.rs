@@ -40,6 +40,25 @@ mod example {
         }
     }
 
+    fn print_caa_results(result: &c_ares::Result<c_ares::CAAResults>) {
+        match *result {
+            Err(ref e) => {
+                println!("CAA lookup failed with error '{}'", e);
+            }
+            Ok(ref caa_results) => {
+                println!("Successful CAA lookup...");
+                for caa_result in caa_results {
+                    println!(
+                        "critical: {}, property: {}, value: {}",
+                        caa_result.critical(),
+                        caa_result.property().to_string_lossy(),
+                        caa_result.value().to_string_lossy()
+                    );
+                }
+            }
+        }
+    }
+
     fn print_srv_results(result: &c_ares::Result<c_ares::SRVResults>) {
         match *result {
             Err(ref e) => {
@@ -82,6 +101,11 @@ mod example {
         ares_channel.query_aaaa("google.com", move |result| {
             println!();
             print_aaaa_results(&result);
+        });
+
+        ares_channel.query_caa("comodo.com", move |result| {
+            println!();
+            print_caa_results(&result);
         });
 
         ares_channel.query_srv("_xmpp-server._tcp.gmail.com", move |result| {

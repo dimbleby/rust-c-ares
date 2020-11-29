@@ -22,7 +22,7 @@ sub print_values {
     }
 }
 
-open(my $ARES_H, '<', 'c-ares/ares.h');
+open(my $ARES_H, '<', 'c-ares/include/ares.h');
 my @lines = <$ARES_H>;
 close($ARES_H);
 

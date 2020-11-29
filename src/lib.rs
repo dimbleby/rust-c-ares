@@ -44,6 +44,7 @@ extern crate itertools;
 mod macros;
 mod a;
 mod aaaa;
+mod caa;
 mod channel;
 mod cname;
 mod error;
@@ -70,6 +71,7 @@ mod tests;
 // Re-export public interfaces.
 pub use crate::a::{AResult, AResults, AResultsIter};
 pub use crate::aaaa::{AAAAResult, AAAAResults, AAAAResultsIter};
+pub use crate::caa::{CAAResult, CAAResults, CAAResultsIter};
 pub use crate::channel::{Channel, GetSock, GetSockIter, Options};
 pub use crate::cname::CNameResults;
 pub use crate::error::{Error, Result};

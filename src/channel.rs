@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 use crate::a::{query_a_callback, AResults};
 use crate::aaaa::{query_aaaa_callback, AAAAResults};
+use crate::caa::{query_caa_callback, CAAResults};
 use crate::cname::{query_cname_callback, CNameResults};
 use crate::error::{Error, Result};
 use crate::host::{get_host_callback, HostResults};
@@ -431,6 +432,23 @@ impl Channel {
     /// Initiate a single-question DNS query for the CNAME records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
+    pub fn query_caa<F>(&mut self, name: &str, handler: F)
+    where
+        F: FnOnce(Result<CAAResults>) + Send + 'static,
+    {
+        ares_query!(
+            self.ares_channel,
+            name,
+            DnsClass::IN,
+            QueryType::CAA,
+            query_caa_callback::<F>,
+            handler
+        );
+    }
+
+    /// Initiate a single-question DNS query for the CNAME records associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
     pub fn query_cname<F>(&mut self, name: &str, handler: F)
     where
         F: FnOnce(Result<CNameResults>) + Send + 'static,
@@ -441,6 +459,24 @@ impl Channel {
             DnsClass::IN,
             QueryType::CNAME,
             query_cname_callback::<F>,
+            handler
+        );
+    }
+
+    /// Initiate a series of single-question DNS queries for the CAA records associated with
+    /// `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_caa<F>(&mut self, name: &str, handler: F)
+    where
+        F: FnOnce(Result<CAAResults>) + Send + 'static,
+    {
+        ares_search!(
+            self.ares_channel,
+            name,
+            DnsClass::IN,
+            QueryType::CAA,
+            query_caa_callback::<F>,
             handler
         );
     }

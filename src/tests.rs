@@ -59,6 +59,21 @@ fn aaaa_results_iter_is_send() {
 }
 
 #[test]
+fn caa_result_is_send() {
+    assert_send::<CAAResult>();
+}
+
+#[test]
+fn caa_results_are_send() {
+    assert_send::<CAAResults>();
+}
+
+#[test]
+fn caa_results_iter_is_send() {
+    assert_send::<CAAResultsIter>();
+}
+
+#[test]
 fn cname_results_are_send() {
     assert_send::<CNameResults>();
 }

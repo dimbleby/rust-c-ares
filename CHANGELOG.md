@@ -1,4 +1,4 @@
-## Unreleased
+## 7.3.0 (29 Nov 2020)
 
 - Update dependencies
 - Add support for CAA records

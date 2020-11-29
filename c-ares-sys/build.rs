@@ -65,9 +65,11 @@ fn main() {
         .env("CC", compiler.path())
         .current_dir(&build)
         .arg(format!("{}", c_ares_dir.join("configure").display()))
-        .arg("--enable-static=yes")
-        .arg("--enable-shared=no")
+        .arg("--enable-static")
+        .arg("--disable-shared")
         .arg("--enable-optimize")
+        .arg("--disable-debug")
+        .arg("--disable-tests")
         .arg(format!("--prefix={}", outdir.display()));
 
     // This code fragment copied from curl-rust... c-ares and curl come from
@@ -96,7 +98,7 @@ fn main() {
         .current_dir(&build));
 
     // Link to compiled library.
-    println!("cargo:rustc-link-search={}/.libs", build.display());
+    println!("cargo:rustc-link-search={}/src/lib/.libs", build.display());
     println!("cargo:rustc-link-lib=static=cares");
 }
 

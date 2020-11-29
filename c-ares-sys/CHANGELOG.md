@@ -1,3 +1,7 @@
+## Unreleased
+
+- Take c-ares 1.17.1
+
 ## 5.0.0 (15 Aug 2020)
 
 - pull upstream c-ares - their release 1.16.1

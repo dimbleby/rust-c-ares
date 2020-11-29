@@ -22,9 +22,10 @@ bindgen --blacklist-type="__.*" \
         --whitelist-type="ares.*" \
         --whitelist-type="apattern" \
         --opaque-type="in_addr_t" \
+        --size_t-is-usize \
         --no-layout-tests \
         --output=src/ffi.rs \
-        c-ares/ares.h
+        c-ares/include/ares.h
 
 # Apply manual patches.
 patch -p0 < ffi.patch

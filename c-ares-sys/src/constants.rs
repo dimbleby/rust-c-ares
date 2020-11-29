@@ -32,6 +32,7 @@ pub const ARES_ENOTINITIALIZED: c_int = 21;
 pub const ARES_ELOADIPHLPAPI: c_int = 22;
 pub const ARES_EADDRGETNETWORKPARAMS: c_int = 23;
 pub const ARES_ECANCELLED: c_int = 24;
+pub const ARES_ESERVICE: c_int = 25;
 
 // Flag values
 pub const ARES_FLAG_USEVC: c_int = 1;

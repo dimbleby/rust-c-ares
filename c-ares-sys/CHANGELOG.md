@@ -1,3 +1,7 @@
+## Unreleased
+
+- `cargo diet` to reduce crate size
+
 ## 5.1.0 (29 Nov 2020)
 
 - Take c-ares 1.17.1

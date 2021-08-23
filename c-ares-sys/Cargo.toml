@@ -11,7 +11,7 @@ readme = "README.md"
 keywords = ["DNS", "c-ares"]
 categories = ["external-ffi-bindings", "network-programming"]
 edition = "2018"
-include = ["src/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md", "c-ares/*", "build.rs", "!**/docs/**/*", "!**/test/**/*"]
+include = ["src/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md", "c-ares/**/*", "build.rs"]
 
 [build-dependencies]
 cc = "1"

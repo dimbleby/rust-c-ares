@@ -7,9 +7,13 @@ Most users should likely prefer
 [`c-ares-resolver`](https://github.com/dimbleby/c-ares-resolver/), which offers
 a much simpler API.
 
-[![Build Status](https://travis-ci.org/dimbleby/rust-c-ares.svg?branch=master)](https://travis-ci.org/dimbleby/rust-c-ares)
-[![Build status](https://ci.appveyor.com/api/projects/status/d5tce0p747b7iud8/branch/master?svg=true)](https://ci.appveyor.com/project/dimbleby/rust-c-ares/branch/master)
-[![crates.io](https://meritbadge.herokuapp.com/c-ares)](https://crates.io/crates/c-ares)
+[![Crates.io][crates-badge]][crates-url]
+[![Build Status][actions-badge]][actions-url]
+
+[crates-badge]: https://img.shields.io/crates/v/c-ares.svg
+[crates-url]: https://crates.io/crates/c-ares
+[actions-badge]: https://github.com/dimbleby/rust-c-ares/actions/workflows/build.yml/badge.svg
+[actions-url]: https://github.com/dimbleby/rust-c-ares/actions?query=workflow%3ACI+branch%3Amaster
 
 ## Documentation
 

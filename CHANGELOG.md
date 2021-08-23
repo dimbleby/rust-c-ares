@@ -1,3 +1,7 @@
+## Unreleased
+
+- Update dependencies
+
 ## 7.4.0 (23 Aug 2020)
 
 - `cargo diet` to reduce crate size

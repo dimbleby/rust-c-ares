@@ -29,4 +29,4 @@ winapi = { version = "0.3", features = ["winsock2"] }
 jni-sys = "0.3"
 
 [package.metadata.pkg-config]
-libcares = "1.17.1"
+libcares = "1.18.0"

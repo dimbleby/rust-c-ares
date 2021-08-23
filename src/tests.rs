@@ -164,6 +164,21 @@ fn txt_results_iter_is_send() {
 }
 
 #[test]
+fn uri_result_is_send() {
+    assert_send::<URIResult>();
+}
+
+#[test]
+fn uri_results_are_send() {
+    assert_send::<URIResults>();
+}
+
+#[test]
+fn uri_results_iter_is_send() {
+    assert_send::<URIResultsIter>();
+}
+
+#[test]
 fn channel_is_sync() {
     assert_sync::<Channel>();
 }

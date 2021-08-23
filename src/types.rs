@@ -32,6 +32,7 @@ pub enum QueryType {
     AAAA = 28,
     SRV = 33,
     NAPTR = 35,
+    URI = 256,
     CAA = 257,
 }
 

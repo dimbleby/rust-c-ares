@@ -63,6 +63,7 @@ mod soa;
 mod srv;
 mod txt;
 mod types;
+mod uri;
 mod utils;
 
 #[cfg(test)]
@@ -88,4 +89,5 @@ pub use crate::soa::SOAResult;
 pub use crate::srv::{SRVResult, SRVResults, SRVResultsIter};
 pub use crate::txt::{TXTResult, TXTResults, TXTResultsIter};
 pub use crate::types::{AddressFamily, Socket, SOCKET_BAD};
+pub use crate::uri::{URIResult, URIResults, URIResultsIter};
 pub use crate::utils::version;

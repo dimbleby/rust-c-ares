@@ -24,6 +24,7 @@ use crate::soa::{query_soa_callback, SOAResult};
 use crate::srv::{query_srv_callback, SRVResults};
 use crate::txt::{query_txt_callback, TXTResults};
 use crate::types::{AddressFamily, DnsClass, QueryType, Socket};
+use crate::uri::{query_uri_callback, URIResults};
 use crate::utils::{
     ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in, socket_addrv6_as_sockaddr_in6,
 };
@@ -429,7 +430,7 @@ impl Channel {
         );
     }
 
-    /// Initiate a single-question DNS query for the CNAME records associated with `name`.
+    /// Initiate a single-question DNS query for the CAA records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
     pub fn query_caa<F>(&mut self, name: &str, handler: F)
@@ -437,6 +438,24 @@ impl Channel {
         F: FnOnce(Result<CAAResults>) + Send + 'static,
     {
         ares_query!(
+            self.ares_channel,
+            name,
+            DnsClass::IN,
+            QueryType::CAA,
+            query_caa_callback::<F>,
+            handler
+        );
+    }
+
+    /// Initiate a series of single-question DNS queries for the CAA records associated with
+    /// `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_caa<F>(&mut self, name: &str, handler: F)
+    where
+        F: FnOnce(Result<CAAResults>) + Send + 'static,
+    {
+        ares_search!(
             self.ares_channel,
             name,
             DnsClass::IN,
@@ -459,24 +478,6 @@ impl Channel {
             DnsClass::IN,
             QueryType::CNAME,
             query_cname_callback::<F>,
-            handler
-        );
-    }
-
-    /// Initiate a series of single-question DNS queries for the CAA records associated with
-    /// `name`.
-    ///
-    /// On completion, `handler` is called with the result.
-    pub fn search_caa<F>(&mut self, name: &str, handler: F)
-    where
-        F: FnOnce(Result<CAAResults>) + Send + 'static,
-    {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::CAA,
-            query_caa_callback::<F>,
             handler
         );
     }
@@ -738,6 +739,41 @@ impl Channel {
             DnsClass::IN,
             QueryType::TXT,
             query_txt_callback::<F>,
+            handler
+        );
+    }
+
+    /// Initiate a single-question DNS query for the URI records associated with `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn query_uri<F>(&mut self, name: &str, handler: F)
+    where
+        F: FnOnce(Result<URIResults>) + Send + 'static,
+    {
+        ares_query!(
+            self.ares_channel,
+            name,
+            DnsClass::IN,
+            QueryType::URI,
+            query_uri_callback::<F>,
+            handler
+        );
+    }
+
+    /// Initiate a series of single-question DNS queries for the URI records associated with
+    /// `name`.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn search_uri<F>(&mut self, name: &str, handler: F)
+    where
+        F: FnOnce(Result<URIResults>) + Send + 'static,
+    {
+        ares_search!(
+            self.ares_channel,
+            name,
+            DnsClass::IN,
+            QueryType::URI,
+            query_uri_callback::<F>,
             handler
         );
     }

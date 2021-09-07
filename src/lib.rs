@@ -1,4 +1,4 @@
-//! A safe wrapper for the [`c-ares`](https://c-ares.haxx.se) library.
+//! A safe wrapper for the [`c-ares`](https://c-ares.org) library.
 //!
 //! This crate is a fairly faithful wrapper of `c-ares`; which is to say that it preserves some of
 //! the complexity of using the underlying library.  If you just want to make a DNS query, you

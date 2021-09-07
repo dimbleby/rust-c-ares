@@ -1,6 +1,6 @@
 # rust-c-ares
 
-A Rust wrapper for the [`c-ares`](https://c-ares.haxx.se/) library, for
+A Rust wrapper for the [`c-ares`](https://c-ares.org/) library, for
 asynchronous DNS requests.
 
 Most users should likely prefer

@@ -21,6 +21,7 @@ pub enum AddressFamily {
 
 // See arpa/nameser.h
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum QueryType {
     A = 1,
     NS = 2,

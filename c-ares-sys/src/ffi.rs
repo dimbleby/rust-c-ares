@@ -511,6 +511,7 @@ pub struct ares_addrinfo_cname {
 pub struct ares_addrinfo {
     pub cnames: *mut ares_addrinfo_cname,
     pub nodes: *mut ares_addrinfo_node,
+    pub name: *mut ::std::os::raw::c_char,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

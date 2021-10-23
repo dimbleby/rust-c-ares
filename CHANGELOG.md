@@ -1,6 +1,7 @@
 ## Unreleased
 
 - Update dependencies
+- Expose `set_sortlist()`
 
 ## 7.4.0 (23 Aug 2020)
 

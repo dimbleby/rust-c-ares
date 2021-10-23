@@ -361,6 +361,24 @@ impl Channel {
         self
     }
 
+    /// Initializes an address sortlist configuration, so that addresses returned by
+    /// `get_host_by_name()` are sorted according to the sortlist.
+    ///
+    /// Each element of the sortlist holds an IP-address/netmask pair. The netmask is optional but
+    /// follows the address after a slash if present. For example: "130.155.160.0/255.255.240.0",
+    /// or "130.155.0.0".
+    pub fn set_sortlist(&mut self, sortlist: &[&str]) -> Result<&mut Self> {
+        let sortlist_str = sortlist.join(" ");
+        let c_sortlist = CString::new(sortlist_str).unwrap();
+        let ares_rc =
+            unsafe { c_ares_sys::ares_set_sortlist(self.ares_channel, c_sortlist.as_ptr()) };
+        if ares_rc == c_ares_sys::ARES_SUCCESS {
+            Ok(self)
+        } else {
+            Err(Error::from(ares_rc))
+        }
+    }
+
     /// Initiate a single-question DNS query for the A records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.

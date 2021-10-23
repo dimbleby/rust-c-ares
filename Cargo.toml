@@ -11,7 +11,7 @@ documentation = "https://docs.rs/c-ares"
 readme = "README.md"
 keywords = ["DNS", "c-ares"]
 categories = ["api-bindings", "asynchronous", "network-programming"]
-edition = "2018"
+edition = "2021"
 include = ["src/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md"]
 
 [dependencies]

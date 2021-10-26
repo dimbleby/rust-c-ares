@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 bitflags!(
     /// Flags that may be provided on a call to `get_name_info()`.
     pub struct NIFlags: i32 {

@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 bitflags!(
     /// Flags that may be passed when initializing a `Channel`.
     pub struct Flags: i32 {

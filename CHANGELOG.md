@@ -1,6 +1,7 @@
-## Unreleased
+## 7.5.0 (26 Oct 2021)
 
 - Update dependencies
+  - in particular, c-ares 1.18.0
 - Expose `set_sortlist()`
 
 ## 7.4.0 (23 Aug 2021)

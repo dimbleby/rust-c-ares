@@ -21,6 +21,11 @@ a much simpler API.
 - There are some example programs
   [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
 
+Setting the feature `build-cmake` will cause the `c-ares` library to be built
+using `cmake`.
+This is significantly faster than the default `autotools` build on unix
+platforms: so if it works for you, you should probably prefer it.
+
 ## Contributing
 
 Contributions are welcome. Please send pull requests!

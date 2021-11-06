@@ -1,7 +1,7 @@
 [package]
 name = "c-ares"
 license = "MIT"
-version = "7.5.0"
+version = "7.5.1"
 authors = ["David Hotham"]
 description = """
 A Rust wrapper for the c-ares library, for asynchronous DNS requests.
@@ -25,5 +25,9 @@ nix = "0.23"
 
 [target.'cfg(windows)'.dev-dependencies]
 winapi = { version = "0.3", features = ["winsock2"] }
+
+[features]
+default = []
+build-cmake = ["c-ares-sys/build-cmake"]
 
 [workspace]

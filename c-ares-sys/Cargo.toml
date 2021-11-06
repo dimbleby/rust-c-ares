@@ -17,6 +17,7 @@ include = ["src/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md", "c-ares/**/*"
 cc = "1"
 fs_extra = "1.1"
 metadeps = "1.1.1"
+cmake = { version = "0.1", optional = true }
 
 [dependencies]
 libc = "0.2"
@@ -30,3 +31,7 @@ jni-sys = "0.3"
 
 [package.metadata.pkg-config]
 libcares = "1.18.0"
+
+[features]
+default = []
+build-cmake = ["cmake"]

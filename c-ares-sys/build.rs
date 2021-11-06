@@ -3,19 +3,12 @@ extern crate fs_extra;
 extern crate metadeps;
 
 use std::env;
+#[cfg(not(feature = "build-cmake"))]
 use std::ffi::OsString;
 use std::fs;
 use std::path::PathBuf;
+#[cfg(not(feature = "build-cmake"))]
 use std::process::Command;
-
-macro_rules! t {
-    ($e:expr) => {
-        match $e {
-            Ok(t) => t,
-            Err(e) => panic!("{} return the error {}", stringify!($e), e),
-        }
-    };
-}
 
 fn main() {
     // Rerun if the c-ares source code has changed.
@@ -41,6 +34,53 @@ fn main() {
     let src = env::current_dir().unwrap().join("c-ares");
     fs_extra::dir::copy(&src, &outdir, &copy_options).unwrap();
 
+    compile();
+}
+
+#[cfg(feature = "build-cmake")]
+fn compile() {
+    let outdir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let c_ares_dir = outdir.join("c-ares");
+    let dst = cmake::Config::new(c_ares_dir)
+        .define("CARES_STATIC", "ON")
+        .define("CARES_SHARED", "OFF")
+        .define("CARES_BUILD_TESTS", "OFF")
+        .build();
+
+    println!("cargo:rustc-link-search={}/lib", dst.display());
+    println!("cargo:rustc-link-lib=static=cares");
+}
+
+#[cfg(not(feature = "build-cmake"))]
+fn run(cmd: &mut Command) {
+    println!("running: {:?}", cmd);
+    match cmd.status() {
+        Ok(t) => assert!(t.success()),
+        Err(e) => panic!("{} return the error {}", stringify!($e), e),
+    }
+}
+
+#[cfg(not(feature = "build-cmake"))]
+fn make() -> &'static str {
+    if cfg!(target_os = "freebsd") {
+        "gmake"
+    } else {
+        "make"
+    }
+}
+
+#[cfg(not(feature = "build-cmake"))]
+fn nmake(target: &str) -> Command {
+    // cargo messes with the environment in a way that nmake does not like -
+    // see https://github.com/rust-lang/cargo/issues/4156.  Explicitly remove
+    // the unwanted variables.
+    let mut cmd = cc::windows_registry::find(target, "nmake.exe").unwrap();
+    cmd.env_remove("MAKEFLAGS").env_remove("MFLAGS");
+    cmd
+}
+
+#[cfg(not(feature = "build-cmake"))]
+fn compile() {
     // MSVC builds are different.
     let target = env::var("TARGET").unwrap();
     if target.contains("msvc") {
@@ -49,6 +89,9 @@ fn main() {
     }
 
     // Prepare.
+    let outdir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let c_ares_dir = outdir.join("c-ares");
+    let build = outdir.join("build");
     run(Command::new("sh").current_dir(&c_ares_dir).arg("buildconf"));
 
     // Configure.
@@ -102,28 +145,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=cares");
 }
 
-fn run(cmd: &mut Command) {
-    println!("running: {:?}", cmd);
-    assert!(t!(cmd.status()).success());
-}
-
-fn make() -> &'static str {
-    if cfg!(target_os = "freebsd") {
-        "gmake"
-    } else {
-        "make"
-    }
-}
-
-fn nmake(target: &str) -> Command {
-    // cargo messes with the environment in a way that nmake does not like -
-    // see https://github.com/rust-lang/cargo/issues/4156.  Explicitly remove
-    // the unwanted variables.
-    let mut cmd = cc::windows_registry::find(target, "nmake.exe").unwrap();
-    cmd.env_remove("MAKEFLAGS").env_remove("MFLAGS");
-    cmd
-}
-
+#[cfg(not(feature = "build-cmake"))]
 fn build_msvc(target: &str) {
     // Prepare.  We've already copied the c-ares source code into the output
     // directory.

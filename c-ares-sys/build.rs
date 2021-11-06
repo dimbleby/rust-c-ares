@@ -44,7 +44,8 @@ fn compile() {
     let dst = cmake::Config::new(c_ares_dir)
         .define("CARES_STATIC", "ON")
         .define("CARES_SHARED", "OFF")
-        .define("CARES_BUILD_TESTS", "OFF")
+        .define("CARES_BUILD_TOOLS", "OFF")
+        .define("CMAKE_INSTALL_LIBDIR", "lib")
         .build();
 
     println!("cargo:rustc-link-search={}/lib", dst.display());

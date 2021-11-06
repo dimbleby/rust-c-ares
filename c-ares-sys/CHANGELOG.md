@@ -1,3 +1,7 @@
+## 5.3.3 (6 Nov 2021)
+
+- fix to the build-cmake feature
+
 ## 5.3.2 (6 Nov 2021)
 
 - feature "build-cmake" to use the cmake-based build for c-ares

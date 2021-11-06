@@ -1,7 +1,7 @@
 [package]
 name = "c-ares"
 license = "MIT"
-version = "7.5.1"
+version = "7.5.2"
 authors = ["David Hotham"]
 description = """
 A Rust wrapper for the c-ares library, for asynchronous DNS requests.
@@ -15,7 +15,7 @@ edition = "2021"
 include = ["src/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md"]
 
 [dependencies]
-bitflags = "1"
+bitflags = "1.3"
 c-ares-sys = { version = "5.3.2", path = "c-ares-sys" }
 c-types = "2.0.2"
 itertools = "0.10"

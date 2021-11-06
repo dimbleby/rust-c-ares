@@ -1,3 +1,7 @@
+## 7.5.2 (6 Nov 2021)
+
+- bump minimum bitflags dependency
+
 ## 7.5.1 (6 Nov 2021)
 
 - feature "build-cmake" to use the cmake-based build for c-ares

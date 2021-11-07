@@ -10,19 +10,20 @@ fi
 # Prepare for bindgen, and do it.
 mkdir -p c-ares/build
 (cd c-ares/build && cmake ..)
-bindgen --blacklist-type="__.*" \
-        --blacklist-type="ares_socket_t" \
-        --blacklist-type="fd_set" \
-        --blacklist-type="hostent" \
-        --blacklist-type="iovec" \
-        --blacklist-type="sockaddr" \
-        --blacklist-type="sa_family_t" \
-        --blacklist-type="socklen_t" \
-        --blacklist-type="timeval" \
-        --whitelist-function="ares.*" \
-        --whitelist-type="ares.*" \
-        --whitelist-type="apattern" \
+bindgen --allowlist-function="ares.*" \
+        --allowlist-type="apattern" \
+        --allowlist-type="ares.*" \
+        --blocklist-type="__.*" \
+        --blocklist-type="ares_socket_t" \
+        --blocklist-type="fd_set" \
+        --blocklist-type="hostent" \
+        --blocklist-type="iovec" \
+        --blocklist-type="sa_family_t" \
+        --blocklist-type="sockaddr" \
+        --blocklist-type="socklen_t" \
+        --blocklist-type="timeval" \
         --opaque-type="in_addr_t" \
+        --no-debug="ares_addrttl" \
         --size_t-is-usize \
         --no-layout-tests \
         --output=src/ffi.rs \

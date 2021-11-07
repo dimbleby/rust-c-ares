@@ -8,7 +8,8 @@ then
 fi
 
 # Prepare for bindgen, and do it.
-(cd c-ares && ./buildconf && ./configure)
+mkdir -p c-ares/build
+(cd c-ares/build && cmake ..)
 bindgen --blacklist-type="__.*" \
         --blacklist-type="ares_socket_t" \
         --blacklist-type="fd_set" \
@@ -25,7 +26,10 @@ bindgen --blacklist-type="__.*" \
         --size_t-is-usize \
         --no-layout-tests \
         --output=src/ffi.rs \
-        c-ares/include/ares.h
+        c-ares/include/ares.h \
+        -- \
+        -Ic-ares/build
+rm -fr c-ares/build
 
 # Apply manual patches.
 patch -p0 < ffi.patch

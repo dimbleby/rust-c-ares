@@ -1,3 +1,7 @@
+## Unreleased
+
+- emit `cargo:include` from build script
+
 ## 5.3.3 (6 Nov 2021)
 
 - fix to the build-cmake feature

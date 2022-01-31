@@ -12,7 +12,6 @@ use std::process::Command;
 
 fn main() {
     // Rerun if the c-ares source code has changed.
-    println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed=c-ares");
 
     // Use the installed libcares if it is available.

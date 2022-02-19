@@ -87,9 +87,7 @@ impl<'a> IntoIterator for &'a URIResults {
 
 impl Drop for URIResults {
     fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_free_data(self.uri_reply as *mut c_void);
-        }
+        unsafe { c_ares_sys::ares_free_data(self.uri_reply as *mut c_void) }
     }
 }
 

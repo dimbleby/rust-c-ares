@@ -87,9 +87,7 @@ impl<'a> IntoIterator for &'a CAAResults {
 
 impl Drop for CAAResults {
     fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_free_data(self.caa_reply as *mut c_void);
-        }
+        unsafe { c_ares_sys::ares_free_data(self.caa_reply as *mut c_void) }
     }
 }
 

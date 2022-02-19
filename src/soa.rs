@@ -103,9 +103,7 @@ impl fmt::Display for SOAResult {
 
 impl Drop for SOAResult {
     fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_free_data(self.soa_reply as *mut c_void);
-        }
+        unsafe { c_ares_sys::ares_free_data(self.soa_reply as *mut c_void) }
     }
 }
 

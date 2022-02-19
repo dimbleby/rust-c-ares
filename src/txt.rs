@@ -86,9 +86,7 @@ impl<'a> IntoIterator for &'a TXTResults {
 
 impl Drop for TXTResults {
     fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_free_data(self.txt_reply as *mut c_void);
-        }
+        unsafe { c_ares_sys::ares_free_data(self.txt_reply as *mut c_void) }
     }
 }
 

@@ -241,9 +241,7 @@ impl Channel {
             )
         };
         if channel_rc != c_ares_sys::ARES_SUCCESS {
-            unsafe {
-                c_ares_sys::ares_library_cleanup();
-            }
+            unsafe { c_ares_sys::ares_library_cleanup() }
             return Err(Error::from(channel_rc));
         }
 
@@ -279,18 +277,14 @@ impl Channel {
     /// providing a value for `write_fd` indicates that the identified socket is writable.  Use
     /// `SOCKET_BAD` for "no action".
     pub fn process_fd(&mut self, read_fd: Socket, write_fd: Socket) {
-        unsafe {
-            c_ares_sys::ares_process_fd(self.ares_channel, read_fd, write_fd);
-        }
+        unsafe { c_ares_sys::ares_process_fd(self.ares_channel, read_fd, write_fd) }
         panic::propagate();
     }
 
     /// Handle input and output events associated with the specified file descriptors (sockets).
     /// Also handles timeouts associated with the `Channel`.
     pub fn process(&mut self, read_fds: &mut c_types::fd_set, write_fds: &mut c_types::fd_set) {
-        unsafe {
-            c_ares_sys::ares_process(self.ares_channel, read_fds, write_fds);
-        }
+        unsafe { c_ares_sys::ares_process(self.ares_channel, read_fds, write_fds) }
         panic::propagate();
     }
 
@@ -334,9 +328,7 @@ impl Channel {
 
     /// Set the local IPv4 address from which to make queries.
     pub fn set_local_ipv4(&mut self, ipv4: Ipv4Addr) -> &mut Self {
-        unsafe {
-            c_ares_sys::ares_set_local_ip4(self.ares_channel, u32::from(ipv4));
-        }
+        unsafe { c_ares_sys::ares_set_local_ip4(self.ares_channel, u32::from(ipv4)) }
         self
     }
 
@@ -347,7 +339,7 @@ impl Channel {
             c_ares_sys::ares_set_local_ip6(
                 self.ares_channel,
                 &in6_addr as *const _ as *const c_uchar,
-            );
+            )
         }
         self
     }
@@ -355,9 +347,7 @@ impl Channel {
     /// Set the local device from which to make queries.
     pub fn set_local_device(&mut self, device: &str) -> &mut Self {
         let c_dev = CString::new(device).unwrap();
-        unsafe {
-            c_ares_sys::ares_set_local_dev(self.ares_channel, c_dev.as_ptr());
-        }
+        unsafe { c_ares_sys::ares_set_local_dev(self.ares_channel, c_dev.as_ptr()) }
         self
     }
 
@@ -828,7 +818,7 @@ impl Channel {
                 family as c_int,
                 Some(get_host_callback::<F>),
                 c_arg as *mut c_void,
-            );
+            )
         }
         panic::propagate();
     }
@@ -849,7 +839,7 @@ impl Channel {
                 family as c_int,
                 Some(get_host_callback::<F>),
                 c_arg as *mut c_void,
-            );
+            )
         }
         panic::propagate();
     }
@@ -888,7 +878,7 @@ impl Channel {
                 flags.bits(),
                 Some(get_name_info_callback::<F>),
                 c_arg as *mut c_void,
-            );
+            )
         }
         panic::propagate();
     }
@@ -942,19 +932,15 @@ impl Channel {
     /// Callbacks will be invoked for each pending query, passing a result
     /// `Err(Error::ECANCELLED)`.
     pub fn cancel(&mut self) {
-        unsafe {
-            c_ares_sys::ares_cancel(self.ares_channel);
-        }
+        unsafe { c_ares_sys::ares_cancel(self.ares_channel) }
         panic::propagate();
     }
 }
 
 impl Drop for Channel {
     fn drop(&mut self) {
-        unsafe {
-            c_ares_sys::ares_destroy(self.ares_channel);
-            c_ares_sys::ares_library_cleanup();
-        }
+        unsafe { c_ares_sys::ares_destroy(self.ares_channel) }
+        unsafe { c_ares_sys::ares_library_cleanup() }
         panic::propagate();
     }
 }

@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 5.3.4 (25 Apr 2021)
+
 - emit `cargo:include` from build script
 
 ## 5.3.3 (6 Nov 2021)

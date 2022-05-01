@@ -13,13 +13,13 @@ a much simpler API.
 [crates-badge]: https://img.shields.io/crates/v/c-ares.svg
 [crates-url]: https://crates.io/crates/c-ares
 [actions-badge]: https://github.com/dimbleby/rust-c-ares/actions/workflows/build.yml/badge.svg
-[actions-url]: https://github.com/dimbleby/rust-c-ares/actions?query=workflow%3ACI+branch%3Amaster
+[actions-url]: https://github.com/dimbleby/rust-c-ares/actions?query=workflow%3ACI+branch%3Amain
 
 ## Documentation
 
 - API documentation is [here](https://docs.rs/c-ares).
 - There are some example programs
-  [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
+  [here](https://github.com/dimbleby/rust-c-ares/tree/main/examples).
 
 Setting the feature `build-cmake` will cause the `c-ares` library to be built
 using `cmake`.

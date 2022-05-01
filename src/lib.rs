@@ -32,7 +32,7 @@
 //! any requests that have timed out.
 //!
 //! Complete examples showing how to use the library can be found
-//! [here](https://github.com/dimbleby/rust-c-ares/tree/master/examples).
+//! [here](https://github.com/dimbleby/rust-c-ares/tree/main/examples).
 #![deny(missing_docs)]
 
 #[macro_use]

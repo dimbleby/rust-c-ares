@@ -29,6 +29,11 @@ use crate::utils::{
     ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in, socket_addrv6_as_sockaddr_in6,
 };
 use crate::Flags;
+use once_cell::sync::Lazy;
+use std::sync::Mutex;
+
+// ares_library_init is not thread-safe, so we put a lock around it.
+static ARES_LIBRARY_LOCK: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
 
 type SocketStateCallback = dyn FnMut(Socket, bool, bool) + Send + 'static;
 
@@ -211,7 +216,9 @@ impl Channel {
     /// Create a new channel for name service lookups, with the given `Options`.
     pub fn with_options(mut options: Options) -> Result<Channel> {
         // Initialize the library.
+        let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
         let lib_rc = unsafe { c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL) };
+        std::mem::drop(ares_library_lock);
         if lib_rc != c_ares_sys::ARES_SUCCESS {
             return Err(Error::from(lib_rc));
         }
@@ -241,7 +248,9 @@ impl Channel {
             )
         };
         if channel_rc != c_ares_sys::ARES_SUCCESS {
+            let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
             unsafe { c_ares_sys::ares_library_cleanup() }
+            std::mem::drop(ares_library_lock);
             return Err(Error::from(channel_rc));
         }
 
@@ -940,7 +949,9 @@ impl Channel {
 impl Drop for Channel {
     fn drop(&mut self) {
         unsafe { c_ares_sys::ares_destroy(self.ares_channel) }
+        let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
         unsafe { c_ares_sys::ares_library_cleanup() }
+        std::mem::drop(ares_library_lock);
         panic::propagate();
     }
 }

@@ -1,3 +1,10 @@
+## Unreleased
+
+- put a lock around `ares_library_init()` and `ares_library_cleanup()`
+  - these are not thread-safe
+  - they only do anything at all on android, so it's unlikely that this matters
+    to anyone
+
 ## 7.5.2 (6 Nov 2021)
 
 - bump minimum bitflags dependency

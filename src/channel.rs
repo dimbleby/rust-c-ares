@@ -29,11 +29,10 @@ use crate::utils::{
     ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in, socket_addrv6_as_sockaddr_in6,
 };
 use crate::Flags;
-use once_cell::sync::Lazy;
 use std::sync::Mutex;
 
 // ares_library_init is not thread-safe, so we put a lock around it.
-static ARES_LIBRARY_LOCK: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
+static ARES_LIBRARY_LOCK: Mutex<()> = Mutex::new(());
 
 type SocketStateCallback = dyn FnMut(Socket, bool, bool) + Send + 'static;
 

@@ -21,7 +21,7 @@ c-types = "2.0.2"
 itertools = "0.10"
 
 [target.'cfg(unix)'.dev-dependencies]
-nix = { version = "0.24", default-features = false, features = ["event"] }
+nix = { version = "0.25", default-features = false, features = ["event"] }
 
 [target.'cfg(windows)'.dev-dependencies]
 winapi = { version = "0.3", features = ["winsock2"] }

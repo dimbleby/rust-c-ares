@@ -64,7 +64,7 @@ fn run(cmd: &mut Command) {
 }
 
 #[cfg(not(feature = "build-cmake"))]
-fn make() -> &'static str {
+const fn make() -> &'static str {
     if cfg!(target_os = "freebsd") {
         "gmake"
     } else {

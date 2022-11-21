@@ -108,7 +108,7 @@ mod example {
             print_caa_results(&result);
         });
 
-        ares_channel.query_srv("_xmpp-server._tcp.gmail.com", move |result| {
+        ares_channel.query_srv("_xmpp-server._tcp.jabber.org", move |result| {
             println!();
             print_srv_results(&result);
         });

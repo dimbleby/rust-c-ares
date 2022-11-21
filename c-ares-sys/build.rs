@@ -162,14 +162,14 @@ fn build_msvc(target: &str) {
     // Compile.
     let mut cmd = nmake(target);
     cmd.current_dir(&c_ares_dir);
-    cmd.args(&["/f", "Makefile.msvc", "CFG=lib-release", "c-ares"]);
+    cmd.args(["/f", "Makefile.msvc", "CFG=lib-release", "c-ares"]);
     run(&mut cmd);
 
     // Install library.
     let build = outdir.join("build");
     let mut cmd = nmake(target);
     cmd.current_dir(&c_ares_dir);
-    cmd.args(&["/f", "Makefile.msvc", "/a", "CFG=lib-release", "install"]);
+    cmd.args(["/f", "Makefile.msvc", "/a", "CFG=lib-release", "install"]);
     cmd.env("INSTALL_DIR", format!("{}", build.display()));
     run(&mut cmd);
 

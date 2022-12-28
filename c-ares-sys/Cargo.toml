@@ -23,9 +23,6 @@ cmake = { version = "0.1", optional = true }
 libc = "0.2"
 c-types = "2.0.2"
 
-[target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["winsock2"] }
-
 [target.'cfg(target_os = "android")'.dependencies]
 jni-sys = "0.3"
 

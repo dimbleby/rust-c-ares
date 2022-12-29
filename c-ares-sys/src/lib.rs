@@ -6,9 +6,6 @@
 extern crate c_types;
 extern crate libc;
 
-#[cfg(windows)]
-extern crate winapi;
-
 #[cfg(target_os = "android")]
 extern crate jni_sys;
 

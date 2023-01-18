@@ -93,7 +93,9 @@ impl<'a> AResult<'a> {
 
     /// Returns the time-to-live in this `AResult`.
     pub fn ttl(self) -> i32 {
-        self.addrttl.ttl as i32
+        #[allow(clippy::unnecessary_cast)]
+        let ttl = self.addrttl.ttl as i32;
+        ttl
     }
 }
 

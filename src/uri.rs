@@ -120,7 +120,9 @@ impl<'a> URIResult<'a> {
 
     /// Returns the time-to-live in this `URIResult`.
     pub fn ttl(self) -> i32 {
-        self.uri_reply.ttl as i32
+        #[allow(clippy::unnecessary_cast)]
+        let ttl = self.uri_reply.ttl as i32;
+        ttl
     }
 }
 

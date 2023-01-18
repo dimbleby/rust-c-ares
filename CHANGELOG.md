@@ -1,5 +1,6 @@
 ## Unreleased
 
+- c-ares 1.19.0
 - put a lock around `ares_library_init()` and `ares_library_cleanup()`
   - these are not thread-safe
   - they only do anything at all on android, so it's unlikely that this matters

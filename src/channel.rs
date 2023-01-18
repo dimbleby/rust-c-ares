@@ -43,6 +43,7 @@ pub struct Options {
     domains: Vec<CString>,
     lookups: Option<CString>,
     resolvconf_path: Option<CString>,
+    hosts_path: Option<CString>,
     socket_state_callback: Option<Arc<SocketStateCallback>>,
 }
 
@@ -54,6 +55,7 @@ impl Default for Options {
             domains: vec![],
             lookups: None,
             resolvconf_path: None,
+            hosts_path: None,
             socket_state_callback: None,
         }
     }
@@ -139,6 +141,15 @@ impl Options {
         let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
         self.resolvconf_path = Some(c_resolvconf_path);
         self.optmask |= c_ares_sys::ARES_OPT_RESOLVCONF;
+        self
+    }
+
+    /// The path to use for reading the hosts file.  The `hosts_path` should be set to a
+    /// path string, and will be honoured on *nix like systems.  The default is /etc/hosts.
+    pub fn set_hosts_path(&mut self, hosts_path: &str) -> &mut Self {
+        let c_hosts_path = CString::new(hosts_path).unwrap();
+        self.hosts_path = Some(c_hosts_path);
+        self.optmask |= c_ares_sys::ARES_OPT_HOSTS_FILE;
         self
     }
 
@@ -235,6 +246,11 @@ impl Channel {
         // And the resolvconf_path.
         for c_resolvconf_path in &options.resolvconf_path {
             options.ares_options.resolvconf_path = c_resolvconf_path.as_ptr() as *mut c_char;
+        }
+
+        // And the hosts_path.
+        for c_hosts_path in &options.hosts_path {
+            options.ares_options.hosts_path = c_hosts_path.as_ptr() as *mut c_char;
         }
 
         // Initialize the channel.

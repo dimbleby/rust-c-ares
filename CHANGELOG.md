@@ -1,4 +1,4 @@
-## Unreleased
+## 7.6.0 (28 Jan 2023)
 
 - c-ares 1.19.0
 - put a lock around `ares_library_init()` and `ares_library_cleanup()`

@@ -1,5 +1,9 @@
 ## Unreleased
 
+## 5.4.0 (28 Jan 2023)
+
+- c-ares 1.19.0
+
 ## 5.3.4 (25 Apr 2021)
 
 - emit `cargo:include` from build script

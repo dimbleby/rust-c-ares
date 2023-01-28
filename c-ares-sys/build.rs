@@ -31,7 +31,7 @@ fn main() {
     let _ = fs::remove_dir_all(&c_ares_dir);
     let copy_options = fs_extra::dir::CopyOptions::new();
     let src = env::current_dir().unwrap().join("c-ares");
-    fs_extra::dir::copy(&src, &outdir, &copy_options).unwrap();
+    fs_extra::dir::copy(src, &outdir, &copy_options).unwrap();
 
     // Export the include path for crates dependending on c-ares
     println!("cargo:include={}", c_ares_dir.join("include").display());

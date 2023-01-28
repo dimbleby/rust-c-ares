@@ -95,7 +95,9 @@ impl<'a> AAAAResult<'a> {
 
     /// Returns the time-to-live in this `AAAAResult`.
     pub fn ttl(self) -> i32 {
-        self.addr6ttl.ttl as i32
+        #[allow(clippy::unnecessary_cast)]
+        let ttl = self.addr6ttl.ttl as i32;
+        ttl
     }
 }
 

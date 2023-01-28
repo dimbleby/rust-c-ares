@@ -53,6 +53,7 @@ pub struct ares_options {
     pub nsort: ::std::os::raw::c_int,
     pub ednspsz: ::std::os::raw::c_int,
     pub resolvconf_path: *mut ::std::os::raw::c_char,
+    pub hosts_path: *mut ::std::os::raw::c_char,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

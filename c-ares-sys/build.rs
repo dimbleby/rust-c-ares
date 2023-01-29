@@ -145,6 +145,9 @@ fn compile() {
 
     // Link to compiled library.
     println!("cargo:rustc-link-search={}/src/lib/.libs", build.display());
+    if cfg!(target_os = "macos") {
+        println!("cargo:rustc-link-lib=static=resolv");
+    }
     println!("cargo:rustc-link-lib=static=cares");
 }
 

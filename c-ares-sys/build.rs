@@ -36,6 +36,11 @@ fn main() {
     // Export the include path for crates dependending on c-ares
     println!("cargo:include={}", c_ares_dir.join("include").display());
 
+    // Need libresolv on macos.
+    if cfg!(target_os = "macos") {
+        println!("cargo:rustc-link-lib=resolv");
+    }
+
     compile();
 }
 

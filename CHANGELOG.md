@@ -1,7 +1,3 @@
-## 7.6.1 (28 Jan 2023)
-
-- link libresolv on macos
-
 ## 7.6.0 (28 Jan 2023)
 
 - c-ares 1.19.0

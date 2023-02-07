@@ -42,12 +42,12 @@ impl<'a> fmt::Display for NameInfoResult<'a> {
             .node()
             .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
             .unwrap_or("<None>");
-        write!(fmt, "Node: {}, ", node)?;
+        write!(fmt, "Node: {node}, ")?;
         let service = self
             .service()
             .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
             .unwrap_or("<None>");
-        write!(fmt, "Service: {}", service)
+        write!(fmt, "Service: {service}")
     }
 }
 

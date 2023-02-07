@@ -63,7 +63,7 @@ impl fmt::Display for NSResults {
             .aliases()
             .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
             .format(", ");
-        write!(fmt, "Aliases: [{}]", aliases)
+        write!(fmt, "Aliases: [{aliases}]")
     }
 }
 

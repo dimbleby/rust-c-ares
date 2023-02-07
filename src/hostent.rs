@@ -39,11 +39,11 @@ fn display(hostent: &c_types::hostent, fmt: &mut fmt::Formatter) -> fmt::Result 
         hostname(hostent).to_str().unwrap_or("<not utf8>")
     )?;
     let addresses = addresses(hostent).format(", ");
-    write!(fmt, "Addresses: [{}]", addresses)?;
+    write!(fmt, "Addresses: [{addresses}]")?;
     let aliases = aliases(hostent)
         .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
         .format(", ");
-    write!(fmt, "Aliases: [{}]", aliases)
+    write!(fmt, "Aliases: [{aliases}]")
 }
 
 pub trait HasHostent<'a>: Sized {

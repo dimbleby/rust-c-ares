@@ -61,7 +61,7 @@ fn compile() {
 
 #[cfg(not(feature = "build-cmake"))]
 fn run(cmd: &mut Command) {
-    println!("running: {:?}", cmd);
+    println!("running: {cmd:?}");
     match cmd.status() {
         Ok(t) => assert!(t.success()),
         Err(e) => panic!("{} return the error {}", stringify!($e), e),
@@ -134,11 +134,11 @@ fn compile() {
     let host = env::var("HOST").unwrap();
     if target != host && (!target.contains("windows") || !host.contains("windows")) {
         if target.contains("windows") {
-            cmd.arg(format!("--host={}", host));
-            cmd.arg(format!("--target={}", target));
+            cmd.arg(format!("--host={host}"));
+            cmd.arg(format!("--target={target}"));
         } else {
-            cmd.arg(format!("--build={}", host));
-            cmd.arg(format!("--host={}", target));
+            cmd.arg(format!("--build={host}"));
+            cmd.arg(format!("--host={target}"));
         }
     }
     run(&mut cmd);

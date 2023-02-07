@@ -57,7 +57,7 @@ impl CAAResults {
 impl fmt::Display for CAAResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        write!(fmt, "[{{{}}}]", results)
+        write!(fmt, "[{{{results}}}]")
     }
 }
 

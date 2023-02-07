@@ -59,7 +59,7 @@ impl AResults {
 impl fmt::Display for AResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let results = self.iter().format("}, {");
-        write!(fmt, "[{{{}}}]", results)
+        write!(fmt, "[{{{results}}}]")
     }
 }
 

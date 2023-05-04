@@ -24,7 +24,6 @@ bindgen --allowlist-function="ares.*" \
         --blocklist-type="timeval" \
         --opaque-type="in_addr_t" \
         --no-debug="ares_addrttl" \
-        --size_t-is-usize \
         --no-layout-tests \
         --output=src/ffi.rs \
         c-ares/include/ares.h \

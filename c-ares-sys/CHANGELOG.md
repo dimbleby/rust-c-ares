@@ -1,5 +1,9 @@
 ## Unreleased
 
+## 5.4.2 (29 Jan 2023)
+
+- c-ares 1.19.1
+
 ## 5.4.1 (29 Jan 2023)
 
 - link libresolv on macos

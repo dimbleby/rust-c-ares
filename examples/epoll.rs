@@ -98,12 +98,12 @@ mod example {
             print_a_results(&result);
         });
 
-        ares_channel.query_aaaa("google.com", move |result| {
+        ares_channel.query_aaaa("microsoft.com", move |result| {
             println!();
             print_aaaa_results(&result);
         });
 
-        ares_channel.query_caa("comodo.com", move |result| {
+        ares_channel.query_caa("google.com", move |result| {
             println!();
             print_caa_results(&result);
         });

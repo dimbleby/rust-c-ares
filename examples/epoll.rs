@@ -68,7 +68,7 @@ mod example {
                 println!("Successful SRV lookup...");
                 for srv_result in srv_results {
                     println!(
-                        "host: {} (port: {}), priority: {} weight: {}",
+                        "host: {} (port: {}), priority: {}, weight: {}",
                         srv_result.host().to_string_lossy(),
                         srv_result.port(),
                         srv_result.priority(),

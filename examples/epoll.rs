@@ -146,8 +146,8 @@ mod example {
             }
 
             // Stop listening for events on file descriptors that c-ares doesn't care about.
-            for fd in &tracked_fds {
-                let borrowed_fd = unsafe { BorrowedFd::borrow_raw(*fd) };
+            for fd in tracked_fds {
+                let borrowed_fd = unsafe { BorrowedFd::borrow_raw(fd) };
                 let _ = epoll.delete(borrowed_fd);
             }
             tracked_fds = new_tracked_fds;

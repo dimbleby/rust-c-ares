@@ -7,8 +7,9 @@ extern crate nix;
 #[cfg(all(unix, any(target_os = "linux", target_os = "android")))]
 mod example {
     extern crate c_ares;
-    use nix::sys::epoll::{epoll_create, epoll_ctl, epoll_wait, EpollEvent, EpollFlags, EpollOp};
+    use nix::sys::epoll::{Epoll, EpollCreateFlags, EpollEvent, EpollFlags};
     use std::collections::HashSet;
+    use std::os::fd::BorrowedFd;
 
     fn print_a_results(result: &c_ares::Result<c_ares::AResults>) {
         match *result {
@@ -114,13 +115,15 @@ mod example {
         });
 
         // Create an epoll file descriptor so that we can listen for events.
-        let epoll = epoll_create().expect("Failed to create epoll");
+        let flags = EpollCreateFlags::empty();
+        let epoll = Epoll::new(flags).expect("Failed to create epoll");
         let mut tracked_fds = HashSet::<c_ares::Socket>::new();
         loop {
             // Ask c-ares what file descriptors we should be listening on, and map those requests
             // onto the epoll file descriptor.
             let mut new_tracked_fds = HashSet::new();
             for (fd, readable, writable) in &ares_channel.get_sock() {
+                let borrowed_fd = unsafe { BorrowedFd::borrow_raw(fd) };
                 let mut interest = EpollFlags::empty();
                 if readable {
                     interest |= EpollFlags::EPOLLIN;
@@ -132,19 +135,20 @@ mod example {
 
                 // Anything left over in tracked_fds when we exit the loop is no longer wanted by
                 // c-ares.
-                let op = if tracked_fds.remove(&fd) {
-                    EpollOp::EpollCtlMod
+                if tracked_fds.remove(&fd) {
+                    epoll
+                        .modify(borrowed_fd, &mut event)
+                        .expect("epoll.modify() failed");
                 } else {
-                    EpollOp::EpollCtlAdd
+                    epoll.add(borrowed_fd, event).expect("epoll.add() failed");
                 };
                 new_tracked_fds.insert(fd);
-
-                epoll_ctl(epoll, op, fd, &mut event).expect("epoll_ctl failed");
             }
 
             // Stop listening for events on file descriptors that c-ares doesn't care about.
             for fd in &tracked_fds {
-                epoll_ctl(epoll, EpollOp::EpollCtlDel, *fd, None).expect("epoll_ctl failed");
+                let borrowed_fd = unsafe { BorrowedFd::borrow_raw(*fd) };
+                let _ = epoll.delete(borrowed_fd);
             }
             tracked_fds = new_tracked_fds;
 
@@ -156,7 +160,7 @@ mod example {
             // Wait for something to happen.
             let empty_event = EpollEvent::new(EpollFlags::empty(), 0);
             let mut events = [empty_event; 2];
-            let results = epoll_wait(epoll, &mut events, 500).expect("epoll_wait failed");
+            let results = epoll.wait(&mut events, 500).expect("epoll_wait failed");
 
             // Process whatever happened.
             match results {

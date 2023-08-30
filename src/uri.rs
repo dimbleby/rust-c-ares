@@ -134,7 +134,7 @@ impl<'a> fmt::Display for URIResult<'a> {
             self.uri().to_str().unwrap_or("<not utf8>")
         )?;
         write!(fmt, "Priority: {}, ", self.priority())?;
-        write!(fmt, "Weight: {}", self.weight())?;
+        write!(fmt, "Weight: {}, ", self.weight())?;
         write!(fmt, "TTL: {}", self.ttl())
     }
 }

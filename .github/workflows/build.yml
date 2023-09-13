@@ -67,3 +67,8 @@ jobs:
           cargo build
         if: matrix.rust == 'nightly'
         name: Check minimal versions
+      - run: |
+          cargo run --example epoll
+          cargo run --example select
+          cargo run --example version
+        name: Run examples

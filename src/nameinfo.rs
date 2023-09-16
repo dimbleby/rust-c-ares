@@ -63,14 +63,12 @@ pub(crate) unsafe extern "C" fn get_name_info_callback<F>(
 ) where
     F: FnOnce(Result<NameInfoResult>) + Send + 'static,
 {
-    panic::catch(|| {
-        let result = if status == c_ares_sys::ARES_SUCCESS {
-            let name_info_result = NameInfoResult::new(node.as_ref(), service.as_ref());
-            Ok(name_info_result)
-        } else {
-            Err(Error::from(status))
-        };
-        let handler = Box::from_raw(arg as *mut F);
-        handler(result);
-    });
+    let result = if status == c_ares_sys::ARES_SUCCESS {
+        let name_info_result = NameInfoResult::new(node.as_ref(), service.as_ref());
+        Ok(name_info_result)
+    } else {
+        Err(Error::from(status))
+    };
+    let handler = Box::from_raw(arg as *mut F);
+    panic::catch(|| handler(result));
 }

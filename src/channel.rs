@@ -984,10 +984,8 @@ unsafe extern "C" fn socket_state_callback<F>(
 ) where
     F: FnMut(Socket, bool, bool) + Send + 'static,
 {
-    panic::catch(|| {
-        let handler = data as *mut F;
-        (*handler)(socket_fd, readable != 0, writable != 0);
-    });
+    let handler = data as *mut F;
+    panic::catch(|| (*handler)(socket_fd, readable != 0, writable != 0));
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as returned by

@@ -36,15 +36,13 @@ macro_rules! ares_search {
 // Most of our `ares_callback` implementations are much the same - macro out the repetition.
 macro_rules! ares_callback {
     ($arg:expr, $status:expr, $abuf:expr, $alen:expr, $parser:expr) => {{
-        panic::catch(|| {
-            let result = if $status == c_ares_sys::ARES_SUCCESS {
-                let data = slice::from_raw_parts($abuf, $alen as usize);
-                $parser(data)
-            } else {
-                Err(Error::from($status))
-            };
-            let handler = Box::from_raw($arg);
-            handler(result);
-        });
+        let result = if $status == c_ares_sys::ARES_SUCCESS {
+            let data = slice::from_raw_parts($abuf, $alen as usize);
+            $parser(data)
+        } else {
+            Err(Error::from($status))
+        };
+        let handler = Box::from_raw($arg);
+        panic::catch(|| handler(result));
     }};
 }

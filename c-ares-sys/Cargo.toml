@@ -31,7 +31,7 @@ libc = "0.2"
 c-types = "2.0.2"
 
 [target.'cfg(target_os = "android")'.dependencies]
-jni-sys = "0.3"
+jni-sys = "0.4"
 
 [package.metadata.pkg-config]
 libcares = "1.19.0"

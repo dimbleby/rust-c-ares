@@ -1,8 +1,12 @@
 ## Unreleased
 
+## 6.0.1 (14 Oct 2023)
+
+- remember to update declared c-ares requirement
+
 ## 6.0.0 (14 Oct 2023)
 
-- cares 1.20.1
+- c-ares 1.20.1
   - changed defaults for timeouts and retries
   - new option `ARES_OPT_UDP_MAX_QUERIES`
 

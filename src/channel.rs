@@ -77,7 +77,7 @@ impl Options {
 
     /// Set the number of milliseconds each name server is given to respond to a query on the first
     /// try.  (After the first try, the timeout algorithm becomes more complicated, but scales
-    /// linearly with the value of timeout).  The default is 5000ms.
+    /// linearly with the value of timeout).  The default is 2000ms.
     pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
         self.ares_options.timeout = ms as c_int;
         self.optmask |= c_ares_sys::ARES_OPT_TIMEOUTMS;
@@ -85,7 +85,7 @@ impl Options {
     }
 
     /// Set the number of tries the resolver will try contacting each name server before giving up.
-    /// The default is four tries.
+    /// The default is three tries.
     pub fn set_tries(&mut self, tries: u32) -> &mut Self {
         self.ares_options.tries = tries as c_int;
         self.optmask |= c_ares_sys::ARES_OPT_TRIES;
@@ -132,24 +132,6 @@ impl Options {
         let c_lookups = CString::new(lookups).unwrap();
         self.lookups = Some(c_lookups);
         self.optmask |= c_ares_sys::ARES_OPT_LOOKUPS;
-        self
-    }
-
-    /// The path to use for reading the resolv.conf file.  The `resolvconf_path` should be set to a
-    /// path string, and will be honoured on *nix like systems.  The default is /etc/resolv.conf.
-    pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
-        let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
-        self.resolvconf_path = Some(c_resolvconf_path);
-        self.optmask |= c_ares_sys::ARES_OPT_RESOLVCONF;
-        self
-    }
-
-    /// The path to use for reading the hosts file.  The `hosts_path` should be set to a
-    /// path string, and will be honoured on *nix like systems.  The default is /etc/hosts.
-    pub fn set_hosts_path(&mut self, hosts_path: &str) -> &mut Self {
-        let c_hosts_path = CString::new(hosts_path).unwrap();
-        self.hosts_path = Some(c_hosts_path);
-        self.optmask |= c_ares_sys::ARES_OPT_HOSTS_FILE;
         self
     }
 
@@ -203,6 +185,33 @@ impl Options {
     pub fn set_ednspsz(&mut self, size: u32) -> &mut Self {
         self.ares_options.ednspsz = size as c_int;
         self.optmask |= c_ares_sys::ARES_OPT_EDNSPSZ;
+        self
+    }
+
+    /// The path to use for reading the resolv.conf file.  The `resolvconf_path` should be set to a
+    /// path string, and will be honoured on *nix like systems.  The default is /etc/resolv.conf.
+    pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
+        let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
+        self.resolvconf_path = Some(c_resolvconf_path);
+        self.optmask |= c_ares_sys::ARES_OPT_RESOLVCONF;
+        self
+    }
+
+    /// The path to use for reading the hosts file.  The `hosts_path` should be set to a
+    /// path string, and will be honoured on *nix like systems.  The default is /etc/hosts.
+    pub fn set_hosts_path(&mut self, hosts_path: &str) -> &mut Self {
+        let c_hosts_path = CString::new(hosts_path).unwrap();
+        self.hosts_path = Some(c_hosts_path);
+        self.optmask |= c_ares_sys::ARES_OPT_HOSTS_FILE;
+        self
+    }
+
+    /// The maximum number of udp queries that can be sent on a single ephemeral port to a given
+    /// DNS server before a new ephemeral port is assigned.  Any value of 0 or less will be
+    /// considered unlimited, and is the default.
+    pub fn set_udp_max_queries(&mut self, udp_max_queries: i32) -> &mut Self {
+        self.ares_options.udp_max_queries = udp_max_queries;
+        self.optmask |= c_ares_sys::ARES_OPT_UDP_MAX_QUERIES;
         self
     }
 }

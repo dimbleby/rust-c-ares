@@ -69,6 +69,6 @@ pub(crate) unsafe extern "C" fn get_name_info_callback<F>(
     } else {
         Err(Error::from(status))
     };
-    let handler = Box::from_raw(arg as *mut F);
+    let handler = Box::from_raw(arg.cast::<F>());
     panic::catch(|| handler(result));
 }

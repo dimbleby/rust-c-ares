@@ -55,12 +55,12 @@ pub(crate) unsafe extern "C" fn get_host_callback<F>(
 {
     panic::catch(|| {
         let result = if status == c_ares_sys::ARES_SUCCESS {
-            let host_results = HostResults::new(&*(hostent as *const c_types::hostent));
+            let host_results = HostResults::new(&*hostent);
             Ok(host_results)
         } else {
             Err(Error::from(status))
         };
-        let handler = Box::from_raw(arg as *mut F);
+        let handler = Box::from_raw(arg.cast::<F>());
         handler(result);
     });
 }

@@ -86,7 +86,7 @@ impl<'a> IntoIterator for &'a TXTResults {
 
 impl Drop for TXTResults {
     fn drop(&mut self) {
-        unsafe { c_ares_sys::ares_free_data(self.txt_reply as *mut c_void) }
+        unsafe { c_ares_sys::ares_free_data(self.txt_reply.cast()) }
     }
 }
 
@@ -127,5 +127,5 @@ pub(crate) unsafe extern "C" fn query_txt_callback<F>(
 ) where
     F: FnOnce(Result<TXTResults>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, TXTResults::parse_from);
+    ares_callback!(arg.cast::<F>(), status, abuf, alen, TXTResults::parse_from);
 }

@@ -76,5 +76,5 @@ pub(crate) unsafe extern "C" fn query_ns_callback<F>(
 ) where
     F: FnOnce(Result<NSResults>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, NSResults::parse_from);
+    ares_callback!(arg.cast::<F>(), status, abuf, alen, NSResults::parse_from);
 }

@@ -38,7 +38,7 @@ impl AResults {
                 data.len() as c_int,
                 ptr::null_mut(),
                 results.addrttls.as_mut_ptr(),
-                &mut results.naddrttls as *mut _ as *mut c_int,
+                (&mut results.naddrttls as *mut usize).cast(),
             )
         };
         if parse_status == c_ares_sys::ARES_SUCCESS {
@@ -115,5 +115,5 @@ pub(crate) unsafe extern "C" fn query_a_callback<F>(
 ) where
     F: FnOnce(Result<AResults>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, AResults::parse_from);
+    ares_callback!(arg.cast::<F>(), status, abuf, alen, AResults::parse_from);
 }

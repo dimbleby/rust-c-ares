@@ -2,7 +2,7 @@ use std::ffi::CString;
 use std::marker::PhantomData;
 use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
-use std::os::raw::{c_char, c_int, c_uchar, c_void};
+use std::os::raw::{c_int, c_void};
 use std::ptr;
 use std::sync::Arc;
 
@@ -147,7 +147,7 @@ impl Options {
     {
         let boxed_callback = Arc::new(callback);
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
-        self.ares_options.sock_state_cb_data = &*boxed_callback as *const _ as *mut c_void;
+        self.ares_options.sock_state_cb_data = (&*boxed_callback as *const F).cast_mut().cast();
         self.socket_state_callback = Some(boxed_callback);
         self.optmask |= c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         self
@@ -244,22 +244,22 @@ impl Channel {
 
         // We deferred setting up domains in the options - do it now.
         let domains: Vec<_> = options.domains.iter().map(|s| s.as_ptr()).collect();
-        options.ares_options.domains = domains.as_ptr() as *mut *mut c_char;
+        options.ares_options.domains = domains.as_ptr().cast_mut().cast();
         options.ares_options.ndomains = domains.len() as c_int;
 
         // Likewise for lookups.
         for c_lookup in &options.lookups {
-            options.ares_options.lookups = c_lookup.as_ptr() as *mut c_char;
+            options.ares_options.lookups = c_lookup.as_ptr().cast_mut()
         }
 
         // And the resolvconf_path.
         for c_resolvconf_path in &options.resolvconf_path {
-            options.ares_options.resolvconf_path = c_resolvconf_path.as_ptr() as *mut c_char;
+            options.ares_options.resolvconf_path = c_resolvconf_path.as_ptr().cast_mut()
         }
 
         // And the hosts_path.
         for c_hosts_path in &options.hosts_path {
-            options.ares_options.hosts_path = c_hosts_path.as_ptr() as *mut c_char;
+            options.ares_options.hosts_path = c_hosts_path.as_ptr().cast_mut()
         }
 
         // Initialize the channel.
@@ -371,7 +371,7 @@ impl Channel {
         unsafe {
             c_ares_sys::ares_set_local_ip6(
                 self.ares_channel,
-                &in6_addr as *const _ as *const c_uchar,
+                (&in6_addr as *const c_types::in6_addr).cast(),
             )
         }
         self
@@ -831,11 +831,11 @@ impl Channel {
         let c_addr = match *address {
             IpAddr::V4(v4) => {
                 in_addr = ipv4_as_in_addr(v4);
-                &in_addr as *const _ as *const c_void
+                (&in_addr as *const c_types::in_addr).cast()
             }
             IpAddr::V6(ref v6) => {
                 in6_addr = ipv6_as_in6_addr(v6);
-                &in6_addr as *const _ as *const c_void
+                (&in6_addr as *const c_types::in6_addr).cast()
             }
         };
         let (family, length) = match *address {
@@ -850,7 +850,7 @@ impl Channel {
                 length as c_int,
                 family as c_int,
                 Some(get_host_callback::<F>),
-                c_arg as *mut c_void,
+                c_arg.cast(),
             )
         }
         panic::propagate();
@@ -871,7 +871,7 @@ impl Channel {
                 c_name.as_ptr(),
                 family as c_int,
                 Some(get_host_callback::<F>),
-                c_arg as *mut c_void,
+                c_arg.cast(),
             )
         }
         panic::propagate();
@@ -891,11 +891,11 @@ impl Channel {
         let c_addr = match *address {
             SocketAddr::V4(ref v4) => {
                 sockaddr_in = socket_addrv4_as_sockaddr_in(v4);
-                &sockaddr_in as *const _ as *const c_types::sockaddr
+                (&sockaddr_in as *const c_types::sockaddr_in).cast()
             }
             SocketAddr::V6(ref v6) => {
                 sockaddr_in6 = socket_addrv6_as_sockaddr_in6(v6);
-                &sockaddr_in6 as *const _ as *const c_types::sockaddr
+                (&sockaddr_in6 as *const c_types::sockaddr_in6).cast()
             }
         };
         let length = match *address {
@@ -910,7 +910,7 @@ impl Channel {
                 length as c_ares_sys::ares_socklen_t,
                 flags.bits(),
                 Some(get_name_info_callback::<F>),
-                c_arg as *mut c_void,
+                c_arg.cast(),
             )
         }
         panic::propagate();
@@ -993,7 +993,7 @@ unsafe extern "C" fn socket_state_callback<F>(
 ) where
     F: FnMut(Socket, bool, bool) + Send + 'static,
 {
-    let handler = data as *mut F;
+    let handler = data.cast::<F>();
     panic::catch(|| (*handler)(socket_fd, readable != 0, writable != 0));
 }
 

@@ -86,7 +86,7 @@ impl<'a> IntoIterator for &'a MXResults {
 
 impl Drop for MXResults {
     fn drop(&mut self) {
-        unsafe { c_ares_sys::ares_free_data(self.mx_reply as *mut c_void) }
+        unsafe { c_ares_sys::ares_free_data(self.mx_reply.cast()) }
     }
 }
 
@@ -133,5 +133,5 @@ pub(crate) unsafe extern "C" fn query_mx_callback<F>(
 ) where
     F: FnOnce(Result<MXResults>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, MXResults::parse_from);
+    ares_callback!(arg.cast::<F>(), status, abuf, alen, MXResults::parse_from);
 }

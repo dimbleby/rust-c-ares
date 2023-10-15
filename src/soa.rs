@@ -103,7 +103,7 @@ impl fmt::Display for SOAResult {
 
 impl Drop for SOAResult {
     fn drop(&mut self) {
-        unsafe { c_ares_sys::ares_free_data(self.soa_reply as *mut c_void) }
+        unsafe { c_ares_sys::ares_free_data(self.soa_reply.cast()) }
     }
 }
 
@@ -119,5 +119,5 @@ pub(crate) unsafe extern "C" fn query_soa_callback<F>(
 ) where
     F: FnOnce(Result<SOAResult>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, SOAResult::parse_from);
+    ares_callback!(arg.cast::<F>(), status, abuf, alen, SOAResult::parse_from);
 }

@@ -18,7 +18,7 @@ macro_rules! ares_call {
                 $dns_class as c_int,
                 $query_type as c_int,
                 Some($callback),
-                c_arg as *mut c_void,
+                c_arg.cast(),
             );
         }
         panic::propagate();

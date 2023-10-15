@@ -71,5 +71,11 @@ pub(crate) unsafe extern "C" fn query_cname_callback<F>(
 ) where
     F: FnOnce(Result<CNameResults>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, CNameResults::parse_from);
+    ares_callback!(
+        arg.cast::<F>(),
+        status,
+        abuf,
+        alen,
+        CNameResults::parse_from
+    );
 }

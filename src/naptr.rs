@@ -1,7 +1,7 @@
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::os::raw::{c_char, c_int, c_uchar, c_void};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 
@@ -86,7 +86,7 @@ impl<'a> IntoIterator for &'a NAPTRResults {
 
 impl Drop for NAPTRResults {
     fn drop(&mut self) {
-        unsafe { c_ares_sys::ares_free_data(self.naptr_reply as *mut c_void) }
+        unsafe { c_ares_sys::ares_free_data(self.naptr_reply.cast()) }
     }
 }
 
@@ -104,7 +104,7 @@ impl<'a> NAPTRResult<'a> {
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn flags(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.naptr_reply.flags as *const c_char) }
+        unsafe { CStr::from_ptr(self.naptr_reply.flags.cast()) }
     }
 
     /// Returns the service name in this `NAPTRResult`.
@@ -113,7 +113,7 @@ impl<'a> NAPTRResult<'a> {
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn service_name(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.naptr_reply.service as *const c_char) }
+        unsafe { CStr::from_ptr(self.naptr_reply.service.cast()) }
     }
 
     /// Returns the regular expression in this `NAPTRResult`.
@@ -122,7 +122,7 @@ impl<'a> NAPTRResult<'a> {
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn reg_exp(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.naptr_reply.regexp as *const c_char) }
+        unsafe { CStr::from_ptr(self.naptr_reply.regexp.cast()) }
     }
 
     /// Returns the replacement pattern in this `NAPTRResult`.
@@ -181,5 +181,11 @@ pub(crate) unsafe extern "C" fn query_naptr_callback<F>(
 ) where
     F: FnOnce(Result<NAPTRResults>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, NAPTRResults::parse_from);
+    ares_callback!(
+        arg.cast::<F>(),
+        status,
+        abuf,
+        alen,
+        NAPTRResults::parse_from
+    );
 }

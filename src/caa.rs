@@ -1,7 +1,7 @@
 use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
-use std::os::raw::{c_char, c_int, c_uchar, c_void};
+use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 
@@ -87,7 +87,7 @@ impl<'a> IntoIterator for &'a CAAResults {
 
 impl Drop for CAAResults {
     fn drop(&mut self) {
-        unsafe { c_ares_sys::ares_free_data(self.caa_reply as *mut c_void) }
+        unsafe { c_ares_sys::ares_free_data(self.caa_reply.cast()) }
     }
 }
 
@@ -110,7 +110,7 @@ impl<'a> CAAResult<'a> {
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn property(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.caa_reply.property as *const c_char) }
+        unsafe { CStr::from_ptr(self.caa_reply.property.cast()) }
     }
 
     /// The value represented by this `CAAResult`.
@@ -119,7 +119,7 @@ impl<'a> CAAResult<'a> {
     /// library does not guarantee this - so we leave it to users to decide whether they prefer a
     /// fallible conversion, a lossy conversion, or something else altogether.
     pub fn value(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.caa_reply.value as *const c_char) }
+        unsafe { CStr::from_ptr(self.caa_reply.value.cast()) }
     }
 }
 
@@ -148,5 +148,5 @@ pub(crate) unsafe extern "C" fn query_caa_callback<F>(
 ) where
     F: FnOnce(Result<CAAResults>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, CAAResults::parse_from);
+    ares_callback!(arg.cast::<F>(), status, abuf, alen, CAAResults::parse_from);
 }

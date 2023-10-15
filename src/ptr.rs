@@ -25,7 +25,7 @@ impl PTRResults {
             c_ares_sys::ares_parse_ptr_reply(
                 data.as_ptr(),
                 data.len() as c_int,
-                dummy_ip.as_ptr() as *const c_void,
+                dummy_ip.as_ptr().cast(),
                 dummy_ip.len() as c_int,
                 c_types::AF_INET,
                 &mut hostent,
@@ -84,5 +84,5 @@ pub(crate) unsafe extern "C" fn query_ptr_callback<F>(
 ) where
     F: FnOnce(Result<PTRResults>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, PTRResults::parse_from);
+    ares_callback!(arg.cast::<F>(), status, abuf, alen, PTRResults::parse_from);
 }

@@ -21,13 +21,13 @@ fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
     let addrtype = c_int::from(hostent.h_addrtype);
     HostAddressResultsIter {
         family: address_family(addrtype),
-        next: unsafe { &*(hostent.h_addr_list as *const _) },
+        next: unsafe { &*(hostent.h_addr_list.cast()) },
     }
 }
 
 fn aliases(hostent: &c_types::hostent) -> HostAliasResultsIter {
     HostAliasResultsIter {
-        next: unsafe { &*(hostent.h_aliases as *const _) },
+        next: unsafe { &*(hostent.h_aliases.cast()) },
     }
 }
 
@@ -38,7 +38,7 @@ fn display(hostent: &c_types::hostent, fmt: &mut fmt::Formatter) -> fmt::Result 
         hostname(hostent).to_str().unwrap_or("<not utf8>")
     )?;
     let addresses = addresses(hostent).format(", ");
-    write!(fmt, "Addresses: [{addresses}]")?;
+    write!(fmt, "Addresses: [{addresses}], ")?;
     let aliases = aliases(hostent)
         .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
         .format(", ");
@@ -166,7 +166,7 @@ impl<'a> Iterator for HostAddressResultsIter<'a> {
             unsafe {
                 self.next = &*(self.next as *const *const c_char).offset(1);
                 self.family
-                    .and_then(|family| ip_address_from_bytes(family, h_addr as *const u8))
+                    .and_then(|family| ip_address_from_bytes(family, h_addr.cast()))
             }
         }
     }

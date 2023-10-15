@@ -87,7 +87,7 @@ impl<'a> IntoIterator for &'a SRVResults {
 
 impl Drop for SRVResults {
     fn drop(&mut self) {
-        unsafe { c_ares_sys::ares_free_data(self.srv_reply as *mut c_void) }
+        unsafe { c_ares_sys::ares_free_data(self.srv_reply.cast()) }
     }
 }
 
@@ -146,5 +146,5 @@ pub(crate) unsafe extern "C" fn query_srv_callback<F>(
 ) where
     F: FnOnce(Result<SRVResults>) + Send + 'static,
 {
-    ares_callback!(arg as *mut F, status, abuf, alen, SRVResults::parse_from);
+    ares_callback!(arg.cast::<F>(), status, abuf, alen, SRVResults::parse_from);
 }

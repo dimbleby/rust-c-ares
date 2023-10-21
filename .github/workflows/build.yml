@@ -70,7 +70,6 @@ jobs:
           cargo build
         if: matrix.rust == 'nightly'
         name: Check minimal versions
-        continue-on-error: true
       - run: |
           cargo run --example epoll
           cargo run --example select

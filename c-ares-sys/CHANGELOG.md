@@ -1,5 +1,7 @@
 ## Unreleased
 
+- c-types 3.0.0
+
 ## 6.0.1 (14 Oct 2023)
 
 - remember to update declared c-ares requirement

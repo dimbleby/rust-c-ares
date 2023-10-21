@@ -22,12 +22,13 @@ impl PTRResults {
         let mut hostent: *mut c_types::hostent = ptr::null_mut();
         let dummy_ip = [0, 0, 0, 0];
         let parse_status = unsafe {
+            #[allow(clippy::useless_conversion)]
             c_ares_sys::ares_parse_ptr_reply(
                 data.as_ptr(),
                 data.len() as c_int,
                 dummy_ip.as_ptr().cast(),
                 dummy_ip.len() as c_int,
-                c_types::AF_INET,
+                c_types::AF_INET.into(),
                 &mut hostent,
             )
         };

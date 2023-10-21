@@ -1,7 +1,7 @@
 // This example uses fds() to find out which file descriptors c-ares wants us to listen on, and
 // uses select() to satisfy those requirements.
 #[cfg(windows)]
-extern crate winapi;
+extern crate windows_sys;
 
 #[cfg(windows)]
 mod example {
@@ -10,8 +10,8 @@ mod example {
     use std::mem;
     use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
     use std::ptr;
-    use winapi::um::winsock2::{
-        fd_set, select, timeval, WSACleanup, WSAStartup, FD_SETSIZE, SOCKET_ERROR, WSADATA,
+    use windows_sys::Win32::Networking::WinSock::{
+        select, WSACleanup, WSAStartup, FD_SET, FD_SETSIZE, SOCKET_ERROR, TIMEVAL, WSADATA,
     };
 
     fn print_soa_result(result: &c_ares::Result<c_ares::SOAResult>) {
@@ -101,13 +101,13 @@ mod example {
 
         // While c-ares wants us to listen for events, do so..
         loop {
-            let mut read_fds = fd_set {
+            let mut read_fds = FD_SET {
                 fd_count: 0,
-                fd_array: [c_ares::SOCKET_BAD as usize; FD_SETSIZE],
+                fd_array: [c_ares::SOCKET_BAD as usize; FD_SETSIZE as usize],
             };
-            let mut write_fds = fd_set {
+            let mut write_fds = FD_SET {
                 fd_count: 0,
-                fd_array: [c_ares::SOCKET_BAD as usize; FD_SETSIZE],
+                fd_array: [c_ares::SOCKET_BAD as usize; FD_SETSIZE as usize],
             };
             let count = ares_channel.fds(&mut read_fds, &mut write_fds);
             if count == 0 {
@@ -115,7 +115,7 @@ mod example {
             }
 
             // Wait for something to happen.
-            let timeout = timeval {
+            let timeout = TIMEVAL {
                 tv_sec: 0,
                 tv_usec: 500_000,
             };

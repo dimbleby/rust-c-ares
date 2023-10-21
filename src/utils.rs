@@ -6,7 +6,7 @@ use std::os::raw::c_int;
 use std::str;
 
 // Convert an address family into a more strongly typed AddressFamily.
-pub fn address_family(family: c_int) -> Option<AddressFamily> {
+pub fn address_family(family: c_types::ADDRESS_FAMILY) -> Option<AddressFamily> {
     match family {
         c_types::AF_INET => Some(AddressFamily::INET),
         c_types::AF_INET6 => Some(AddressFamily::INET6),
@@ -27,13 +27,10 @@ pub fn ipv4_as_in_addr(ipv4: Ipv4Addr) -> c_types::in_addr {
 pub fn ipv4_as_in_addr(ipv4: Ipv4Addr) -> c_types::in_addr {
     let octets = ipv4.octets();
     let mut in_addr: c_types::in_addr = unsafe { mem::zeroed() };
-    {
-        let bytes = unsafe { in_addr.S_un.S_un_b_mut() };
-        bytes.s_b1 = octets[0];
-        bytes.s_b2 = octets[1];
-        bytes.s_b3 = octets[2];
-        bytes.s_b4 = octets[3];
-    }
+    in_addr.S_un.S_un_b.s_b1 = octets[0];
+    in_addr.S_un.S_un_b.s_b2 = octets[1];
+    in_addr.S_un.S_un_b.s_b3 = octets[2];
+    in_addr.S_un.S_un_b.s_b4 = octets[3];
     in_addr
 }
 
@@ -45,7 +42,7 @@ pub fn ipv4_from_in_addr(in_addr: c_types::in_addr) -> Ipv4Addr {
 
 #[cfg(windows)]
 pub fn ipv4_from_in_addr(in_addr: c_types::in_addr) -> Ipv4Addr {
-    let bytes = unsafe { in_addr.S_un.S_un_b() };
+    let bytes = unsafe { in_addr.S_un.S_un_b };
     Ipv4Addr::new(bytes.s_b1, bytes.s_b2, bytes.s_b3, bytes.s_b4)
 }
 
@@ -62,10 +59,7 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
 pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
     let octets = ipv6.octets();
     let mut in6_addr: c_types::in6_addr = unsafe { mem::zeroed() };
-    {
-        let bytes = unsafe { in6_addr.u.Byte_mut() };
-        bytes.copy_from_slice(&octets);
-    }
+    unsafe { in6_addr.u.Byte.copy_from_slice(&octets) }
     in6_addr
 }
 
@@ -161,10 +155,7 @@ pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockadd
     sockaddr_in6.sin6_port = sock_v6.port().to_be();
     sockaddr_in6.sin6_addr = ipv6_as_in6_addr(sock_v6.ip());
     sockaddr_in6.sin6_flowinfo = sock_v6.flowinfo();
-    {
-        let scope_id = unsafe { sockaddr_in6.u.sin6_scope_id_mut() };
-        *scope_id = sock_v6.scope_id();
-    }
+    sockaddr_in6.Anonymous.sin6_scope_id = sock_v6.scope_id();
     sockaddr_in6
 }
 

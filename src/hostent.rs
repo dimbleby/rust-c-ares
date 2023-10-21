@@ -2,7 +2,7 @@ use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::os::raw::{c_char, c_int};
+use std::os::raw::c_char;
 use std::slice;
 
 use itertools::Itertools;
@@ -11,14 +11,11 @@ use crate::types::AddressFamily;
 use crate::utils::address_family;
 
 fn hostname(hostent: &c_types::hostent) -> &CStr {
-    unsafe { CStr::from_ptr(hostent.h_name) }
+    unsafe { CStr::from_ptr(hostent.h_name.cast()) }
 }
 
 fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
-    // h_addrtype is `c_short` on windows, `c_int` on unix.  Tell clippy to allow the identity
-    // conversion in the latter case.
-    #[allow(clippy::useless_conversion)]
-    let addrtype = c_int::from(hostent.h_addrtype);
+    let addrtype = hostent.h_addrtype as c_types::ADDRESS_FAMILY;
     HostAddressResultsIter {
         family: address_family(addrtype),
         next: unsafe { &*(hostent.h_addr_list.cast()) },

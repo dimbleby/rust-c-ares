@@ -28,7 +28,7 @@ cmake = { version = "0.1", optional = true }
 
 [dependencies]
 libc = "0.2"
-c-types = "2.0.2"
+c-types = "3.0.0"
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni-sys = "0.4"

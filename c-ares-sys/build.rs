@@ -1,6 +1,6 @@
 extern crate cc;
 extern crate fs_extra;
-extern crate metadeps;
+extern crate system_deps;
 
 use std::env;
 #[cfg(not(feature = "build-cmake"))]
@@ -15,7 +15,7 @@ fn main() {
     println!("cargo:rerun-if-changed=c-ares");
 
     // Use the installed libcares if it is available.
-    if metadeps::probe().is_ok() {
+    if system_deps::Config::new().probe().is_ok() {
         return;
     }
 

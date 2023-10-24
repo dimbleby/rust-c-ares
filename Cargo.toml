@@ -16,7 +16,7 @@ include = ["src/**/*", "LICENSE.txt", "README.md", "CHANGELOG.md"]
 
 [dependencies]
 bitflags = "2.0"
-c-ares-sys = { version = "6.0.0", path = "c-ares-sys" }
+c-ares-sys = { version = "6.0.0", path = "c-ares-sys", default-features = false }
 c-types = "3.0.0"
 itertools = "0.11"
 
@@ -27,7 +27,9 @@ nix = { version = "0.27", default-features = false, features = ["event"] }
 windows-sys = { version = "0.48.0", features = ["Win32_Networking_WinSock"] }
 
 [features]
-default = []
+default = ["maybe-vendored"]
+maybe-vendored = ["c-ares-sys/maybe-vendored"]
+vendored = ["c-ares-sys/vendored"]
 build-cmake = ["c-ares-sys/build-cmake"]
 
 [workspace]

@@ -40,5 +40,7 @@ jni-sys = "0.4"
 libcares = "1.20.1"
 
 [features]
-default = []
+default = ["maybe-vendored"]
+maybe-vendored = []
+vendored = ["maybe-vendored"]
 build-cmake = ["cmake"]

@@ -7,6 +7,7 @@ fn main() {
 
     #[cfg(feature = "maybe-vendored")]
     vendored::build();
+
     #[cfg(not(feature = "maybe-vendored"))]
     panic!(
         "no pre installed c-ares library found, \

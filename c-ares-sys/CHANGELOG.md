@@ -1,6 +1,12 @@
 ## Unreleased
 
 - c-types 3.0.0
+- vendored c-ares 1.21.0
+- add features `vendored` and `maybe-vendored`
+  - default is `maybe-vendored` which preserves existing behaviour: look for
+    a suitable installed `c-ares` else build the vendored copy
+  - `vendored` requires use of the vendored copy
+  - omit both features to require use of an already-installed `c-ares`
 
 ## 6.0.1 (14 Oct 2023)
 

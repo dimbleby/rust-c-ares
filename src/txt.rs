@@ -30,7 +30,7 @@ impl TXTResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_txt_reply_ext(data.as_ptr(), data.len() as c_int, &mut txt_reply)
         };
-        if parse_status == c_ares_sys::ARES_SUCCESS {
+        if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let result = TXTResults::new(txt_reply);
             Ok(result)
         } else {

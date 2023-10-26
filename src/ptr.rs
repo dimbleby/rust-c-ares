@@ -32,7 +32,7 @@ impl PTRResults {
                 &mut hostent,
             )
         };
-        if parse_status == c_ares_sys::ARES_SUCCESS {
+        if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let result = PTRResults::new(hostent);
             Ok(result)
         } else {

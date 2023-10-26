@@ -31,7 +31,7 @@ impl CAAResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_caa_reply(data.as_ptr(), data.len() as c_int, &mut caa_reply)
         };
-        if parse_status == c_ares_sys::ARES_SUCCESS {
+        if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let caa_result = CAAResults::new(caa_reply);
             Ok(caa_result)
         } else {

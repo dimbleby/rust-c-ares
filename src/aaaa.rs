@@ -40,7 +40,7 @@ impl AAAAResults {
                 (&mut results.naddr6ttls as *mut usize).cast(),
             )
         };
-        if parse_status == c_ares_sys::ARES_SUCCESS {
+        if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             Ok(results)
         } else {
             Err(Error::from(parse_status))

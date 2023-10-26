@@ -30,7 +30,7 @@ impl NAPTRResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_naptr_reply(data.as_ptr(), data.len() as c_int, &mut naptr_reply)
         };
-        if parse_status == c_ares_sys::ARES_SUCCESS {
+        if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let naptr_result = NAPTRResults::new(naptr_reply);
             Ok(naptr_result)
         } else {

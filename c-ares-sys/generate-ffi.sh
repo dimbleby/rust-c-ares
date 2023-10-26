@@ -22,6 +22,7 @@ bindgen --allowlist-function="ares.*" \
         --blocklist-type="sockaddr" \
         --blocklist-type="socklen_t" \
         --blocklist-type="timeval" \
+        --default-enum-style="rust" \
         --opaque-type="in_addr_t" \
         --no-debug="ares_addrttl" \
         --no-layout-tests \

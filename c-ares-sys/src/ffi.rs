@@ -18,6 +18,42 @@ pub type ares_socket_t = ::std::os::unix::io::RawFd;
 
 pub type ares_socklen_t = socklen_t;
 pub type ares_ssize_t = isize;
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_status_t {
+    ARES_SUCCESS = 0,
+    ARES_ENODATA = 1,
+    ARES_EFORMERR = 2,
+    ARES_ESERVFAIL = 3,
+    ARES_ENOTFOUND = 4,
+    ARES_ENOTIMP = 5,
+    ARES_EREFUSED = 6,
+    ARES_EBADQUERY = 7,
+    ARES_EBADNAME = 8,
+    ARES_EBADFAMILY = 9,
+    ARES_EBADRESP = 10,
+    ARES_ECONNREFUSED = 11,
+    ARES_ETIMEOUT = 12,
+    ARES_EOF = 13,
+    ARES_EFILE = 14,
+    ARES_ENOMEM = 15,
+    ARES_EDESTRUCTION = 16,
+    ARES_EBADSTR = 17,
+    ARES_EBADFLAGS = 18,
+    ARES_ENONAME = 19,
+    ARES_EBADHINTS = 20,
+    ARES_ENOTINITIALIZED = 21,
+    ARES_ELOADIPHLPAPI = 22,
+    ARES_EADDRGETNETWORKPARAMS = 23,
+    ARES_ECANCELLED = 24,
+    ARES_ESERVICE = 25,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_bool_t {
+    ARES_FALSE = 0,
+    ARES_TRUE = 1,
+}
 pub type ares_sock_state_cb = ::std::option::Option<
     unsafe extern "C" fn(
         data: *mut ::std::os::raw::c_void,

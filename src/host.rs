@@ -54,7 +54,7 @@ pub(crate) unsafe extern "C" fn get_host_callback<F>(
     F: FnOnce(Result<HostResults>) + Send + 'static,
 {
     panic::catch(|| {
-        let result = if status == c_ares_sys::ARES_SUCCESS {
+        let result = if status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let host_results = HostResults::new(&*hostent);
             Ok(host_results)
         } else {

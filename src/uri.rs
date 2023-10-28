@@ -31,7 +31,7 @@ impl URIResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_uri_reply(data.as_ptr(), data.len() as c_int, &mut uri_reply)
         };
-        if parse_status == c_ares_sys::ARES_SUCCESS {
+        if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let uri_result = URIResults::new(uri_reply);
             Ok(uri_result)
         } else {

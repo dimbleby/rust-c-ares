@@ -13,7 +13,7 @@ pub(crate) unsafe extern "C" fn query_callback<F>(
 ) where
     F: FnOnce(Result<&[u8]>) + Send + 'static,
 {
-    let result = if status == c_ares_sys::ARES_SUCCESS {
+    let result = if status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
         let data = slice::from_raw_parts(abuf, alen as usize);
         Ok(data)
     } else {

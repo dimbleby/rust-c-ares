@@ -238,7 +238,7 @@ impl Channel {
         let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
         let lib_rc = unsafe { c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL) };
         std::mem::drop(ares_library_lock);
-        if lib_rc != c_ares_sys::ARES_SUCCESS {
+        if lib_rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             return Err(Error::from(lib_rc));
         }
 
@@ -271,7 +271,7 @@ impl Channel {
                 options.optmask,
             )
         };
-        if channel_rc != c_ares_sys::ARES_SUCCESS {
+        if channel_rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
             unsafe { c_ares_sys::ares_library_cleanup() }
             std::mem::drop(ares_library_lock);
@@ -290,7 +290,7 @@ impl Channel {
     pub fn try_clone(&self) -> Result<Channel> {
         let mut ares_channel = ptr::null_mut();
         let rc = unsafe { c_ares_sys::ares_dup(&mut ares_channel, self.ares_channel) };
-        if rc != c_ares_sys::ARES_SUCCESS {
+        if rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             return Err(Error::from(rc));
         }
 
@@ -352,7 +352,7 @@ impl Channel {
         let ares_rc = unsafe {
             c_ares_sys::ares_set_servers_ports_csv(self.ares_channel, c_servers.as_ptr())
         };
-        if ares_rc == c_ares_sys::ARES_SUCCESS {
+        if ares_rc == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             Ok(self)
         } else {
             Err(Error::from(ares_rc))
@@ -395,7 +395,7 @@ impl Channel {
         let c_sortlist = CString::new(sortlist_str).unwrap();
         let ares_rc =
             unsafe { c_ares_sys::ares_set_sortlist(self.ares_channel, c_sortlist.as_ptr()) };
-        if ares_rc == c_ares_sys::ARES_SUCCESS {
+        if ares_rc == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             Ok(self)
         } else {
             Err(Error::from(ares_rc))

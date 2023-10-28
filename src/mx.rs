@@ -30,7 +30,7 @@ impl MXResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_mx_reply(data.as_ptr(), data.len() as c_int, &mut mx_reply)
         };
-        if parse_status == c_ares_sys::ARES_SUCCESS {
+        if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let result = MXResults::new(mx_reply);
             Ok(result)
         } else {

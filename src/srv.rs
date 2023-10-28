@@ -31,7 +31,7 @@ impl SRVResults {
         let parse_status = unsafe {
             c_ares_sys::ares_parse_srv_reply(data.as_ptr(), data.len() as c_int, &mut srv_reply)
         };
-        if parse_status == c_ares_sys::ARES_SUCCESS {
+        if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let srv_result = SRVResults::new(srv_reply);
             Ok(srv_result)
         } else {

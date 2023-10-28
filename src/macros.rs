@@ -36,7 +36,7 @@ macro_rules! ares_search {
 // Most of our `ares_callback` implementations are much the same - macro out the repetition.
 macro_rules! ares_callback {
     ($arg:expr, $status:expr, $abuf:expr, $alen:expr, $parser:expr) => {{
-        let result = if $status == c_ares_sys::ARES_SUCCESS {
+        let result = if $status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let data = slice::from_raw_parts($abuf, $alen as usize);
             $parser(data)
         } else {

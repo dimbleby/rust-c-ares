@@ -42,11 +42,6 @@ print "// Library initialization flags\n";
 print_values("ARES_LIB_INIT_", @lines);
 
 print "\n";
-print "// Error codes\n";
-print "pub const ARES_SUCCESS: c_int = 0;\n";
-print_values("ARES_E", @lines);
-
-print "\n";
 print "// Flag values\n";
 print_values("ARES_FLAG_", @lines);
 

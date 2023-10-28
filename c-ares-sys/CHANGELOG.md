@@ -1,7 +1,8 @@
-## Unreleased
+## 7.0.0 (28 October 2023)
 
 - c-types 3.0.0
 - vendored c-ares 1.21.0
+- expose `ares_status_t` as an enum rather than a `const`
 - add features `vendored` and `maybe-vendored`
   - default is `maybe-vendored` which preserves existing behaviour: look for
     a suitable installed `c-ares` else build the vendored copy

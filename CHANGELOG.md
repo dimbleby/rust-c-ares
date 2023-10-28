@@ -1,4 +1,4 @@
-## Unreleased
+## 7.8.0 (28 October 2023)
 
 - c-types 3.0.0
 - add features `vendored` and `maybe-vendored`

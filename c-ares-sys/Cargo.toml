@@ -3,7 +3,7 @@ name = "c-ares-sys"
 license = "MIT"
 version = "7.0.0"
 authors = ["David Hotham"]
-build = "build.rs"
+build = "build/main.rs"
 links = "cares"
 description = "Low-level bindings to the c-ares library"
 repository = "https://github.com/dimbleby/rust-c-ares"
@@ -37,7 +37,7 @@ c-types = "3.0.0"
 jni-sys = "0.4"
 
 [package.metadata.system-deps]
-libcares = "1.20.1"
+libcares = "1.14.0"
 
 [features]
 default = ["maybe-vendored"]

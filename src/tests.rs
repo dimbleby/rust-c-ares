@@ -59,16 +59,19 @@ fn aaaa_results_iter_is_send() {
 }
 
 #[test]
+#[cfg(cares117)]
 fn caa_result_is_send() {
     assert_send::<CAAResult>();
 }
 
 #[test]
+#[cfg(cares117)]
 fn caa_results_are_send() {
     assert_send::<CAAResults>();
 }
 
 #[test]
+#[cfg(cares117)]
 fn caa_results_iter_is_send() {
     assert_send::<CAAResultsIter>();
 }

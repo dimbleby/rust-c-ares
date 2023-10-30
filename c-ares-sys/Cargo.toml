@@ -21,7 +21,7 @@ include = [
 ]
 
 [build-dependencies]
-cc = "1"
+cc = "1.0.61"
 fs_extra = "1.3"
 system-deps = "6.1.2"
 cmake = { version = "0.1", optional = true }

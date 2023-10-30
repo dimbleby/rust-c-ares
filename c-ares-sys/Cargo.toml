@@ -37,7 +37,7 @@ c-types = "3.0.0"
 jni-sys = "0.4"
 
 [package.metadata.system-deps]
-libcares = "1.14.0"
+libcares = "1.13.0"
 
 [features]
 default = ["maybe-vendored"]

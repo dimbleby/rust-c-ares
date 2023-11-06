@@ -8,7 +8,7 @@ use std::sync::Arc;
 
 use crate::a::{query_a_callback, AResults};
 use crate::aaaa::{query_aaaa_callback, AAAAResults};
-#[cfg(cares117)]
+#[cfg(cares1_17)]
 use crate::caa::{query_caa_callback, CAAResults};
 use crate::cname::{query_cname_callback, CNameResults};
 use crate::error::{Error, Result};
@@ -43,9 +43,9 @@ pub struct Options {
     optmask: c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
-    #[cfg(cares115)]
+    #[cfg(cares1_15)]
     resolvconf_path: Option<CString>,
-    #[cfg(cares119)]
+    #[cfg(cares1_19)]
     hosts_path: Option<CString>,
     socket_state_callback: Option<Arc<SocketStateCallback>>,
 }
@@ -57,9 +57,9 @@ impl Default for Options {
             optmask: 0,
             domains: vec![],
             lookups: None,
-            #[cfg(cares115)]
+            #[cfg(cares1_15)]
             resolvconf_path: None,
-            #[cfg(cares119)]
+            #[cfg(cares1_19)]
             hosts_path: None,
             socket_state_callback: None,
         }
@@ -195,7 +195,7 @@ impl Options {
 
     /// The path to use for reading the resolv.conf file.  The `resolvconf_path` should be set to a
     /// path string, and will be honoured on *nix like systems.  The default is /etc/resolv.conf.
-    #[cfg(cares115)]
+    #[cfg(cares1_15)]
     pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
         let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
         self.resolvconf_path = Some(c_resolvconf_path);
@@ -205,7 +205,7 @@ impl Options {
 
     /// The path to use for reading the hosts file.  The `hosts_path` should be set to a
     /// path string, and will be honoured on *nix like systems.  The default is /etc/hosts.
-    #[cfg(cares119)]
+    #[cfg(cares1_19)]
     pub fn set_hosts_path(&mut self, hosts_path: &str) -> &mut Self {
         let c_hosts_path = CString::new(hosts_path).unwrap();
         self.hosts_path = Some(c_hosts_path);
@@ -216,7 +216,7 @@ impl Options {
     /// The maximum number of udp queries that can be sent on a single ephemeral port to a given
     /// DNS server before a new ephemeral port is assigned.  Any value of 0 or less will be
     /// considered unlimited, and is the default.
-    #[cfg(cares120)]
+    #[cfg(cares1_20)]
     pub fn set_udp_max_queries(&mut self, udp_max_queries: i32) -> &mut Self {
         self.ares_options.udp_max_queries = udp_max_queries;
         self.optmask |= c_ares_sys::ARES_OPT_UDP_MAX_QUERIES;
@@ -261,13 +261,13 @@ impl Channel {
         }
 
         // And the resolvconf_path.
-        #[cfg(cares115)]
+        #[cfg(cares1_15)]
         for c_resolvconf_path in &options.resolvconf_path {
             options.ares_options.resolvconf_path = c_resolvconf_path.as_ptr().cast_mut()
         }
 
         // And the hosts_path.
-        #[cfg(cares119)]
+        #[cfg(cares1_19)]
         for c_hosts_path in &options.hosts_path {
             options.ares_options.hosts_path = c_hosts_path.as_ptr().cast_mut()
         }
@@ -484,7 +484,7 @@ impl Channel {
     /// Initiate a single-question DNS query for the CAA records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
-    #[cfg(cares117)]
+    #[cfg(cares1_17)]
     pub fn query_caa<F>(&mut self, name: &str, handler: F)
     where
         F: FnOnce(Result<CAAResults>) + Send + 'static,
@@ -503,7 +503,7 @@ impl Channel {
     /// `name`.
     ///
     /// On completion, `handler` is called with the result.
-    #[cfg(cares117)]
+    #[cfg(cares1_17)]
     pub fn search_caa<F>(&mut self, name: &str, handler: F)
     where
         F: FnOnce(Result<CAAResults>) + Send + 'static,

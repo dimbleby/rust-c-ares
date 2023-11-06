@@ -39,14 +39,11 @@ fn check_version(include_dirs: &[PathBuf]) {
     };
     let expanded = String::from_utf8(expanded).unwrap();
 
-    let mut c_ares_version = None;
-    for line in expanded.lines() {
-        let line = line.trim();
-
-        if let Some(version) = line.strip_prefix("RUST_VERSION_C_ARES_") {
-            c_ares_version = Some(parse_version(version));
-        }
-    }
+    let c_ares_version = expanded.lines().find_map(|line| {
+        line.trim()
+            .strip_prefix("RUST_VERSION_C_ARES_")
+            .map(parse_version)
+    });
 
     let version = c_ares_version.unwrap();
     println!("cargo:version_number={version:x}");

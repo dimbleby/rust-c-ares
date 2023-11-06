@@ -48,8 +48,33 @@ fn check_version(include_dirs: &[PathBuf]) {
         }
     }
 
-    let c_ares_version = c_ares_version.unwrap();
-    println!("cargo:version_number={c_ares_version:x}");
+    let version = c_ares_version.unwrap();
+    println!("cargo:version_number={version:x}");
+
+    if version >= 0x1_0f_00 {
+        // 1.15.0
+        println!("cargo:rustc-cfg=cares1_15");
+    }
+
+    if version >= 0x1_11_00 {
+        // 1.17.0
+        println!("cargo:rustc-cfg=cares1_17");
+    }
+
+    if version >= 0x1_12_00 {
+        // 1.18.0
+        println!("cargo:rustc-cfg=cares1_18");
+    }
+
+    if version >= 0x1_13_00 {
+        // 1.19.0
+        println!("cargo:rustc-cfg=cares1_19");
+    }
+
+    if version >= 0x1_14_00 {
+        // 1.20.0
+        println!("cargo:rustc-cfg=cares1_20");
+    }
 }
 
 fn parse_version(version: &str) -> u64 {

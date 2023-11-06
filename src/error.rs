@@ -80,7 +80,7 @@ pub enum Error {
     /// DNS query cancelled.
     ECANCELLED = c_ares_sys::ares_status_t::ARES_ECANCELLED as isize,
 
-    /// Undocumented - <https://github.com/c-ares/c-ares/issues/586>.
+    /// The textual service name provided could not be dereferenced into a port.
     ESERVICE = c_ares_sys::ares_status_t::ARES_ESERVICE as isize,
 
     /// Unknown error.
@@ -130,6 +130,44 @@ impl From<i32> for Error {
             x if x == Error::ESERVICE as i32 => Error::ESERVICE,
             _ => Error::UNKNOWN,
         }
+    }
+}
+
+impl TryFrom<c_ares_sys::ares_status_t> for Error {
+    type Error = ();
+
+    fn try_from(
+        status: c_ares_sys::ares_status_t,
+    ) -> std::result::Result<Self, <Self as TryFrom<c_ares_sys::ares_status_t>>::Error> {
+        let error = match status {
+            c_ares_sys::ares_status_t::ARES_SUCCESS => return Err(()),
+            c_ares_sys::ares_status_t::ARES_ENODATA => Error::ENODATA,
+            c_ares_sys::ares_status_t::ARES_EFORMERR => Error::EFORMERR,
+            c_ares_sys::ares_status_t::ARES_ESERVFAIL => Error::ESERVFAIL,
+            c_ares_sys::ares_status_t::ARES_ENOTFOUND => Error::ENOTFOUND,
+            c_ares_sys::ares_status_t::ARES_ENOTIMP => Error::ENOTIMP,
+            c_ares_sys::ares_status_t::ARES_EREFUSED => Error::EREFUSED,
+            c_ares_sys::ares_status_t::ARES_EBADQUERY => Error::EBADQUERY,
+            c_ares_sys::ares_status_t::ARES_EBADNAME => Error::EBADNAME,
+            c_ares_sys::ares_status_t::ARES_EBADFAMILY => Error::EBADFAMILY,
+            c_ares_sys::ares_status_t::ARES_EBADRESP => Error::EBADRESP,
+            c_ares_sys::ares_status_t::ARES_ECONNREFUSED => Error::ECONNREFUSED,
+            c_ares_sys::ares_status_t::ARES_ETIMEOUT => Error::ETIMEOUT,
+            c_ares_sys::ares_status_t::ARES_EOF => Error::EOF,
+            c_ares_sys::ares_status_t::ARES_EFILE => Error::EFILE,
+            c_ares_sys::ares_status_t::ARES_ENOMEM => Error::ENOMEM,
+            c_ares_sys::ares_status_t::ARES_EDESTRUCTION => Error::EDESTRUCTION,
+            c_ares_sys::ares_status_t::ARES_EBADSTR => Error::EBADSTR,
+            c_ares_sys::ares_status_t::ARES_EBADFLAGS => Error::EBADFLAGS,
+            c_ares_sys::ares_status_t::ARES_ENONAME => Error::ENONAME,
+            c_ares_sys::ares_status_t::ARES_EBADHINTS => Error::EBADHINTS,
+            c_ares_sys::ares_status_t::ARES_ENOTINITIALIZED => Error::ENOTINITIALIZED,
+            c_ares_sys::ares_status_t::ARES_ELOADIPHLPAPI => Error::ELOADIPHLPAPI,
+            c_ares_sys::ares_status_t::ARES_EADDRGETNETWORKPARAMS => Error::EADDRGETNETWORKPARAMS,
+            c_ares_sys::ares_status_t::ARES_ECANCELLED => Error::ECANCELLED,
+            c_ares_sys::ares_status_t::ARES_ESERVICE => Error::ESERVICE,
+        };
+        Ok(error)
     }
 }
 

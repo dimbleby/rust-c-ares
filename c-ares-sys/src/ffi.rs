@@ -94,6 +94,8 @@ pub struct ares_options {
     pub hosts_path: *mut ::std::os::raw::c_char,
     #[cfg(cares1_20)]
     pub udp_max_queries: ::std::os::raw::c_int,
+    #[cfg(cares1_22)]
+    pub maxtimeout: ::std::os::raw::c_int,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -101,6 +103,7 @@ pub struct ares_channeldata {
     _unused: [u8; 0],
 }
 pub type ares_channel = *mut ares_channeldata;
+pub type ares_channel_t = ares_channeldata;
 pub type ares_callback = ::std::option::Option<
     unsafe extern "C" fn(
         arg: *mut ::std::os::raw::c_void,
@@ -177,18 +180,18 @@ extern "C" {
     pub fn ares_version(version: *mut ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
 }
 extern "C" {
-    pub fn ares_init(channelptr: *mut ares_channel) -> ::std::os::raw::c_int;
+    pub fn ares_init(channelptr: *mut *mut ares_channel_t) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_init_options(
-        channelptr: *mut ares_channel,
-        options: *mut ares_options,
+        channelptr: *mut *mut ares_channel_t,
+        options: *const ares_options,
         optmask: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_save_options(
-        channel: *const ares_channeldata,
+        channel: *const ares_channel_t,
         options: *mut ares_options,
         optmask: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
@@ -197,47 +200,58 @@ extern "C" {
     pub fn ares_destroy_options(options: *mut ares_options);
 }
 extern "C" {
-    pub fn ares_dup(dest: *mut ares_channel, src: *const ares_channeldata)
-        -> ::std::os::raw::c_int;
+    pub fn ares_dup(
+        dest: *mut *mut ares_channel_t,
+        src: *const ares_channel_t,
+    ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn ares_destroy(channel: ares_channel);
+    pub fn ares_reinit(channel: *mut ares_channel_t) -> ares_status_t;
 }
 extern "C" {
-    pub fn ares_cancel(channel: ares_channel);
+    pub fn ares_destroy(channel: *mut ares_channel_t);
 }
 extern "C" {
-    pub fn ares_set_local_ip4(channel: ares_channel, local_ip: ::std::os::raw::c_uint);
+    pub fn ares_cancel(channel: *mut ares_channel_t);
 }
 extern "C" {
-    pub fn ares_set_local_ip6(channel: ares_channel, local_ip6: *const ::std::os::raw::c_uchar);
+    pub fn ares_set_local_ip4(channel: *mut ares_channel_t, local_ip: ::std::os::raw::c_uint);
 }
 extern "C" {
-    pub fn ares_set_local_dev(channel: ares_channel, local_dev_name: *const ::std::os::raw::c_char);
+    pub fn ares_set_local_ip6(
+        channel: *mut ares_channel_t,
+        local_ip6: *const ::std::os::raw::c_uchar,
+    );
+}
+extern "C" {
+    pub fn ares_set_local_dev(
+        channel: *mut ares_channel_t,
+        local_dev_name: *const ::std::os::raw::c_char,
+    );
 }
 extern "C" {
     pub fn ares_set_socket_callback(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         callback: ares_sock_create_callback,
         user_data: *mut ::std::os::raw::c_void,
     );
 }
 extern "C" {
     pub fn ares_set_socket_configure_callback(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         callback: ares_sock_config_callback,
         user_data: *mut ::std::os::raw::c_void,
     );
 }
 extern "C" {
     pub fn ares_set_sortlist(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         sortstr: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_getaddrinfo(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         node: *const ::std::os::raw::c_char,
         service: *const ::std::os::raw::c_char,
         hints: *const ares_addrinfo_hints,
@@ -295,14 +309,14 @@ pub struct ares_socket_functions {
 }
 extern "C" {
     pub fn ares_set_socket_functions(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         funcs: *const ares_socket_functions,
         user_data: *mut ::std::os::raw::c_void,
     );
 }
 extern "C" {
     pub fn ares_send(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         qbuf: *const ::std::os::raw::c_uchar,
         qlen: ::std::os::raw::c_int,
         callback: ares_callback,
@@ -311,7 +325,7 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_query(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         name: *const ::std::os::raw::c_char,
         dnsclass: ::std::os::raw::c_int,
         type_: ::std::os::raw::c_int,
@@ -321,7 +335,7 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_search(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         name: *const ::std::os::raw::c_char,
         dnsclass: ::std::os::raw::c_int,
         type_: ::std::os::raw::c_int,
@@ -331,7 +345,7 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_gethostbyname(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         name: *const ::std::os::raw::c_char,
         family: ::std::os::raw::c_int,
         callback: ares_host_callback,
@@ -340,7 +354,7 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_gethostbyname_file(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         name: *const ::std::os::raw::c_char,
         family: ::std::os::raw::c_int,
         host: *mut *mut hostent,
@@ -348,7 +362,7 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_gethostbyaddr(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         addr: *const ::std::os::raw::c_void,
         addrlen: ::std::os::raw::c_int,
         family: ::std::os::raw::c_int,
@@ -358,7 +372,7 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_getnameinfo(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         sa: *const sockaddr,
         salen: ares_socklen_t,
         flags: ::std::os::raw::c_int,
@@ -368,30 +382,38 @@ extern "C" {
 }
 extern "C" {
     pub fn ares_fds(
-        channel: *const ares_channeldata,
+        channel: *const ares_channel_t,
         read_fds: *mut fd_set,
         write_fds: *mut fd_set,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_getsock(
-        channel: *const ares_channeldata,
+        channel: *const ares_channel_t,
         socks: *mut ares_socket_t,
         numsocks: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_timeout(
-        channel: *const ares_channeldata,
+        channel: *const ares_channel_t,
         maxtv: *mut timeval,
         tv: *mut timeval,
     ) -> *mut timeval;
 }
 extern "C" {
-    pub fn ares_process(channel: ares_channel, read_fds: *mut fd_set, write_fds: *mut fd_set);
+    pub fn ares_process(
+        channel: *mut ares_channel_t,
+        read_fds: *mut fd_set,
+        write_fds: *mut fd_set,
+    );
 }
 extern "C" {
-    pub fn ares_process_fd(channel: ares_channel, read_fd: ares_socket_t, write_fd: ares_socket_t);
+    pub fn ares_process_fd(
+        channel: *mut ares_channel_t,
+        read_fd: ares_socket_t,
+        write_fd: ares_socket_t,
+    );
 }
 extern "C" {
     pub fn ares_create_query(
@@ -443,6 +465,18 @@ pub struct ares_in6_addr {
 #[derive(Copy, Clone)]
 pub union ares_in6_addr__bindgen_ty_1 {
     pub _S6_u8: [::std::os::raw::c_uchar; 16usize],
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ares_addr {
+    pub family: ::std::os::raw::c_int,
+    pub addr: ares_addr__bindgen_ty_1,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union ares_addr__bindgen_ty_1 {
+    pub addr4: in_addr,
+    pub addr6: ares_in6_addr,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -696,37 +730,37 @@ pub union ares_addr_port_node__bindgen_ty_1 {
 }
 extern "C" {
     pub fn ares_set_servers(
-        channel: ares_channel,
-        servers: *mut ares_addr_node,
+        channel: *mut ares_channel_t,
+        servers: *const ares_addr_node,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_set_servers_ports(
-        channel: ares_channel,
-        servers: *mut ares_addr_port_node,
+        channel: *mut ares_channel_t,
+        servers: *const ares_addr_port_node,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_set_servers_csv(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         servers: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_set_servers_ports_csv(
-        channel: ares_channel,
+        channel: *mut ares_channel_t,
         servers: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_get_servers(
-        channel: *const ares_channeldata,
+        channel: *const ares_channel_t,
         servers: *mut *mut ares_addr_node,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
     pub fn ares_get_servers_ports(
-        channel: *const ares_channeldata,
+        channel: *const ares_channel_t,
         servers: *mut *mut ares_addr_port_node,
     ) -> ::std::os::raw::c_int;
 }
@@ -744,6 +778,759 @@ extern "C" {
         src: *const ::std::os::raw::c_char,
         dst: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int;
+}
+#[repr(u32)]
+#[doc = " DNS Record types handled by c-ares.  Some record types may only be valid\n  on requests (e.g. ARES_REC_TYPE_ANY), and some may only be valid on\n  responses"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_rec_type_t {
+    #[doc = "< Host address."]
+    ARES_REC_TYPE_A = 1,
+    #[doc = "< Authoritative server."]
+    ARES_REC_TYPE_NS = 2,
+    #[doc = "< Canonical name."]
+    ARES_REC_TYPE_CNAME = 5,
+    #[doc = "< Start of authority zone."]
+    ARES_REC_TYPE_SOA = 6,
+    #[doc = "< Domain name pointer."]
+    ARES_REC_TYPE_PTR = 12,
+    #[doc = "< Host information."]
+    ARES_REC_TYPE_HINFO = 13,
+    #[doc = "< Mail routing information."]
+    ARES_REC_TYPE_MX = 15,
+    #[doc = "< Text strings."]
+    ARES_REC_TYPE_TXT = 16,
+    #[doc = "< RFC 3596. Ip6 Address."]
+    ARES_REC_TYPE_AAAA = 28,
+    #[doc = "< RFC 2782. Server Selection."]
+    ARES_REC_TYPE_SRV = 33,
+    #[doc = "< RFC 3403. Naming Authority Pointer"]
+    ARES_REC_TYPE_NAPTR = 35,
+    #[doc = "< RFC 6891. EDNS0 option (meta-RR)"]
+    ARES_REC_TYPE_OPT = 41,
+    #[doc = "< RFC 6698. DNS-Based Authentication of Named\n   Entities (DANE) Transport Layer Security\n   (TLS) Protocol: TLSA"]
+    ARES_REC_TYPE_TLSA = 52,
+    #[doc = "< RFC 9460. General Purpose Service Binding"]
+    ARES_REC_TYPE_SVCB = 64,
+    #[doc = "< RFC 9460. Service Binding type for use with\n   HTTPS"]
+    ARES_REC_TYPE_HTTPS = 65,
+    #[doc = "< Wildcard match.  Not response RR."]
+    ARES_REC_TYPE_ANY = 255,
+    #[doc = "< RFC 7553. Uniform Resource Identifier"]
+    ARES_REC_TYPE_URI = 256,
+    #[doc = "< RFC 6844. Certification Authority\n   Authorization."]
+    ARES_REC_TYPE_CAA = 257,
+    #[doc = "< Used as an indicator that the RR record\n   is not parsed, but provided in wire\n   format"]
+    ARES_REC_TYPE_RAW_RR = 65536,
+}
+#[repr(u32)]
+#[doc = " DNS Classes for requests and responses."]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_class_t {
+    #[doc = "< Internet"]
+    ARES_CLASS_IN = 1,
+    #[doc = "< CHAOS"]
+    ARES_CLASS_CHAOS = 3,
+    #[doc = "< Hesoid [Dyer 87]"]
+    ARES_CLASS_HESOID = 4,
+    #[doc = "< RFC 2136"]
+    ARES_CLASS_NONE = 254,
+    #[doc = "< Any class (requests only)"]
+    ARES_CLASS_ANY = 255,
+}
+#[repr(u32)]
+#[doc = " DNS RR Section type"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_section_t {
+    #[doc = "< Answer section"]
+    ARES_SECTION_ANSWER = 1,
+    #[doc = "< Authority section"]
+    ARES_SECTION_AUTHORITY = 2,
+    #[doc = "< Additional information section"]
+    ARES_SECTION_ADDITIONAL = 3,
+}
+#[repr(u32)]
+#[doc = " DNS Header opcodes"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_opcode_t {
+    #[doc = "< Standard query"]
+    ARES_OPCODE_QUERY = 0,
+    #[doc = "< Inverse query. Obsolete."]
+    ARES_OPCODE_IQUERY = 1,
+    #[doc = "< Name server status query"]
+    ARES_OPCODE_STATUS = 2,
+    #[doc = "< Zone change notification (RFC 1996)"]
+    ARES_OPCODE_NOTIFY = 4,
+    #[doc = "< Zone update message (RFC2136)"]
+    ARES_OPCODE_UPDATE = 5,
+}
+#[repr(u32)]
+#[doc = " DNS Header flags"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_flags_t {
+    #[doc = "< QR. If set, is a response"]
+    ARES_FLAG_QR = 1,
+    #[doc = "< Authoritative Answer. If set, is authoritative"]
+    ARES_FLAG_AA = 2,
+    #[doc = "< Truncation. If set, is truncated response"]
+    ARES_FLAG_TC = 4,
+    #[doc = "< Recursion Desired. If set, recursion is desired"]
+    ARES_FLAG_RD = 8,
+    #[doc = "< Recursion Available. If set, server supports\n   recursion"]
+    ARES_FLAG_RA = 16,
+    #[doc = "< RFC 2065. Authentic Data bit indicates in a\n response that the data included has been verified by\n the server providing it"]
+    ARES_FLAG_AD = 32,
+    #[doc = "< RFC 2065. Checking Disabled bit indicates in a\n query that non-verified data is acceptable to the\n resolver sending the query."]
+    ARES_FLAG_CD = 64,
+}
+#[repr(u32)]
+#[doc = " DNS Response Codes from server"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_rcode_t {
+    #[doc = "< Success"]
+    ARES_RCODE_NOERROR = 0,
+    #[doc = "< Format error. The name server was unable\n   to interpret the query."]
+    ARES_RCODE_FORMERR = 1,
+    #[doc = "< Server Failure. The name server was\n   unable to process this query due to a\n   problem with the nameserver"]
+    ARES_RCODE_SERVFAIL = 2,
+    #[doc = "< Name Error.  Meaningful only for\n   responses from an authoritative name\n   server, this code signifies that the\n   domain name referenced in the query does\n   not exist."]
+    ARES_RCODE_NXDOMAIN = 3,
+    #[doc = "< Not implemented.  The name server does\n   not support the requested kind of\n   query"]
+    ARES_RCODE_NOTIMP = 4,
+    #[doc = "< Refused. The name server refuses to\n   perform the speciied operation for\n   policy reasons."]
+    ARES_RCODE_REFUSED = 5,
+    #[doc = "< RFC 2136. Some name that ought not to\n   exist, does exist."]
+    ARES_RCODE_YXDOMAIN = 6,
+    #[doc = "< RFC 2136. Some RRset that ought to not\n   exist, does exist."]
+    ARES_RCODE_YXRRSET = 7,
+    #[doc = "< RFC 2136. Some RRset that ought to exist,\n   does not exist."]
+    ARES_RCODE_NXRRSET = 8,
+    #[doc = "< RFC 2136. The server is not authoritative\n   for the zone named in the Zone section."]
+    ARES_RCODE_NOTAUTH = 9,
+    #[doc = "< RFC 2136. A name used in the Prerequisite\n   or Update Section is not within the zone\n   denoted by the Zone Section."]
+    ARES_RCODE_NOTZONE = 10,
+    #[doc = "< RFC 8409. DSO-TYPE Not implemented"]
+    ARES_RCODE_DSOTYPEI = 11,
+    #[doc = "< RFC 8945. TSIG Signature Failure"]
+    ARES_RCODE_BADSIG = 16,
+    #[doc = "< RFC 8945. Key not recognized."]
+    ARES_RCODE_BADKEY = 17,
+    #[doc = "< RFC 8945. Signature out of time window."]
+    ARES_RCODE_BADTIME = 18,
+    #[doc = "< RFC 2930. Bad TKEY Mode"]
+    ARES_RCODE_BADMODE = 19,
+    #[doc = "< RFC 2930. Duplicate Key Name"]
+    ARES_RCODE_BADNAME = 20,
+    #[doc = "< RFC 2930. Algorithm not supported"]
+    ARES_RCODE_BADALG = 21,
+    #[doc = "< RFC 8945. Bad Truncation"]
+    ARES_RCODE_BADTRUNC = 22,
+    #[doc = "< RVC 7973. Bad/missing Server Cookie"]
+    ARES_RCODE_BADCOOKIE = 23,
+}
+#[repr(u32)]
+#[doc = " Data types used"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_datatype_t {
+    #[doc = "< struct in_addr * type"]
+    ARES_DATATYPE_INADDR = 1,
+    #[doc = "< struct ares_in6_addr * type"]
+    ARES_DATATYPE_INADDR6 = 2,
+    #[doc = "< 8bit unsigned integer"]
+    ARES_DATATYPE_U8 = 3,
+    #[doc = "< 16bit unsigned integer"]
+    ARES_DATATYPE_U16 = 4,
+    #[doc = "< 32bit unsigned integer"]
+    ARES_DATATYPE_U32 = 5,
+    #[doc = "< Null-terminated string of a domain name"]
+    ARES_DATATYPE_NAME = 6,
+    #[doc = "< Null-terminated string"]
+    ARES_DATATYPE_STR = 7,
+    #[doc = "< Binary data"]
+    ARES_DATATYPE_BIN = 8,
+    #[doc = "< Officially defined as binary data, but likely\n   printable. Guaranteed to have a NULL\n   terminator for convenience (not included in\n   length)"]
+    ARES_DATATYPE_BINP = 9,
+    #[doc = "< Array of options.  16bit identifier, BIN\n   data."]
+    ARES_DATATYPE_OPT = 10,
+}
+#[repr(u32)]
+#[doc = " Keys used for all RR Types.  We take the record type and multiply by 100\n  to ensure we have a proper offset between keys so we can keep these sorted"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_rr_key_t {
+    #[doc = " A Record. Address. Datatype: INADDR"]
+    ARES_RR_A_ADDR = 101,
+    #[doc = " NS Record. Name. Datatype: NAME"]
+    ARES_RR_NS_NSDNAME = 201,
+    #[doc = " CNAME Record. CName. Datatype: NAME"]
+    ARES_RR_CNAME_CNAME = 501,
+    #[doc = " SOA Record. MNAME, Primary Source of Data. Datatype: NAME"]
+    ARES_RR_SOA_MNAME = 601,
+    #[doc = " SOA Record. RNAME, Mailbox of person responsible. Datatype: NAME"]
+    ARES_RR_SOA_RNAME = 602,
+    #[doc = " SOA Record. Serial, version. Datatype: U32"]
+    ARES_RR_SOA_SERIAL = 603,
+    #[doc = " SOA Record. Refresh, zone refersh interval. Datatype: U32"]
+    ARES_RR_SOA_REFRESH = 604,
+    #[doc = " SOA Record. Retry, failed refresh retry interval. Datatype: U32"]
+    ARES_RR_SOA_RETRY = 605,
+    #[doc = " SOA Record. Expire, upper limit on authority. Datatype: U32"]
+    ARES_RR_SOA_EXPIRE = 606,
+    #[doc = " SOA Record. Minimum, RR TTL. Datatype: U32"]
+    ARES_RR_SOA_MINIMUM = 607,
+    #[doc = " PTR Record. DNAME, pointer domain. Datatype: NAME"]
+    ARES_RR_PTR_DNAME = 1201,
+    #[doc = " HINFO Record. CPU. Datatype: STR"]
+    ARES_RR_HINFO_CPU = 1301,
+    #[doc = " HINFO Record. OS. Datatype: STR"]
+    ARES_RR_HINFO_OS = 1302,
+    #[doc = " MX Record. Preference. Datatype: U16"]
+    ARES_RR_MX_PREFERENCE = 1501,
+    #[doc = " MX Record. Exchange, domain. Datatype: NAME"]
+    ARES_RR_MX_EXCHANGE = 1502,
+    #[doc = " TXT Record. Data. Datatype: BINP"]
+    ARES_RR_TXT_DATA = 1601,
+    #[doc = " AAAA Record. Address. Datatype: INADDR6"]
+    ARES_RR_AAAA_ADDR = 2801,
+    #[doc = " SRV Record. Priority. Datatype: U16"]
+    ARES_RR_SRV_PRIORITY = 3302,
+    #[doc = " SRV Record. Weight. Datatype: U16"]
+    ARES_RR_SRV_WEIGHT = 3303,
+    #[doc = " SRV Record. Port. Datatype: U16"]
+    ARES_RR_SRV_PORT = 3304,
+    #[doc = " SRV Record. Target domain. Datatype: NAME"]
+    ARES_RR_SRV_TARGET = 3305,
+    #[doc = " NAPTR Record. Order. Datatype: U16"]
+    ARES_RR_NAPTR_ORDER = 3501,
+    #[doc = " NAPTR Record. Preference. Datatype: U16"]
+    ARES_RR_NAPTR_PREFERENCE = 3502,
+    #[doc = " NAPTR Record. Flags. Datatype: STR"]
+    ARES_RR_NAPTR_FLAGS = 3503,
+    #[doc = " NAPTR Record. Services. Datatype: STR"]
+    ARES_RR_NAPTR_SERVICES = 3504,
+    #[doc = " NAPTR Record. Regexp. Datatype: STR"]
+    ARES_RR_NAPTR_REGEXP = 3505,
+    #[doc = " NAPTR Record. Replacement. Datatype: NAME"]
+    ARES_RR_NAPTR_REPLACEMENT = 3506,
+    #[doc = " OPT Record. UDP Size. Datatype: U16"]
+    ARES_RR_OPT_UDP_SIZE = 4101,
+    #[doc = " OPT Record. Version. Datatype: U8"]
+    ARES_RR_OPT_VERSION = 4103,
+    #[doc = " OPT Record. Flags. Datatype: U16"]
+    ARES_RR_OPT_FLAGS = 4104,
+    #[doc = " OPT Record. Options. Datatype: OPT"]
+    ARES_RR_OPT_OPTIONS = 4105,
+    #[doc = " TLSA Record. Certificate Usage. Datatype: U8"]
+    ARES_RR_TLSA_CERT_USAGE = 5201,
+    #[doc = " TLSA Record. Selector. Datatype: U8"]
+    ARES_RR_TLSA_SELECTOR = 5202,
+    #[doc = " TLSA Record. Matching Type. Datatype: U8"]
+    ARES_RR_TLSA_MATCH = 5203,
+    #[doc = " TLSA Record. Certificate Association Data. Datatype: BIN"]
+    ARES_RR_TLSA_DATA = 5204,
+    #[doc = " SVCB Record. SvcPriority. Datatype: U16"]
+    ARES_RR_SVCB_PRIORITY = 6401,
+    #[doc = " SVCB Record. TargetName. Datatype: NAME"]
+    ARES_RR_SVCB_TARGET = 6402,
+    #[doc = " SVCB Record. SvcParams. Datatype: OPT"]
+    ARES_RR_SVCB_PARAMS = 6403,
+    #[doc = " HTTPS Record. SvcPriority. Datatype: U16"]
+    ARES_RR_HTTPS_PRIORITY = 6501,
+    #[doc = " HTTPS Record. TargetName. Datatype: NAME"]
+    ARES_RR_HTTPS_TARGET = 6502,
+    #[doc = " HTTPS Record. SvcParams. Datatype: OPT"]
+    ARES_RR_HTTPS_PARAMS = 6503,
+    #[doc = " URI Record. Priority. Datatype: U16"]
+    ARES_RR_URI_PRIORITY = 25601,
+    #[doc = " URI Record. Weight. Datatype: U16"]
+    ARES_RR_URI_WEIGHT = 25602,
+    #[doc = " URI Record. Target domain. Datatype: NAME"]
+    ARES_RR_URI_TARGET = 25603,
+    #[doc = " CAA Record. Critical flag. Datatype: U8"]
+    ARES_RR_CAA_CRITICAL = 25701,
+    #[doc = " CAA Record. Tag/Property. Datatype: STR"]
+    ARES_RR_CAA_TAG = 25702,
+    #[doc = " CAA Record. Value. Datatype: BINP"]
+    ARES_RR_CAA_VALUE = 25703,
+    #[doc = " RAW Record. RR Type. Datatype: U16"]
+    ARES_RR_RAW_RR_TYPE = 6553601,
+    #[doc = " RAW Record. RR Data. Datatype: BIN"]
+    ARES_RR_RAW_RR_DATA = 6553602,
+}
+#[repr(u32)]
+#[doc = " TLSA Record ARES_RR_TLSA_CERT_USAGE known values"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_tlsa_usage_t {
+    #[doc = " Certificate Usage 0. CA Constraint."]
+    ARES_TLSA_USAGE_CA = 0,
+    #[doc = " Certificate Usage 1. Service Certificate Constraint."]
+    ARES_TLSA_USAGE_SERVICE = 1,
+    #[doc = " Certificate Usage 2. Trust Anchor Assertation."]
+    ARES_TLSA_USAGE_TRUSTANCHOR = 2,
+    #[doc = " Certificate Usage 3. Domain-issued certificate."]
+    ARES_TLSA_USAGE_DOMAIN = 3,
+}
+#[repr(u32)]
+#[doc = " TLSA Record ARES_RR_TLSA_SELECTOR known values"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_tlsa_selector_t {
+    #[doc = " Full Certificate"]
+    ARES_TLSA_SELECTOR_FULL = 0,
+    #[doc = " DER-encoded SubjectPublicKeyInfo"]
+    ARES_TLSA_SELECTOR_SUBJPUBKEYINFO = 1,
+}
+#[repr(u32)]
+#[doc = " TLSA Record ARES_RR_TLSA_MATCH known values"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_tlsa_match_t {
+    #[doc = " Exact match"]
+    ARES_TLSA_MATCH_EXACT = 0,
+    #[doc = " Sha256 match"]
+    ARES_TLSA_MATCH_SHA256 = 1,
+    #[doc = " Sha512 match"]
+    ARES_TLSA_MATCH_SHA512 = 2,
+}
+#[repr(u32)]
+#[doc = " SVCB (and HTTPS) RR known parameters"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_svcb_param_t {
+    #[doc = " Mandatory keys in this RR (RFC 9460 Section 8)"]
+    ARES_SVCB_PARAM_MANDATORY = 0,
+    #[doc = " Additional supported protocols (RFC 9460 Section 7.1)"]
+    ARES_SVCB_PARAM_ALPN = 1,
+    #[doc = " No support for default protocol (RFC 9460 Section 7.1)"]
+    ARES_SVCB_PARAM_NO_DEFAULT_ALPN = 2,
+    #[doc = " Port for alternative endpoint (RFC 9460 Section 7.2)"]
+    ARES_SVCB_PARAM_PORT = 3,
+    #[doc = " IPv4 address hints (RFC 9460 Section 7.3)"]
+    ARES_SVCB_PARAM_IPV4HINT = 4,
+    #[doc = " RESERVED (held for Encrypted ClientHello)"]
+    ARES_SVCB_PARAM_ECH = 5,
+    #[doc = " IPv6 address hints (RFC 9460 Section 7.3)"]
+    ARES_SVCB_PARAM_IPV6HINT = 6,
+}
+#[repr(u32)]
+#[doc = " OPT RR known parameters"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_opt_param_t {
+    #[doc = " RFC 8764. Apple's DNS Long-Lived Queries Protocol"]
+    ARES_OPT_PARAM_LLQ = 1,
+    #[doc = " http://files.dns-sd.org/draft-sekar-dns-ul.txt: Update Lease"]
+    ARES_OPT_PARAM_UL = 2,
+    #[doc = " RFC 5001. Name Server Identification"]
+    ARES_OPT_PARAM_NSID = 3,
+    #[doc = " RFC 6975. DNSSEC Algorithm Understood"]
+    ARES_OPT_PARAM_DAU = 5,
+    #[doc = " RFC 6975. DS Hash Understood"]
+    ARES_OPT_PARAM_DHU = 6,
+    #[doc = " RFC 6975. NSEC3 Hash Understood"]
+    ARES_OPT_PARAM_N3U = 7,
+    #[doc = " RFC 7871. Client Subnet"]
+    ARES_OPT_PARAM_EDNS_CLIENT_SUBNET = 8,
+    #[doc = " RFC 7314. Expire Timer"]
+    ARES_OPT_PARAM_EDNS_EXPIRE = 9,
+    #[doc = " RFC 7873. Client and Server Cookies"]
+    ARES_OPT_PARAM_COOKIE = 10,
+    #[doc = " RFC 7828. TCP Keepalive timeout"]
+    ARES_OPT_PARAM_EDNS_TCP_KEEPALIVE = 11,
+    #[doc = " RFC 7830. Padding"]
+    ARES_OPT_PARAM_PADDING = 12,
+    #[doc = " RFC 7901. Chain query requests"]
+    ARES_OPT_PARAM_CHAIN = 13,
+    #[doc = " RFC 8145. Signaling Trust Anchor Knowledge in DNSSEC"]
+    ARES_OPT_PARAM_EDNS_KEY_TAG = 14,
+    #[doc = " RFC 8914. Extended ERROR code and message"]
+    ARES_OPT_PARAM_EXTENDED_DNS_ERROR = 15,
+}
+#[repr(u32)]
+#[doc = " Data type for option records for keys like ARES_RR_OPT_OPTIONS and\n  ARES_RR_HTTPS_PARAMS returned by ares_dns_opt_get_datatype()"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_opt_datatype_t {
+    #[doc = " No value allowed for this option"]
+    ARES_OPT_DATATYPE_NONE = 1,
+    #[doc = " List of strings, each prefixed with a single octet representing the length"]
+    ARES_OPT_DATATYPE_STR_LIST = 2,
+    #[doc = " List of 8bit integers, concatenated"]
+    ARES_OPT_DATATYPE_U8_LIST = 3,
+    #[doc = " 16bit integer in network byte order"]
+    ARES_OPT_DATATYPE_U16 = 4,
+    #[doc = " list of 16bit integer in network byte order, concatenated."]
+    ARES_OPT_DATATYPE_U16_LIST = 5,
+    #[doc = " 32bit integer in network byte order"]
+    ARES_OPT_DATATYPE_U32 = 6,
+    #[doc = " list 32bit integer in network byte order, concatenated"]
+    ARES_OPT_DATATYPE_U32_LIST = 7,
+    #[doc = " List of ipv4 addresses in network byte order, concatenated"]
+    ARES_OPT_DATATYPE_INADDR4_LIST = 8,
+    #[doc = " List of ipv6 addresses in network byte order, concatenated"]
+    ARES_OPT_DATATYPE_INADDR6_LIST = 9,
+    #[doc = " Binary Data"]
+    ARES_OPT_DATATYPE_BIN = 10,
+    #[doc = " DNS Domain Name Format"]
+    ARES_OPT_DATATYPE_NAME = 11,
+}
+extern "C" {
+    #[doc = " String representation of DNS Record Type\n\n  \\param[in] type  DNS Record Type\n  \\return string"]
+    pub fn ares_dns_rec_type_tostr(type_: ares_dns_rec_type_t) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " String representation of DNS Class\n\n  \\param[in] qclass  DNS Class\n  \\return string"]
+    pub fn ares_dns_class_tostr(qclass: ares_dns_class_t) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " String representation of DNS OpCode\n\n  \\param[in] opcode  DNS OpCode\n  \\return string"]
+    pub fn ares_dns_opcode_tostr(opcode: ares_dns_opcode_t) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " String representation of DNS Resource Record Parameter\n\n  \\param[in] key  DNS Resource Record parameter\n  \\return string"]
+    pub fn ares_dns_rr_key_tostr(key: ares_dns_rr_key_t) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " String representation of DNS Resource Record section\n\n \\param[in] section  Section\n \\return string"]
+    pub fn ares_dns_section_tostr(section: ares_dns_section_t) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " Convert DNS class name as string to ares_dns_class_t\n\n  \\param[out] qclass  Pointer passed by reference to write class\n  \\param[in]  str     String to convert\n  \\return ARES_TRUE on success"]
+    pub fn ares_dns_class_fromstr(
+        qclass: *mut ares_dns_class_t,
+        str_: *const ::std::os::raw::c_char,
+    ) -> ares_bool_t;
+}
+extern "C" {
+    #[doc = " Convert DNS record type as string to ares_dns_rec_type_t\n\n  \\param[out] qclass  Pointer passed by reference to write record type\n  \\param[in]  str     String to convert\n  \\return ARES_TRUE on success"]
+    pub fn ares_dns_rec_type_fromstr(
+        qtype: *mut ares_dns_rec_type_t,
+        str_: *const ::std::os::raw::c_char,
+    ) -> ares_bool_t;
+}
+extern "C" {
+    #[doc = " Convert DNS response code as string to from ares_dns_rcode_t\n\n  \\param[in] rcode  Response code to convert\n  \\return ARES_TRUE on success"]
+    pub fn ares_dns_rcode_tostr(rcode: ares_dns_rcode_t) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " Convert any valid ip address (ipv4 or ipv6) into struct ares_addr and\n  return the starting pointer of the network byte order address and the\n  length of the address (4 or 16).\n\n  \\param[in]     ipaddr  ASCII string form of the ip address\n  \\param[in,out] addr    Must set \"family\" member to one of AF_UNSPEC,\n                         AF_INET, AF_INET6 on input.\n  \\param[out]    ptr_len Length of binary form address\n  \\return Pointer to start of binary address or NULL on error."]
+    pub fn ares_dns_pton(
+        ipaddr: *const ::std::os::raw::c_char,
+        addr: *mut ares_addr,
+        out_len: *mut usize,
+    ) -> *const ::std::os::raw::c_void;
+}
+extern "C" {
+    #[doc = " Convert an ip address into the PTR format for in-addr.arpa or in6.arpa\n\n  \\param[in]  addr  properly filled address structure\n  \\return  String representing PTR, use ares_free_string() to free"]
+    pub fn ares_dns_addr_to_ptr(addr: *const ares_addr) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " The options/parameters extensions to some RRs can be somewhat opaque, this\n  is a helper to return the best match for a datatype for interpreting the\n  option record.\n\n  \\param[in] key  Key associated with options/parameters\n  \\param[in] opt  Option Key/Parameter\n  \\return Datatype"]
+    pub fn ares_dns_opt_get_datatype(
+        key: ares_dns_rr_key_t,
+        opt: ::std::os::raw::c_ushort,
+    ) -> ares_dns_opt_datatype_t;
+}
+extern "C" {
+    #[doc = " The options/parameters extensions to some RRs can be somewhat opaque, this\n  is a helper to return the name if the option is known.\n\n  \\param[in] key  Key associated with options/parameters\n  \\param[in] opt  Option Key/Parameter\n  \\return name, or NULL if not known."]
+    pub fn ares_dns_opt_get_name(
+        key: ares_dns_rr_key_t,
+        opt: ::std::os::raw::c_ushort,
+    ) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " Retrieve a list of Resource Record keys that can be set or retrieved for\n  the Resource record type.\n\n  \\param[in]  type  Record Type\n  \\param[out] cnt   Number of keys returned\n  \\return array of keys associated with Resource Record"]
+    pub fn ares_dns_rr_get_keys(
+        type_: ares_dns_rec_type_t,
+        cnt: *mut usize,
+    ) -> *const ares_dns_rr_key_t;
+}
+extern "C" {
+    #[doc = " Retrieve the datatype associated with a Resource Record key.\n\n  \\param[in] key   Resource Record Key\n  \\return datatype"]
+    pub fn ares_dns_rr_key_datatype(key: ares_dns_rr_key_t) -> ares_dns_datatype_t;
+}
+extern "C" {
+    #[doc = " Retrieve the DNS Resource Record type associated with a Resource Record key.\n\n  \\param[in] key   Resource Record Key\n  \\return DNS Resource Record Type"]
+    pub fn ares_dns_rr_key_to_rec_type(key: ares_dns_rr_key_t) -> ares_dns_rec_type_t;
+}
+#[doc = " Opaque data type representing a DNS RR (Resource Record)"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_dns_rr {
+    _unused: [u8; 0],
+}
+#[doc = " Typedef for opaque data type representing a DNS RR (Resource Record)"]
+pub type ares_dns_rr_t = ares_dns_rr;
+#[doc = " Opaque data type representing a DNS Query Data QD Packet"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_dns_qd {
+    _unused: [u8; 0],
+}
+#[doc = " Typedef for opaque data type representing a DNS Query Data QD Packet"]
+pub type ares_dns_qd_t = ares_dns_qd;
+#[doc = " Opaque data type representing a DNS Packet"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_dns_record {
+    _unused: [u8; 0],
+}
+#[doc = " Typedef for opaque data type representing a DNS Packet"]
+pub type ares_dns_record_t = ares_dns_record;
+extern "C" {
+    #[doc = " Create a new DNS record object\n\n  \\param[out] dnsrec  Pointer passed by reference for a newly allocated\n                      record object.  Must be ares_dns_record_destroy()'d by\n                      caller.\n  \\param[in]  id      DNS Query ID.  If structuring a new query to be sent\n                      with ares_send(), this value should be zero.\n  \\param[in]  flags   DNS Flags from \\ares_dns_flags_t\n  \\param[in]  opcode  DNS OpCode (typically ARES_OPCODE_QUERY)\n  \\param[in]  rcode   DNS RCode\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_record_create(
+        dnsrec: *mut *mut ares_dns_record_t,
+        id: ::std::os::raw::c_ushort,
+        flags: ::std::os::raw::c_ushort,
+        opcode: ares_dns_opcode_t,
+        rcode: ares_dns_rcode_t,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Destroy a DNS record object\n\n  \\param[in] dnsrec  Initialized record object"]
+    pub fn ares_dns_record_destroy(dnsrec: *mut ares_dns_record_t);
+}
+extern "C" {
+    #[doc = " Get the DNS Query ID\n\n  \\param[in] dnsrec  Initialized record object\n  \\return DNS query id"]
+    pub fn ares_dns_record_get_id(dnsrec: *const ares_dns_record_t) -> ::std::os::raw::c_ushort;
+}
+extern "C" {
+    #[doc = " Get the DNS Record Flags\n\n  \\param[in] dnsrec  Initialized record object\n  \\return One or more \\ares_dns_flags_t"]
+    pub fn ares_dns_record_get_flags(dnsrec: *const ares_dns_record_t) -> ::std::os::raw::c_ushort;
+}
+extern "C" {
+    #[doc = " Get the DNS Record OpCode\n\n  \\param[in] dnsrec  Initialized record object\n  \\return opcode"]
+    pub fn ares_dns_record_get_opcode(dnsrec: *const ares_dns_record_t) -> ares_dns_opcode_t;
+}
+extern "C" {
+    #[doc = " Get the DNS Record RCode\n\n  \\param[in] dnsrec  Initialized record object\n  \\return rcode"]
+    pub fn ares_dns_record_get_rcode(dnsrec: *const ares_dns_record_t) -> ares_dns_rcode_t;
+}
+extern "C" {
+    #[doc = " Add a query to the DNS Record.  Typically a record will have only 1\n  query. Most DNS servers will reject queries with more than 1 question.\n\n \\param[in] dnsrec  Initialized record object\n \\param[in] name    Name/Hostname of request\n \\param[in] qtype   Type of query\n \\param[in] qclass  Class of query (typically ARES_CLASS_IN)\n \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_record_query_add(
+        dnsrec: *mut ares_dns_record_t,
+        name: *const ::std::os::raw::c_char,
+        qtype: ares_dns_rec_type_t,
+        qclass: ares_dns_class_t,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Get the count of queries in the DNS Record\n\n \\param[in] dnsrec  Initialized record object\n \\return count of queries"]
+    pub fn ares_dns_record_query_cnt(dnsrec: *const ares_dns_record_t) -> usize;
+}
+extern "C" {
+    #[doc = " Get the data about the query at the provided index.\n\n \\param[in]  dnsrec  Initialized record object\n \\param[in]  idx     Index of query\n \\param[out] name    Optional.  Returns name, may pass NULL if not desired.\n \\param[out] qtype   Optional.  Returns record type, may pass NULL.\n \\param[out] qclass  Optional.  Returns class, may pass NULL.\n \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_record_query_get(
+        dnsrec: *const ares_dns_record_t,
+        idx: usize,
+        name: *mut *const ::std::os::raw::c_char,
+        qtype: *mut ares_dns_rec_type_t,
+        qclass: *mut ares_dns_class_t,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Get the count of Resource Records in the provided section\n\n \\param[in] dnsrec  Initialized record object\n \\param[in] sect    Section.  ARES_SECTION_ANSWER is most used.\n \\return count of resource records."]
+    pub fn ares_dns_record_rr_cnt(
+        dnsrec: *const ares_dns_record_t,
+        sect: ares_dns_section_t,
+    ) -> usize;
+}
+extern "C" {
+    #[doc = " Add a Resource Record to the DNS Record.\n\n  \\param[out] rr_out   Pointer to created resource record.  This pointer\n                       is owned by the DNS record itself, this is just made\n                       available to facilitate adding RR-specific fields.\n  \\param[in]  dnsrec   Initialized record object\n  \\param[in]  sect     Section to add resource record to\n  \\param[in]  name     Resource Record name/hostname\n  \\param[in]  type     Record Type\n  \\param[in]  rclass   Class\n  \\param[in]  ttl      TTL\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_record_rr_add(
+        rr_out: *mut *mut ares_dns_rr_t,
+        dnsrec: *mut ares_dns_record_t,
+        sect: ares_dns_section_t,
+        name: *const ::std::os::raw::c_char,
+        type_: ares_dns_rec_type_t,
+        rclass: ares_dns_class_t,
+        ttl: ::std::os::raw::c_uint,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Fetch a resource record based on the section and index.\n\n  \\param[in]  dnsrec   Initialized record object\n  \\param[in]  sect     Section for resource record\n  \\param[in]  idx      Index of resource record in section\n  \\return NULL on misuse, otherwise a pointer to the resource record"]
+    pub fn ares_dns_record_rr_get(
+        dnsrec: *mut ares_dns_record_t,
+        sect: ares_dns_section_t,
+        idx: usize,
+    ) -> *mut ares_dns_rr_t;
+}
+extern "C" {
+    #[doc = " Remove the resource record based on the section and index\n\n  \\param[in]  dnsrec   Initialized record object\n  \\param[in]  sect     Section for resource record\n  \\param[in]  idx      Index of resource record in section\n  \\return ARES_SUCCESS on success, otherwise an error code."]
+    pub fn ares_dns_record_rr_del(
+        dnsrec: *mut ares_dns_record_t,
+        sect: ares_dns_section_t,
+        idx: usize,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Retrieve the resource record Name/Hostname\n\n  \\param[in] rr  Pointer to resource record\n  \\return Name"]
+    pub fn ares_dns_rr_get_name(rr: *const ares_dns_rr_t) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " Retrieve the resource record type\n\n  \\param[in] rr  Pointer to resource record\n  \\return type"]
+    pub fn ares_dns_rr_get_type(rr: *const ares_dns_rr_t) -> ares_dns_rec_type_t;
+}
+extern "C" {
+    #[doc = " Retrieve the resource record class\n\n  \\param[in] rr  Pointer to resource record\n  \\return class"]
+    pub fn ares_dns_rr_get_class(rr: *const ares_dns_rr_t) -> ares_dns_class_t;
+}
+extern "C" {
+    #[doc = " Retrieve the resource record TTL\n\n  \\param[in] rr  Pointer to resource record\n  \\return TTL"]
+    pub fn ares_dns_rr_get_ttl(rr: *const ares_dns_rr_t) -> ::std::os::raw::c_uint;
+}
+extern "C" {
+    #[doc = " Set ipv4 address data type for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_INADDR\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] addr   Pointer to ipv4 address to use.\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_addr(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        addr: *const in_addr,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Set ipv6 address data type for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_INADDR6\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] addr   Pointer to ipv6 address to use.\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_addr6(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        addr: *const ares_in6_addr,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Set string data for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_STR or ARES_DATATYPE_NAME.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] val    Pointer to string to set.\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_str(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        val: *const ::std::os::raw::c_char,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Set 8bit unsigned integer for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_U8\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] val    8bit unsigned integer\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_u8(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        val: ::std::os::raw::c_uchar,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Set 16bit unsigned integer for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_U16\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] val    16bit unsigned integer\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_u16(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        val: ::std::os::raw::c_ushort,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Set 32bit unsigned integer for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_U32\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] val    32bit unsigned integer\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_u32(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        val: ::std::os::raw::c_uint,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Set binary (BIN or BINP) data for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_BIN or ARES_DATATYPE_BINP.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] val    Pointer to binary data.\n  \\param[in] len    Length of binary data\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_bin(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        val: *const ::std::os::raw::c_uchar,
+        len: usize,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Set the option for the RR\n\n  \\param[in]  dns_rr   Pointer to resource record\n  \\param[in]  key      DNS Resource Record Key\n  \\param[in]  opt      Option record key id.\n  \\param[out] val      Optional. Value to associate with option.\n  \\param[out] val_len  Length of value passed.\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_opt(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        opt: ::std::os::raw::c_ushort,
+        val: *const ::std::os::raw::c_uchar,
+        val_len: usize,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Retrieve a pointer to the ipv4 address.  Can only be used on keys with\n  datatype ARES_DATATYPE_INADDR.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return pointer to ipv4 address or NULL on error"]
+    pub fn ares_dns_rr_get_addr(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+    ) -> *const in_addr;
+}
+extern "C" {
+    #[doc = " Retrieve a pointer to the ipv6 address.  Can only be used on keys with\n  datatype ARES_DATATYPE_INADDR6.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return pointer to ipv6 address or NULL on error"]
+    pub fn ares_dns_rr_get_addr6(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+    ) -> *const ares_in6_addr;
+}
+extern "C" {
+    #[doc = " Retrieve a pointer to the string.  Can only be used on keys with\n  datatype ARES_DATATYPE_STR and ARES_DATATYPE_NAME.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return pointer string or NULL on error"]
+    pub fn ares_dns_rr_get_str(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+    ) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    #[doc = " Retrieve an 8bit unsigned integer.  Can only be used on keys with\n  datatype ARES_DATATYPE_U8.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return 8bit unsigned integer"]
+    pub fn ares_dns_rr_get_u8(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+    ) -> ::std::os::raw::c_uchar;
+}
+extern "C" {
+    #[doc = " Retrieve an 16bit unsigned integer.  Can only be used on keys with\n  datatype ARES_DATATYPE_U16.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return 16bit unsigned integer"]
+    pub fn ares_dns_rr_get_u16(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+    ) -> ::std::os::raw::c_ushort;
+}
+extern "C" {
+    #[doc = " Retrieve an 32bit unsigned integer.  Can only be used on keys with\n  datatype ARES_DATATYPE_U32.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return 32bit unsigned integer"]
+    pub fn ares_dns_rr_get_u32(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+    ) -> ::std::os::raw::c_uint;
+}
+extern "C" {
+    #[doc = " Retrieve a pointer to the binary data.  Can only be used on keys with\n  datatype ARES_DATATYPE_BIN or ARES_DATATYPE_BINP.  If BINP, the data is\n  guaranteed to have a NULL terminator which is NOT included in the length.\n\n  \\param[in]  dns_rr Pointer to resource record\n  \\param[in]  key    DNS Resource Record Key\n  \\param[out] len    Length of binary data returned\n  \\return pointer binary data or NULL on error"]
+    pub fn ares_dns_rr_get_bin(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        len: *mut usize,
+    ) -> *const ::std::os::raw::c_uchar;
+}
+extern "C" {
+    #[doc = " Retrieve the number of options stored for the RR.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return count, or 0 if none."]
+    pub fn ares_dns_rr_get_opt_cnt(dns_rr: *const ares_dns_rr_t, key: ares_dns_rr_key_t) -> usize;
+}
+extern "C" {
+    #[doc = " Retrieve the option for the RR by index.\n\n  \\param[in]  dns_rr  Pointer to resource record\n  \\param[in]  key     DNS Resource Record Key\n  \\param[in]  idx     Index of option record\n  \\param[out] val     Optional. Pointer passed by reference to hold value.\n                      Options may not have values.  Value if returned is\n                      guaranteed to be NULL terminated, however in most\n                      cases it is not printable.\n  \\param[out] val_len Optional. Pointer passed by reference to hold value\n                      length.\n  \\return option key/id on success, 65535 on misuse."]
+    pub fn ares_dns_rr_get_opt(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        idx: usize,
+        val: *mut *const ::std::os::raw::c_uchar,
+        val_len: *mut usize,
+    ) -> ::std::os::raw::c_ushort;
+}
+extern "C" {
+    #[doc = " Retrieve the option for the RR by the option key/id.\n\n  \\param[in]  dns_rr  Pointer to resource record\n  \\param[in]  key     DNS Resource Record Key\n  \\param[in]  opt     Option record key id (this is not the index).\n  \\param[out] val     Optional. Pointer passed by reference to hold value.\n                      Options may not have values. Value if returned is\n                      guaranteed to be NULL terminated, however in most cases\n                      it is not printable.\n  \\param[out] val_len Optional. Pointer passed by reference to hold value\n                      length.\n  \\return ARES_TRUE on success, ARES_FALSE on misuse."]
+    pub fn ares_dns_rr_get_opt_byid(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        opt: ::std::os::raw::c_ushort,
+        val: *mut *const ::std::os::raw::c_uchar,
+        val_len: *mut usize,
+    ) -> ares_bool_t;
+}
+extern "C" {
+    #[doc = " Parse a complete DNS message.\n\n  \\param[in]  buf      pointer to bytes to be parsed\n  \\param[in]  buf_len  Length of buf provided\n  \\param[in]  flags    Flags dictating how the message should be parsed. TBD.\n  \\param[out] dnsrec   Pointer passed by reference for a new DNS record object\n                       that must be ares_dns_record_destroy()'d by caller.\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_parse(
+        buf: *const ::std::os::raw::c_uchar,
+        buf_len: usize,
+        flags: ::std::os::raw::c_uint,
+        dnsrec: *mut *mut ares_dns_record_t,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Write a complete DNS message\n\n  \\param[in]  dnsrec   Pointer to initialized and filled DNS record object.\n  \\param[out] buf      Pointer passed by reference to be filled in with with\n                       DNS message.  Must be ares_free()'d by caller.\n  \\param[out] buf_len  Length of returned buffer containing DNS message.\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_write(
+        dnsrec: *mut ares_dns_record_t,
+        buf: *mut *mut ::std::os::raw::c_uchar,
+        buf_len: *mut usize,
+    ) -> ares_status_t;
 }
 #[cfg(target_os = "android")]
 extern "C" {

@@ -53,11 +53,6 @@ fn check_version(include_dirs: &[PathBuf]) {
         println!("cargo:rustc-cfg=cares1_15");
     }
 
-    if version >= 0x1_11_00 {
-        // 1.17.0
-        println!("cargo:rustc-cfg=cares1_17");
-    }
-
     if version >= 0x1_12_00 {
         // 1.18.0
         println!("cargo:rustc-cfg=cares1_18");

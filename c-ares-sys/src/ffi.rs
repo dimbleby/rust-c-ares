@@ -458,7 +458,6 @@ pub struct ares_addr6ttl {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-#[cfg(cares1_17)]
 pub struct ares_caa_reply {
     pub next: *mut ares_caa_reply,
     pub critical: ::std::os::raw::c_int,
@@ -582,7 +581,6 @@ extern "C" {
         naddrttls: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
-#[cfg(cares1_17)]
 extern "C" {
     pub fn ares_parse_caa_reply(
         abuf: *const ::std::os::raw::c_uchar,

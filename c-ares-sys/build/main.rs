@@ -70,7 +70,6 @@ fn check_version(include_dirs: &[PathBuf]) {
 }
 
 fn parse_version(version: &str) -> u64 {
-    println!("version: {version}");
     let mut it = version.split('_');
     let major = it.next().unwrap().parse::<u64>().unwrap();
     let minor = it.next().unwrap().parse::<u64>().unwrap();

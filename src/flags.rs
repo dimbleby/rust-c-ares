@@ -1,6 +1,7 @@
 use bitflags::bitflags;
 bitflags!(
     /// Flags that may be passed when initializing a `Channel`.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct Flags: i32 {
         /// Always use TCP queries (the "virtual circuit") instead of UDP queries.  Normally, TCP
         /// is only used if a UDP query yields a truncated result.

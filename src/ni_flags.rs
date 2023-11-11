@@ -1,6 +1,7 @@
 use bitflags::bitflags;
 bitflags!(
     /// Flags that may be provided on a call to `get_name_info()`.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     pub struct NIFlags: i32 {
         /// Only the nodename portion of the FQDN is returned for local hosts.
         const NOFQDN = c_ares_sys::ARES_NI_NOFQDN;

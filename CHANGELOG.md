@@ -1,3 +1,12 @@
+## 8.0.0 (11 November 2023)
+
+- Support versions of c-ares back to 1.13.0
+  - Breaking if you are using features from a new c-ares but building in an
+    environment where an old c-ares is available
+  - Then this crate will by default attempt to use the old c-ares: you should
+    either remove the old c-ares from your environment, or set the `vendored`
+    feature flag.
+
 ## 7.8.0 (28 October 2023)
 
 - c-types 3.0.0

@@ -34,7 +34,6 @@ pub enum QueryType {
     SRV = 33,
     NAPTR = 35,
     URI = 256,
-    #[cfg(cares1_17)]
     CAA = 257,
 }
 

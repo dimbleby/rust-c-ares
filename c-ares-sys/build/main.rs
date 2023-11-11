@@ -31,21 +31,18 @@ fn get_cares() -> Vec<PathBuf> {
 
 fn check_version(include_dirs: &[PathBuf]) {
     println!("cargo:rerun-if-changed=build/expando.c");
-    let mut gcc = cc::Build::new();
-    gcc.includes(include_dirs);
-    let expanded = match gcc.file("build/expando.c").try_expand() {
-        Ok(expanded) => expanded,
-        Err(e) => panic!("Failed to get c-ares headers: {e}"),
-    };
+    let expanded = cc::Build::new()
+        .includes(include_dirs)
+        .file("build/expando.c")
+        .expand();
     let expanded = String::from_utf8(expanded).unwrap();
 
-    let c_ares_version = expanded.lines().find_map(|line| {
-        line.trim()
-            .strip_prefix("RUST_VERSION_C_ARES_")
-            .map(parse_version)
-    });
+    let version = expanded
+        .lines()
+        .find_map(|line| line.trim().strip_prefix("RUST_VERSION_C_ARES_"))
+        .map(parse_version)
+        .unwrap();
 
-    let version = c_ares_version.unwrap();
     println!("cargo:version_number={version:x}");
 
     if version >= 0x1_0f_00 {
@@ -71,9 +68,9 @@ fn check_version(include_dirs: &[PathBuf]) {
 
 fn parse_version(version: &str) -> u64 {
     let mut it = version.split('_');
-    let major = it.next().unwrap().parse::<u64>().unwrap();
-    let minor = it.next().unwrap().parse::<u64>().unwrap();
-    let patch = it.next().unwrap().parse::<u64>().unwrap();
+    let major: u64 = it.next().unwrap().parse().unwrap();
+    let minor: u64 = it.next().unwrap().parse().unwrap();
+    let patch: u64 = it.next().unwrap().parse().unwrap();
 
     (major << 16) | (minor << 8) | patch
 }

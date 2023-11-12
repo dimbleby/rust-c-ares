@@ -1,3 +1,5 @@
+# Changelog
+
 ## 8.0.0 (11 November 2023)
 
 - Support versions of c-ares back to 1.13.0

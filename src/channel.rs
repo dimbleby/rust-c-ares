@@ -193,8 +193,9 @@ impl Options {
         self
     }
 
-    /// The path to use for reading the resolv.conf file.  The `resolvconf_path` should be set to a
-    /// path string, and will be honoured on *nix like systems.  The default is /etc/resolv.conf.
+    /// Set the path to use for reading the resolv.conf file.  The `resolvconf_path` should be set
+    /// to a path string, and will be honoured on *nix like systems.  The default is
+    /// /etc/resolv.conf.
     #[cfg(cares1_15)]
     pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
         let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
@@ -203,8 +204,8 @@ impl Options {
         self
     }
 
-    /// The path to use for reading the hosts file.  The `hosts_path` should be set to a
-    /// path string, and will be honoured on *nix like systems.  The default is /etc/hosts.
+    /// Set the path to use for reading the hosts file.  The `hosts_path` should be set to a path
+    /// string, and will be honoured on *nix like systems.  The default is /etc/hosts.
     #[cfg(cares1_19)]
     pub fn set_hosts_path(&mut self, hosts_path: &str) -> &mut Self {
         let c_hosts_path = CString::new(hosts_path).unwrap();
@@ -213,13 +214,23 @@ impl Options {
         self
     }
 
-    /// The maximum number of udp queries that can be sent on a single ephemeral port to a given
-    /// DNS server before a new ephemeral port is assigned.  Any value of 0 or less will be
+    /// Set the maximum number of udp queries that can be sent on a single ephemeral port to a
+    /// given DNS server before a new ephemeral port is assigned.  Any value of 0 or less will be
     /// considered unlimited, and is the default.
     #[cfg(cares1_20)]
     pub fn set_udp_max_queries(&mut self, udp_max_queries: i32) -> &mut Self {
         self.ares_options.udp_max_queries = udp_max_queries;
         self.optmask |= c_ares_sys::ARES_OPT_UDP_MAX_QUERIES;
+        self
+    }
+
+    /// Set the upper bound for timeout between sequential retry attempts, in milliseconds.  When
+    /// retrying queries, the timeout is increased from the requested timeout parameter, this caps
+    /// the value.
+    #[cfg(cares1_22)]
+    pub fn set_max_timeout(&mut self, max_timeout: i32) -> &mut Self {
+        self.ares_options.maxtimeout = max_timeout;
+        self.optmask |= c_ares_sys::ARES_OPT_MAXTIMEOUTMS;
         self
     }
 }
@@ -275,11 +286,7 @@ impl Channel {
         // Initialize the channel.
         let mut ares_channel = ptr::null_mut();
         let channel_rc = unsafe {
-            c_ares_sys::ares_init_options(
-                &mut ares_channel,
-                &mut options.ares_options,
-                options.optmask,
-            )
+            c_ares_sys::ares_init_options(&mut ares_channel, &options.ares_options, options.optmask)
         };
         if channel_rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
@@ -294,6 +301,18 @@ impl Channel {
             _socket_state_callback: options.socket_state_callback,
         };
         Ok(channel)
+    }
+
+    /// Reinitialize a channel from system configuration.
+    #[cfg(cares1_22)]
+    pub fn reinit(&mut self) -> Result<&mut Self> {
+        let rc = unsafe { c_ares_sys::ares_reinit(self.ares_channel) };
+        panic::propagate();
+
+        if let Ok(err) = Error::try_from(rc) {
+            return Err(err);
+        }
+        Ok(self)
     }
 
     /// Duplicate a channel.

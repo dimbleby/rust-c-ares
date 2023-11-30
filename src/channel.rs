@@ -233,6 +233,19 @@ impl Options {
         self.optmask |= c_ares_sys::ARES_OPT_MAXTIMEOUTMS;
         self
     }
+
+    /// Enable the built-in query cache.  Will cache queries based on the returned TTL in the DNS
+    /// message.  Only fully successful and NXDOMAIN query results will be cached.
+    ///
+    /// The provided value is the maximum number of seconds a query result may be cached; this will
+    /// override a larger TTL in the response message. This must be a non-zero value otherwise the
+    /// cache will be disabled.
+    #[cfg(cares1_23)]
+    pub fn set_query_cache_max_ttl(&mut self, qcache_max_ttl: u32) -> &mut Self {
+        self.ares_options.qcache_max_ttl = qcache_max_ttl;
+        self.optmask |= c_ares_sys::ARES_OPT_QUERY_CACHE;
+        self
+    }
 }
 
 /// A channel for name service lookups.

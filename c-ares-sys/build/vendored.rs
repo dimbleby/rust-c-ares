@@ -49,6 +49,7 @@ fn compile() {
         .define("CARES_STATIC", "ON")
         .define("CARES_SHARED", "OFF")
         .define("CARES_BUILD_TOOLS", "OFF")
+        .define("CARES_THREADS", "OFF")
         .define("CMAKE_INSTALL_LIBDIR", "lib")
         .build();
 
@@ -118,6 +119,7 @@ fn compile() {
         .arg("--enable-optimize")
         .arg("--disable-debug")
         .arg("--disable-tests")
+        .arg("--disable-cares-threads")
         .arg(format!("--prefix={}", outdir.display()));
 
     // This code fragment copied from curl-rust... c-ares and curl come from

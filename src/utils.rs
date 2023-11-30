@@ -173,3 +173,13 @@ pub fn version() -> (&'static str, u32) {
     };
     (str_version, int_version as u32)
 }
+
+/// Whether the underlying `c-ares` library was built with thread safety enabled or not.
+///
+/// This is unlikely to be of interest to users of this crate.  Our API assumes that c-ares was not
+/// built with thread safety, and uses Rust's safety features to prevent errors.
+#[cfg(cares1_23)]
+pub fn thread_safety() -> bool {
+    let safety = unsafe { c_ares_sys::ares_threadsafety() };
+    safety != c_ares_sys::ares_bool_t::ARES_FALSE
+}

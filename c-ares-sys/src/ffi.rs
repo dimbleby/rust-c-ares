@@ -96,6 +96,8 @@ pub struct ares_options {
     pub udp_max_queries: ::std::os::raw::c_int,
     #[cfg(cares1_22)]
     pub maxtimeout: ::std::os::raw::c_int,
+    #[cfg(cares1_23)]
+    pub qcache_max_ttl: ::std::os::raw::c_uint,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -779,6 +781,10 @@ extern "C" {
         dst: *mut ::std::os::raw::c_void,
     ) -> ::std::os::raw::c_int;
 }
+extern "C" {
+    #[doc = " Whether or not the c-ares library was built with threadsafety\n\n  \\return ARES_TRUE if built with threadsafety, ARES_FALSE if not"]
+    pub fn ares_threadsafety() -> ares_bool_t;
+}
 #[repr(u32)]
 #[doc = " DNS Record types handled by c-ares.  Some record types may only be valid\n  on requests (e.g. ARES_REC_TYPE_ANY), and some may only be valid on\n  responses"]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -896,7 +902,7 @@ pub enum ares_dns_rcode_t {
     ARES_RCODE_NXDOMAIN = 3,
     #[doc = "< Not implemented.  The name server does\n   not support the requested kind of\n   query"]
     ARES_RCODE_NOTIMP = 4,
-    #[doc = "< Refused. The name server refuses to\n   perform the speciied operation for\n   policy reasons."]
+    #[doc = "< Refused. The name server refuses to\n   perform the specified operation for\n   policy reasons."]
     ARES_RCODE_REFUSED = 5,
     #[doc = "< RFC 2136. Some name that ought not to\n   exist, does exist."]
     ARES_RCODE_YXDOMAIN = 6,

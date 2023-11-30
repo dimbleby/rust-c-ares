@@ -64,6 +64,10 @@ fn check_version(include_dirs: &[PathBuf]) {
     if version >= 0x1_16_00 {
         println!("cargo:rustc-cfg=cares1_22");
     }
+
+    if version >= 0x1_17_00 {
+        println!("cargo:rustc-cfg=cares1_23");
+    }
 }
 
 fn parse_version(version: &str) -> u64 {

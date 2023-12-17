@@ -755,6 +755,9 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
+    pub fn ares_get_servers_csv(channel: *mut ares_channel_t) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
     pub fn ares_get_servers(
         channel: *const ares_channel_t,
         servers: *mut *mut ares_addr_node,

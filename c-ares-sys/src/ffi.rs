@@ -54,6 +54,23 @@ pub enum ares_bool_t {
     ARES_FALSE = 0,
     ARES_TRUE = 1,
 }
+#[repr(u32)]
+#[doc = " Values for ARES_OPT_EVENT_THREAD"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_evsys_t {
+    #[doc = " Default (best choice) event system"]
+    ARES_EVSYS_DEFAULT = 0,
+    #[doc = " Win32 IOCP/AFD_POLL event system"]
+    ARES_EVSYS_WIN32 = 1,
+    #[doc = " Linux epoll"]
+    ARES_EVSYS_EPOLL = 2,
+    #[doc = " BSD/MacOS kqueue"]
+    ARES_EVSYS_KQUEUE = 3,
+    #[doc = " POSIX poll()"]
+    ARES_EVSYS_POLL = 4,
+    #[doc = " last fallback on Unix-like systems, select()"]
+    ARES_EVSYS_SELECT = 5,
+}
 pub type ares_sock_state_cb = ::std::option::Option<
     unsafe extern "C" fn(
         data: *mut ::std::os::raw::c_void,
@@ -98,6 +115,8 @@ pub struct ares_options {
     pub maxtimeout: ::std::os::raw::c_int,
     #[cfg(cares1_23)]
     pub qcache_max_ttl: ::std::os::raw::c_uint,
+    #[cfg(cares1_26)]
+    pub evsys: ares_evsys_t,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1176,6 +1195,23 @@ pub enum ares_dns_opt_datatype_t {
     #[doc = " DNS Domain Name Format"]
     ARES_OPT_DATATYPE_NAME = 11,
 }
+#[repr(u32)]
+#[doc = " Data type for flags to ares_dns_parse()"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dns_parse_flags_t {
+    #[doc = "< Parse Answers from RFC 1035 that allow name compression as RAW"]
+    ARES_DNS_PARSE_AN_BASE_RAW = 1,
+    #[doc = "< Parse Authority from RFC 1035 that allow name compression as RAW"]
+    ARES_DNS_PARSE_NS_BASE_RAW = 2,
+    #[doc = "< Parse Additional from RFC 1035 that allow name compression as RAW"]
+    ARES_DNS_PARSE_AR_BASE_RAW = 4,
+    #[doc = "< Parse Answers from later RFCs (no name compression) RAW"]
+    ARES_DNS_PARSE_AN_EXT_RAW = 8,
+    #[doc = "< Parse Authority from later RFCs (no name compression) as RAW"]
+    ARES_DNS_PARSE_NS_EXT_RAW = 16,
+    #[doc = "< Parse Additional from later RFCs (no name compression) as RAW"]
+    ARES_DNS_PARSE_AR_EXT_RAW = 32,
+}
 extern "C" {
     #[doc = " String representation of DNS Record Type\n\n  \\param[in] type  DNS Record Type\n  \\return string"]
     pub fn ares_dns_rec_type_tostr(type_: ares_dns_rec_type_t) -> *const ::std::os::raw::c_char;
@@ -1204,7 +1240,7 @@ extern "C" {
     ) -> ares_bool_t;
 }
 extern "C" {
-    #[doc = " Convert DNS record type as string to ares_dns_rec_type_t\n\n  \\param[out] qclass  Pointer passed by reference to write record type\n  \\param[in]  str     String to convert\n  \\return ARES_TRUE on success"]
+    #[doc = " Convert DNS record type as string to ares_dns_rec_type_t\n\n  \\param[out] qtype   Pointer passed by reference to write record type\n  \\param[in]  str     String to convert\n  \\return ARES_TRUE on success"]
     pub fn ares_dns_rec_type_fromstr(
         qtype: *mut ares_dns_rec_type_t,
         str_: *const ::std::os::raw::c_char,
@@ -1525,7 +1561,7 @@ extern "C" {
     ) -> ares_bool_t;
 }
 extern "C" {
-    #[doc = " Parse a complete DNS message.\n\n  \\param[in]  buf      pointer to bytes to be parsed\n  \\param[in]  buf_len  Length of buf provided\n  \\param[in]  flags    Flags dictating how the message should be parsed. TBD.\n  \\param[out] dnsrec   Pointer passed by reference for a new DNS record object\n                       that must be ares_dns_record_destroy()'d by caller.\n  \\return ARES_SUCCESS on success"]
+    #[doc = " Parse a complete DNS message.\n\n  \\param[in]  buf      pointer to bytes to be parsed\n  \\param[in]  buf_len  Length of buf provided\n  \\param[in]  flags    Flags dictating how the message should be parsed.\n  \\param[out] dnsrec   Pointer passed by reference for a new DNS record object\n                       that must be ares_dns_record_destroy()'d by caller.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_parse(
         buf: *const ::std::os::raw::c_uchar,
         buf_len: usize,

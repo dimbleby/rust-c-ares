@@ -1,5 +1,11 @@
 # Changelog
 
+## 9.0.0 (23 February 2024)
+
+- cares 1.27.0
+  - breaking only because of the introduction of `ENOSERVER` into the
+    `Error` enum
+
 ## 8.2.0 (30 November 2023)
 
 - c-ares 1.23.0

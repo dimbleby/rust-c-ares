@@ -83,6 +83,9 @@ pub enum Error {
     /// The textual service name provided could not be dereferenced into a port.
     ESERVICE = c_ares_sys::ares_status_t::ARES_ESERVICE as isize,
 
+    /// No DNS servers were configured.
+    ENOSERVER = c_ares_sys::ares_status_t::ARES_ENOSERVER as isize,
+
     /// Unknown error.
     UNKNOWN,
 }
@@ -128,6 +131,7 @@ impl From<i32> for Error {
             x if x == Error::EADDRGETNETWORKPARAMS as i32 => Error::EADDRGETNETWORKPARAMS,
             x if x == Error::ECANCELLED as i32 => Error::ECANCELLED,
             x if x == Error::ESERVICE as i32 => Error::ESERVICE,
+            x if x == Error::ENOSERVER as i32 => Error::ENOSERVER,
             _ => Error::UNKNOWN,
         }
     }
@@ -166,6 +170,7 @@ impl TryFrom<c_ares_sys::ares_status_t> for Error {
             c_ares_sys::ares_status_t::ARES_EADDRGETNETWORKPARAMS => Error::EADDRGETNETWORKPARAMS,
             c_ares_sys::ares_status_t::ARES_ECANCELLED => Error::ECANCELLED,
             c_ares_sys::ares_status_t::ARES_ESERVICE => Error::ESERVICE,
+            c_ares_sys::ares_status_t::ARES_ENOSERVER => Error::ENOSERVER,
         };
         Ok(error)
     }

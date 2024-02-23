@@ -4,7 +4,7 @@ use std::panic::{self, AssertUnwindSafe};
 
 thread_local! {
     static LAST_ERROR: RefCell<Option<Box<dyn Any + Send>>> = RefCell::new(None);
-    static UNWINDING: RefCell<bool> = RefCell::new(false);
+    static UNWINDING: RefCell<bool> = const { RefCell::new(false) }
 }
 
 pub fn catch<T, F: FnOnce() -> T>(f: F) -> Option<T> {

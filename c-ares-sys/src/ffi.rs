@@ -127,358 +127,6 @@ pub struct ares_channeldata {
 }
 pub type ares_channel = *mut ares_channeldata;
 pub type ares_channel_t = ares_channeldata;
-pub type ares_callback = ::std::option::Option<
-    unsafe extern "C" fn(
-        arg: *mut ::std::os::raw::c_void,
-        status: ::std::os::raw::c_int,
-        timeouts: ::std::os::raw::c_int,
-        abuf: *mut ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-    ),
->;
-pub type ares_host_callback = ::std::option::Option<
-    unsafe extern "C" fn(
-        arg: *mut ::std::os::raw::c_void,
-        status: ::std::os::raw::c_int,
-        timeouts: ::std::os::raw::c_int,
-        hostent: *mut hostent,
-    ),
->;
-pub type ares_nameinfo_callback = ::std::option::Option<
-    unsafe extern "C" fn(
-        arg: *mut ::std::os::raw::c_void,
-        status: ::std::os::raw::c_int,
-        timeouts: ::std::os::raw::c_int,
-        node: *mut ::std::os::raw::c_char,
-        service: *mut ::std::os::raw::c_char,
-    ),
->;
-pub type ares_sock_create_callback = ::std::option::Option<
-    unsafe extern "C" fn(
-        socket_fd: ares_socket_t,
-        type_: ::std::os::raw::c_int,
-        data: *mut ::std::os::raw::c_void,
-    ) -> ::std::os::raw::c_int,
->;
-pub type ares_sock_config_callback = ::std::option::Option<
-    unsafe extern "C" fn(
-        socket_fd: ares_socket_t,
-        type_: ::std::os::raw::c_int,
-        data: *mut ::std::os::raw::c_void,
-    ) -> ::std::os::raw::c_int,
->;
-pub type ares_addrinfo_callback = ::std::option::Option<
-    unsafe extern "C" fn(
-        arg: *mut ::std::os::raw::c_void,
-        status: ::std::os::raw::c_int,
-        timeouts: ::std::os::raw::c_int,
-        res: *mut ares_addrinfo,
-    ),
->;
-extern "C" {
-    pub fn ares_library_init(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_library_init_mem(
-        flags: ::std::os::raw::c_int,
-        amalloc: ::std::option::Option<
-            unsafe extern "C" fn(size: usize) -> *mut ::std::os::raw::c_void,
-        >,
-        afree: ::std::option::Option<unsafe extern "C" fn(ptr: *mut ::std::os::raw::c_void)>,
-        arealloc: ::std::option::Option<
-            unsafe extern "C" fn(
-                ptr: *mut ::std::os::raw::c_void,
-                size: usize,
-            ) -> *mut ::std::os::raw::c_void,
-        >,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_library_initialized() -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_library_cleanup();
-}
-extern "C" {
-    pub fn ares_version(version: *mut ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
-}
-extern "C" {
-    pub fn ares_init(channelptr: *mut *mut ares_channel_t) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_init_options(
-        channelptr: *mut *mut ares_channel_t,
-        options: *const ares_options,
-        optmask: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_save_options(
-        channel: *const ares_channel_t,
-        options: *mut ares_options,
-        optmask: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_destroy_options(options: *mut ares_options);
-}
-extern "C" {
-    pub fn ares_dup(
-        dest: *mut *mut ares_channel_t,
-        src: *const ares_channel_t,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_reinit(channel: *mut ares_channel_t) -> ares_status_t;
-}
-extern "C" {
-    pub fn ares_destroy(channel: *mut ares_channel_t);
-}
-extern "C" {
-    pub fn ares_cancel(channel: *mut ares_channel_t);
-}
-extern "C" {
-    pub fn ares_set_local_ip4(channel: *mut ares_channel_t, local_ip: ::std::os::raw::c_uint);
-}
-extern "C" {
-    pub fn ares_set_local_ip6(
-        channel: *mut ares_channel_t,
-        local_ip6: *const ::std::os::raw::c_uchar,
-    );
-}
-extern "C" {
-    pub fn ares_set_local_dev(
-        channel: *mut ares_channel_t,
-        local_dev_name: *const ::std::os::raw::c_char,
-    );
-}
-extern "C" {
-    pub fn ares_set_socket_callback(
-        channel: *mut ares_channel_t,
-        callback: ares_sock_create_callback,
-        user_data: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_set_socket_configure_callback(
-        channel: *mut ares_channel_t,
-        callback: ares_sock_config_callback,
-        user_data: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_set_sortlist(
-        channel: *mut ares_channel_t,
-        sortstr: *const ::std::os::raw::c_char,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_getaddrinfo(
-        channel: *mut ares_channel_t,
-        node: *const ::std::os::raw::c_char,
-        service: *const ::std::os::raw::c_char,
-        hints: *const ares_addrinfo_hints,
-        callback: ares_addrinfo_callback,
-        arg: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_freeaddrinfo(ai: *mut ares_addrinfo);
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_socket_functions {
-    pub asocket: ::std::option::Option<
-        unsafe extern "C" fn(
-            arg1: ::std::os::raw::c_int,
-            arg2: ::std::os::raw::c_int,
-            arg3: ::std::os::raw::c_int,
-            arg4: *mut ::std::os::raw::c_void,
-        ) -> ares_socket_t,
-    >,
-    pub aclose: ::std::option::Option<
-        unsafe extern "C" fn(
-            arg1: ares_socket_t,
-            arg2: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
-    >,
-    pub aconnect: ::std::option::Option<
-        unsafe extern "C" fn(
-            arg1: ares_socket_t,
-            arg2: *const sockaddr,
-            arg3: ares_socklen_t,
-            arg4: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
-    >,
-    pub arecvfrom: ::std::option::Option<
-        unsafe extern "C" fn(
-            arg1: ares_socket_t,
-            arg2: *mut ::std::os::raw::c_void,
-            arg3: usize,
-            arg4: ::std::os::raw::c_int,
-            arg5: *mut sockaddr,
-            arg6: *mut ares_socklen_t,
-            arg7: *mut ::std::os::raw::c_void,
-        ) -> ares_ssize_t,
-    >,
-    pub asendv: ::std::option::Option<
-        unsafe extern "C" fn(
-            arg1: ares_socket_t,
-            arg2: *const iovec,
-            arg3: ::std::os::raw::c_int,
-            arg4: *mut ::std::os::raw::c_void,
-        ) -> ares_ssize_t,
-    >,
-}
-extern "C" {
-    pub fn ares_set_socket_functions(
-        channel: *mut ares_channel_t,
-        funcs: *const ares_socket_functions,
-        user_data: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_send(
-        channel: *mut ares_channel_t,
-        qbuf: *const ::std::os::raw::c_uchar,
-        qlen: ::std::os::raw::c_int,
-        callback: ares_callback,
-        arg: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_query(
-        channel: *mut ares_channel_t,
-        name: *const ::std::os::raw::c_char,
-        dnsclass: ::std::os::raw::c_int,
-        type_: ::std::os::raw::c_int,
-        callback: ares_callback,
-        arg: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_search(
-        channel: *mut ares_channel_t,
-        name: *const ::std::os::raw::c_char,
-        dnsclass: ::std::os::raw::c_int,
-        type_: ::std::os::raw::c_int,
-        callback: ares_callback,
-        arg: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_gethostbyname(
-        channel: *mut ares_channel_t,
-        name: *const ::std::os::raw::c_char,
-        family: ::std::os::raw::c_int,
-        callback: ares_host_callback,
-        arg: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_gethostbyname_file(
-        channel: *mut ares_channel_t,
-        name: *const ::std::os::raw::c_char,
-        family: ::std::os::raw::c_int,
-        host: *mut *mut hostent,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_gethostbyaddr(
-        channel: *mut ares_channel_t,
-        addr: *const ::std::os::raw::c_void,
-        addrlen: ::std::os::raw::c_int,
-        family: ::std::os::raw::c_int,
-        callback: ares_host_callback,
-        arg: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_getnameinfo(
-        channel: *mut ares_channel_t,
-        sa: *const sockaddr,
-        salen: ares_socklen_t,
-        flags: ::std::os::raw::c_int,
-        callback: ares_nameinfo_callback,
-        arg: *mut ::std::os::raw::c_void,
-    );
-}
-extern "C" {
-    pub fn ares_fds(
-        channel: *const ares_channel_t,
-        read_fds: *mut fd_set,
-        write_fds: *mut fd_set,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_getsock(
-        channel: *const ares_channel_t,
-        socks: *mut ares_socket_t,
-        numsocks: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_timeout(
-        channel: *const ares_channel_t,
-        maxtv: *mut timeval,
-        tv: *mut timeval,
-    ) -> *mut timeval;
-}
-extern "C" {
-    pub fn ares_process(
-        channel: *mut ares_channel_t,
-        read_fds: *mut fd_set,
-        write_fds: *mut fd_set,
-    );
-}
-extern "C" {
-    pub fn ares_process_fd(
-        channel: *mut ares_channel_t,
-        read_fd: ares_socket_t,
-        write_fd: ares_socket_t,
-    );
-}
-extern "C" {
-    pub fn ares_create_query(
-        name: *const ::std::os::raw::c_char,
-        dnsclass: ::std::os::raw::c_int,
-        type_: ::std::os::raw::c_int,
-        id: ::std::os::raw::c_ushort,
-        rd: ::std::os::raw::c_int,
-        buf: *mut *mut ::std::os::raw::c_uchar,
-        buflen: *mut ::std::os::raw::c_int,
-        max_udp_size: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_mkquery(
-        name: *const ::std::os::raw::c_char,
-        dnsclass: ::std::os::raw::c_int,
-        type_: ::std::os::raw::c_int,
-        id: ::std::os::raw::c_ushort,
-        rd: ::std::os::raw::c_int,
-        buf: *mut *mut ::std::os::raw::c_uchar,
-        buflen: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_expand_name(
-        encoded: *const ::std::os::raw::c_uchar,
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        s: *mut *mut ::std::os::raw::c_char,
-        enclen: *mut ::std::os::raw::c_long,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_expand_string(
-        encoded: *const ::std::os::raw::c_uchar,
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        s: *mut *mut ::std::os::raw::c_uchar,
-        enclen: *mut ::std::os::raw::c_long,
-    ) -> ::std::os::raw::c_int;
-}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ares_in6_addr {
@@ -500,325 +148,6 @@ pub struct ares_addr {
 pub union ares_addr__bindgen_ty_1 {
     pub addr4: in_addr,
     pub addr6: ares_in6_addr,
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct ares_addrttl {
-    pub ipaddr: in_addr,
-    pub ttl: ::std::os::raw::c_int,
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct ares_addr6ttl {
-    pub ip6addr: ares_in6_addr,
-    pub ttl: ::std::os::raw::c_int,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_caa_reply {
-    pub next: *mut ares_caa_reply,
-    pub critical: ::std::os::raw::c_int,
-    pub property: *mut ::std::os::raw::c_uchar,
-    pub plength: usize,
-    pub value: *mut ::std::os::raw::c_uchar,
-    pub length: usize,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_srv_reply {
-    pub next: *mut ares_srv_reply,
-    pub host: *mut ::std::os::raw::c_char,
-    pub priority: ::std::os::raw::c_ushort,
-    pub weight: ::std::os::raw::c_ushort,
-    pub port: ::std::os::raw::c_ushort,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_mx_reply {
-    pub next: *mut ares_mx_reply,
-    pub host: *mut ::std::os::raw::c_char,
-    pub priority: ::std::os::raw::c_ushort,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_txt_reply {
-    pub next: *mut ares_txt_reply,
-    pub txt: *mut ::std::os::raw::c_uchar,
-    pub length: usize,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_txt_ext {
-    pub next: *mut ares_txt_ext,
-    pub txt: *mut ::std::os::raw::c_uchar,
-    pub length: usize,
-    pub record_start: ::std::os::raw::c_uchar,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_naptr_reply {
-    pub next: *mut ares_naptr_reply,
-    pub flags: *mut ::std::os::raw::c_uchar,
-    pub service: *mut ::std::os::raw::c_uchar,
-    pub regexp: *mut ::std::os::raw::c_uchar,
-    pub replacement: *mut ::std::os::raw::c_char,
-    pub order: ::std::os::raw::c_ushort,
-    pub preference: ::std::os::raw::c_ushort,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_soa_reply {
-    pub nsname: *mut ::std::os::raw::c_char,
-    pub hostmaster: *mut ::std::os::raw::c_char,
-    pub serial: ::std::os::raw::c_uint,
-    pub refresh: ::std::os::raw::c_uint,
-    pub retry: ::std::os::raw::c_uint,
-    pub expire: ::std::os::raw::c_uint,
-    pub minttl: ::std::os::raw::c_uint,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_uri_reply {
-    pub next: *mut ares_uri_reply,
-    pub priority: ::std::os::raw::c_ushort,
-    pub weight: ::std::os::raw::c_ushort,
-    pub uri: *mut ::std::os::raw::c_char,
-    pub ttl: ::std::os::raw::c_int,
-}
-#[repr(C)]
-pub struct ares_addrinfo_node {
-    pub ai_ttl: ::std::os::raw::c_int,
-    pub ai_flags: ::std::os::raw::c_int,
-    pub ai_family: ::std::os::raw::c_int,
-    pub ai_socktype: ::std::os::raw::c_int,
-    pub ai_protocol: ::std::os::raw::c_int,
-    pub ai_addrlen: ares_socklen_t,
-    pub ai_addr: *mut sockaddr,
-    pub ai_next: *mut ares_addrinfo_node,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_addrinfo_cname {
-    pub ttl: ::std::os::raw::c_int,
-    pub alias: *mut ::std::os::raw::c_char,
-    pub name: *mut ::std::os::raw::c_char,
-    pub next: *mut ares_addrinfo_cname,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_addrinfo {
-    pub cnames: *mut ares_addrinfo_cname,
-    pub nodes: *mut ares_addrinfo_node,
-    #[cfg(cares1_18)]
-    pub name: *mut ::std::os::raw::c_char,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ares_addrinfo_hints {
-    pub ai_flags: ::std::os::raw::c_int,
-    pub ai_family: ::std::os::raw::c_int,
-    pub ai_socktype: ::std::os::raw::c_int,
-    pub ai_protocol: ::std::os::raw::c_int,
-}
-extern "C" {
-    pub fn ares_parse_a_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        host: *mut *mut hostent,
-        addrttls: *mut ares_addrttl,
-        naddrttls: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_aaaa_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        host: *mut *mut hostent,
-        addrttls: *mut ares_addr6ttl,
-        naddrttls: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_caa_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        caa_out: *mut *mut ares_caa_reply,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_ptr_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        addr: *const ::std::os::raw::c_void,
-        addrlen: ::std::os::raw::c_int,
-        family: ::std::os::raw::c_int,
-        host: *mut *mut hostent,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_ns_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        host: *mut *mut hostent,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_srv_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        srv_out: *mut *mut ares_srv_reply,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_mx_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        mx_out: *mut *mut ares_mx_reply,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_txt_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        txt_out: *mut *mut ares_txt_reply,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_txt_reply_ext(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        txt_out: *mut *mut ares_txt_ext,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_naptr_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        naptr_out: *mut *mut ares_naptr_reply,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_soa_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        soa_out: *mut *mut ares_soa_reply,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_parse_uri_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        uri_out: *mut *mut ares_uri_reply,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_free_string(str_: *mut ::std::os::raw::c_void);
-}
-extern "C" {
-    pub fn ares_free_hostent(host: *mut hostent);
-}
-extern "C" {
-    pub fn ares_free_data(dataptr: *mut ::std::os::raw::c_void);
-}
-extern "C" {
-    pub fn ares_strerror(code: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct ares_addr_node {
-    pub next: *mut ares_addr_node,
-    pub family: ::std::os::raw::c_int,
-    pub addr: ares_addr_node__bindgen_ty_1,
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub union ares_addr_node__bindgen_ty_1 {
-    pub addr4: in_addr,
-    pub addr6: ares_in6_addr,
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct ares_addr_port_node {
-    pub next: *mut ares_addr_port_node,
-    pub family: ::std::os::raw::c_int,
-    pub addr: ares_addr_port_node__bindgen_ty_1,
-    pub udp_port: ::std::os::raw::c_int,
-    pub tcp_port: ::std::os::raw::c_int,
-}
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub union ares_addr_port_node__bindgen_ty_1 {
-    pub addr4: in_addr,
-    pub addr6: ares_in6_addr,
-}
-extern "C" {
-    pub fn ares_set_servers(
-        channel: *mut ares_channel_t,
-        servers: *const ares_addr_node,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_set_servers_ports(
-        channel: *mut ares_channel_t,
-        servers: *const ares_addr_port_node,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_set_servers_csv(
-        channel: *mut ares_channel_t,
-        servers: *const ::std::os::raw::c_char,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_set_servers_ports_csv(
-        channel: *mut ares_channel_t,
-        servers: *const ::std::os::raw::c_char,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_get_servers_csv(channel: *mut ares_channel_t) -> *mut ::std::os::raw::c_char;
-}
-extern "C" {
-    pub fn ares_get_servers(
-        channel: *const ares_channel_t,
-        servers: *mut *mut ares_addr_node,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_get_servers_ports(
-        channel: *const ares_channel_t,
-        servers: *mut *mut ares_addr_port_node,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn ares_inet_ntop(
-        af: ::std::os::raw::c_int,
-        src: *const ::std::os::raw::c_void,
-        dst: *mut ::std::os::raw::c_char,
-        size: ares_socklen_t,
-    ) -> *const ::std::os::raw::c_char;
-}
-extern "C" {
-    pub fn ares_inet_pton(
-        af: ::std::os::raw::c_int,
-        src: *const ::std::os::raw::c_char,
-        dst: *mut ::std::os::raw::c_void,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Whether or not the c-ares library was built with threadsafety\n\n  \\return ARES_TRUE if built with threadsafety, ARES_FALSE if not"]
-    pub fn ares_threadsafety() -> ares_bool_t;
-}
-extern "C" {
-    #[doc = " Block until notified that there are no longer any queries in queue, or\n  the specified timeout has expired.\n\n  \\param[in] channel    Initialized ares channel\n  \\param[in] timeout_ms Number of milliseconds to wait for the queue to be\n                        empty. -1 for Infinite.\n  \\return ARES_ENOTIMP if not built with threading support, ARES_ETIMEOUT\n          if requested timeout expires, ARES_SUCCESS when queue is empty."]
-    pub fn ares_queue_wait_empty(
-        channel: *mut ares_channel_t,
-        timeout_ms: ::std::os::raw::c_int,
-    ) -> ares_status_t;
-}
-extern "C" {
-    #[doc = " Retrieve the total number of active queries pending answers from servers.\n  Some c-ares requests may spawn multiple queries, such as ares_getaddrinfo()\n  when using AF_UNSPEC, which will be reflected in this number.\n\n  \\param[in] channel Initialized ares channel\n  \\return Number of active queries to servers"]
-    pub fn ares_queue_active_queries(channel: *const ares_channel_t) -> usize;
 }
 #[repr(u32)]
 #[doc = " DNS Record types handled by c-ares.  Some record types may only be valid\n  on requests (e.g. ARES_REC_TYPE_ANY), and some may only be valid on\n  responses"]
@@ -1222,7 +551,7 @@ pub enum ares_dns_parse_flags_t {
     ARES_DNS_PARSE_AN_EXT_RAW = 8,
     #[doc = " Parse Authority from later RFCs (no name compression) as RAW"]
     ARES_DNS_PARSE_NS_EXT_RAW = 16,
-    #[doc = " Parse Authority from later RFCs (no name compression) as RAW"]
+    #[doc = " Parse Additional from later RFCs (no name compression) as RAW"]
     ARES_DNS_PARSE_AR_EXT_RAW = 32,
 }
 extern "C" {
@@ -1264,7 +593,7 @@ extern "C" {
     pub fn ares_dns_rcode_tostr(rcode: ares_dns_rcode_t) -> *const ::std::os::raw::c_char;
 }
 extern "C" {
-    #[doc = " Convert any valid ip address (ipv4 or ipv6) into struct ares_addr and\n  return the starting pointer of the network byte order address and the\n  length of the address (4 or 16).\n\n  \\param[in]     ipaddr  ASCII string form of the ip address\n  \\param[in,out] addr    Must set \"family\" member to one of AF_UNSPEC,\n                         AF_INET, AF_INET6 on input.\n  \\param[out]    ptr_len Length of binary form address\n  \\return Pointer to start of binary address or NULL on error."]
+    #[doc = " Convert any valid ip address (ipv4 or ipv6) into struct ares_addr and\n  return the starting pointer of the network byte order address and the\n  length of the address (4 or 16).\n\n  \\param[in]     ipaddr  ASCII string form of the ip address\n  \\param[in,out] addr    Must set \"family\" member to one of AF_UNSPEC,\n                         AF_INET, AF_INET6 on input.\n  \\param[out]    out_len Length of binary form address\n  \\return Pointer to start of binary address or NULL on error."]
     pub fn ares_dns_pton(
         ipaddr: *const ::std::os::raw::c_char,
         addr: *mut ares_addr,
@@ -1368,11 +697,27 @@ extern "C" {
     ) -> ares_status_t;
 }
 extern "C" {
+    #[doc = " Replace the question name with a new name.  This may be used when performing\n  a search with aliases.\n\n  Note that this will invalidate the name pointer returned from\n  ares_dns_record_query_get().\n\n \\param[in] dnsrec  Initialized record object\n \\param[in] idx     Index of question (typically 0)\n \\param[in] name    Name to use as replacement.\n \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_record_query_set_name(
+        dnsrec: *mut ares_dns_record_t,
+        idx: usize,
+        name: *const ::std::os::raw::c_char,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Replace the question type with a different type.  This may be used when\n  needing to query more than one address class (e.g. A and AAAA)\n\n \\param[in] dnsrec  Initialized record object\n \\param[in] idx     Index of question (typically 0)\n \\param[in] qtype   Record Type to use as replacement.\n \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_record_query_set_type(
+        dnsrec: *mut ares_dns_record_t,
+        idx: usize,
+        qtype: ares_dns_rec_type_t,
+    ) -> ares_status_t;
+}
+extern "C" {
     #[doc = " Get the count of queries in the DNS Record\n\n \\param[in] dnsrec  Initialized record object\n \\return count of queries"]
     pub fn ares_dns_record_query_cnt(dnsrec: *const ares_dns_record_t) -> usize;
 }
 extern "C" {
-    #[doc = " Get the data about the query at the provided index.\n\n \\param[in]  dnsrec  Initialized record object\n \\param[in]  idx     Index of query\n \\param[out] name    Optional.  Returns name, may pass NULL if not desired.\n \\param[out] qtype   Optional.  Returns record type, may pass NULL.\n \\param[out] qclass  Optional.  Returns class, may pass NULL.\n \\return ARES_SUCCESS on success"]
+    #[doc = " Get the data about the query at the provided index.\n\n \\param[in]  dnsrec  Initialized record object\n \\param[in]  idx     Index of query\n \\param[out] name    Optional.  Returns name, may pass NULL if not desired.\n                     This pointer will be invalided by any call to\n                     ares_dns_record_query_set_name().\n \\param[out] qtype   Optional.  Returns record type, may pass NULL.\n \\param[out] qclass  Optional.  Returns class, may pass NULL.\n \\return ARES_SUCCESS on success"]
     pub fn ares_dns_record_query_get(
         dnsrec: *const ares_dns_record_t,
         idx: usize,
@@ -1401,12 +746,20 @@ extern "C" {
     ) -> ares_status_t;
 }
 extern "C" {
-    #[doc = " Fetch a resource record based on the section and index.\n\n  \\param[in]  dnsrec   Initialized record object\n  \\param[in]  sect     Section for resource record\n  \\param[in]  idx      Index of resource record in section\n  \\return NULL on misuse, otherwise a pointer to the resource record"]
+    #[doc = " Fetch a writable resource record based on the section and index.\n\n  \\param[in]  dnsrec   Initialized record object\n  \\param[in]  sect     Section for resource record\n  \\param[in]  idx      Index of resource record in section\n  \\return NULL on misuse, otherwise a writable pointer to the resource record"]
     pub fn ares_dns_record_rr_get(
         dnsrec: *mut ares_dns_record_t,
         sect: ares_dns_section_t,
         idx: usize,
     ) -> *mut ares_dns_rr_t;
+}
+extern "C" {
+    #[doc = " Fetch a non-writeable resource record based on the section and index.\n\n  \\param[in]  dnsrec   Initialized record object\n  \\param[in]  sect     Section for resource record\n  \\param[in]  idx      Index of resource record in section\n  \\return NULL on misuse, otherwise a const pointer to the resource record"]
+    pub fn ares_dns_record_rr_get_const(
+        dnsrec: *const ares_dns_record_t,
+        sect: ares_dns_section_t,
+        idx: usize,
+    ) -> *const ares_dns_rr_t;
 }
 extern "C" {
     #[doc = " Remove the resource record based on the section and index\n\n  \\param[in]  dnsrec   Initialized record object\n  \\param[in]  sect     Section for resource record\n  \\param[in]  idx      Index of resource record in section\n  \\return ARES_SUCCESS on success, otherwise an error code."]
@@ -1585,10 +938,724 @@ extern "C" {
 extern "C" {
     #[doc = " Write a complete DNS message\n\n  \\param[in]  dnsrec   Pointer to initialized and filled DNS record object.\n  \\param[out] buf      Pointer passed by reference to be filled in with with\n                       DNS message.  Must be ares_free()'d by caller.\n  \\param[out] buf_len  Length of returned buffer containing DNS message.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_write(
-        dnsrec: *mut ares_dns_record_t,
+        dnsrec: *const ares_dns_record_t,
         buf: *mut *mut ::std::os::raw::c_uchar,
         buf_len: *mut usize,
     ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicted DNS record object, or NULL on out of memory."]
+    pub fn ares_dns_record_duplicate(dnsrec: *const ares_dns_record_t) -> *mut ares_dns_record_t;
+}
+pub type ares_callback = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg: *mut ::std::os::raw::c_void,
+        status: ::std::os::raw::c_int,
+        timeouts: ::std::os::raw::c_int,
+        abuf: *mut ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+    ),
+>;
+pub type ares_callback_dnsrec = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg: *mut ::std::os::raw::c_void,
+        status: ares_status_t,
+        timeouts: usize,
+        dnsrec: *const ares_dns_record_t,
+    ),
+>;
+pub type ares_host_callback = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg: *mut ::std::os::raw::c_void,
+        status: ::std::os::raw::c_int,
+        timeouts: ::std::os::raw::c_int,
+        hostent: *mut hostent,
+    ),
+>;
+pub type ares_nameinfo_callback = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg: *mut ::std::os::raw::c_void,
+        status: ::std::os::raw::c_int,
+        timeouts: ::std::os::raw::c_int,
+        node: *mut ::std::os::raw::c_char,
+        service: *mut ::std::os::raw::c_char,
+    ),
+>;
+pub type ares_sock_create_callback = ::std::option::Option<
+    unsafe extern "C" fn(
+        socket_fd: ares_socket_t,
+        type_: ::std::os::raw::c_int,
+        data: *mut ::std::os::raw::c_void,
+    ) -> ::std::os::raw::c_int,
+>;
+pub type ares_sock_config_callback = ::std::option::Option<
+    unsafe extern "C" fn(
+        socket_fd: ares_socket_t,
+        type_: ::std::os::raw::c_int,
+        data: *mut ::std::os::raw::c_void,
+    ) -> ::std::os::raw::c_int,
+>;
+pub type ares_addrinfo_callback = ::std::option::Option<
+    unsafe extern "C" fn(
+        arg: *mut ::std::os::raw::c_void,
+        status: ::std::os::raw::c_int,
+        timeouts: ::std::os::raw::c_int,
+        res: *mut ares_addrinfo,
+    ),
+>;
+extern "C" {
+    pub fn ares_library_init(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_library_init_mem(
+        flags: ::std::os::raw::c_int,
+        amalloc: ::std::option::Option<
+            unsafe extern "C" fn(size: usize) -> *mut ::std::os::raw::c_void,
+        >,
+        afree: ::std::option::Option<unsafe extern "C" fn(ptr: *mut ::std::os::raw::c_void)>,
+        arealloc: ::std::option::Option<
+            unsafe extern "C" fn(
+                ptr: *mut ::std::os::raw::c_void,
+                size: usize,
+            ) -> *mut ::std::os::raw::c_void,
+        >,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_library_initialized() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_library_cleanup();
+}
+extern "C" {
+    pub fn ares_version(version: *mut ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn ares_init(channelptr: *mut *mut ares_channel_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_init_options(
+        channelptr: *mut *mut ares_channel_t,
+        options: *const ares_options,
+        optmask: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_save_options(
+        channel: *const ares_channel_t,
+        options: *mut ares_options,
+        optmask: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_destroy_options(options: *mut ares_options);
+}
+extern "C" {
+    pub fn ares_dup(
+        dest: *mut *mut ares_channel_t,
+        src: *const ares_channel_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_reinit(channel: *mut ares_channel_t) -> ares_status_t;
+}
+extern "C" {
+    pub fn ares_destroy(channel: *mut ares_channel_t);
+}
+extern "C" {
+    pub fn ares_cancel(channel: *mut ares_channel_t);
+}
+extern "C" {
+    pub fn ares_set_local_ip4(channel: *mut ares_channel_t, local_ip: ::std::os::raw::c_uint);
+}
+extern "C" {
+    pub fn ares_set_local_ip6(
+        channel: *mut ares_channel_t,
+        local_ip6: *const ::std::os::raw::c_uchar,
+    );
+}
+extern "C" {
+    pub fn ares_set_local_dev(
+        channel: *mut ares_channel_t,
+        local_dev_name: *const ::std::os::raw::c_char,
+    );
+}
+extern "C" {
+    pub fn ares_set_socket_callback(
+        channel: *mut ares_channel_t,
+        callback: ares_sock_create_callback,
+        user_data: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    pub fn ares_set_socket_configure_callback(
+        channel: *mut ares_channel_t,
+        callback: ares_sock_config_callback,
+        user_data: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    pub fn ares_set_sortlist(
+        channel: *mut ares_channel_t,
+        sortstr: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_getaddrinfo(
+        channel: *mut ares_channel_t,
+        node: *const ::std::os::raw::c_char,
+        service: *const ::std::os::raw::c_char,
+        hints: *const ares_addrinfo_hints,
+        callback: ares_addrinfo_callback,
+        arg: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    pub fn ares_freeaddrinfo(ai: *mut ares_addrinfo);
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_socket_functions {
+    pub asocket: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ::std::os::raw::c_int,
+            arg2: ::std::os::raw::c_int,
+            arg3: ::std::os::raw::c_int,
+            arg4: *mut ::std::os::raw::c_void,
+        ) -> ares_socket_t,
+    >,
+    pub aclose: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ares_socket_t,
+            arg2: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub aconnect: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ares_socket_t,
+            arg2: *const sockaddr,
+            arg3: ares_socklen_t,
+            arg4: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub arecvfrom: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ares_socket_t,
+            arg2: *mut ::std::os::raw::c_void,
+            arg3: usize,
+            arg4: ::std::os::raw::c_int,
+            arg5: *mut sockaddr,
+            arg6: *mut ares_socklen_t,
+            arg7: *mut ::std::os::raw::c_void,
+        ) -> ares_ssize_t,
+    >,
+    pub asendv: ::std::option::Option<
+        unsafe extern "C" fn(
+            arg1: ares_socket_t,
+            arg2: *const iovec,
+            arg3: ::std::os::raw::c_int,
+            arg4: *mut ::std::os::raw::c_void,
+        ) -> ares_ssize_t,
+    >,
+}
+extern "C" {
+    pub fn ares_set_socket_functions(
+        channel: *mut ares_channel_t,
+        funcs: *const ares_socket_functions,
+        user_data: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    pub fn ares_send(
+        channel: *mut ares_channel_t,
+        qbuf: *const ::std::os::raw::c_uchar,
+        qlen: ::std::os::raw::c_int,
+        callback: ares_callback,
+        arg: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    #[doc = " Send a DNS query as an ares_dns_record_t with a callback containing the\n  parsed DNS record.\n\n  \\param[in]  channel  Pointer to channel on which queries will be sent.\n  \\param[in]  dnsrec   DNS Record to send\n  \\param[in]  callback Callback function invoked on completion or failure of\n                       the query sequence.\n  \\param[in]  arg      Additional argument passed to the callback function.\n  \\param[out] qid      Query ID\n  \\return One of the c-ares status codes."]
+    pub fn ares_send_dnsrec(
+        channel: *mut ares_channel_t,
+        dnsrec: *const ares_dns_record_t,
+        callback: ares_callback_dnsrec,
+        arg: *mut ::std::os::raw::c_void,
+        qid: *mut ::std::os::raw::c_ushort,
+    ) -> ares_status_t;
+}
+extern "C" {
+    pub fn ares_query(
+        channel: *mut ares_channel_t,
+        name: *const ::std::os::raw::c_char,
+        dnsclass: ::std::os::raw::c_int,
+        type_: ::std::os::raw::c_int,
+        callback: ares_callback,
+        arg: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    #[doc = " Perform a DNS query with a callback containing the parsed DNS record.\n\n  \\param[in]  channel  Pointer to channel on which queries will be sent.\n  \\param[in]  name     Query name\n  \\param[in]  dnsclass DNS Class\n  \\param[in]  type     DNS Record Type\n  \\param[in]  callback Callback function invoked on completion or failure of\n                       the query sequence.\n  \\param[in]  arg      Additional argument passed to the callback function.\n  \\param[out] qid      Query ID\n  \\return One of the c-ares status codes."]
+    pub fn ares_query_dnsrec(
+        channel: *mut ares_channel_t,
+        name: *const ::std::os::raw::c_char,
+        dnsclass: ares_dns_class_t,
+        type_: ares_dns_rec_type_t,
+        callback: ares_callback_dnsrec,
+        arg: *mut ::std::os::raw::c_void,
+        qid: *mut ::std::os::raw::c_ushort,
+    ) -> ares_status_t;
+}
+extern "C" {
+    pub fn ares_search(
+        channel: *mut ares_channel_t,
+        name: *const ::std::os::raw::c_char,
+        dnsclass: ::std::os::raw::c_int,
+        type_: ::std::os::raw::c_int,
+        callback: ares_callback,
+        arg: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    #[doc = " Search for a complete DNS message.\n\n  \\param[in] channel  Pointer to channel on which queries will be sent.\n  \\param[in] dnsrec   Pointer to initialized and filled DNS record object.\n  \\param[in] callback Callback function invoked on completion or failure of\n                      the query sequence.\n  \\param[in] arg      Additional argument passed to the callback function.\n  \\return One of the c-ares status codes.  In all cases, except\n          ARES_EFORMERR due to misuse, this error code will also be sent\n          to the provided callback."]
+    pub fn ares_search_dnsrec(
+        channel: *mut ares_channel_t,
+        dnsrec: *const ares_dns_record_t,
+        callback: ares_callback_dnsrec,
+        arg: *mut ::std::os::raw::c_void,
+    ) -> ares_status_t;
+}
+extern "C" {
+    pub fn ares_gethostbyname(
+        channel: *mut ares_channel_t,
+        name: *const ::std::os::raw::c_char,
+        family: ::std::os::raw::c_int,
+        callback: ares_host_callback,
+        arg: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    pub fn ares_gethostbyname_file(
+        channel: *mut ares_channel_t,
+        name: *const ::std::os::raw::c_char,
+        family: ::std::os::raw::c_int,
+        host: *mut *mut hostent,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_gethostbyaddr(
+        channel: *mut ares_channel_t,
+        addr: *const ::std::os::raw::c_void,
+        addrlen: ::std::os::raw::c_int,
+        family: ::std::os::raw::c_int,
+        callback: ares_host_callback,
+        arg: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    pub fn ares_getnameinfo(
+        channel: *mut ares_channel_t,
+        sa: *const sockaddr,
+        salen: ares_socklen_t,
+        flags: ::std::os::raw::c_int,
+        callback: ares_nameinfo_callback,
+        arg: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    pub fn ares_fds(
+        channel: *const ares_channel_t,
+        read_fds: *mut fd_set,
+        write_fds: *mut fd_set,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_getsock(
+        channel: *const ares_channel_t,
+        socks: *mut ares_socket_t,
+        numsocks: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_timeout(
+        channel: *const ares_channel_t,
+        maxtv: *mut timeval,
+        tv: *mut timeval,
+    ) -> *mut timeval;
+}
+extern "C" {
+    pub fn ares_process(
+        channel: *mut ares_channel_t,
+        read_fds: *mut fd_set,
+        write_fds: *mut fd_set,
+    );
+}
+extern "C" {
+    pub fn ares_process_fd(
+        channel: *mut ares_channel_t,
+        read_fd: ares_socket_t,
+        write_fd: ares_socket_t,
+    );
+}
+extern "C" {
+    pub fn ares_create_query(
+        name: *const ::std::os::raw::c_char,
+        dnsclass: ::std::os::raw::c_int,
+        type_: ::std::os::raw::c_int,
+        id: ::std::os::raw::c_ushort,
+        rd: ::std::os::raw::c_int,
+        buf: *mut *mut ::std::os::raw::c_uchar,
+        buflen: *mut ::std::os::raw::c_int,
+        max_udp_size: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_mkquery(
+        name: *const ::std::os::raw::c_char,
+        dnsclass: ::std::os::raw::c_int,
+        type_: ::std::os::raw::c_int,
+        id: ::std::os::raw::c_ushort,
+        rd: ::std::os::raw::c_int,
+        buf: *mut *mut ::std::os::raw::c_uchar,
+        buflen: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_expand_name(
+        encoded: *const ::std::os::raw::c_uchar,
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        s: *mut *mut ::std::os::raw::c_char,
+        enclen: *mut ::std::os::raw::c_long,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_expand_string(
+        encoded: *const ::std::os::raw::c_uchar,
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        s: *mut *mut ::std::os::raw::c_uchar,
+        enclen: *mut ::std::os::raw::c_long,
+    ) -> ::std::os::raw::c_int;
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ares_addrttl {
+    pub ipaddr: in_addr,
+    pub ttl: ::std::os::raw::c_int,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ares_addr6ttl {
+    pub ip6addr: ares_in6_addr,
+    pub ttl: ::std::os::raw::c_int,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_caa_reply {
+    pub next: *mut ares_caa_reply,
+    pub critical: ::std::os::raw::c_int,
+    pub property: *mut ::std::os::raw::c_uchar,
+    pub plength: usize,
+    pub value: *mut ::std::os::raw::c_uchar,
+    pub length: usize,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_srv_reply {
+    pub next: *mut ares_srv_reply,
+    pub host: *mut ::std::os::raw::c_char,
+    pub priority: ::std::os::raw::c_ushort,
+    pub weight: ::std::os::raw::c_ushort,
+    pub port: ::std::os::raw::c_ushort,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_mx_reply {
+    pub next: *mut ares_mx_reply,
+    pub host: *mut ::std::os::raw::c_char,
+    pub priority: ::std::os::raw::c_ushort,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_txt_reply {
+    pub next: *mut ares_txt_reply,
+    pub txt: *mut ::std::os::raw::c_uchar,
+    pub length: usize,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_txt_ext {
+    pub next: *mut ares_txt_ext,
+    pub txt: *mut ::std::os::raw::c_uchar,
+    pub length: usize,
+    pub record_start: ::std::os::raw::c_uchar,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_naptr_reply {
+    pub next: *mut ares_naptr_reply,
+    pub flags: *mut ::std::os::raw::c_uchar,
+    pub service: *mut ::std::os::raw::c_uchar,
+    pub regexp: *mut ::std::os::raw::c_uchar,
+    pub replacement: *mut ::std::os::raw::c_char,
+    pub order: ::std::os::raw::c_ushort,
+    pub preference: ::std::os::raw::c_ushort,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_soa_reply {
+    pub nsname: *mut ::std::os::raw::c_char,
+    pub hostmaster: *mut ::std::os::raw::c_char,
+    pub serial: ::std::os::raw::c_uint,
+    pub refresh: ::std::os::raw::c_uint,
+    pub retry: ::std::os::raw::c_uint,
+    pub expire: ::std::os::raw::c_uint,
+    pub minttl: ::std::os::raw::c_uint,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_uri_reply {
+    pub next: *mut ares_uri_reply,
+    pub priority: ::std::os::raw::c_ushort,
+    pub weight: ::std::os::raw::c_ushort,
+    pub uri: *mut ::std::os::raw::c_char,
+    pub ttl: ::std::os::raw::c_int,
+}
+#[repr(C)]
+pub struct ares_addrinfo_node {
+    pub ai_ttl: ::std::os::raw::c_int,
+    pub ai_flags: ::std::os::raw::c_int,
+    pub ai_family: ::std::os::raw::c_int,
+    pub ai_socktype: ::std::os::raw::c_int,
+    pub ai_protocol: ::std::os::raw::c_int,
+    pub ai_addrlen: ares_socklen_t,
+    pub ai_addr: *mut sockaddr,
+    pub ai_next: *mut ares_addrinfo_node,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_addrinfo_cname {
+    pub ttl: ::std::os::raw::c_int,
+    pub alias: *mut ::std::os::raw::c_char,
+    pub name: *mut ::std::os::raw::c_char,
+    pub next: *mut ares_addrinfo_cname,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_addrinfo {
+    pub cnames: *mut ares_addrinfo_cname,
+    pub nodes: *mut ares_addrinfo_node,
+    #[cfg(cares1_18)]
+    pub name: *mut ::std::os::raw::c_char,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_addrinfo_hints {
+    pub ai_flags: ::std::os::raw::c_int,
+    pub ai_family: ::std::os::raw::c_int,
+    pub ai_socktype: ::std::os::raw::c_int,
+    pub ai_protocol: ::std::os::raw::c_int,
+}
+extern "C" {
+    pub fn ares_parse_a_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        host: *mut *mut hostent,
+        addrttls: *mut ares_addrttl,
+        naddrttls: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_aaaa_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        host: *mut *mut hostent,
+        addrttls: *mut ares_addr6ttl,
+        naddrttls: *mut ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_caa_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        caa_out: *mut *mut ares_caa_reply,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_ptr_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        addr: *const ::std::os::raw::c_void,
+        addrlen: ::std::os::raw::c_int,
+        family: ::std::os::raw::c_int,
+        host: *mut *mut hostent,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_ns_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        host: *mut *mut hostent,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_srv_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        srv_out: *mut *mut ares_srv_reply,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_mx_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        mx_out: *mut *mut ares_mx_reply,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_txt_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        txt_out: *mut *mut ares_txt_reply,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_txt_reply_ext(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        txt_out: *mut *mut ares_txt_ext,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_naptr_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        naptr_out: *mut *mut ares_naptr_reply,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_soa_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        soa_out: *mut *mut ares_soa_reply,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_parse_uri_reply(
+        abuf: *const ::std::os::raw::c_uchar,
+        alen: ::std::os::raw::c_int,
+        uri_out: *mut *mut ares_uri_reply,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_free_string(str_: *mut ::std::os::raw::c_void);
+}
+extern "C" {
+    pub fn ares_free_hostent(host: *mut hostent);
+}
+extern "C" {
+    pub fn ares_free_data(dataptr: *mut ::std::os::raw::c_void);
+}
+extern "C" {
+    pub fn ares_strerror(code: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ares_addr_node {
+    pub next: *mut ares_addr_node,
+    pub family: ::std::os::raw::c_int,
+    pub addr: ares_addr_node__bindgen_ty_1,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union ares_addr_node__bindgen_ty_1 {
+    pub addr4: in_addr,
+    pub addr6: ares_in6_addr,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ares_addr_port_node {
+    pub next: *mut ares_addr_port_node,
+    pub family: ::std::os::raw::c_int,
+    pub addr: ares_addr_port_node__bindgen_ty_1,
+    pub udp_port: ::std::os::raw::c_int,
+    pub tcp_port: ::std::os::raw::c_int,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union ares_addr_port_node__bindgen_ty_1 {
+    pub addr4: in_addr,
+    pub addr6: ares_in6_addr,
+}
+extern "C" {
+    pub fn ares_set_servers(
+        channel: *mut ares_channel_t,
+        servers: *const ares_addr_node,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_set_servers_ports(
+        channel: *mut ares_channel_t,
+        servers: *const ares_addr_port_node,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_set_servers_csv(
+        channel: *mut ares_channel_t,
+        servers: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_set_servers_ports_csv(
+        channel: *mut ares_channel_t,
+        servers: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_get_servers_csv(channel: *mut ares_channel_t) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn ares_get_servers(
+        channel: *const ares_channel_t,
+        servers: *mut *mut ares_addr_node,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_get_servers_ports(
+        channel: *const ares_channel_t,
+        servers: *mut *mut ares_addr_port_node,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ares_inet_ntop(
+        af: ::std::os::raw::c_int,
+        src: *const ::std::os::raw::c_void,
+        dst: *mut ::std::os::raw::c_char,
+        size: ares_socklen_t,
+    ) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn ares_inet_pton(
+        af: ::std::os::raw::c_int,
+        src: *const ::std::os::raw::c_char,
+        dst: *mut ::std::os::raw::c_void,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    #[doc = " Whether or not the c-ares library was built with threadsafety\n\n  \\return ARES_TRUE if built with threadsafety, ARES_FALSE if not"]
+    pub fn ares_threadsafety() -> ares_bool_t;
+}
+extern "C" {
+    #[doc = " Block until notified that there are no longer any queries in queue, or\n  the specified timeout has expired.\n\n  \\param[in] channel    Initialized ares channel\n  \\param[in] timeout_ms Number of milliseconds to wait for the queue to be\n                        empty. -1 for Infinite.\n  \\return ARES_ENOTIMP if not built with threading support, ARES_ETIMEOUT\n          if requested timeout expires, ARES_SUCCESS when queue is empty."]
+    pub fn ares_queue_wait_empty(
+        channel: *mut ares_channel_t,
+        timeout_ms: ::std::os::raw::c_int,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Retrieve the total number of active queries pending answers from servers.\n  Some c-ares requests may spawn multiple queries, such as ares_getaddrinfo()\n  when using AF_UNSPEC, which will be reflected in this number.\n\n  \\param[in] channel Initialized ares channel\n  \\return Number of active queries to servers"]
+    pub fn ares_queue_active_queries(channel: *const ares_channel_t) -> usize;
 }
 #[cfg(target_os = "android")]
 extern "C" {

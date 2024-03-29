@@ -160,7 +160,7 @@ mod example {
             // Wait for something to happen.
             let empty_event = EpollEvent::new(EpollFlags::empty(), 0);
             let mut events = [empty_event; 2];
-            let results = epoll.wait(&mut events, 500).expect("epoll_wait failed");
+            let results = epoll.wait(&mut events, 500u16).expect("epoll_wait failed");
 
             // Process whatever happened.
             match results {

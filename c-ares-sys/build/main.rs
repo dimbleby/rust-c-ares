@@ -45,30 +45,37 @@ fn check_version(include_dirs: &[PathBuf]) {
 
     println!("cargo:version_number={version:x}");
 
+    println!("cargo::rustc-check-cfg=cfg(cares1_15)");
     if version >= 0x1_0f_00 {
         println!("cargo:rustc-cfg=cares1_15");
     }
 
+    println!("cargo::rustc-check-cfg=cfg(cares1_18)");
     if version >= 0x1_12_00 {
         println!("cargo:rustc-cfg=cares1_18");
     }
 
+    println!("cargo::rustc-check-cfg=cfg(cares1_19)");
     if version >= 0x1_13_00 {
         println!("cargo:rustc-cfg=cares1_19");
     }
 
+    println!("cargo::rustc-check-cfg=cfg(cares1_20)");
     if version >= 0x1_14_00 {
         println!("cargo:rustc-cfg=cares1_20");
     }
 
+    println!("cargo::rustc-check-cfg=cfg(cares1_22)");
     if version >= 0x1_16_00 {
         println!("cargo:rustc-cfg=cares1_22");
     }
 
+    println!("cargo::rustc-check-cfg=cfg(cares1_23)");
     if version >= 0x1_17_00 {
         println!("cargo:rustc-cfg=cares1_23");
     }
 
+    println!("cargo::rustc-check-cfg=cfg(cares1_26)");
     if version >= 0x1_1a_00 {
         println!("cargo:rustc-cfg=cares1_26");
     }

@@ -71,7 +71,6 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
     target_os = "dragonfly",
     target_os = "openbsd",
     target_os = "netbsd",
-    target_os = "bitrig"
 ))]
 pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr_in {
     let in_addr = ipv4_as_in_addr(*sock_v4.ip());
@@ -91,7 +90,6 @@ pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr
     target_os = "dragonfly",
     target_os = "openbsd",
     target_os = "netbsd",
-    target_os = "bitrig"
 )))]
 pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr_in {
     let in_addr = ipv4_as_in_addr(*sock_v4.ip());
@@ -111,7 +109,6 @@ pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr
     target_os = "dragonfly",
     target_os = "openbsd",
     target_os = "netbsd",
-    target_os = "bitrig"
 ))]
 pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockaddr_in6 {
     let in6_addr = ipv6_as_in6_addr(sock_v6.ip());
@@ -134,7 +131,6 @@ pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockadd
         target_os = "dragonfly",
         target_os = "openbsd",
         target_os = "netbsd",
-        target_os = "bitrig"
     ))
 ))]
 pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockaddr_in6 {

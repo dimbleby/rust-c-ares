@@ -44,6 +44,50 @@ type SocketStateCallback = dyn FnMut(Socket, bool, bool) + Send + 'static;
 #[cfg(cares1_29)]
 type ServerStateCallback = dyn FnMut(&str, bool, ServerStateFlags) + Send + 'static;
 
+/// Server failover options.
+///
+/// When a DNS server fails to respond to a query, c-ares will deprioritize the server.  On
+/// subsequent queries, servers with fewer consecutive failures will be selected in preference.
+/// However, in order to detect when such a server has recovered, c-ares will occasionally retry
+/// failed servers.  `ServerFailoverOptions` contains options to control this behaviour.
+#[cfg(cares1_29)]
+pub struct ServerFailoverOptions {
+    retry_chance: u16,
+    retry_delay: usize,
+}
+
+#[cfg(cares1_29)]
+impl Default for ServerFailoverOptions {
+    fn default() -> Self {
+        Self {
+            retry_chance: 10,
+            retry_delay: 5000,
+        }
+    }
+}
+
+#[cfg(cares1_29)]
+impl ServerFailoverOptions {
+    /// Returns a new `ServerFailoverOptions`.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// The `retry_chance` sets the probability (1/N) of retrying a failed server on any given
+    /// query.  Setting to a value of 0 disables retries.
+    pub fn set_retry_chance(&mut self, retry_chance: u16) -> &mut Self {
+        self.retry_chance = retry_chance;
+        self
+    }
+
+    /// The `retry_delay` sets the minimum delay in milliseconds that c-ares will wait before
+    /// retrying a specific failed server.
+    pub fn set_retry_delay(&mut self, retry_delay: usize) -> &mut Self {
+        self.retry_delay = retry_delay;
+        self
+    }
+}
+
 /// Used to configure the behaviour of the name resolver.
 pub struct Options {
     ares_options: c_ares_sys::ares_options,
@@ -251,6 +295,21 @@ impl Options {
     pub fn set_query_cache_max_ttl(&mut self, qcache_max_ttl: u32) -> &mut Self {
         self.ares_options.qcache_max_ttl = qcache_max_ttl;
         self.optmask |= c_ares_sys::ARES_OPT_QUERY_CACHE;
+        self
+    }
+
+    /// Set server failover options.
+    ///
+    /// If this option is not specified then c-ares will use a probability of 10% and a minimum
+    /// delay of 5 seconds.
+    #[cfg(cares1_29)]
+    pub fn set_server_failover_options(
+        &mut self,
+        server_failover_options: &ServerFailoverOptions,
+    ) -> &mut Self {
+        self.ares_options.server_failover_opts.retry_chance = server_failover_options.retry_chance;
+        self.ares_options.server_failover_opts.retry_delay = server_failover_options.retry_delay;
+        self.optmask |= c_ares_sys::ARES_OPT_SERVER_FAILOVER;
         self
     }
 }

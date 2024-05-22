@@ -71,6 +71,8 @@ pub use crate::a::{AResult, AResults, AResultsIter};
 pub use crate::aaaa::{AAAAResult, AAAAResults, AAAAResultsIter};
 #[cfg(cares1_17)]
 pub use crate::caa::{CAAResult, CAAResults, CAAResultsIter};
+#[cfg(cares1_29)]
+pub use crate::channel::ServerFailoverOptions;
 pub use crate::channel::{Channel, GetSock, GetSockIter, Options};
 pub use crate::cname::CNameResults;
 pub use crate::error::{Error, Result};

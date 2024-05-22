@@ -42,6 +42,7 @@ pub const ARES_OPT_UDP_MAX_QUERIES: c_int = 1 << 19;
 pub const ARES_OPT_MAXTIMEOUTMS: c_int = 1 << 20;
 pub const ARES_OPT_QUERY_CACHE: c_int = 1 << 21;
 pub const ARES_OPT_EVENT_THREAD: c_int = 1 << 22;
+pub const ARES_OPT_SERVER_FAILOVER: c_int = 1 << 23;
 
 // Flags for nameinfo queries
 pub const ARES_NI_NOFQDN: c_int = 1;

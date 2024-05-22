@@ -1,8 +1,10 @@
-use std::ffi::CString;
+#[allow(unused_imports)]
+use std::ffi::{CStr, CString};
 use std::marker::PhantomData;
 use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
-use std::os::raw::{c_int, c_void};
+#[allow(unused_imports)]
+use std::os::raw::{c_char, c_int, c_void};
 use std::ptr;
 use std::sync::Arc;
 
@@ -30,12 +32,17 @@ use crate::utils::{
     ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in, socket_addrv6_as_sockaddr_in6,
 };
 use crate::Flags;
+#[cfg(cares1_29)]
+use crate::ServerStateFlags;
 use std::sync::Mutex;
 
 // ares_library_init is not thread-safe, so we put a lock around it.
 static ARES_LIBRARY_LOCK: Mutex<()> = Mutex::new(());
 
 type SocketStateCallback = dyn FnMut(Socket, bool, bool) + Send + 'static;
+
+#[cfg(cares1_29)]
+type ServerStateCallback = dyn FnMut(&str, bool, ServerStateFlags) + Send + 'static;
 
 /// Used to configure the behaviour of the name resolver.
 pub struct Options {
@@ -255,6 +262,10 @@ pub struct Channel {
 
     // For ownership only.
     _socket_state_callback: Option<Arc<SocketStateCallback>>,
+
+    // For ownership only.
+    #[cfg(cares1_29)]
+    _server_state_callback: Option<Arc<ServerStateCallback>>,
 }
 
 impl Channel {
@@ -312,6 +323,8 @@ impl Channel {
             ares_channel,
             phantom: PhantomData,
             _socket_state_callback: options.socket_state_callback,
+            #[cfg(cares1_29)]
+            _server_state_callback: None,
         };
         Ok(channel)
     }
@@ -336,11 +349,17 @@ impl Channel {
             return Err(Error::from(rc));
         }
 
-        let callback = self._socket_state_callback.as_ref().cloned();
+        let socket_state_callback = self._socket_state_callback.as_ref().cloned();
+
+        #[cfg(cares1_29)]
+        let server_state_callback = self._server_state_callback.as_ref().cloned();
+
         let channel = Channel {
             ares_channel,
             phantom: PhantomData,
-            _socket_state_callback: callback,
+            _socket_state_callback: socket_state_callback,
+            #[cfg(cares1_29)]
+            _server_state_callback: server_state_callback,
         };
         Ok(channel)
     }
@@ -442,6 +461,31 @@ impl Channel {
         } else {
             Err(Error::from(ares_rc))
         }
+    }
+
+    /// Set a callback function to be invoked whenever a query on the channel completes.
+    ///
+    /// `callback(server, success, flags)` will be called when a query completes.
+    ///
+    /// - `server` indicates the DNS server that was used for the query.
+    /// - `success` indicates whether the query succeeded or not.
+    /// - `flags` is a bitmask of flags describing various aspects of the query.
+    #[cfg(cares1_29)]
+    pub fn set_server_state_callback<F>(&mut self, callback: F) -> &mut Self
+    where
+        F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
+    {
+        let boxed_callback = Arc::new(callback);
+        let data = (&*boxed_callback as *const F).cast_mut().cast();
+        unsafe {
+            c_ares_sys::ares_set_server_state_callback(
+                self.ares_channel,
+                Some(server_state_callback::<F>),
+                data,
+            )
+        }
+        self._server_state_callback = Some(boxed_callback);
+        self
     }
 
     /// Initiate a single-question DNS query for the A records associated with `name`.
@@ -1039,6 +1083,27 @@ unsafe extern "C" fn socket_state_callback<F>(
 {
     let handler = data.cast::<F>();
     panic::catch(|| (*handler)(socket_fd, readable != 0, writable != 0));
+}
+
+#[cfg(cares1_29)]
+unsafe extern "C" fn server_state_callback<F>(
+    server_string: *const c_char,
+    success: c_ares_sys::ares_bool_t,
+    flags: c_int,
+    data: *mut c_void,
+) where
+    F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
+{
+    let handler = data.cast::<F>();
+    let c_str = CStr::from_ptr(server_string);
+    let server = c_str.to_str().unwrap();
+    panic::catch(|| {
+        (*handler)(
+            server,
+            success != c_ares_sys::ares_bool_t::ARES_FALSE,
+            ServerStateFlags::from_bits_truncate(flags),
+        )
+    });
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as returned by

@@ -55,6 +55,7 @@ mod ns;
 mod panic;
 mod ptr;
 mod query;
+mod server_state_flags;
 mod soa;
 mod srv;
 mod txt;
@@ -82,6 +83,8 @@ pub use crate::naptr::{NAPTRResult, NAPTRResults, NAPTRResultsIter};
 pub use crate::ni_flags::NIFlags;
 pub use crate::ns::NSResults;
 pub use crate::ptr::PTRResults;
+#[cfg(cares1_29)]
+pub use crate::server_state_flags::ServerStateFlags;
 pub use crate::soa::SOAResult;
 pub use crate::srv::{SRVResult, SRVResults, SRVResultsIter};
 pub use crate::txt::{TXTResult, TXTResults, TXTResultsIter};

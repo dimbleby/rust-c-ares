@@ -61,6 +61,10 @@ pub const ARES_NI_IDN: c_int = 1 << 10;
 pub const ARES_NI_IDN_ALLOW_UNASSIGNED: c_int = 1 << 11;
 pub const ARES_NI_IDN_USE_STD3_ASCII_RULES: c_int = 1 << 12;
 
+// Server state callback flag values
+pub const ARES_SERV_STATE_UDP: c_int = 1;
+pub const ARES_SERV_STATE_TCP: c_int = 1 << 1;
+
 // A non-existent file descriptor
 #[cfg(windows)]
 pub const ARES_SOCKET_BAD: ares_socket_t = !0;

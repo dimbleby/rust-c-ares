@@ -54,6 +54,10 @@ print "// Flags for nameinfo queries\n";
 print_values("ARES_NI_", @lines);
 
 print "\n";
+print "// Server state callback flag values\n";
+print_values("ARES_SERV_STATE_", @lines);
+
+print "\n";
 print "// A non-existent file descriptor\n";
 print "#[cfg(windows)]\n";
 print "pub const ARES_SOCKET_BAD: ares_socket_t = !0;\n";

@@ -88,6 +88,12 @@ pub struct apattern {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct ares_server_failover_options {
+    pub retry_chance: ::std::os::raw::c_ushort,
+    pub retry_delay: usize,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_options {
     pub flags: ::std::os::raw::c_int,
     pub timeout: ::std::os::raw::c_int,
@@ -119,6 +125,8 @@ pub struct ares_options {
     pub qcache_max_ttl: ::std::os::raw::c_uint,
     #[cfg(cares1_26)]
     pub evsys: ares_evsys_t,
+    #[cfg(cares1_29)]
+    pub server_failover_opts: ares_server_failover_options,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1003,6 +1011,14 @@ pub type ares_addrinfo_callback = ::std::option::Option<
         res: *mut ares_addrinfo,
     ),
 >;
+pub type ares_server_state_callback = ::std::option::Option<
+    unsafe extern "C" fn(
+        server_string: *const ::std::os::raw::c_char,
+        success: ares_bool_t,
+        flags: ::std::os::raw::c_int,
+        data: *mut ::std::os::raw::c_void,
+    ),
+>;
 extern "C" {
     pub fn ares_library_init(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
 }
@@ -1091,6 +1107,13 @@ extern "C" {
     pub fn ares_set_socket_configure_callback(
         channel: *mut ares_channel_t,
         callback: ares_sock_config_callback,
+        user_data: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    pub fn ares_set_server_state_callback(
+        channel: *mut ares_channel_t,
+        callback: ares_server_state_callback,
         user_data: *mut ::std::os::raw::c_void,
     );
 }
@@ -1613,7 +1636,7 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    pub fn ares_get_servers_csv(channel: *mut ares_channel_t) -> *mut ::std::os::raw::c_char;
+    pub fn ares_get_servers_csv(channel: *const ares_channel_t) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
     pub fn ares_get_servers(

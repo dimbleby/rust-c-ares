@@ -350,19 +350,19 @@ impl Channel {
         options.ares_options.ndomains = domains.len() as c_int;
 
         // Likewise for lookups.
-        for c_lookup in &options.lookups {
+        if let Some(c_lookup) = &options.lookups {
             options.ares_options.lookups = c_lookup.as_ptr().cast_mut()
         }
 
         // And the resolvconf_path.
         #[cfg(cares1_15)]
-        for c_resolvconf_path in &options.resolvconf_path {
+        if let Some(c_resolvconf_path) = &options.resolvconf_path {
             options.ares_options.resolvconf_path = c_resolvconf_path.as_ptr().cast_mut()
         }
 
         // And the hosts_path.
         #[cfg(cares1_19)]
-        for c_hosts_path in &options.hosts_path {
+        if let Some(c_hosts_path) = &options.hosts_path {
             options.ares_options.hosts_path = c_hosts_path.as_ptr().cast_mut()
         }
 

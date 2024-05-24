@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.1.0 (24 May 2024)
+
+- c-ares 1.29.0
+
 ## 9.0.0 (23 February 2024)
 
 - cares 1.27.0

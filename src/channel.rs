@@ -25,6 +25,8 @@ use crate::ptr::{query_ptr_callback, PTRResults};
 use crate::query::query_callback;
 use crate::soa::{query_soa_callback, SOAResult};
 use crate::srv::{query_srv_callback, SRVResults};
+#[cfg(cares1_24)]
+use crate::string::AresString;
 use crate::txt::{query_txt_callback, TXTResults};
 use crate::types::{AddressFamily, DnsClass, QueryType, Socket};
 use crate::uri::{query_uri_callback, URIResults};
@@ -477,6 +479,13 @@ impl Channel {
         } else {
             Err(Error::from(ares_rc))
         }
+    }
+
+    /// Retrieves the list of servers in comma delimited format.
+    #[cfg(cares1_24)]
+    pub fn get_servers(&self) -> AresString {
+        let servers = unsafe { c_ares_sys::ares_get_servers_csv(self.ares_channel) };
+        AresString::new(servers)
     }
 
     /// Set the local IPv4 address from which to make queries.

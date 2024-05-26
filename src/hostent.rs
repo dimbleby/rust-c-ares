@@ -1,9 +1,8 @@
 use std::ffi::CStr;
-use std::fmt;
 use std::marker::PhantomData;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::raw::c_char;
-use std::slice;
+use std::{fmt, ptr, slice};
 
 use itertools::Itertools;
 
@@ -161,7 +160,7 @@ impl<'a> Iterator for HostAddressResultsIter<'a> {
             None
         } else {
             unsafe {
-                self.next = &*(self.next as *const *const c_char).offset(1);
+                self.next = &*ptr::from_ref(self.next).offset(1);
                 self.family
                     .and_then(|family| ip_address_from_bytes(family, h_addr.cast()))
             }
@@ -190,7 +189,7 @@ impl<'a> Iterator for HostAliasResultsIter<'a> {
             None
         } else {
             unsafe {
-                self.next = &*(self.next as *const *const c_char).offset(1);
+                self.next = &*ptr::from_ref(self.next).offset(1);
                 let c_str = CStr::from_ptr(h_alias);
                 Some(c_str)
             }

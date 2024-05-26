@@ -205,7 +205,7 @@ impl Options {
     {
         let boxed_callback = Arc::new(callback);
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
-        self.ares_options.sock_state_cb_data = (&*boxed_callback as *const F).cast_mut().cast();
+        self.ares_options.sock_state_cb_data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
         self.socket_state_callback = Some(boxed_callback);
         self.optmask |= c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         self
@@ -498,10 +498,7 @@ impl Channel {
     pub fn set_local_ipv6(&mut self, ipv6: &Ipv6Addr) -> &mut Self {
         let in6_addr = ipv6_as_in6_addr(ipv6);
         unsafe {
-            c_ares_sys::ares_set_local_ip6(
-                self.ares_channel,
-                (&in6_addr as *const c_types::in6_addr).cast(),
-            )
+            c_ares_sys::ares_set_local_ip6(self.ares_channel, ptr::from_ref(&in6_addr).cast())
         }
         self
     }
@@ -544,7 +541,7 @@ impl Channel {
         F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
     {
         let boxed_callback = Arc::new(callback);
-        let data = (&*boxed_callback as *const F).cast_mut().cast();
+        let data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
         unsafe {
             c_ares_sys::ares_set_server_state_callback(
                 self.ares_channel,
@@ -987,11 +984,11 @@ impl Channel {
         let c_addr = match *address {
             IpAddr::V4(v4) => {
                 in_addr = ipv4_as_in_addr(v4);
-                (&in_addr as *const c_types::in_addr).cast()
+                ptr::from_ref(&in_addr).cast()
             }
             IpAddr::V6(ref v6) => {
                 in6_addr = ipv6_as_in6_addr(v6);
-                (&in6_addr as *const c_types::in6_addr).cast()
+                ptr::from_ref(&in6_addr).cast()
             }
         };
         let (family, length) = match *address {
@@ -1047,11 +1044,11 @@ impl Channel {
         let c_addr = match *address {
             SocketAddr::V4(ref v4) => {
                 sockaddr_in = socket_addrv4_as_sockaddr_in(v4);
-                (&sockaddr_in as *const c_types::sockaddr_in).cast()
+                ptr::from_ref(&sockaddr_in).cast()
             }
             SocketAddr::V6(ref v6) => {
                 sockaddr_in6 = socket_addrv6_as_sockaddr_in6(v6);
-                (&sockaddr_in6 as *const c_types::sockaddr_in6).cast()
+                ptr::from_ref(&sockaddr_in6).cast()
             }
         };
         let length = match *address {

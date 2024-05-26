@@ -38,7 +38,7 @@ impl AResults {
                 data.len() as c_int,
                 ptr::null_mut(),
                 results.addrttls.as_mut_ptr(),
-                (&mut results.naddrttls as *mut usize).cast(),
+                ptr::from_mut(&mut results.naddrttls).cast(),
             )
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {

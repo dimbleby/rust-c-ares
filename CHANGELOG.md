@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- CAA record value is bytes, not a string
+
 ## 9.2.1 (26 May 2024)
 
 - Include the whole API in docs

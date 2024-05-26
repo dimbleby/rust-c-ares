@@ -21,11 +21,8 @@ mod example {
             }
             Ok(ref soa_result) => {
                 println!("Successful SOA lookup...");
-                println!(
-                    "Name server: {}",
-                    soa_result.name_server().to_string_lossy()
-                );
-                println!("Hostmaster: {}", soa_result.hostmaster().to_string_lossy());
+                println!("Name server: {}", soa_result.name_server());
+                println!("Hostmaster: {}", soa_result.hostmaster());
                 println!("Serial: {}", soa_result.serial());
                 println!("Retry: {}", soa_result.retry());
                 println!("Expire: {}", soa_result.expire());
@@ -42,10 +39,10 @@ mod example {
             Ok(ref name_info_result) => {
                 println!("Successful name info lookup...");
                 if let Some(node) = name_info_result.node() {
-                    println!("Node: {}", node.to_string_lossy());
+                    println!("Node: {}", node);
                 }
                 if let Some(service) = name_info_result.service() {
-                    println!("Service: {}", service.to_string_lossy());
+                    println!("Service: {}", service);
                 }
             }
         }

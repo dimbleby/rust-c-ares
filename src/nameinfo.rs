@@ -18,35 +18,27 @@ impl<'a> NameInfoResult<'a> {
     }
 
     /// Returns the node from this `NameInfoResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn node(&self) -> Option<&CStr> {
-        self.node.map(|string| unsafe { CStr::from_ptr(string) })
+    pub fn node(&self) -> Option<&str> {
+        self.node.map(|string| {
+            let c_str = unsafe { CStr::from_ptr(string) };
+            c_str.to_str().unwrap()
+        })
     }
 
     /// Returns the service from this `NameInfoResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn service(&self) -> Option<&CStr> {
-        self.service.map(|string| unsafe { CStr::from_ptr(string) })
+    pub fn service(&self) -> Option<&str> {
+        self.service.map(|string| {
+            let c_str = unsafe { CStr::from_ptr(string) };
+            c_str.to_str().unwrap()
+        })
     }
 }
 
 impl<'a> fmt::Display for NameInfoResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let node = self
-            .node()
-            .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
-            .unwrap_or("<None>");
+        let node = self.node().unwrap_or("<None>");
         write!(fmt, "Node: {node}, ")?;
-        let service = self
-            .service()
-            .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
-            .unwrap_or("<None>");
+        let service = self.service().unwrap_or("<None>");
         write!(fmt, "Service: {service}")
     }
 }

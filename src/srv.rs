@@ -100,12 +100,9 @@ unsafe impl<'a> Sync for SRVResultsIter<'a> {}
 
 impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn host(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.srv_reply.host) }
+    pub fn host(self) -> &'a str {
+        let c_str = unsafe { CStr::from_ptr(self.srv_reply.host) };
+        c_str.to_str().unwrap()
     }
 
     /// Returns the weight in this `SRVResult`.
@@ -126,11 +123,7 @@ impl<'a> SRVResult<'a> {
 
 impl<'a> fmt::Display for SRVResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "Host: {}, ",
-            self.host().to_str().unwrap_or("<not utf8>")
-        )?;
+        write!(fmt, "Host: {}, ", self.host())?;
         write!(fmt, "Port: {}, ", self.port())?;
         write!(fmt, "Priority: {}, ", self.priority())?;
         write!(fmt, "Weight: {}", self.weight())

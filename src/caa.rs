@@ -103,12 +103,9 @@ impl<'a> CAAResult<'a> {
     }
 
     /// The property represented by this `CAAResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn property(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.caa_reply.property.cast()) }
+    pub fn property(self) -> &'a str {
+        let c_str = unsafe { CStr::from_ptr(self.caa_reply.property.cast()) };
+        c_str.to_str().unwrap()
     }
 
     /// The value represented by this `CAAResult`.
@@ -120,11 +117,7 @@ impl<'a> CAAResult<'a> {
 impl<'a> fmt::Display for CAAResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "Critical: {}, ", self.critical())?;
-        write!(
-            fmt,
-            "Property: {}, ",
-            self.property().to_str().unwrap_or("<not utf8>")
-        )?;
+        write!(fmt, "Property: {}, ", self.property())?;
         let value = str::from_utf8(self.value()).unwrap_or("<binary>");
         write!(fmt, "Value: {}", value)
     }

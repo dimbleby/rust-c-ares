@@ -99,12 +99,9 @@ unsafe impl<'a> Sync for MXResultsIter<'a> {}
 
 impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn host(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.mx_reply.host) }
+    pub fn host(self) -> &'a str {
+        let c_str = unsafe { CStr::from_ptr(self.mx_reply.host) };
+        c_str.to_str().unwrap()
     }
 
     /// Returns the priority from this `MXResult`.
@@ -115,11 +112,7 @@ impl<'a> MXResult<'a> {
 
 impl<'a> fmt::Display for MXResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "Hostname: {}, ",
-            self.host().to_str().unwrap_or("<not utf8>")
-        )?;
+        write!(fmt, "Hostname: {}, ", self.host())?;
         write!(fmt, "Priority: {}", self.priority())
     }
 }

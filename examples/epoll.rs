@@ -49,12 +49,7 @@ mod example {
             Ok(ref caa_results) => {
                 println!("Successful CAA lookup...");
                 for caa_result in caa_results {
-                    println!(
-                        "critical: {}, property: {}, value: {}",
-                        caa_result.critical(),
-                        caa_result.property().to_string_lossy(),
-                        caa_result.value().to_string_lossy()
-                    );
+                    println!("{}", caa_result);
                 }
             }
         }

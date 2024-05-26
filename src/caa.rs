@@ -1,9 +1,7 @@
 use std::ffi::CStr;
-use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
-use std::ptr;
-use std::slice;
+use std::{fmt, ptr, slice, str};
 
 use itertools::Itertools;
 
@@ -114,12 +112,8 @@ impl<'a> CAAResult<'a> {
     }
 
     /// The value represented by this `CAAResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn value(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.caa_reply.value.cast()) }
+    pub fn value(self) -> &'a [u8] {
+        unsafe { slice::from_raw_parts(self.caa_reply.value, self.caa_reply.length) }
     }
 }
 
@@ -131,11 +125,8 @@ impl<'a> fmt::Display for CAAResult<'a> {
             "Property: {}, ",
             self.property().to_str().unwrap_or("<not utf8>")
         )?;
-        write!(
-            fmt,
-            "Value: {}",
-            self.value().to_str().unwrap_or("<not utf8>")
-        )
+        let value = str::from_utf8(self.value()).unwrap_or("<binary>");
+        write!(fmt, "Value: {}", value)
     }
 }
 

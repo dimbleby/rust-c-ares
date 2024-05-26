@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.2.0 (26 May 2024)
+
+- add `get_servers()`
+
 ## 9.1.0 (24 May 2024)
 
 - c-ares 1.29.0

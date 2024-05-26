@@ -1,9 +1,9 @@
 use std::error;
-use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::c_int;
 use std::result;
-use std::str;
+
+use crate::utils::c_string_as_str_unchecked;
 
 /// Error codes that the library might return.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
@@ -96,8 +96,7 @@ impl fmt::Display for Error {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> result::Result<(), fmt::Error> {
         let text = unsafe {
             let ptr = c_ares_sys::ares_strerror(*self as c_int);
-            let buf = CStr::from_ptr(ptr).to_bytes();
-            str::from_utf8_unchecked(buf)
+            c_string_as_str_unchecked(ptr)
         };
         fmt.write_str(text)
     }

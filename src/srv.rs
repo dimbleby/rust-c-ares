@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
@@ -9,6 +8,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::hostname_as_str;
 
 /// The result of a successful SRV lookup.
 #[derive(Debug)]
@@ -101,8 +101,7 @@ unsafe impl<'a> Sync for SRVResultsIter<'a> {}
 impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
     pub fn host(self) -> &'a str {
-        let c_str = unsafe { CStr::from_ptr(self.srv_reply.host) };
-        c_str.to_str().unwrap()
+        unsafe { hostname_as_str(self.srv_reply.host) }
     }
 
     /// Returns the weight in this `SRVResult`.

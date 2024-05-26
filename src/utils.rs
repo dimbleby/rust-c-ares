@@ -1,5 +1,5 @@
 use crate::types::AddressFamily;
-use std::ffi::CStr;
+use std::ffi::{c_char, CStr};
 use std::mem;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
 use std::os::raw::c_int;
@@ -155,6 +155,26 @@ pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockadd
     sockaddr_in6
 }
 
+pub unsafe fn c_string_as_str_unchecked<'a>(c_str: *const c_char) -> &'a str {
+    let bytes = CStr::from_ptr(c_str).to_bytes();
+    str::from_utf8_unchecked(bytes)
+}
+
+pub unsafe fn c_string_as_str_checked<'a>(c_str: *const c_char) -> &'a str {
+    let c_str = CStr::from_ptr(c_str);
+    c_str.to_str().unwrap()
+}
+
+#[cfg(not(cares1_17_2))]
+pub unsafe fn hostname_as_str<'a>(hostname: *const c_char) -> &'a str {
+    c_string_as_str_checked(hostname)
+}
+
+#[cfg(cares1_17_2)]
+pub unsafe fn hostname_as_str<'a>(hostname: *const c_char) -> &'a str {
+    c_string_as_str_unchecked(hostname)
+}
+
 /// Get the version number of the underlying `c-ares` library.
 ///
 /// The version is returned as both a string and an integer.  The integer is built up as 24bit
@@ -164,8 +184,7 @@ pub fn version() -> (&'static str, u32) {
     let mut int_version: c_int = 0;
     let str_version = unsafe {
         let ptr = c_ares_sys::ares_version(&mut int_version);
-        let buf = CStr::from_ptr(ptr).to_bytes();
-        str::from_utf8_unchecked(buf)
+        c_string_as_str_unchecked(ptr)
     };
     (str_version, int_version as u32)
 }

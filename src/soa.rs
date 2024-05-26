@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
@@ -7,6 +6,7 @@ use std::slice;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::hostname_as_str;
 
 /// The result of a successful SOA lookup.
 #[derive(Debug)]
@@ -39,14 +39,12 @@ impl SOAResult {
 
     /// Returns the name server from this `SOAResult`.
     pub fn name_server(&self) -> &str {
-        let c_str = unsafe { CStr::from_ptr((*self.soa_reply).nsname) };
-        c_str.to_str().unwrap()
+        unsafe { hostname_as_str((*self.soa_reply).nsname) }
     }
 
     /// Returns the hostmaster from this `SOAResult`.
     pub fn hostmaster(&self) -> &str {
-        let c_str = unsafe { CStr::from_ptr((*self.soa_reply).hostmaster) };
-        c_str.to_str().unwrap()
+        unsafe { hostname_as_str((*self.soa_reply).hostmaster) }
     }
 
     /// Returns the serial number from this `SOAResult`.

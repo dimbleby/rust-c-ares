@@ -1,9 +1,9 @@
-use std::ffi::CStr;
-use std::fmt;
 use std::os::raw::{c_char, c_int, c_void};
+use std::{fmt, str};
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::{c_string_as_str_unchecked, hostname_as_str};
 
 /// The result of a successful name-info lookup.
 #[derive(Clone, Copy, Debug)]
@@ -19,18 +19,13 @@ impl<'a> NameInfoResult<'a> {
 
     /// Returns the node from this `NameInfoResult`.
     pub fn node(&self) -> Option<&str> {
-        self.node.map(|string| {
-            let c_str = unsafe { CStr::from_ptr(string) };
-            c_str.to_str().unwrap()
-        })
+        self.node.map(|string| unsafe { hostname_as_str(string) })
     }
 
     /// Returns the service from this `NameInfoResult`.
     pub fn service(&self) -> Option<&str> {
-        self.service.map(|string| {
-            let c_str = unsafe { CStr::from_ptr(string) };
-            c_str.to_str().unwrap()
-        })
+        self.service
+            .map(|string| unsafe { c_string_as_str_unchecked(string) })
     }
 }
 

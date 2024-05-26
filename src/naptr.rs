@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
@@ -9,6 +8,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::{c_string_as_str_checked, hostname_as_str};
 
 /// The result of a successful NAPTR lookup.
 #[derive(Debug)]
@@ -100,26 +100,22 @@ unsafe impl<'a> Sync for NAPTRResultsIter<'a> {}
 impl<'a> NAPTRResult<'a> {
     /// Returns the flags in this `NAPTRResult`.
     pub fn flags(self) -> &'a str {
-        let c_str = unsafe { CStr::from_ptr(self.naptr_reply.flags.cast()) };
-        c_str.to_str().unwrap()
+        unsafe { c_string_as_str_checked(self.naptr_reply.flags.cast()) }
     }
 
     /// Returns the service name in this `NAPTRResult`.
     pub fn service_name(self) -> &'a str {
-        let c_str = unsafe { CStr::from_ptr(self.naptr_reply.service.cast()) };
-        c_str.to_str().unwrap()
+        unsafe { c_string_as_str_checked(self.naptr_reply.service.cast()) }
     }
 
     /// Returns the regular expression in this `NAPTRResult`.
     pub fn reg_exp(self) -> &'a str {
-        let c_str = unsafe { CStr::from_ptr(self.naptr_reply.regexp.cast()) };
-        c_str.to_str().unwrap()
+        unsafe { c_string_as_str_checked(self.naptr_reply.regexp.cast()) }
     }
 
     /// Returns the replacement pattern in this `NAPTRResult`.
     pub fn replacement_pattern(self) -> &'a str {
-        let c_str = unsafe { CStr::from_ptr(self.naptr_reply.replacement) };
-        c_str.to_str().unwrap()
+        unsafe { hostname_as_str(self.naptr_reply.replacement) }
     }
 
     /// Returns the order value in this `NAPTRResult`.

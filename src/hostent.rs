@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::raw::c_char;
@@ -7,11 +6,10 @@ use std::{fmt, ptr, slice};
 use itertools::Itertools;
 
 use crate::types::AddressFamily;
-use crate::utils::address_family;
+use crate::utils::{address_family, hostname_as_str};
 
 fn hostname(hostent: &c_types::hostent) -> &str {
-    let c_str = unsafe { CStr::from_ptr(hostent.h_name.cast()) };
-    c_str.to_str().unwrap()
+    unsafe { hostname_as_str(hostent.h_name.cast()) }
 }
 
 fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
@@ -180,8 +178,7 @@ impl<'a> Iterator for HostAliasResultsIter<'a> {
             None
         } else {
             self.next = unsafe { &*ptr::from_ref(self.next).offset(1) };
-            let c_str = unsafe { CStr::from_ptr(h_alias) };
-            let string = c_str.to_str().unwrap();
+            let string = unsafe { hostname_as_str(h_alias) };
             Some(string)
         }
     }

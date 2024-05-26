@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::{fmt, ptr, slice, str};
@@ -7,6 +6,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::c_string_as_str_checked;
 
 /// The result of a successful CAA lookup.
 #[derive(Debug)]
@@ -104,8 +104,7 @@ impl<'a> CAAResult<'a> {
 
     /// The property represented by this `CAAResult`.
     pub fn property(self) -> &'a str {
-        let c_str = unsafe { CStr::from_ptr(self.caa_reply.property.cast()) };
-        c_str.to_str().unwrap()
+        unsafe { c_string_as_str_checked(self.caa_reply.property.cast()) }
     }
 
     /// The value represented by this `CAAResult`.

@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
@@ -9,6 +8,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::hostname_as_str;
 
 /// The result of a successful MX lookup.
 #[derive(Debug)]
@@ -100,8 +100,7 @@ unsafe impl<'a> Sync for MXResultsIter<'a> {}
 impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.
     pub fn host(self) -> &'a str {
-        let c_str = unsafe { CStr::from_ptr(self.mx_reply.host) };
-        c_str.to_str().unwrap()
+        unsafe { hostname_as_str(self.mx_reply.host) }
     }
 
     /// Returns the priority from this `MXResult`.

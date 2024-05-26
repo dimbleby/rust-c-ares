@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
@@ -9,6 +8,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::c_string_as_str_checked;
 
 /// The result of a successful URI lookup.
 #[derive(Debug)]
@@ -111,8 +111,7 @@ impl<'a> URIResult<'a> {
 
     /// Returns the uri in this `URIResult`.
     pub fn uri(self) -> &'a str {
-        let c_str = unsafe { CStr::from_ptr(self.uri_reply.uri) };
-        c_str.to_str().unwrap()
+        unsafe { c_string_as_str_checked(self.uri_reply.uri) }
     }
 
     /// Returns the time-to-live in this `URIResult`.

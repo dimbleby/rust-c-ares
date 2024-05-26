@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.2.1 (26 May 2024)
+
+- Include the whole API in docs
+
 ## 9.2.0 (24 May 2024)
 
 - c-ares 1.29.0

@@ -6,7 +6,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
-use crate::utils::c_string_as_str_checked;
+use crate::utils::dns_string_as_str;
 
 /// The result of a successful CAA lookup.
 #[derive(Debug)]
@@ -104,7 +104,7 @@ impl<'a> CAAResult<'a> {
 
     /// The property represented by this `CAAResult`.
     pub fn property(self) -> &'a str {
-        unsafe { c_string_as_str_checked(self.caa_reply.property.cast()) }
+        unsafe { dns_string_as_str(self.caa_reply.property.cast()) }
     }
 
     /// The value represented by this `CAAResult`.

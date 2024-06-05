@@ -175,6 +175,16 @@ pub unsafe fn hostname_as_str<'a>(hostname: *const c_char) -> &'a str {
     c_string_as_str_unchecked(hostname)
 }
 
+#[cfg(not(cares1_30))]
+pub unsafe fn dns_string_as_str<'a>(hostname: *const c_char) -> &'a str {
+    c_string_as_str_checked(hostname)
+}
+
+#[cfg(cares1_30)]
+pub unsafe fn dns_string_as_str<'a>(hostname: *const c_char) -> &'a str {
+    c_string_as_str_unchecked(hostname)
+}
+
 /// Get the version number of the underlying `c-ares` library.
 ///
 /// The version is returned as both a string and an integer.  The integer is built up as 24bit

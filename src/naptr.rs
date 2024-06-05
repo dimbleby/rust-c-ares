@@ -8,7 +8,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
-use crate::utils::{c_string_as_str_checked, hostname_as_str};
+use crate::utils::{dns_string_as_str, hostname_as_str};
 
 /// The result of a successful NAPTR lookup.
 #[derive(Debug)]
@@ -100,17 +100,17 @@ unsafe impl<'a> Sync for NAPTRResultsIter<'a> {}
 impl<'a> NAPTRResult<'a> {
     /// Returns the flags in this `NAPTRResult`.
     pub fn flags(self) -> &'a str {
-        unsafe { c_string_as_str_checked(self.naptr_reply.flags.cast()) }
+        unsafe { dns_string_as_str(self.naptr_reply.flags.cast()) }
     }
 
     /// Returns the service name in this `NAPTRResult`.
     pub fn service_name(self) -> &'a str {
-        unsafe { c_string_as_str_checked(self.naptr_reply.service.cast()) }
+        unsafe { dns_string_as_str(self.naptr_reply.service.cast()) }
     }
 
     /// Returns the regular expression in this `NAPTRResult`.
     pub fn reg_exp(self) -> &'a str {
-        unsafe { c_string_as_str_checked(self.naptr_reply.regexp.cast()) }
+        unsafe { dns_string_as_str(self.naptr_reply.regexp.cast()) }
     }
 
     /// Returns the replacement pattern in this `NAPTRResult`.

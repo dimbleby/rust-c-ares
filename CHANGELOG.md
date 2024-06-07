@@ -1,6 +1,6 @@
 # Changelog
 
-## 10.0.0 (unreleased)
+## 10.0.0 (7 June 2024)
 
 - string values are `&str`, not `CStr`
   - returning `CStr` was ugly but necessary while c-ares made no promises about

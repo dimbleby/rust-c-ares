@@ -160,6 +160,7 @@ pub unsafe fn c_string_as_str_unchecked<'a>(c_str: *const c_char) -> &'a str {
     str::from_utf8_unchecked(bytes)
 }
 
+#[cfg(not(cares1_30))]
 pub unsafe fn c_string_as_str_checked<'a>(c_str: *const c_char) -> &'a str {
     let c_str = CStr::from_ptr(c_str);
     c_str.to_str().unwrap()

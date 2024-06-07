@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::raw::c_char;
@@ -7,10 +6,10 @@ use std::{fmt, ptr, slice};
 use itertools::Itertools;
 
 use crate::types::AddressFamily;
-use crate::utils::address_family;
+use crate::utils::{address_family, hostname_as_str};
 
-fn hostname(hostent: &c_types::hostent) -> &CStr {
-    unsafe { CStr::from_ptr(hostent.h_name.cast()) }
+fn hostname(hostent: &c_types::hostent) -> &str {
+    unsafe { hostname_as_str(hostent.h_name.cast()) }
 }
 
 fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
@@ -28,23 +27,17 @@ fn aliases(hostent: &c_types::hostent) -> HostAliasResultsIter {
 }
 
 fn display(hostent: &c_types::hostent, fmt: &mut fmt::Formatter) -> fmt::Result {
-    write!(
-        fmt,
-        "Hostname: {}, ",
-        hostname(hostent).to_str().unwrap_or("<not utf8>")
-    )?;
+    write!(fmt, "Hostname: {}, ", hostname(hostent))?;
     let addresses = addresses(hostent).format(", ");
     write!(fmt, "Addresses: [{addresses}], ")?;
-    let aliases = aliases(hostent)
-        .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
-        .format(", ");
+    let aliases = aliases(hostent).format(", ");
     write!(fmt, "Aliases: [{aliases}]")
 }
 
 pub trait HasHostent<'a>: Sized {
     fn hostent(self) -> &'a c_types::hostent;
 
-    fn hostname(self) -> &'a CStr {
+    fn hostname(self) -> &'a str {
         let hostent = self.hostent();
         hostname(hostent)
     }
@@ -171,28 +164,22 @@ impl<'a> Iterator for HostAddressResultsIter<'a> {
 unsafe impl<'a> Send for HostAddressResultsIter<'a> {}
 unsafe impl<'a> Sync for HostAddressResultsIter<'a> {}
 
-/// Iterator of `&'a CStr`s.
-///
-/// Each item is very likely to be a valid UTF-8 string, but the underlying `c-ares` library does
-/// not guarantee this - so we leave it to users to decide whether they prefer a fallible
-/// conversion, a lossy conversion, or something else altogether.
+/// Iterator of `&'a str`s.
 #[derive(Clone, Copy, Debug)]
 pub struct HostAliasResultsIter<'a> {
     next: &'a *const c_char,
 }
 
 impl<'a> Iterator for HostAliasResultsIter<'a> {
-    type Item = &'a CStr;
+    type Item = &'a str;
     fn next(&mut self) -> Option<Self::Item> {
         let h_alias = *self.next;
         if h_alias.is_null() {
             None
         } else {
-            unsafe {
-                self.next = &*ptr::from_ref(self.next).offset(1);
-                let c_str = CStr::from_ptr(h_alias);
-                Some(c_str)
-            }
+            self.next = unsafe { &*ptr::from_ref(self.next).offset(1) };
+            let string = unsafe { hostname_as_str(h_alias) };
+            Some(string)
         }
     }
 }

@@ -1,5 +1,4 @@
-#[allow(unused_imports)]
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 use std::marker::PhantomData;
 use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
@@ -30,8 +29,10 @@ use crate::string::AresString;
 use crate::txt::{query_txt_callback, TXTResults};
 use crate::types::{AddressFamily, DnsClass, QueryType, Socket};
 use crate::uri::{query_uri_callback, URIResults};
+#[allow(unused_imports)]
 use crate::utils::{
-    ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in, socket_addrv6_as_sockaddr_in6,
+    c_string_as_str_unchecked, ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in,
+    socket_addrv6_as_sockaddr_in6,
 };
 use crate::Flags;
 #[cfg(cares1_29)]
@@ -1160,8 +1161,7 @@ unsafe extern "C" fn server_state_callback<F>(
     F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
 {
     let handler = data.cast::<F>();
-    let c_str = CStr::from_ptr(server_string);
-    let server = c_str.to_str().unwrap();
+    let server = c_string_as_str_unchecked(server_string);
     panic::catch(|| {
         (*handler)(
             server,

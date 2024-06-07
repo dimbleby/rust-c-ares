@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
@@ -9,6 +8,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::dns_string_as_str;
 
 /// The result of a successful URI lookup.
 #[derive(Debug)]
@@ -110,12 +110,8 @@ impl<'a> URIResult<'a> {
     }
 
     /// Returns the uri in this `URIResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn uri(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.uri_reply.uri) }
+    pub fn uri(self) -> &'a str {
+        unsafe { dns_string_as_str(self.uri_reply.uri) }
     }
 
     /// Returns the time-to-live in this `URIResult`.
@@ -128,11 +124,7 @@ impl<'a> URIResult<'a> {
 
 impl<'a> fmt::Display for URIResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "URI: {}, ",
-            self.uri().to_str().unwrap_or("<not utf8>")
-        )?;
+        write!(fmt, "URI: {}, ", self.uri())?;
         write!(fmt, "Priority: {}, ", self.priority())?;
         write!(fmt, "Weight: {}, ", self.weight())?;
         write!(fmt, "TTL: {}", self.ttl())

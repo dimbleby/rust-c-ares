@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
@@ -9,6 +8,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::hostname_as_str;
 
 /// The result of a successful MX lookup.
 #[derive(Debug)]
@@ -99,12 +99,8 @@ unsafe impl<'a> Sync for MXResultsIter<'a> {}
 
 impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn host(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.mx_reply.host) }
+    pub fn host(self) -> &'a str {
+        unsafe { hostname_as_str(self.mx_reply.host) }
     }
 
     /// Returns the priority from this `MXResult`.
@@ -115,11 +111,7 @@ impl<'a> MXResult<'a> {
 
 impl<'a> fmt::Display for MXResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "Hostname: {}, ",
-            self.host().to_str().unwrap_or("<not utf8>")
-        )?;
+        write!(fmt, "Hostname: {}, ", self.host())?;
         write!(fmt, "Priority: {}", self.priority())
     }
 }

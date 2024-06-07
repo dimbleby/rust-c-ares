@@ -1,8 +1,23 @@
 # Changelog
 
-## Unreleased
+## 10.0.0 (7 June 2024)
 
+- string values are `&str`, not `CStr`
+  - returning `CStr` was ugly but necessary while c-ares made no promises about
+    the values that it returned
+  - from its release 1.17.2 c-ares verifies that hostnames are strings, and from
+    its 1.30.0 it makes the same check for other DNS strings
+  - therefore this wrapper now prefers to return native rust `&str`
+  - when using a new enough version of c-ares we trust the c-ares validation,
+    and make unchecked conversions from C strings to `&str`
+  - when using older c-ares we make a fallible conversion, and `unwrap()` the
+    result
+  - therefore if you are using old c-ares and new rust-c-ares and you are
+    talking to a server that returns invalid DNS strings: you may see panics
+  - solve this by using a newer c-ares, or an older rust-c-ares, or by fixing
+    your DNS server
 - CAA record value is bytes, not a string
+- c-ares 1.30.0
 
 ## 9.2.1 (26 May 2024)
 

@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
@@ -9,6 +8,7 @@ use itertools::Itertools;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::utils::{dns_string_as_str, hostname_as_str};
 
 /// The result of a successful NAPTR lookup.
 #[derive(Debug)]
@@ -99,39 +99,23 @@ unsafe impl<'a> Sync for NAPTRResultsIter<'a> {}
 
 impl<'a> NAPTRResult<'a> {
     /// Returns the flags in this `NAPTRResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn flags(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.naptr_reply.flags.cast()) }
+    pub fn flags(self) -> &'a str {
+        unsafe { dns_string_as_str(self.naptr_reply.flags.cast()) }
     }
 
     /// Returns the service name in this `NAPTRResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn service_name(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.naptr_reply.service.cast()) }
+    pub fn service_name(self) -> &'a str {
+        unsafe { dns_string_as_str(self.naptr_reply.service.cast()) }
     }
 
     /// Returns the regular expression in this `NAPTRResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn reg_exp(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.naptr_reply.regexp.cast()) }
+    pub fn reg_exp(self) -> &'a str {
+        unsafe { dns_string_as_str(self.naptr_reply.regexp.cast()) }
     }
 
     /// Returns the replacement pattern in this `NAPTRResult`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn replacement_pattern(self) -> &'a CStr {
-        unsafe { CStr::from_ptr(self.naptr_reply.replacement) }
+    pub fn replacement_pattern(self) -> &'a str {
+        unsafe { hostname_as_str(self.naptr_reply.replacement) }
     }
 
     /// Returns the order value in this `NAPTRResult`.
@@ -147,26 +131,10 @@ impl<'a> NAPTRResult<'a> {
 
 impl<'a> fmt::Display for NAPTRResult<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "Flags: {}, ",
-            self.flags().to_str().unwrap_or("<not utf8>")
-        )?;
-        write!(
-            fmt,
-            "Service name: {}, ",
-            self.service_name().to_str().unwrap_or("<not utf8>")
-        )?;
-        write!(
-            fmt,
-            "Regular expression: {}, ",
-            self.reg_exp().to_str().unwrap_or("<not utf8>")
-        )?;
-        write!(
-            fmt,
-            "Replacement pattern: {}, ",
-            self.replacement_pattern().to_str().unwrap_or("<not utf8>")
-        )?;
+        write!(fmt, "Flags: {}, ", self.flags())?;
+        write!(fmt, "Service name: {}, ", self.service_name())?;
+        write!(fmt, "Regular expression: {}, ", self.reg_exp())?;
+        write!(fmt, "Replacement pattern: {}, ", self.replacement_pattern())?;
         write!(fmt, "Order: {}, ", self.order())?;
         write!(fmt, "Preference: {}", self.preference())
     }

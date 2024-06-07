@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::{c_int, c_void};
 
@@ -20,11 +19,7 @@ impl<'a> HostResults<'a> {
     }
 
     /// Returns the hostname from this `HostResults`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn hostname(self) -> &'a CStr {
+    pub fn hostname(self) -> &'a str {
         self.hostent.hostname()
     }
 

@@ -1,4 +1,3 @@
-use std::ffi::CStr;
 use std::fmt;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
@@ -47,11 +46,7 @@ impl PTRResults {
     }
 
     /// Returns the hostname from this `PTRResults`.
-    ///
-    /// In practice this is very likely to be a valid UTF-8 string, but the underlying `c-ares`
-    /// library does not guarantee this - so we leave it to users to decide whether they prefer a
-    /// fallible conversion, a lossy conversion, or something else altogether.
-    pub fn hostname(&self) -> &CStr {
+    pub fn hostname(&self) -> &str {
         self.hostent.hostname()
     }
 
@@ -63,15 +58,8 @@ impl PTRResults {
 
 impl fmt::Display for PTRResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "Hostname: {}, ",
-            self.hostname().to_str().unwrap_or("<not utf8>")
-        )?;
-        let aliases = self
-            .aliases()
-            .map(|cstr| cstr.to_str().unwrap_or("<not utf8>"))
-            .format(", ");
+        write!(fmt, "Hostname: {}, ", self.hostname())?;
+        let aliases = self.aliases().format(", ");
         write!(fmt, "Aliases: [{aliases}]")
     }
 }

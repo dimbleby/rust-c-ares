@@ -34,7 +34,17 @@ bitflags!(
         /// for writing clients which might be used to test or debug name servers.
         const NOCHECKRESP = c_ares_sys::ARES_FLAG_NOCHECKRESP;
 
-        /// Use Extension Mechanisms for DNS.
+        /// Include an EDNS pseudo-resource record (RFC 2671) in generated requests.  As of c-ares
+        /// v1.22, this is on by default if flags are otherwise not set.
         const EDNS = c_ares_sys::ARES_FLAG_EDNS;
+
+        /// Do not attempt to add a default local named server if there are no other servers
+        /// available.  Instead, fail initialization with ARES_ENOSERVER.
+        const NO_DFLT_SVR = c_ares_sys::ARES_FLAG_NO_DFLT_SVR;
+
+        /// Enable support for DNS 0x20 as per
+        /// https://datatracker.ietf.org/doc/html/draft-vixie-dnsext-dns0x20-00 which adds
+        /// additional entropy to the request by randomizing the case of the query name.
+        const DNS_0X20 = c_ares_sys::ARES_FLAG_DNS0x20;
     }
 );

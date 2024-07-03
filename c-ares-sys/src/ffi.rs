@@ -331,6 +331,8 @@ pub enum ares_dns_datatype_t {
     ARES_DATATYPE_BINP = 9,
     #[doc = "< Array of options.  16bit identifier, BIN\n   data."]
     ARES_DATATYPE_OPT = 10,
+    #[doc = "< Array of binary data, likely printable.\n   Guaranteed to have a NULL terminator for\n   convenience (not included in length)"]
+    ARES_DATATYPE_ABINP = 11,
 }
 #[repr(u32)]
 #[doc = " Keys used for all RR Types.  We take the record type and multiply by 100\n  to ensure we have a proper offset between keys so we can keep these sorted"]
@@ -366,7 +368,7 @@ pub enum ares_dns_rr_key_t {
     ARES_RR_MX_PREFERENCE = 1501,
     #[doc = " MX Record. Exchange, domain. Datatype: NAME"]
     ARES_RR_MX_EXCHANGE = 1502,
-    #[doc = " TXT Record. Data. Datatype: BINP"]
+    #[doc = " TXT Record. Data. Datatype: ABINP"]
     ARES_RR_TXT_DATA = 1601,
     #[doc = " SIG Record. Type Covered. Datatype: U16"]
     ARES_RR_SIG_TYPE_COVERED = 2401,
@@ -704,6 +706,13 @@ extern "C" {
     pub fn ares_dns_record_get_id(dnsrec: *const ares_dns_record_t) -> ::std::os::raw::c_ushort;
 }
 extern "C" {
+    #[doc = " Overwrite the DNS query id\n\n \\param[in] dnsrec  Initialized record object\n \\param[in] id      DNS query id\n \\return ARES_TRUE on success, ARES_FALSE on usage error"]
+    pub fn ares_dns_record_set_id(
+        dnsrec: *mut ares_dns_record_t,
+        id: ::std::os::raw::c_ushort,
+    ) -> ares_bool_t;
+}
+extern "C" {
     #[doc = " Get the DNS Record Flags\n\n  \\param[in] dnsrec  Initialized record object\n  \\return One or more \\ares_dns_flags_t"]
     pub fn ares_dns_record_get_flags(dnsrec: *const ares_dns_record_t) -> ::std::os::raw::c_ushort;
 }
@@ -871,6 +880,23 @@ extern "C" {
     ) -> ares_status_t;
 }
 extern "C" {
+    #[doc = " Add binary array value (ABINP) data for specified resource record and key.\n  Can only be used on keys with datatype ARES_DATATYPE_ABINP.  The value will\n  Be added as the last element in the array.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] val    Pointer to binary data.\n  \\param[in] len    Length of binary data\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_add_abin(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        val: *const ::std::os::raw::c_uchar,
+        len: usize,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Delete binary array value (ABINP) data for specified resource record and\n  key by specified index. Can only be used on keys with datatype\n  ARES_DATATYPE_ABINP.  The value at the index will be deleted.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] idx    Index to delete\n  \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_del_abin(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        idx: usize,
+    ) -> ares_status_t;
+}
+extern "C" {
     #[doc = " Set the option for the RR\n\n  \\param[in]  dns_rr   Pointer to resource record\n  \\param[in]  key      DNS Resource Record Key\n  \\param[in]  opt      Option record key id.\n  \\param[out] val      Optional. Value to associate with option.\n  \\param[out] val_len  Length of value passed.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_rr_set_opt(
         dns_rr: *mut ares_dns_rr_t,
@@ -923,10 +949,23 @@ extern "C" {
     ) -> ::std::os::raw::c_uint;
 }
 extern "C" {
-    #[doc = " Retrieve a pointer to the binary data.  Can only be used on keys with\n  datatype ARES_DATATYPE_BIN or ARES_DATATYPE_BINP.  If BINP, the data is\n  guaranteed to have a NULL terminator which is NOT included in the length.\n\n  \\param[in]  dns_rr Pointer to resource record\n  \\param[in]  key    DNS Resource Record Key\n  \\param[out] len    Length of binary data returned\n  \\return pointer binary data or NULL on error"]
+    #[doc = " Retrieve a pointer to the binary data.  Can only be used on keys with\n  datatype ARES_DATATYPE_BIN, ARES_DATATYPE_BINP, or ARES_DATATYPE_ABINP.\n  If BINP or ABINP, the data is guaranteed to have a NULL terminator which\n  is NOT included in the length.\n\n  \\param[in]  dns_rr Pointer to resource record\n  \\param[in]  key    DNS Resource Record Key\n  \\param[out] len    Length of binary data returned\n  \\return pointer binary data or NULL on error"]
     pub fn ares_dns_rr_get_bin(
         dns_rr: *const ares_dns_rr_t,
         key: ares_dns_rr_key_t,
+        len: *mut usize,
+    ) -> *const ::std::os::raw::c_uchar;
+}
+extern "C" {
+    #[doc = " Retrieve the count of the array of stored binary values. Can only be used on\n  keys with datatype ARES_DATATYPE_ABINP.\n\n  \\param[in]  dns_rr Pointer to resource record\n  \\param[in]  key    DNS Resource Record Key\n  \\return count of values"]
+    pub fn ares_dns_rr_get_abin_cnt(dns_rr: *const ares_dns_rr_t, key: ares_dns_rr_key_t) -> usize;
+}
+extern "C" {
+    #[doc = " Retrieve a pointer to the binary array data from the specified index.  Can\n  only be used on keys with datatype ARES_DATATYPE_ABINP.  If ABINP, the data\n  is guaranteed to have a NULL terminator which is NOT included in the length.\n  If want all array membersconcatenated, may use ares_dns_rr_get_bin()\n  instead.\n\n  \\param[in]  dns_rr Pointer to resource record\n  \\param[in]  key    DNS Resource Record Key\n  \\param[in]  idx    Index of value to retrieve\n  \\param[out] len    Length of binary data returned\n  \\return pointer binary data or NULL on error"]
+    pub fn ares_dns_rr_get_abin(
+        dns_rr: *const ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        idx: usize,
         len: *mut usize,
     ) -> *const ::std::os::raw::c_uchar;
 }

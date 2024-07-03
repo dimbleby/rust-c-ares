@@ -1,5 +1,9 @@
 # Changelog
 
+## 10.1.0 (3 July 2024)
+
+- c-ares 1.32.0
+
 ## 10.0.0 (7 June 2024)
 
 - string values are `&str`, not `CStr`

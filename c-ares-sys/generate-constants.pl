@@ -12,6 +12,11 @@ sub print_values {
             my $value = $2;
             $value =~ s/^\(//;
             $value =~ s/\)$//;
+
+            if ($flag =~ /\p{Lowercase}/) {
+                print "#[allow(non_upper_case_globals)]\n"
+            }
+
             if ($value =~ /1 << 0/) {
                 # Sidestep clippy's "identity_op" warning
                 print "pub const $flag: c_int = 1;\n";

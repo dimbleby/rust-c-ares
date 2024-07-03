@@ -17,6 +17,8 @@ pub const ARES_FLAG_NOALIASES: c_int = 1 << 6;
 pub const ARES_FLAG_NOCHECKRESP: c_int = 1 << 7;
 pub const ARES_FLAG_EDNS: c_int = 1 << 8;
 pub const ARES_FLAG_NO_DFLT_SVR: c_int = 1 << 9;
+#[allow(non_upper_case_globals)]
+pub const ARES_FLAG_DNS0x20: c_int = 1 << 10;
 
 // Option mask values
 pub const ARES_OPT_FLAGS: c_int = 1;

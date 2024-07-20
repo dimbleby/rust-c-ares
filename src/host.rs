@@ -50,12 +50,12 @@ pub(crate) unsafe extern "C" fn get_host_callback<F>(
 {
     panic::catch(|| {
         let result = if status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
-            let host_results = HostResults::new(&*hostent);
+            let host_results = HostResults::new(unsafe { &*hostent });
             Ok(host_results)
         } else {
             Err(Error::from(status))
         };
-        let handler = Box::from_raw(arg.cast::<F>());
+        let handler = unsafe { Box::from_raw(arg.cast::<F>()) };
         handler(result);
     });
 }

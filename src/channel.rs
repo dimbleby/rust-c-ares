@@ -1148,7 +1148,8 @@ unsafe extern "C" fn socket_state_callback<F>(
     F: FnMut(Socket, bool, bool) + Send + 'static,
 {
     let handler = data.cast::<F>();
-    panic::catch(|| (*handler)(socket_fd, readable != 0, writable != 0));
+    let handler = unsafe { &mut *handler };
+    panic::catch(|| handler(socket_fd, readable != 0, writable != 0));
 }
 
 #[cfg(cares1_29)]

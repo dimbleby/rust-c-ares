@@ -123,13 +123,13 @@ unsafe impl<'a> Sync for HostentBorrowed<'a> {}
 unsafe fn ip_address_from_bytes(family: AddressFamily, h_addr: *const u8) -> Option<IpAddr> {
     match family {
         AddressFamily::INET => {
-            let source = slice::from_raw_parts(h_addr, 4);
+            let source = unsafe { slice::from_raw_parts(h_addr, 4) };
             let bytes: [u8; 4] = source.try_into().unwrap();
             let ipv4 = Ipv4Addr::from(bytes);
             Some(IpAddr::V4(ipv4))
         }
         AddressFamily::INET6 => {
-            let source = slice::from_raw_parts(h_addr, 16);
+            let source = unsafe { slice::from_raw_parts(h_addr, 16) };
             let bytes: [u8; 16] = source.try_into().unwrap();
             let ipv6 = Ipv6Addr::from(bytes);
             Some(IpAddr::V6(ipv6))

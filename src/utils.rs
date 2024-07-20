@@ -156,13 +156,13 @@ pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockadd
 }
 
 pub unsafe fn c_string_as_str_unchecked<'a>(c_str: *const c_char) -> &'a str {
-    let bytes = CStr::from_ptr(c_str).to_bytes();
-    str::from_utf8_unchecked(bytes)
+    let bytes = unsafe { CStr::from_ptr(c_str) }.to_bytes();
+    unsafe { str::from_utf8_unchecked(bytes) }
 }
 
 #[cfg(not(cares1_30))]
 pub unsafe fn c_string_as_str_checked<'a>(c_str: *const c_char) -> &'a str {
-    let c_str = CStr::from_ptr(c_str);
+    let c_str = unsafe { CStr::from_ptr(c_str) };
     c_str.to_str().unwrap()
 }
 
@@ -173,12 +173,12 @@ pub unsafe fn hostname_as_str<'a>(hostname: *const c_char) -> &'a str {
 
 #[cfg(cares1_17_2)]
 pub unsafe fn hostname_as_str<'a>(hostname: *const c_char) -> &'a str {
-    c_string_as_str_unchecked(hostname)
+    unsafe { c_string_as_str_unchecked(hostname) }
 }
 
 #[cfg(not(cares1_30))]
 pub unsafe fn dns_string_as_str<'a>(hostname: *const c_char) -> &'a str {
-    c_string_as_str_checked(hostname)
+    unsafe { c_string_as_str_checked(hostname) }
 }
 
 #[cfg(cares1_30)]

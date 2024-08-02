@@ -1,6 +1,6 @@
 # Changelog
 
-## 9.5.4 (2 August 2024)
+## 9.6.0 (2 August 2024)
 
 - c-ares 1.33.0
 

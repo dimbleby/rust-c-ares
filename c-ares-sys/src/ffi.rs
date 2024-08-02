@@ -304,7 +304,7 @@ pub enum ares_dns_rcode_t {
     ARES_RCODE_BADALG = 21,
     #[doc = "< RFC 8945. Bad Truncation"]
     ARES_RCODE_BADTRUNC = 22,
-    #[doc = "< RVC 7973. Bad/missing Server Cookie"]
+    #[doc = "< RFC 7873. Bad/missing Server Cookie"]
     ARES_RCODE_BADCOOKIE = 23,
 }
 #[repr(u32)]
@@ -904,6 +904,14 @@ extern "C" {
         opt: ::std::os::raw::c_ushort,
         val: *const ::std::os::raw::c_uchar,
         val_len: usize,
+    ) -> ares_status_t;
+}
+extern "C" {
+    #[doc = " Delete the option for the RR by id\n\n  \\param[in] dns_rr   Pointer to resource record\n  \\param[in] key      DNS Resource Record Key\n  \\param[in] opt      Option record key id.\n  \\return ARES_SUCCESS if removed, ARES_ENOTFOUND if not found"]
+    pub fn ares_dns_rr_del_opt_byid(
+        dns_rr: *mut ares_dns_rr_t,
+        key: ares_dns_rr_key_t,
+        opt: ::std::os::raw::c_ushort,
     ) -> ares_status_t;
 }
 extern "C" {

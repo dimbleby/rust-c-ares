@@ -1,5 +1,10 @@
 # Changelog
 
+## 11.0.0 (2 Aug 2024)
+
+- c-types 4.0.0
+  - breaking only because re-exported types are part of our interface
+
 ## 10.1.0 (3 July 2024)
 
 - c-ares 1.32.0

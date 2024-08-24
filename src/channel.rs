@@ -13,6 +13,8 @@ use crate::aaaa::{query_aaaa_callback, AAAAResults};
 use crate::caa::{query_caa_callback, CAAResults};
 use crate::cname::{query_cname_callback, CNameResults};
 use crate::error::{Error, Result};
+#[cfg(cares1_34)]
+use crate::events::{FdEvents, ProcessFlags};
 use crate::host::{get_host_callback, HostResults};
 use crate::mx::{query_mx_callback, MXResults};
 use crate::nameinfo::{get_name_info_callback, NameInfoResult};
@@ -46,6 +48,9 @@ type SocketStateCallback = dyn FnMut(Socket, bool, bool) + Send + 'static;
 
 #[cfg(cares1_29)]
 type ServerStateCallback = dyn FnMut(&str, bool, ServerStateFlags) + Send + 'static;
+
+#[cfg(cares1_34)]
+type PendingWriteCallback = dyn FnMut() + Send + 'static;
 
 /// Server failover options.
 ///
@@ -328,6 +333,10 @@ pub struct Channel {
     // For ownership only.
     #[cfg(cares1_29)]
     _server_state_callback: Option<Arc<ServerStateCallback>>,
+
+    // For ownership only.
+    #[cfg(cares1_34)]
+    _pending_write_callback: Option<Arc<PendingWriteCallback>>,
 }
 
 impl Channel {
@@ -387,6 +396,8 @@ impl Channel {
             _socket_state_callback: options.socket_state_callback,
             #[cfg(cares1_29)]
             _server_state_callback: None,
+            #[cfg(cares1_34)]
+            _pending_write_callback: None,
         };
         Ok(channel)
     }
@@ -416,12 +427,17 @@ impl Channel {
         #[cfg(cares1_29)]
         let server_state_callback = self._server_state_callback.as_ref().cloned();
 
+        #[cfg(cares1_34)]
+        let pending_write_callback = self._pending_write_callback.as_ref().cloned();
+
         let channel = Channel {
             ares_channel,
             phantom: PhantomData,
             _socket_state_callback: socket_state_callback,
             #[cfg(cares1_29)]
             _server_state_callback: server_state_callback,
+            #[cfg(cares1_34)]
+            _pending_write_callback: pending_write_callback,
         };
         Ok(channel)
     }
@@ -442,6 +458,27 @@ impl Channel {
     pub fn process(&mut self, read_fds: &mut c_types::fd_set, write_fds: &mut c_types::fd_set) {
         unsafe { c_ares_sys::ares_process(self.ares_channel, read_fds, write_fds) }
         panic::propagate();
+    }
+
+    /// Process events on multiple file descriptors based on the event mask associated with each
+    /// file descriptor.  Recommended over calling `process_fd()` multiple times since it would
+    /// trigger additional logic such as timeout processing on each call.
+    #[cfg(cares1_34)]
+    pub fn process_fds(&mut self, events: &[FdEvents], flags: ProcessFlags) -> Result<()> {
+        let rc = unsafe {
+            c_ares_sys::ares_process_fds(
+                self.ares_channel,
+                events.as_ptr().cast(),
+                events.len(),
+                flags.bits(),
+            )
+        };
+        panic::propagate();
+
+        if let Ok(err) = Error::try_from(rc) {
+            return Err(err);
+        }
+        Ok(())
     }
 
     /// Retrieve the set of socket descriptors which the calling application should wait on for
@@ -551,6 +588,26 @@ impl Channel {
             )
         }
         self._server_state_callback = Some(boxed_callback);
+        self
+    }
+
+    /// Set a callback function to be invoked when there is potential pending data
+    /// which needs to be written.
+    #[cfg(cares1_34)]
+    pub fn set_pending_write_callback<F>(&mut self, callback: F) -> &mut Self
+    where
+        F: FnMut() + Send + 'static,
+    {
+        let boxed_callback = Arc::new(callback);
+        let data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
+        unsafe {
+            c_ares_sys::ares_set_pending_write_cb(
+                self.ares_channel,
+                Some(pending_write_callback::<F>),
+                data,
+            )
+        }
+        self._pending_write_callback = Some(boxed_callback);
         self
     }
 
@@ -1122,6 +1179,13 @@ impl Channel {
         unsafe { c_ares_sys::ares_cancel(self.ares_channel) }
         panic::propagate();
     }
+
+    /// Kick c-ares to process a pending write.
+    #[cfg(cares1_34)]
+    pub fn process_pending_write(&mut self) {
+        unsafe { c_ares_sys::ares_process_pending_write(self.ares_channel) }
+        panic::propagate();
+    }
 }
 
 impl Drop for Channel {
@@ -1162,14 +1226,25 @@ unsafe extern "C" fn server_state_callback<F>(
     F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
 {
     let handler = data.cast::<F>();
+    let handler = unsafe { &mut *handler };
     let server = c_string_as_str_unchecked(server_string);
     panic::catch(|| {
-        (*handler)(
+        handler(
             server,
             success != c_ares_sys::ares_bool_t::ARES_FALSE,
             ServerStateFlags::from_bits_truncate(flags),
         )
     });
+}
+
+#[cfg(cares1_34)]
+unsafe extern "C" fn pending_write_callback<F>(data: *mut c_void)
+where
+    F: FnMut() + Send + 'static,
+{
+    let handler = data.cast::<F>();
+    let handler = unsafe { &mut *handler };
+    panic::catch(handler);
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as returned by

@@ -44,6 +44,8 @@ mod caa;
 mod channel;
 mod cname;
 mod error;
+#[cfg(cares1_34)]
+mod events;
 mod flags;
 mod host;
 mod hostent;
@@ -77,6 +79,8 @@ pub use crate::channel::ServerFailoverOptions;
 pub use crate::channel::{Channel, GetSock, GetSockIter, Options};
 pub use crate::cname::CNameResults;
 pub use crate::error::{Error, Result};
+#[cfg(cares1_34)]
+pub use crate::events::{FdEventFlags, FdEvents, ProcessFlags};
 pub use crate::flags::Flags;
 pub use crate::host::HostResults;
 pub use crate::hostent::{HostAddressResultsIter, HostAliasResultsIter};

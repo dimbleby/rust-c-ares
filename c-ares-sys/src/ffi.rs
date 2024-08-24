@@ -1086,6 +1086,8 @@ pub type ares_server_state_callback = ::std::option::Option<
         data: *mut ::std::os::raw::c_void,
     ),
 >;
+pub type ares_pending_write_cb =
+    ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void)>;
 extern "C" {
     pub fn ares_library_init(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
 }
@@ -1185,6 +1187,16 @@ extern "C" {
     );
 }
 extern "C" {
+    pub fn ares_set_pending_write_cb(
+        channel: *mut ares_channel_t,
+        callback: ares_pending_write_cb,
+        user_data: *mut ::std::os::raw::c_void,
+    );
+}
+extern "C" {
+    pub fn ares_process_pending_write(channel: *mut ares_channel_t);
+}
+extern "C" {
     pub fn ares_set_sortlist(
         channel: *mut ares_channel_t,
         sortstr: *const ::std::os::raw::c_char,
@@ -1254,6 +1266,152 @@ extern "C" {
         funcs: *const ares_socket_functions,
         user_data: *mut ::std::os::raw::c_void,
     );
+}
+#[repr(u32)]
+#[doc = " Flags defining behavior of socket functions"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_sockfunc_flags_t {
+    #[doc = " Strongly recommended to create sockets as non-blocking and set this\n  flag"]
+    ARES_SOCKFUNC_FLAG_NONBLOCKING = 1,
+}
+#[repr(u32)]
+#[doc = " Socket options in request to asetsockopt() in struct\n  ares_socket_functions_ex"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_socket_opt_t {
+    #[doc = " Set the send buffer size. Value is a pointer to an int. (SO_SNDBUF)"]
+    ARES_SOCKET_OPT_SENDBUF_SIZE = 0,
+    #[doc = " Set the recv buffer size. Value is a pointer to an int. (SO_RCVBUF)"]
+    ARES_SOCKET_OPT_RECVBUF_SIZE = 1,
+    #[doc = " Set the network interface to use as the source for communication.\n  Value is a C string. (SO_BINDTODEVICE)"]
+    ARES_SOCKET_OPT_BIND_DEVICE = 2,
+    #[doc = " Enable TCP Fast Open.  Value is a pointer to an ares_bool_t.  On some\n  systems this could be a no-op if it is known it is on by default and\n  return success.  Other systems may be a no-op if known the system does\n  not support the feature and returns failure with errno set to ENOSYS or\n  WSASetLastError(WSAEOPNOTSUPP)."]
+    ARES_SOCKET_OPT_TCP_FASTOPEN = 3,
+}
+#[repr(u32)]
+#[doc = " Flags for behavior during connect"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_socket_connect_flags_t {
+    #[doc = " Connect using TCP Fast Open"]
+    ARES_SOCKET_CONN_TCP_FASTOPEN = 1,
+}
+#[repr(u32)]
+#[doc = " Flags for behavior during bind"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_socket_bind_flags_t {
+    #[doc = " Bind is for a TCP connection"]
+    ARES_SOCKET_BIND_TCP = 1,
+    #[doc = " Bind is for a client connection, not server"]
+    ARES_SOCKET_BIND_CLIENT = 2,
+}
+#[doc = " Socket functions to call rather than using OS-native functions"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ares_socket_functions_ex {
+    #[doc = " ABI Version: must be \"1\""]
+    pub version: ::std::os::raw::c_uint,
+    #[doc = " Flags indicating behavior of the subsystem. One or more\n ares_sockfunc_flags_t"]
+    pub flags: ::std::os::raw::c_uint,
+    #[doc = " REQUIRED. Create a new socket file descriptor.  The file descriptor must\n be opened in non-blocking mode (so that reads and writes never block).\n Recommended other options would be to disable signals on write errors\n (SO_NOSIGPIPE), Disable the Nagle algorithm on SOCK_STREAM (TCP_NODELAY),\n and to automatically close file descriptors on exec (FD_CLOEXEC).\n\n  \\param[in] domain      Socket domain. Valid values are AF_INET, AF_INET6.\n  \\param[in] type       Socket type. Valid values are SOCK_STREAM (tcp) and\n                        SOCK_DGRAM (udp).\n  \\param[in] protocol   In general this should be ignored, may be passed as\n                        0 (use as default for type), or may be IPPROTO_UDP\n                        or IPPROTO_TCP.\n  \\param[in] user_data  Pointer provided to ares_set_socket_functions_ex().\n  \\return ARES_SOCKET_BAD on error, or socket file descriptor on success.\n          On error, it is expected to set errno (or WSASetLastError()) to an\n          appropriate reason code such as EAFNOSUPPORT / WSAAFNOSUPPORT."]
+    pub asocket: ::std::option::Option<
+        unsafe extern "C" fn(
+            domain: ::std::os::raw::c_int,
+            type_: ::std::os::raw::c_int,
+            protocol: ::std::os::raw::c_int,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> ares_socket_t,
+    >,
+    #[doc = " REQUIRED. Close a socket file descriptor.\n  \\param[in] sock      Socket file descriptor returned from asocket.\n  \\param[in] user_data Pointer provided to ares_set_socket_functions_ex().\n  \\return 0 on success.  On failure, should set errno (or WSASetLastError)\n          to an appropriate code such as EBADF / WSAEBADF"]
+    pub aclose: ::std::option::Option<
+        unsafe extern "C" fn(
+            sock: ares_socket_t,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " REQUIRED. Set socket option.  This shares a similar syntax to the BSD\n  setsockopt() call, however we use our own options.  The value is typically\n  a pointer to the desired value and each option has its own data type it\n  will express in the documentation.\n\n \\param[in] sock         Socket file descriptor returned from asocket.\n \\param[in] opt          Option to set.\n \\param[in] val          Pointer to value for option.\n \\param[in] val_size     Size of value.\n \\param[in] user_data    Pointer provided to\n ares_set_socket_functions_ex().\n \\return Return 0 on success, otherwise -1 should be returned with an\n         appropriate errno (or WSASetLastError()) set.  If error is ENOSYS /\n         WSAEOPNOTSUPP an error will not be propagated as it will take it\n         to mean it is an intentional decision to not support the feature."]
+    pub asetsockopt: ::std::option::Option<
+        unsafe extern "C" fn(
+            sock: ares_socket_t,
+            opt: ares_socket_opt_t,
+            val: *const ::std::os::raw::c_void,
+            val_size: ares_socklen_t,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " REQUIRED. Connect to the remote using the supplied address.  For UDP\n sockets this will bind the file descriptor to only send and receive packets\n from the remote address provided.\n\n  \\param[in] sock         Socket file descriptor returned from asocket.\n  \\param[in] address      Address to connect to\n  \\param[in] address_len  Size of address structure passed\n  \\param[in] flags        One or more ares_socket_connect_flags_t\n  \\param[in] user_data    Pointer provided to\n ares_set_socket_functions_ex().\n  \\return Return 0 upon successful establishement, otherwise -1 should be\n          returned with an appropriate errno (or WSASetLastError()) set.  It\n is generally expected that most TCP connections (not using TCP Fast Open)\n will return -1 with an error of EINPROGRESS / WSAEINPROGRESS due to the\n non-blocking nature of the connection.  It is then the responsibility of\n the implementation to notify of writability on the socket to indicate the\n connection has succeeded (or readability on failure to retrieve the\n appropriate error)."]
+    pub aconnect: ::std::option::Option<
+        unsafe extern "C" fn(
+            sock: ares_socket_t,
+            address: *const sockaddr,
+            address_len: ares_socklen_t,
+            flags: ::std::os::raw::c_uint,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " REQUIRED. Attempt to read data from the remote.\n\n  \\param[in]     sock        Socket file descriptor returned from asocket.\n  \\param[in,out] buffer      Allocated buffer to place data read from\n socket.\n  \\param[in]     length      Size of buffer\n  \\param[in]     flags       Unused, always 0.\n  \\param[in,out] address     Buffer to hold address data was received from.\n                             May be NULL if address not desired.\n  \\param[in,out] address_len Input size of address buffer, output actual\n                             written size. Must be NULL if address is NULL.\n  \\param[in]     user_data   Pointer provided to\n ares_set_socket_functions_ex().\n  \\return -1 on error with appropriate errno (or WSASetLastError()) set,\n such as EWOULDBLOCK / EAGAIN / WSAEWOULDBLOCK, or ECONNRESET /\n WSAECONNRESET."]
+    pub arecvfrom: ::std::option::Option<
+        unsafe extern "C" fn(
+            sock: ares_socket_t,
+            buffer: *mut ::std::os::raw::c_void,
+            length: usize,
+            flags: ::std::os::raw::c_int,
+            address: *mut sockaddr,
+            address_len: *mut ares_socklen_t,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> ares_ssize_t,
+    >,
+    #[doc = " REQUIRED. Attempt to send data to the remote.  Optional address may be\n specified which may be useful on unbound UDP sockets (though currently not\n used), and TCP FastOpen where the connection is delayed until first write.\n\n  \\param[in]     sock        Socket file descriptor returned from asocket.\n  \\param[in]     buffer      Containing data to place onto wire.\n  \\param[in]     length      Size of buffer\n  \\param[in]     flags       Flags for writing.  Currently only used flag is\n                             MSG_NOSIGNAL if the host OS has such a flag. In\n                             general flags can be ignored.\n  \\param[in]     address     Buffer containing address to send data to.  May\n                             be NULL.\n  \\param[in,out] address_len Size of address buffer.  Must be 0 if address\n                             is NULL.\n  \\param[in]     user_data   Pointer provided to\n ares_set_socket_functions_ex().\n  \\return Number of bytes written. -1 on error with appropriate errno (or\n WSASetLastError()) set."]
+    pub asendto: ::std::option::Option<
+        unsafe extern "C" fn(
+            sock: ares_socket_t,
+            buffer: *const ::std::os::raw::c_void,
+            length: usize,
+            flags: ::std::os::raw::c_int,
+            address: *const sockaddr,
+            address_len: ares_socklen_t,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> ares_ssize_t,
+    >,
+    #[doc = " Optional. Retrieve the local address of the socket.\n\n  \\param[in]     sock        Socket file descriptor returned from asocket\n  \\param[in,out] address     Buffer to hold address\n  \\param[in,out] address_len Size of address buffer on input, written size\n on output.\n  \\param[in]     user_data   Pointer provided to\n ares_set_socket_functions_ex().\n  \\return 0 on success. -1 on error with an appropriate errno (or\n WSASetLastError()) set."]
+    pub agetsockname: ::std::option::Option<
+        unsafe extern "C" fn(
+            sock: ares_socket_t,
+            address: *mut sockaddr,
+            address_len: *mut ares_socklen_t,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    #[doc = " Optional. Bind the socket to an address.  This can be used for client\n  connections to bind the source address for packets before connect, or\n  for server connections to bind to an address and port before listening.\n  Currently c-ares only supports client connections.\n\n  \\param[in] sock        Socket file descriptor returned from asocket\n  \\param[in] flags       ares_socket_bind_flags_t flags.\n  \\param[in] address     Buffer containing address.\n  \\param[in] address_len Size of address buffer.\n  \\param[in] user_data   Pointer provided to\n ares_set_socket_functions_ex().\n  \\return 0 on success. -1 on error with an appropriate errno (or\n WSASetLastError()) set."]
+    pub abind: ::std::option::Option<
+        unsafe extern "C" fn(
+            sock: ares_socket_t,
+            flags: ::std::os::raw::c_uint,
+            address: *const sockaddr,
+            address_len: socklen_t,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_int,
+    >,
+    pub aif_nametoindex: ::std::option::Option<
+        unsafe extern "C" fn(
+            ifname: *const ::std::os::raw::c_char,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> ::std::os::raw::c_uint,
+    >,
+    pub aif_indextoname: ::std::option::Option<
+        unsafe extern "C" fn(
+            ifindex: ::std::os::raw::c_uint,
+            ifname_buf: *mut ::std::os::raw::c_char,
+            ifname_buf_len: usize,
+            user_data: *mut ::std::os::raw::c_void,
+        ) -> *const ::std::os::raw::c_char,
+    >,
+}
+extern "C" {
+    #[doc = " Override the native socket functions for the OS with the provided set.\n  An optional user data thunk may be specified which will be passed to\n  each registered callback.  Replaces ares_set_socket_functions().\n\n  \\param[in] channel   An initialized c-ares channel.\n  \\param[in] funcs     Structure registering the implementations for the\n                       various functions.  See the structure definition.\n                       This will be duplicated and does not need to exist\n                       past the life of this call.\n  \\param[in] user_data User data thunk which will be passed to each call of\n                       the registered callbacks.\n  \\return ARES_SUCCESS on success, or another error code such as ARES_EFORMERR\n          on misuse."]
+    pub fn ares_set_socket_functions_ex(
+        channel: *mut ares_channel_t,
+        funcs: *const ares_socket_functions_ex,
+        user_data: *mut ::std::os::raw::c_void,
+    ) -> ares_status_t;
 }
 extern "C" {
     pub fn ares_send(
@@ -1379,6 +1537,43 @@ extern "C" {
         read_fds: *mut fd_set,
         write_fds: *mut fd_set,
     );
+}
+#[repr(u32)]
+#[doc = " Events used by ares_fd_events_t"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_fd_eventflag_t {
+    #[doc = "< No events"]
+    ARES_FD_EVENT_NONE = 0,
+    #[doc = "< Read event (including disconnect/error)"]
+    ARES_FD_EVENT_READ = 1,
+    #[doc = "< Write event"]
+    ARES_FD_EVENT_WRITE = 2,
+}
+#[doc = " Type holding a file descriptor and mask of events, used by\n  ares_process_fds()"]
+#[repr(C)]
+pub struct ares_fd_events_t {
+    #[doc = "< File descriptor"]
+    pub fd: ares_socket_t,
+    #[doc = "< Mask of ares_fd_eventflag_t"]
+    pub events: ::std::os::raw::c_uint,
+}
+#[repr(u32)]
+#[doc = " Flags used by ares_process_fds()"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_process_flag_t {
+    #[doc = "< No flag value"]
+    ARES_PROCESS_FLAG_NONE = 0,
+    #[doc = "< skip any processing unrelated to\n   the file descriptor events passed\n    in"]
+    ARES_PROCESS_FLAG_SKIP_NON_FD = 1,
+}
+extern "C" {
+    #[doc = " Process events on multiple file descriptors based on the event mask\n  associated with each file descriptor.  Recommended over calling\n  ares_process_fd() multiple times since it would trigger additional logic\n  such as timeout processing on each call.\n\n  \\param[in] channel  Initialized ares channel\n  \\param[in] events   Array of file descriptors with events.  May be NULL if\n                      no events, but may have timeouts to process.\n  \\param[in] nevents  Number of elements in the events array.  May be 0 if\n                      no events, but may have timeouts to process.\n  \\param[in] flags    Flags to alter behavior of the process command.\n  \\return ARES_ENOMEM on out of memory, ARES_EFORMERR on misuse,\n          otherwise ARES_SUCCESS"]
+    pub fn ares_process_fds(
+        channel: *mut ares_channel_t,
+        events: *const ares_fd_events_t,
+        nevents: usize,
+        flags: ::std::os::raw::c_uint,
+    ) -> ares_status_t;
 }
 extern "C" {
     pub fn ares_process_fd(

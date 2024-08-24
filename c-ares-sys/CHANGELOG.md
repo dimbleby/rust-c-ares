@@ -1,5 +1,9 @@
 # Changelog
 
+## 10.0.1 (24 August 2024)
+
+- c-ares 1.33.1
+
 ## 10.0.0 (2 August 2024)
 
 - c-types 4.0.0

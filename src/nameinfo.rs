@@ -29,7 +29,7 @@ impl<'a> NameInfoResult<'a> {
     }
 }
 
-impl<'a> fmt::Display for NameInfoResult<'a> {
+impl fmt::Display for NameInfoResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let node = self.node().unwrap_or("<None>");
         write!(fmt, "Node: {node}, ")?;
@@ -38,8 +38,8 @@ impl<'a> fmt::Display for NameInfoResult<'a> {
     }
 }
 
-unsafe impl<'a> Send for NameInfoResult<'a> {}
-unsafe impl<'a> Sync for NameInfoResult<'a> {}
+unsafe impl Send for NameInfoResult<'_> {}
+unsafe impl Sync for NameInfoResult<'_> {}
 
 pub(crate) unsafe extern "C" fn get_name_info_callback<F>(
     arg: *mut c_void,

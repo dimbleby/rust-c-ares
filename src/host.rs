@@ -34,7 +34,7 @@ impl<'a> HostResults<'a> {
     }
 }
 
-impl<'a> fmt::Display for HostResults<'a> {
+impl fmt::Display for HostResults<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         self.hostent.fmt(fmt)
     }

@@ -91,10 +91,10 @@ impl Drop for CAAResults {
 
 unsafe impl Send for CAAResults {}
 unsafe impl Sync for CAAResults {}
-unsafe impl<'a> Send for CAAResult<'a> {}
-unsafe impl<'a> Sync for CAAResult<'a> {}
-unsafe impl<'a> Send for CAAResultsIter<'a> {}
-unsafe impl<'a> Sync for CAAResultsIter<'a> {}
+unsafe impl Send for CAAResult<'_> {}
+unsafe impl Sync for CAAResult<'_> {}
+unsafe impl Send for CAAResultsIter<'_> {}
+unsafe impl Sync for CAAResultsIter<'_> {}
 
 impl<'a> CAAResult<'a> {
     /// Is the 'critical' flag set in this `CAAResult`?
@@ -113,7 +113,7 @@ impl<'a> CAAResult<'a> {
     }
 }
 
-impl<'a> fmt::Display for CAAResult<'a> {
+impl fmt::Display for CAAResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "Critical: {}, ", self.critical())?;
         write!(fmt, "Property: {}, ", self.property())?;

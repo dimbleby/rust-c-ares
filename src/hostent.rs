@@ -109,15 +109,15 @@ impl<'a> HasHostent<'a> for HostentBorrowed<'a> {
     }
 }
 
-impl<'a> fmt::Display for HostentBorrowed<'a> {
+impl fmt::Display for HostentBorrowed<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let hostent = self.hostent();
         display(hostent, fmt)
     }
 }
 
-unsafe impl<'a> Send for HostentBorrowed<'a> {}
-unsafe impl<'a> Sync for HostentBorrowed<'a> {}
+unsafe impl Send for HostentBorrowed<'_> {}
+unsafe impl Sync for HostentBorrowed<'_> {}
 
 // Get an IpAddr from a family and an array of bytes, as found in a `hostent`.
 unsafe fn ip_address_from_bytes(family: AddressFamily, h_addr: *const u8) -> Option<IpAddr> {
@@ -145,7 +145,7 @@ pub struct HostAddressResultsIter<'a> {
     next: &'a *const c_char,
 }
 
-impl<'a> Iterator for HostAddressResultsIter<'a> {
+impl Iterator for HostAddressResultsIter<'_> {
     type Item = IpAddr;
     fn next(&mut self) -> Option<Self::Item> {
         let h_addr = *self.next;
@@ -161,8 +161,8 @@ impl<'a> Iterator for HostAddressResultsIter<'a> {
     }
 }
 
-unsafe impl<'a> Send for HostAddressResultsIter<'a> {}
-unsafe impl<'a> Sync for HostAddressResultsIter<'a> {}
+unsafe impl Send for HostAddressResultsIter<'_> {}
+unsafe impl Sync for HostAddressResultsIter<'_> {}
 
 /// Iterator of `&'a str`s.
 #[derive(Clone, Copy, Debug)]
@@ -184,5 +184,5 @@ impl<'a> Iterator for HostAliasResultsIter<'a> {
     }
 }
 
-unsafe impl<'a> Send for HostAliasResultsIter<'a> {}
-unsafe impl<'a> Sync for HostAliasResultsIter<'a> {}
+unsafe impl Send for HostAliasResultsIter<'_> {}
+unsafe impl Sync for HostAliasResultsIter<'_> {}

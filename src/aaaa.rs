@@ -86,7 +86,7 @@ impl<'a> IntoIterator for &'a AAAAResults {
     }
 }
 
-impl<'a> AAAAResult<'a> {
+impl AAAAResult<'_> {
     /// Returns the IPv6 address in this `AAAAResult`.
     pub fn ipv6(self) -> Ipv6Addr {
         let bytes = unsafe { self.addr6ttl.ip6addr._S6_un._S6_u8 };
@@ -101,7 +101,7 @@ impl<'a> AAAAResult<'a> {
     }
 }
 
-impl<'a> fmt::Display for AAAAResult<'a> {
+impl fmt::Display for AAAAResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "IPv6: {}, ", self.ipv6())?;
         write!(fmt, "TTL: {}", self.ttl())

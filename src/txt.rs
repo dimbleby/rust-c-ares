@@ -90,12 +90,12 @@ impl Drop for TXTResults {
     }
 }
 
-unsafe impl<'a> Send for TXTResult<'a> {}
-unsafe impl<'a> Sync for TXTResult<'a> {}
+unsafe impl Send for TXTResult<'_> {}
+unsafe impl Sync for TXTResult<'_> {}
 unsafe impl Send for TXTResults {}
 unsafe impl Sync for TXTResults {}
-unsafe impl<'a> Send for TXTResultsIter<'a> {}
-unsafe impl<'a> Sync for TXTResultsIter<'a> {}
+unsafe impl Send for TXTResultsIter<'_> {}
+unsafe impl Sync for TXTResultsIter<'_> {}
 
 impl<'a> TXTResult<'a> {
     /// Is this the start of a text record, or the continuation of a previous record?
@@ -111,7 +111,7 @@ impl<'a> TXTResult<'a> {
     }
 }
 
-impl<'a> fmt::Display for TXTResult<'a> {
+impl fmt::Display for TXTResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         let text = str::from_utf8(self.text()).unwrap_or("<binary>");
         write!(fmt, "Record start: {}, Text: {}", self.record_start(), text)

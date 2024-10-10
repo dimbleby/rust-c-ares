@@ -93,10 +93,10 @@ impl Drop for SRVResults {
 
 unsafe impl Send for SRVResults {}
 unsafe impl Sync for SRVResults {}
-unsafe impl<'a> Send for SRVResult<'a> {}
-unsafe impl<'a> Sync for SRVResult<'a> {}
-unsafe impl<'a> Send for SRVResultsIter<'a> {}
-unsafe impl<'a> Sync for SRVResultsIter<'a> {}
+unsafe impl Send for SRVResult<'_> {}
+unsafe impl Sync for SRVResult<'_> {}
+unsafe impl Send for SRVResultsIter<'_> {}
+unsafe impl Sync for SRVResultsIter<'_> {}
 
 impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
@@ -120,7 +120,7 @@ impl<'a> SRVResult<'a> {
     }
 }
 
-impl<'a> fmt::Display for SRVResult<'a> {
+impl fmt::Display for SRVResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "Host: {}, ", self.host())?;
         write!(fmt, "Port: {}, ", self.port())?;

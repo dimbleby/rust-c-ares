@@ -1281,7 +1281,7 @@ pub struct GetSockIter<'a> {
     getsock: &'a GetSock,
 }
 
-impl<'a> Iterator for GetSockIter<'a> {
+impl Iterator for GetSockIter<'_> {
     type Item = (Socket, bool, bool);
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.next;

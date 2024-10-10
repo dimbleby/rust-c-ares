@@ -93,10 +93,10 @@ impl Drop for URIResults {
 
 unsafe impl Send for URIResults {}
 unsafe impl Sync for URIResults {}
-unsafe impl<'a> Send for URIResult<'a> {}
-unsafe impl<'a> Sync for URIResult<'a> {}
-unsafe impl<'a> Send for URIResultsIter<'a> {}
-unsafe impl<'a> Sync for URIResultsIter<'a> {}
+unsafe impl Send for URIResult<'_> {}
+unsafe impl Sync for URIResult<'_> {}
+unsafe impl Send for URIResultsIter<'_> {}
+unsafe impl Sync for URIResultsIter<'_> {}
 
 impl<'a> URIResult<'a> {
     /// Returns the weight in this `URIResult`.
@@ -122,7 +122,7 @@ impl<'a> URIResult<'a> {
     }
 }
 
-impl<'a> fmt::Display for URIResult<'a> {
+impl fmt::Display for URIResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "URI: {}, ", self.uri())?;
         write!(fmt, "Priority: {}, ", self.priority())?;

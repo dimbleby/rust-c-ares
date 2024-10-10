@@ -85,7 +85,7 @@ impl<'a> IntoIterator for &'a AResults {
     }
 }
 
-impl<'a> AResult<'a> {
+impl AResult<'_> {
     /// Returns the IPv4 address in this `AResult`.
     pub fn ipv4(self) -> Ipv4Addr {
         ipv4_from_in_addr(self.addrttl.ipaddr)
@@ -99,7 +99,7 @@ impl<'a> AResult<'a> {
     }
 }
 
-impl<'a> fmt::Display for AResult<'a> {
+impl fmt::Display for AResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "IPv4: {}, ", self.ipv4())?;
         write!(fmt, "TTL: {}", self.ttl())

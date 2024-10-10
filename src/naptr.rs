@@ -92,10 +92,10 @@ impl Drop for NAPTRResults {
 
 unsafe impl Send for NAPTRResults {}
 unsafe impl Sync for NAPTRResults {}
-unsafe impl<'a> Send for NAPTRResult<'a> {}
-unsafe impl<'a> Sync for NAPTRResult<'a> {}
-unsafe impl<'a> Send for NAPTRResultsIter<'a> {}
-unsafe impl<'a> Sync for NAPTRResultsIter<'a> {}
+unsafe impl Send for NAPTRResult<'_> {}
+unsafe impl Sync for NAPTRResult<'_> {}
+unsafe impl Send for NAPTRResultsIter<'_> {}
+unsafe impl Sync for NAPTRResultsIter<'_> {}
 
 impl<'a> NAPTRResult<'a> {
     /// Returns the flags in this `NAPTRResult`.
@@ -129,7 +129,7 @@ impl<'a> NAPTRResult<'a> {
     }
 }
 
-impl<'a> fmt::Display for NAPTRResult<'a> {
+impl fmt::Display for NAPTRResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "Flags: {}, ", self.flags())?;
         write!(fmt, "Service name: {}, ", self.service_name())?;

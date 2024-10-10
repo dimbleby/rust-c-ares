@@ -92,10 +92,10 @@ impl Drop for MXResults {
 
 unsafe impl Send for MXResults {}
 unsafe impl Sync for MXResults {}
-unsafe impl<'a> Send for MXResult<'a> {}
-unsafe impl<'a> Sync for MXResult<'a> {}
-unsafe impl<'a> Send for MXResultsIter<'a> {}
-unsafe impl<'a> Sync for MXResultsIter<'a> {}
+unsafe impl Send for MXResult<'_> {}
+unsafe impl Sync for MXResult<'_> {}
+unsafe impl Send for MXResultsIter<'_> {}
+unsafe impl Sync for MXResultsIter<'_> {}
 
 impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.
@@ -109,7 +109,7 @@ impl<'a> MXResult<'a> {
     }
 }
 
-impl<'a> fmt::Display for MXResult<'a> {
+impl fmt::Display for MXResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "Hostname: {}, ", self.host())?;
         write!(fmt, "Priority: {}", self.priority())

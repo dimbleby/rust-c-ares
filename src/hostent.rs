@@ -1,4 +1,3 @@
-use std::marker::PhantomData;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::raw::c_char;
 use std::{fmt, ptr, slice};
@@ -56,15 +55,11 @@ pub trait HasHostent<'a>: Sized {
 #[derive(Debug)]
 pub struct HostentOwned {
     inner: *mut c_types::hostent,
-    phantom: PhantomData<c_types::hostent>,
 }
 
 impl HostentOwned {
     pub fn new(hostent: *mut c_types::hostent) -> Self {
-        HostentOwned {
-            inner: hostent,
-            phantom: PhantomData,
-        }
+        HostentOwned { inner: hostent }
     }
 }
 

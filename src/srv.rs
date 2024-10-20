@@ -1,5 +1,4 @@
 use std::fmt;
-use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
@@ -14,7 +13,6 @@ use crate::utils::hostname_as_str;
 #[derive(Debug)]
 pub struct SRVResults {
     srv_reply: *mut c_ares_sys::ares_srv_reply,
-    phantom: PhantomData<c_ares_sys::ares_srv_reply>,
 }
 
 /// The contents of a single SRV record.
@@ -40,10 +38,7 @@ impl SRVResults {
     }
 
     fn new(srv_reply: *mut c_ares_sys::ares_srv_reply) -> Self {
-        SRVResults {
-            srv_reply,
-            phantom: PhantomData,
-        }
+        SRVResults { srv_reply }
     }
 
     /// Returns an iterator over the `SRVResult` values in this `SRVResults`.

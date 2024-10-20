@@ -1,5 +1,4 @@
 use std::fmt;
-use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
@@ -12,7 +11,6 @@ use crate::utils::hostname_as_str;
 #[derive(Debug)]
 pub struct SOAResult {
     soa_reply: *mut c_ares_sys::ares_soa_reply,
-    phantom: PhantomData<c_ares_sys::ares_soa_reply>,
 }
 
 impl SOAResult {
@@ -31,10 +29,7 @@ impl SOAResult {
     }
 
     fn new(soa_reply: *mut c_ares_sys::ares_soa_reply) -> Self {
-        SOAResult {
-            soa_reply,
-            phantom: PhantomData,
-        }
+        SOAResult { soa_reply }
     }
 
     /// Returns the name server from this `SOAResult`.

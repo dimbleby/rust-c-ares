@@ -1,4 +1,3 @@
-use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::{fmt, ptr, slice, str};
 
@@ -12,7 +11,6 @@ use crate::utils::dns_string_as_str;
 #[derive(Debug)]
 pub struct CAAResults {
     caa_reply: *mut c_ares_sys::ares_caa_reply,
-    phantom: PhantomData<c_ares_sys::ares_caa_reply>,
 }
 
 /// The contents of a single CAA record.
@@ -38,10 +36,7 @@ impl CAAResults {
     }
 
     fn new(caa_reply: *mut c_ares_sys::ares_caa_reply) -> Self {
-        CAAResults {
-            caa_reply,
-            phantom: PhantomData,
-        }
+        CAAResults { caa_reply }
     }
 
     /// Returns an iterator over the `CAAResult` values in this `CAAResults`.

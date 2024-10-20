@@ -1,5 +1,4 @@
 use std::fmt;
-use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
@@ -14,7 +13,6 @@ use crate::utils::hostname_as_str;
 #[derive(Debug)]
 pub struct MXResults {
     mx_reply: *mut c_ares_sys::ares_mx_reply,
-    phantom: PhantomData<c_ares_sys::ares_mx_reply>,
 }
 
 /// The contents of a single MX record.
@@ -39,10 +37,7 @@ impl MXResults {
     }
 
     fn new(mx_reply: *mut c_ares_sys::ares_mx_reply) -> Self {
-        MXResults {
-            mx_reply,
-            phantom: PhantomData,
-        }
+        MXResults { mx_reply }
     }
 
     /// Returns an iterator over the `MXResult` values in this `MXResults`.

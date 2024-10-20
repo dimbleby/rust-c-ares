@@ -1,5 +1,4 @@
 use std::ffi::CString;
-use std::marker::PhantomData;
 use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 #[allow(unused_imports)]
@@ -325,7 +324,6 @@ impl Options {
 /// A channel for name service lookups.
 pub struct Channel {
     ares_channel: c_ares_sys::ares_channel,
-    phantom: PhantomData<c_ares_sys::ares_channeldata>,
 
     // For ownership only.
     _socket_state_callback: Option<Arc<SocketStateCallback>>,
@@ -392,7 +390,6 @@ impl Channel {
 
         let channel = Channel {
             ares_channel,
-            phantom: PhantomData,
             _socket_state_callback: options.socket_state_callback,
             #[cfg(cares1_29)]
             _server_state_callback: None,
@@ -432,7 +429,6 @@ impl Channel {
 
         let channel = Channel {
             ares_channel,
-            phantom: PhantomData,
             _socket_state_callback: socket_state_callback,
             #[cfg(cares1_29)]
             _server_state_callback: server_state_callback,

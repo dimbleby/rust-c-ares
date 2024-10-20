@@ -1,5 +1,4 @@
 use std::fmt;
-use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
@@ -14,7 +13,6 @@ use crate::panic;
 #[derive(Debug)]
 pub struct TXTResults {
     txt_reply: *mut c_ares_sys::ares_txt_ext,
-    phantom: PhantomData<c_ares_sys::ares_txt_ext>,
 }
 
 /// The contents of a single TXT record.
@@ -39,10 +37,7 @@ impl TXTResults {
     }
 
     fn new(txt_reply: *mut c_ares_sys::ares_txt_ext) -> Self {
-        TXTResults {
-            txt_reply,
-            phantom: PhantomData,
-        }
+        TXTResults { txt_reply }
     }
 
     /// Returns an iterator over the `TXTResult` values in this `TXTResults`.

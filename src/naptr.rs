@@ -1,5 +1,4 @@
 use std::fmt;
-use std::marker::PhantomData;
 use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
@@ -14,7 +13,6 @@ use crate::utils::{dns_string_as_str, hostname_as_str};
 #[derive(Debug)]
 pub struct NAPTRResults {
     naptr_reply: *mut c_ares_sys::ares_naptr_reply,
-    phantom: PhantomData<c_ares_sys::ares_naptr_reply>,
 }
 
 /// The contents of a single NAPTR record.
@@ -38,11 +36,8 @@ impl NAPTRResults {
         }
     }
 
-    fn new(reply: *mut c_ares_sys::ares_naptr_reply) -> Self {
-        NAPTRResults {
-            naptr_reply: reply,
-            phantom: PhantomData,
-        }
+    fn new(naptr_reply: *mut c_ares_sys::ares_naptr_reply) -> Self {
+        NAPTRResults { naptr_reply }
     }
 
     /// Returns an iterator over the `NAPTRResult` values in this `NAPTRResults`.

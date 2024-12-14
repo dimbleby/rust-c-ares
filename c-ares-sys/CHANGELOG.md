@@ -1,5 +1,9 @@
 # Changelog
 
+## 10.1.2 (14 December 2024)
+
+- c-ares 1.34.4
+
 ## 10.1.1 (09 November 2024)
 
 - c-ares 1.34.3

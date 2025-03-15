@@ -11,7 +11,7 @@ mod example {
     use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
     use std::ptr;
     use windows_sys::Win32::Networking::WinSock::{
-        select, WSACleanup, WSAStartup, FD_SET, FD_SETSIZE, SOCKET_ERROR, TIMEVAL, WSADATA,
+        FD_SET, FD_SETSIZE, SOCKET_ERROR, TIMEVAL, WSACleanup, WSADATA, WSAStartup, select,
     };
 
     fn print_soa_result(result: &c_ares::Result<c_ares::SOAResult>) {

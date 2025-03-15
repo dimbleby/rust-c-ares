@@ -6,38 +6,38 @@ use std::os::raw::{c_char, c_int, c_void};
 use std::ptr;
 use std::sync::Arc;
 
-use crate::a::{query_a_callback, AResults};
-use crate::aaaa::{query_aaaa_callback, AAAAResults};
+use crate::Flags;
+#[cfg(cares1_29)]
+use crate::ServerStateFlags;
+use crate::a::{AResults, query_a_callback};
+use crate::aaaa::{AAAAResults, query_aaaa_callback};
 #[cfg(cares1_17)]
-use crate::caa::{query_caa_callback, CAAResults};
-use crate::cname::{query_cname_callback, CNameResults};
+use crate::caa::{CAAResults, query_caa_callback};
+use crate::cname::{CNameResults, query_cname_callback};
 use crate::error::{Error, Result};
 #[cfg(cares1_34)]
 use crate::events::{FdEvents, ProcessFlags};
-use crate::host::{get_host_callback, HostResults};
-use crate::mx::{query_mx_callback, MXResults};
-use crate::nameinfo::{get_name_info_callback, NameInfoResult};
-use crate::naptr::{query_naptr_callback, NAPTRResults};
+use crate::host::{HostResults, get_host_callback};
+use crate::mx::{MXResults, query_mx_callback};
+use crate::nameinfo::{NameInfoResult, get_name_info_callback};
+use crate::naptr::{NAPTRResults, query_naptr_callback};
 use crate::ni_flags::NIFlags;
-use crate::ns::{query_ns_callback, NSResults};
+use crate::ns::{NSResults, query_ns_callback};
 use crate::panic;
-use crate::ptr::{query_ptr_callback, PTRResults};
+use crate::ptr::{PTRResults, query_ptr_callback};
 use crate::query::query_callback;
-use crate::soa::{query_soa_callback, SOAResult};
-use crate::srv::{query_srv_callback, SRVResults};
+use crate::soa::{SOAResult, query_soa_callback};
+use crate::srv::{SRVResults, query_srv_callback};
 #[cfg(cares1_24)]
 use crate::string::AresString;
-use crate::txt::{query_txt_callback, TXTResults};
+use crate::txt::{TXTResults, query_txt_callback};
 use crate::types::{AddressFamily, DnsClass, QueryType, Socket};
-use crate::uri::{query_uri_callback, URIResults};
+use crate::uri::{URIResults, query_uri_callback};
 #[allow(unused_imports)]
 use crate::utils::{
     c_string_as_str_unchecked, ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in,
     socket_addrv6_as_sockaddr_in6,
 };
-use crate::Flags;
-#[cfg(cares1_29)]
-use crate::ServerStateFlags;
 use std::sync::Mutex;
 
 // ares_library_init is not thread-safe, so we put a lock around it.
@@ -1223,7 +1223,7 @@ unsafe extern "C" fn server_state_callback<F>(
 {
     let handler = data.cast::<F>();
     let handler = unsafe { &mut *handler };
-    let server = c_string_as_str_unchecked(server_string);
+    let server = unsafe { c_string_as_str_unchecked(server_string) };
     panic::catch(|| {
         handler(
             server,

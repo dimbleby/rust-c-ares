@@ -1,5 +1,5 @@
 use crate::types::AddressFamily;
-use std::ffi::{c_char, CStr};
+use std::ffi::{CStr, c_char};
 use std::mem;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
 use std::os::raw::c_int;
@@ -183,7 +183,7 @@ pub unsafe fn dns_string_as_str<'a>(hostname: *const c_char) -> &'a str {
 
 #[cfg(cares1_30)]
 pub unsafe fn dns_string_as_str<'a>(hostname: *const c_char) -> &'a str {
-    c_string_as_str_unchecked(hostname)
+    unsafe { c_string_as_str_unchecked(hostname) }
 }
 
 /// Get the version number of the underlying `c-ares` library.

@@ -1019,7 +1019,7 @@ unsafe extern "C" {
     ) -> ares_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicted DNS record object, or NULL on out of memory."]
+    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
     pub fn ares_dns_record_duplicate(dnsrec: *const ares_dns_record_t) -> *mut ares_dns_record_t;
 }
 pub type ares_callback = ::std::option::Option<

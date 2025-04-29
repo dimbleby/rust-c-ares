@@ -113,7 +113,7 @@ impl fmt::Display for CAAResult<'_> {
         write!(fmt, "Critical: {}, ", self.critical())?;
         write!(fmt, "Property: {}, ", self.property())?;
         let value = str::from_utf8(self.value()).unwrap_or("<binary>");
-        write!(fmt, "Value: {}", value)
+        write!(fmt, "Value: {value}")
     }
 }
 

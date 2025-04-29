@@ -30,7 +30,7 @@ c-types = "4.0.0"
 itertools = "0.14"
 
 [target.'cfg(unix)'.dev-dependencies]
-nix = { version = "0.29", default-features = false, features = ["event"] }
+nix = { version = "0.30", default-features = false, features = ["event"] }
 
 [target.'cfg(windows)'.dev-dependencies]
 windows-sys = { version = "0.59.0", features = ["Win32_Networking_WinSock"] }

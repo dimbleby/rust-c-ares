@@ -81,7 +81,7 @@ pub type ares_sock_state_cb = ::std::option::Option<
     ),
 >;
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct apattern {
     _unused: [u8; 0],
 }
@@ -127,7 +127,7 @@ pub struct ares_options {
     pub server_failover_opts: ares_server_failover_options,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct ares_channeldata {
     _unused: [u8; 0],
 }
@@ -663,7 +663,7 @@ unsafe extern "C" {
 }
 #[doc = " Opaque data type representing a DNS RR (Resource Record)"]
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct ares_dns_rr {
     _unused: [u8; 0],
 }
@@ -671,7 +671,7 @@ pub struct ares_dns_rr {
 pub type ares_dns_rr_t = ares_dns_rr;
 #[doc = " Opaque data type representing a DNS Query Data QD Packet"]
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct ares_dns_qd {
     _unused: [u8; 0],
 }
@@ -679,7 +679,7 @@ pub struct ares_dns_qd {
 pub type ares_dns_qd_t = ares_dns_qd;
 #[doc = " Opaque data type representing a DNS Packet"]
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct ares_dns_record {
     _unused: [u8; 0],
 }

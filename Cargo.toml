@@ -26,7 +26,7 @@ features = ["vendored"]
 [dependencies]
 bitflags = "2.0"
 c-ares-sys = { version = "10.0.0", path = "c-ares-sys", default-features = false }
-c-types = "4.0.0"
+c-types = "5.0.0"
 itertools = "0.14"
 
 [target.'cfg(unix)'.dev-dependencies]

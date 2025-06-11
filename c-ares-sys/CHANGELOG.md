@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- c-types 5.0.0
+  - breaking only because re-exported types are part of our interface
+
 ## 10.1.3 (09 April 2025)
 
 - c-ares 1.34.5

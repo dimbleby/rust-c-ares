@@ -33,7 +33,7 @@ itertools = "0.14"
 nix = { version = "0.30", default-features = false, features = ["event"] }
 
 [target.'cfg(windows)'.dev-dependencies]
-windows-sys = { version = "0.59.0", features = ["Win32_Networking_WinSock"] }
+windows-sys = { version = "0.60.0", features = ["Win32_Networking_WinSock"] }
 
 [features]
 default = ["maybe-vendored"]

@@ -41,7 +41,7 @@ impl TXTResults {
     }
 
     /// Returns an iterator over the `TXTResult` values in this `TXTResults`.
-    pub fn iter(&self) -> TXTResultsIter {
+    pub fn iter(&self) -> TXTResultsIter<'_> {
         TXTResultsIter {
             next: unsafe { self.txt_reply.as_ref() },
         }

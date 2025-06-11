@@ -40,7 +40,7 @@ impl CAAResults {
     }
 
     /// Returns an iterator over the `CAAResult` values in this `CAAResults`.
-    pub fn iter(&self) -> CAAResultsIter {
+    pub fn iter(&self) -> CAAResultsIter<'_> {
         CAAResultsIter {
             next: unsafe { self.caa_reply.as_ref() },
         }

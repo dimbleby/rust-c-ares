@@ -42,7 +42,7 @@ impl URIResults {
     }
 
     /// Returns an iterator over the `URIResult` values in this `URIResults`.
-    pub fn iter(&self) -> URIResultsIter {
+    pub fn iter(&self) -> URIResultsIter<'_> {
         URIResultsIter {
             next: unsafe { self.uri_reply.as_ref() },
         }

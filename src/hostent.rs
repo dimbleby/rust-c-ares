@@ -11,7 +11,7 @@ fn hostname(hostent: &c_types::hostent) -> &str {
     unsafe { hostname_as_str(hostent.h_name.cast()) }
 }
 
-fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
+fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter<'_> {
     let addrtype = hostent.h_addrtype as c_types::ADDRESS_FAMILY;
     HostAddressResultsIter {
         family: address_family(addrtype),
@@ -19,7 +19,7 @@ fn addresses(hostent: &c_types::hostent) -> HostAddressResultsIter {
     }
 }
 
-fn aliases(hostent: &c_types::hostent) -> HostAliasResultsIter {
+fn aliases(hostent: &c_types::hostent) -> HostAliasResultsIter<'_> {
     HostAliasResultsIter {
         next: unsafe { &*(hostent.h_aliases.cast()) },
     }

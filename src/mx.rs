@@ -41,7 +41,7 @@ impl MXResults {
     }
 
     /// Returns an iterator over the `MXResult` values in this `MXResults`.
-    pub fn iter(&self) -> MXResultsIter {
+    pub fn iter(&self) -> MXResultsIter<'_> {
         MXResultsIter {
             next: unsafe { self.mx_reply.as_ref() },
         }

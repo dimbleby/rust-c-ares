@@ -42,7 +42,7 @@ impl SRVResults {
     }
 
     /// Returns an iterator over the `SRVResult` values in this `SRVResults`.
-    pub fn iter(&self) -> SRVResultsIter {
+    pub fn iter(&self) -> SRVResultsIter<'_> {
         SRVResultsIter {
             next: unsafe { self.srv_reply.as_ref() },
         }

@@ -48,7 +48,7 @@ impl AAAAResults {
     }
 
     /// Returns an iterator over the `AAAAResult` values in this `AAAAResults`.
-    pub fn iter(&self) -> AAAAResultsIter {
+    pub fn iter(&self) -> AAAAResultsIter<'_> {
         AAAAResultsIter {
             addr6ttls: self.addr6ttls[0..self.naddr6ttls].iter(),
         }

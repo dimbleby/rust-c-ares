@@ -1260,7 +1260,7 @@ impl GetSock {
     }
 
     /// Returns an iterator over the sockets that `c-ares` is interested in.
-    pub fn iter(&self) -> GetSockIter {
+    pub fn iter(&self) -> GetSockIter<'_> {
         GetSockIter {
             next: 0,
             getsock: self,

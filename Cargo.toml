@@ -26,14 +26,14 @@ features = ["vendored"]
 [dependencies]
 bitflags = "2.0"
 c-ares-sys = { version = "10.0.0", path = "c-ares-sys", default-features = false }
-c-types = "5.0.0"
+c-types = "6.0.0"
 itertools = "0.14"
 
 [target.'cfg(unix)'.dev-dependencies]
 nix = { version = "0.30", default-features = false, features = ["event"] }
 
 [target.'cfg(windows)'.dev-dependencies]
-windows-sys = { version = "0.60.0", features = ["Win32_Networking_WinSock"] }
+windows-sys = { version = "0.61", features = ["Win32_Networking_WinSock"] }
 
 [features]
 default = ["maybe-vendored"]

@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- c-types 5.0.0
+- c-types 6.0.0
   - breaking only because re-exported types are part of our interface
 
 ## 11.1.0 (10 October 2024)

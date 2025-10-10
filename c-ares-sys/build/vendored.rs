@@ -1,6 +1,5 @@
 extern crate cc;
 extern crate fs_extra;
-extern crate system_deps;
 
 use std::env;
 #[cfg(not(feature = "build-cmake"))]

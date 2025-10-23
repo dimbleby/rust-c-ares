@@ -1,4 +1,3 @@
-use std::env;
 use std::path::PathBuf;
 
 #[cfg(feature = "maybe-vendored")]
@@ -27,22 +26,22 @@ fn get_cares() -> Vec<PathBuf> {
 }
 
 fn probe_installed() -> Option<Vec<PathBuf>> {
-    let target = env::var("TARGET").unwrap();
-
-    if target.contains("windows") {
-        let lib = vcpkg::Config::new()
-            .emit_includes(true)
-            .find_package("c-ares")
-            .ok()?;
-        Some(lib.include_paths)
-    } else {
-        let lib = pkg_config::Config::new()
-            .atleast_version("1.13.0")
-            .print_system_libs(false)
-            .probe("libcares")
-            .ok()?;
-        Some(lib.include_paths)
+    if let Ok(lib) = pkg_config::Config::new()
+        .atleast_version("1.13.0")
+        .print_system_libs(false)
+        .probe("libcares")
+    {
+        return Some(lib.include_paths);
     }
+
+    if let Ok(lib) = vcpkg::Config::new()
+        .emit_includes(true)
+        .find_package("c-ares")
+    {
+        return Some(lib.include_paths);
+    }
+
+    None
 }
 
 fn check_version(include_dirs: &[PathBuf]) {

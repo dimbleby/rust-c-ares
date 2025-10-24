@@ -11,7 +11,6 @@ use crate::Flags;
 use crate::ServerStateFlags;
 use crate::a::{AResults, query_a_callback};
 use crate::aaaa::{AAAAResults, query_aaaa_callback};
-#[cfg(cares1_17)]
 use crate::caa::{CAAResults, query_caa_callback};
 use crate::cname::{CNameResults, query_cname_callback};
 use crate::error::{Error, Result};
@@ -101,7 +100,6 @@ pub struct Options {
     optmask: c_int,
     domains: Vec<CString>,
     lookups: Option<CString>,
-    #[cfg(cares1_15)]
     resolvconf_path: Option<CString>,
     #[cfg(cares1_19)]
     hosts_path: Option<CString>,
@@ -115,7 +113,6 @@ impl Default for Options {
             optmask: 0,
             domains: vec![],
             lookups: None,
-            #[cfg(cares1_15)]
             resolvconf_path: None,
             #[cfg(cares1_19)]
             hosts_path: None,
@@ -254,7 +251,6 @@ impl Options {
     /// Set the path to use for reading the resolv.conf file.  The `resolvconf_path` should be set
     /// to a path string, and will be honoured on *nix like systems.  The default is
     /// /etc/resolv.conf.
-    #[cfg(cares1_15)]
     pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
         let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
         self.resolvconf_path = Some(c_resolvconf_path);
@@ -365,7 +361,6 @@ impl Channel {
         }
 
         // And the resolvconf_path.
-        #[cfg(cares1_15)]
         if let Some(c_resolvconf_path) = &options.resolvconf_path {
             options.ares_options.resolvconf_path = c_resolvconf_path.as_ptr().cast_mut()
         }
@@ -679,7 +674,6 @@ impl Channel {
     /// Initiate a single-question DNS query for the CAA records associated with `name`.
     ///
     /// On completion, `handler` is called with the result.
-    #[cfg(cares1_17)]
     pub fn query_caa<F>(&mut self, name: &str, handler: F)
     where
         F: FnOnce(Result<CAAResults>) + Send + 'static,
@@ -698,7 +692,6 @@ impl Channel {
     /// `name`.
     ///
     /// On completion, `handler` is called with the result.
-    #[cfg(cares1_17)]
     pub fn search_caa<F>(&mut self, name: &str, handler: F)
     where
         F: FnOnce(Result<CAAResults>) + Send + 'static,

@@ -112,7 +112,6 @@ pub struct ares_options {
     pub sortlist: *mut apattern,
     pub nsort: ::std::os::raw::c_int,
     pub ednspsz: ::std::os::raw::c_int,
-    #[cfg(cares1_15)]
     pub resolvconf_path: *mut ::std::os::raw::c_char,
     #[cfg(cares1_19)]
     pub hosts_path: *mut ::std::os::raw::c_char,
@@ -1730,7 +1729,6 @@ pub struct ares_addrinfo_cname {
 pub struct ares_addrinfo {
     pub cnames: *mut ares_addrinfo_cname,
     pub nodes: *mut ares_addrinfo_node,
-    #[cfg(cares1_18)]
     pub name: *mut ::std::os::raw::c_char,
 }
 #[repr(C)]

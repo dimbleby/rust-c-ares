@@ -25,6 +25,7 @@ fn get_cares() -> Vec<PathBuf> {
     vendored::build()
 }
 
+#[cfg(not(feature = "vendored"))]
 fn probe_installed() -> Option<Vec<PathBuf>> {
     if let Ok(lib) = pkg_config::Config::new()
         .atleast_version("1.13.0")

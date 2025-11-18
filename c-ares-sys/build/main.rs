@@ -28,7 +28,7 @@ fn get_cares() -> Vec<PathBuf> {
 #[cfg(not(feature = "vendored"))]
 fn probe_installed() -> Option<Vec<PathBuf>> {
     if let Ok(lib) = pkg_config::Config::new()
-        .atleast_version("1.13.0")
+        .atleast_version("1.18.0")
         .print_system_libs(false)
         .probe("libcares")
     {
@@ -60,16 +60,6 @@ fn check_version(include_dirs: &[PathBuf]) {
         .unwrap();
 
     println!("cargo:version_number={version:x}");
-
-    println!("cargo::rustc-check-cfg=cfg(cares1_15)");
-    if version >= 0x1_0f_00 {
-        println!("cargo:rustc-cfg=cares1_15");
-    }
-
-    println!("cargo::rustc-check-cfg=cfg(cares1_18)");
-    if version >= 0x1_12_00 {
-        println!("cargo:rustc-cfg=cares1_18");
-    }
 
     println!("cargo::rustc-check-cfg=cfg(cares1_19)");
     if version >= 0x1_13_00 {

@@ -166,12 +166,6 @@ pub unsafe fn c_string_as_str_checked<'a>(c_str: *const c_char) -> &'a str {
     c_str.to_str().unwrap()
 }
 
-#[cfg(not(cares1_17_2))]
-pub unsafe fn hostname_as_str<'a>(hostname: *const c_char) -> &'a str {
-    c_string_as_str_checked(hostname)
-}
-
-#[cfg(cares1_17_2)]
 pub unsafe fn hostname_as_str<'a>(hostname: *const c_char) -> &'a str {
     unsafe { c_string_as_str_unchecked(hostname) }
 }

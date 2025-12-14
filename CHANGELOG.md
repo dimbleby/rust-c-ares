@@ -2,8 +2,12 @@
 
 ## Unreleased
 
+## 12.0.0 (14 December 2025)
+
+- c-ares 1.34.6
+- bump minimum supported c-ares to 1.18.0
 - c-types 6.0.0
-  - breaking only because re-exported types are part of our interface
+- support vcpkg for finding c-ares
 
 ## 11.1.0 (10 October 2024)
 

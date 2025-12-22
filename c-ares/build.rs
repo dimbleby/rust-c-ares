@@ -58,5 +58,10 @@ fn main() {
         if version >= 0x1_22_00 {
             println!("cargo:rustc-cfg=cares1_34");
         }
+
+        println!("cargo::rustc-check-cfg=cfg(cares1_35)");
+        if version >= 0x1_23_00 {
+            println!("cargo:rustc-cfg=cares1_35");
+        }
     }
 }

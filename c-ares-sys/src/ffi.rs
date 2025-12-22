@@ -182,6 +182,20 @@ impl ares_dns_rec_type_t {
     pub const ARES_REC_TYPE_NAPTR: ares_dns_rec_type_t = ares_dns_rec_type_t(35);
     #[doc = "< RFC 6891. EDNS0 option (meta-RR)"]
     pub const ARES_REC_TYPE_OPT: ares_dns_rec_type_t = ares_dns_rec_type_t(41);
+    #[doc = "< RFC 4034. Delegation Signer"]
+    pub const ARES_REC_TYPE_DS: ares_dns_rec_type_t = ares_dns_rec_type_t(43);
+    #[doc = "< RFC 4255. SSH Key Fingerprint"]
+    pub const ARES_REC_TYPE_SSHFP: ares_dns_rec_type_t = ares_dns_rec_type_t(44);
+    #[doc = "< RFC 4034. Resource Record Signature"]
+    pub const ARES_REC_TYPE_RRSIG: ares_dns_rec_type_t = ares_dns_rec_type_t(46);
+    #[doc = "< RFC 4034. Next Secure"]
+    pub const ARES_REC_TYPE_NSEC: ares_dns_rec_type_t = ares_dns_rec_type_t(47);
+    #[doc = "< RFC 4034. DNS Public Key"]
+    pub const ARES_REC_TYPE_DNSKEY: ares_dns_rec_type_t = ares_dns_rec_type_t(48);
+    #[doc = "< RFC 5155. NSEC3"]
+    pub const ARES_REC_TYPE_NSEC3: ares_dns_rec_type_t = ares_dns_rec_type_t(50);
+    #[doc = "< RFC 5155. NSEC3 Parameters"]
+    pub const ARES_REC_TYPE_NSEC3PARAM: ares_dns_rec_type_t = ares_dns_rec_type_t(51);
     #[doc = "< RFC 6698. DNS-Based Authentication of Named\n   Entities (DANE) Transport Layer Security\n   (TLS) Protocol: TLSA"]
     pub const ARES_REC_TYPE_TLSA: ares_dns_rec_type_t = ares_dns_rec_type_t(52);
     #[doc = "< RFC 9460. General Purpose Service Binding"]
@@ -420,6 +434,70 @@ pub enum ares_dns_rr_key_t {
     ARES_RR_OPT_FLAGS = 4104,
     #[doc = " OPT Record. Options. Datatype: OPT"]
     ARES_RR_OPT_OPTIONS = 4105,
+    #[doc = " DS Record. Key Tag. Datatype: U16"]
+    ARES_RR_DS_KEY_TAG = 4301,
+    #[doc = " DS Record. Algorithm. Datatype: U8"]
+    ARES_RR_DS_ALGORITHM = 4302,
+    #[doc = " DS Record. Digest Type. Datatype: U8"]
+    ARES_RR_DS_DIGEST_TYPE = 4303,
+    #[doc = " DS Record. Digest. Datatype: BIN"]
+    ARES_RR_DS_DIGEST = 4304,
+    #[doc = " SSHFP Record. Algorithm. Datatype: U8"]
+    ARES_RR_SSHFP_ALGORITHM = 4401,
+    #[doc = " SSHFP Record. Fingerprint Type. Datatype: U8"]
+    ARES_RR_SSHFP_FP_TYPE = 4402,
+    #[doc = " SSHFP Record. Fingerprint. Datatype: BIN"]
+    ARES_RR_SSHFP_FINGERPRINT = 4403,
+    #[doc = " RRSIG Record. Type Covered. Datatype: U16"]
+    ARES_RR_RRSIG_TYPE_COVERED = 4601,
+    #[doc = " RRSIG Record. Algorithm. Datatype: U8"]
+    ARES_RR_RRSIG_ALGORITHM = 4602,
+    #[doc = " RRSIG Record. Labels. Datatype: U8"]
+    ARES_RR_RRSIG_LABELS = 4603,
+    #[doc = " RRSIG Record. Original TTL. Datatype: U32"]
+    ARES_RR_RRSIG_ORIGINAL_TTL = 4604,
+    #[doc = " RRSIG Record. Signature Expiration. Datatype: U32"]
+    ARES_RR_RRSIG_EXPIRATION = 4605,
+    #[doc = " RRSIG Record. Signature Inception. Datatype: U32"]
+    ARES_RR_RRSIG_INCEPTION = 4606,
+    #[doc = " RRSIG Record. Key Tag. Datatype: U16"]
+    ARES_RR_RRSIG_KEY_TAG = 4607,
+    #[doc = " RRSIG Record. Signers Name. Datatype: NAME"]
+    ARES_RR_RRSIG_SIGNERS_NAME = 4608,
+    #[doc = " RRSIG Record. Signature. Datatype: BIN"]
+    ARES_RR_RRSIG_SIGNATURE = 4609,
+    #[doc = " NSEC Record. Next Domain Name. Datatype: NAME"]
+    ARES_RR_NSEC_NEXT_DOMAIN = 4701,
+    #[doc = " NSEC Record. Type Bit Maps. Datatype: BIN"]
+    ARES_RR_NSEC_TYPE_BIT_MAPS = 4702,
+    #[doc = " DNSKEY Record. Flags. Datatype: U16"]
+    ARES_RR_DNSKEY_FLAGS = 4801,
+    #[doc = " DNSKEY Record. Protocol. Datatype: U8"]
+    ARES_RR_DNSKEY_PROTOCOL = 4802,
+    #[doc = " DNSKEY Record. Algorithm. Datatype: U8"]
+    ARES_RR_DNSKEY_ALGORITHM = 4803,
+    #[doc = " DNSKEY Record. Public Key. Datatype: BIN"]
+    ARES_RR_DNSKEY_PUBLIC_KEY = 4804,
+    #[doc = " NSEC3 Record. Hash Algorithm. Datatype: U8"]
+    ARES_RR_NSEC3_HASH_ALGORITHM = 5001,
+    #[doc = " NSEC3 Record. Flags. Datatype: U8"]
+    ARES_RR_NSEC3_FLAGS = 5002,
+    #[doc = " NSEC3 Record. Iterations. Datatype: U16"]
+    ARES_RR_NSEC3_ITERATIONS = 5003,
+    #[doc = " NSEC3 Record. Salt. Datatype: BIN"]
+    ARES_RR_NSEC3_SALT = 5004,
+    #[doc = " NSEC3 Record. Next Hashed Owner Name. Datatype: BIN"]
+    ARES_RR_NSEC3_NEXT_HASHED_OWNER = 5005,
+    #[doc = " NSEC3 Record. Type Bit Maps. Datatype: BIN"]
+    ARES_RR_NSEC3_TYPE_BIT_MAPS = 5006,
+    #[doc = " NSEC3PARAM Record. Hash Algorithm. Datatype: U8"]
+    ARES_RR_NSEC3PARAM_HASH_ALGORITHM = 5101,
+    #[doc = " NSEC3PARAM Record. Flags. Datatype: U8"]
+    ARES_RR_NSEC3PARAM_FLAGS = 5102,
+    #[doc = " NSEC3PARAM Record. Iterations. Datatype: U16"]
+    ARES_RR_NSEC3PARAM_ITERATIONS = 5103,
+    #[doc = " NSEC3PARAM Record. Salt. Datatype: BIN"]
+    ARES_RR_NSEC3PARAM_SALT = 5104,
     #[doc = " TLSA Record. Certificate Usage. Datatype: U8"]
     ARES_RR_TLSA_CERT_USAGE = 5201,
     #[doc = " TLSA Record. Selector. Datatype: U8"]
@@ -491,6 +569,87 @@ pub enum ares_tlsa_match_t {
     ARES_TLSA_MATCH_SHA512 = 2,
 }
 #[repr(u32)]
+#[doc = " SSHFP Record ARES_RR_SSHFP_ALGORITHM known values (RFC 4255, RFC 6594,\n  RFC 7479, RFC 8709)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_sshfp_algorithm_t {
+    #[doc = " RSA"]
+    ARES_SSHFP_ALGORITHM_RSA = 1,
+    #[doc = " DSA"]
+    ARES_SSHFP_ALGORITHM_DSA = 2,
+    #[doc = " ECDSA"]
+    ARES_SSHFP_ALGORITHM_ECDSA = 3,
+    #[doc = " Ed25519 (RFC 7479)"]
+    ARES_SSHFP_ALGORITHM_ED25519 = 4,
+    #[doc = " Ed448 (RFC 8709)"]
+    ARES_SSHFP_ALGORITHM_ED448 = 6,
+}
+#[repr(u32)]
+#[doc = " SSHFP Record ARES_RR_SSHFP_FP_TYPE known values (RFC 4255, RFC 6594)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_sshfp_fp_type_t {
+    #[doc = " SHA-1"]
+    ARES_SSHFP_FP_SHA1 = 1,
+    #[doc = " SHA-256"]
+    ARES_SSHFP_FP_SHA256 = 2,
+}
+#[repr(u32)]
+#[doc = " DNSSEC Algorithm Numbers (RFC 4034, RFC 8624)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dnssec_algorithm_t {
+    #[doc = " RSA/MD5 (deprecated, RFC 6725)"]
+    ARES_DNSSEC_ALGORITHM_RSAMD5 = 1,
+    #[doc = " Diffie-Hellman (RFC 2539)"]
+    ARES_DNSSEC_ALGORITHM_DH = 2,
+    #[doc = " DSA/SHA1 (RFC 3755, NOT RECOMMENDED)"]
+    ARES_DNSSEC_ALGORITHM_DSA = 3,
+    #[doc = " RSA/SHA-1 (RFC 3110, NOT RECOMMENDED)"]
+    ARES_DNSSEC_ALGORITHM_RSASHA1 = 5,
+    #[doc = " DSA-NSEC3-SHA1 (RFC 5155, NOT RECOMMENDED)"]
+    ARES_DNSSEC_ALGORITHM_DSA_NSEC3_SHA1 = 6,
+    #[doc = " RSASHA1-NSEC3-SHA1 (RFC 5155, NOT RECOMMENDED)"]
+    ARES_DNSSEC_ALGORITHM_RSASHA1_NSEC3_SHA1 = 7,
+    #[doc = " RSA/SHA-256 (RFC 5702)"]
+    ARES_DNSSEC_ALGORITHM_RSASHA256 = 8,
+    #[doc = " RSA/SHA-512 (RFC 5702)"]
+    ARES_DNSSEC_ALGORITHM_RSASHA512 = 10,
+    #[doc = " GOST R 34.10-2001 (RFC 5933)"]
+    ARES_DNSSEC_ALGORITHM_ECC_GOST = 12,
+    #[doc = " ECDSA Curve P-256 with SHA-256 (RFC 6605)"]
+    ARES_DNSSEC_ALGORITHM_ECDSAP256SHA256 = 13,
+    #[doc = " ECDSA Curve P-384 with SHA-384 (RFC 6605)"]
+    ARES_DNSSEC_ALGORITHM_ECDSAP384SHA384 = 14,
+    #[doc = " Ed25519 (RFC 8080)"]
+    ARES_DNSSEC_ALGORITHM_ED25519 = 15,
+    #[doc = " Ed448 (RFC 8080)"]
+    ARES_DNSSEC_ALGORITHM_ED448 = 16,
+    #[doc = " Indirect (RFC 4034)"]
+    ARES_DNSSEC_ALGORITHM_INDIRECT = 252,
+    #[doc = " Private algorithm (domain name) (RFC 4034)"]
+    ARES_DNSSEC_ALGORITHM_PRIVATEDNS = 253,
+    #[doc = " Private algorithm (OID) (RFC 4034)"]
+    ARES_DNSSEC_ALGORITHM_PRIVATEOID = 254,
+}
+#[repr(u32)]
+#[doc = " DS Record Digest Type known values (RFC 4034, RFC 4509, RFC 6605)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_ds_digest_t {
+    #[doc = " SHA-1 (RFC 3658)"]
+    ARES_DS_DIGEST_SHA1 = 1,
+    #[doc = " SHA-256 (RFC 4509)"]
+    ARES_DS_DIGEST_SHA256 = 2,
+    #[doc = " GOST R 34.11-94 (RFC 5933)"]
+    ARES_DS_DIGEST_GOST = 3,
+    #[doc = " SHA-384 (RFC 6605)"]
+    ARES_DS_DIGEST_SHA384 = 4,
+}
+#[repr(u32)]
+#[doc = " NSEC3 Hash Algorithm known values (RFC 5155)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_nsec3_hash_t {
+    #[doc = " SHA-1"]
+    ARES_NSEC3_HASH_SHA1 = 1,
+}
+#[repr(u32)]
 #[doc = " SVCB (and HTTPS) RR known parameters"]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum ares_svcb_param_t {
@@ -508,6 +667,10 @@ pub enum ares_svcb_param_t {
     ARES_SVCB_PARAM_ECH = 5,
     #[doc = " IPv6 address hints (RFC 9460 Section 7.3)"]
     ARES_SVCB_PARAM_IPV6HINT = 6,
+    #[doc = " DNS over HTTPS path (RFC 9461 Section 5)"]
+    ARES_SVCB_PARAM_DOHPATH = 7,
+    #[doc = " Oblivious HTTP (RFC 9540 Section 4)"]
+    ARES_SVCB_PARAM_OHTTP = 8,
 }
 #[repr(u32)]
 #[doc = " OPT RR known parameters"]
@@ -568,6 +731,8 @@ pub enum ares_dns_opt_datatype_t {
     ARES_OPT_DATATYPE_BIN = 10,
     #[doc = " DNS Domain Name Format"]
     ARES_OPT_DATATYPE_NAME = 11,
+    #[doc = " UTF-8 encoded string"]
+    ARES_OPT_DATATYPE_UTF8_STR = 12,
 }
 #[repr(u32)]
 #[doc = " Data type for flags to ares_dns_parse()"]
@@ -825,6 +990,13 @@ unsafe extern "C" {
     pub fn ares_dns_rr_get_ttl(rr: *const ares_dns_rr_t) -> ::core::ffi::c_uint;
 }
 unsafe extern "C" {
+    #[doc = " Overwrite the resource record TTL\n\n \\param[in] dns_rr Pointer to resource record\n \\param[in] ttl    TTL\n \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_ttl(
+        dns_rr: *mut ares_dns_rr_t,
+        ttl: ::core::ffi::c_uint,
+    ) -> ares_status_t;
+}
+unsafe extern "C" {
     #[doc = " Set ipv4 address data type for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_INADDR\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] addr   Pointer to ipv4 address to use.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_rr_set_addr(
         dns_rr: *mut ares_dns_rr_t,
@@ -1021,7 +1193,7 @@ unsafe extern "C" {
     ) -> ares_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
+    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  Returns NULL if \\p dnsrec is NULL.\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
     pub fn ares_dns_record_duplicate(dnsrec: *const ares_dns_record_t) -> *mut ares_dns_record_t;
 }
 pub type ares_callback = ::core::option::Option<
@@ -1029,7 +1201,7 @@ pub type ares_callback = ::core::option::Option<
         arg: *mut ::core::ffi::c_void,
         status: ::core::ffi::c_int,
         timeouts: ::core::ffi::c_int,
-        abuf: *const ::core::ffi::c_uchar,
+        abuf: *mut ::core::ffi::c_uchar,
         alen: ::core::ffi::c_int,
     ),
 >;
@@ -1046,7 +1218,7 @@ pub type ares_host_callback = ::core::option::Option<
         arg: *mut ::core::ffi::c_void,
         status: ::core::ffi::c_int,
         timeouts: ::core::ffi::c_int,
-        hostent: *const hostent,
+        hostent: *mut hostent,
     ),
 >;
 pub type ares_nameinfo_callback = ::core::option::Option<
@@ -1054,8 +1226,8 @@ pub type ares_nameinfo_callback = ::core::option::Option<
         arg: *mut ::core::ffi::c_void,
         status: ::core::ffi::c_int,
         timeouts: ::core::ffi::c_int,
-        node: *const ::core::ffi::c_char,
-        service: *const ::core::ffi::c_char,
+        node: *mut ::core::ffi::c_char,
+        service: *mut ::core::ffi::c_char,
     ),
 >;
 pub type ares_sock_create_callback = ::core::option::Option<
@@ -1089,6 +1261,8 @@ pub type ares_server_state_callback = ::core::option::Option<
     ),
 >;
 pub type ares_pending_write_cb =
+    ::core::option::Option<unsafe extern "C" fn(data: *mut ::core::ffi::c_void)>;
+pub type ares_query_enqueue_cb =
     ::core::option::Option<unsafe extern "C" fn(data: *mut ::core::ffi::c_void)>;
 unsafe extern "C" {
     pub fn ares_library_init(flags: ::core::ffi::c_int) -> ::core::ffi::c_int;
@@ -1189,6 +1363,13 @@ unsafe extern "C" {
     pub fn ares_set_pending_write_cb(
         channel: *mut ares_channel_t,
         callback: ares_pending_write_cb,
+        user_data: *mut ::core::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn ares_set_query_enqueue_cb(
+        channel: *mut ares_channel_t,
+        callback: ares_query_enqueue_cb,
         user_data: *mut ::core::ffi::c_void,
     );
 }

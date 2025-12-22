@@ -49,6 +49,8 @@ pub enum OptValue {
     Bin(Vec<u8>),
     /// A DNS domain name.
     Name(String),
+    /// A UTF-8 encoded string.
+    Utf8Str(String),
 }
 
 impl fmt::Display for OptValue {
@@ -88,6 +90,7 @@ impl fmt::Display for OptValue {
                 Ok(())
             }
             OptValue::Name(s) => write!(f, "{s}"),
+            OptValue::Utf8Str(s) => write!(f, "{s}"),
         }
     }
 }
@@ -109,6 +112,7 @@ pub fn parse_opt_value(key: DnsRrKey, opt: u16, data: &[u8]) -> Result<OptValue,
         DnsOptDataType::InAddr6List => parse_inaddr6_list(data).map(OptValue::InAddr6List),
         DnsOptDataType::Bin => Ok(OptValue::Bin(data.to_vec())),
         DnsOptDataType::Name => parse_name(data).map(OptValue::Name),
+        DnsOptDataType::Utf8Str => parse_utf8_str(data).map(OptValue::Utf8Str),
     }
 }
 
@@ -218,6 +222,12 @@ fn parse_name(data: &[u8]) -> Result<String, OptParseError> {
         )));
     }
     Ok(name.to_owned())
+}
+
+fn parse_utf8_str(data: &[u8]) -> Result<String, OptParseError> {
+    std::str::from_utf8(data)
+        .map(|s| s.to_owned())
+        .map_err(|e| OptParseError(format!("invalid UTF-8 string: {e}")))
 }
 
 #[cfg(test)]
@@ -421,6 +431,27 @@ mod tests {
     }
 
     #[test]
+    fn display_utf8_str() {
+        let val = OptValue::Utf8Str("hello world".to_owned());
+        assert_eq!(val.to_string(), "hello world");
+    }
+
+    #[test]
+    fn parse_utf8_str_basic() {
+        assert_eq!(parse_utf8_str(b"hello").unwrap(), "hello".to_owned());
+    }
+
+    #[test]
+    fn parse_utf8_str_empty() {
+        assert_eq!(parse_utf8_str(b"").unwrap(), "".to_owned());
+    }
+
+    #[test]
+    fn parse_utf8_str_invalid() {
+        assert!(parse_utf8_str(&[0xff, 0xfe]).is_err());
+    }
+
+    #[test]
     fn display_bin_empty() {
         assert_eq!(OptValue::Bin(vec![]).to_string(), "");
     }
@@ -589,5 +620,17 @@ mod tests {
         ];
         let result = parse_opt_value(DnsRrKey::OPT_OPTIONS, 13, &data).unwrap();
         assert_eq!(result, OptValue::Name("example.com".to_owned()));
+    }
+
+    #[test]
+    fn parse_opt_value_utf8_str() {
+        // HTTPS param 7 = dohpath (Utf8Str)
+        let result = parse_opt_value(DnsRrKey::HTTPS_PARAMS, 7, b"/dns-query{?dns}").unwrap();
+        assert_eq!(result, OptValue::Utf8Str("/dns-query{?dns}".to_owned()));
+    }
+
+    #[test]
+    fn parse_opt_value_utf8_str_invalid() {
+        assert!(parse_opt_value(DnsRrKey::HTTPS_PARAMS, 7, &[0xff, 0xfe]).is_err());
     }
 }

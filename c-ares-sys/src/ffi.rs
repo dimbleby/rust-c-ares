@@ -1017,7 +1017,7 @@ unsafe extern "C" {
     ) -> ares_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
+    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  Returns NULL if \\p dnsrec is NULL.\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
     pub fn ares_dns_record_duplicate(dnsrec: *const ares_dns_record_t) -> *mut ares_dns_record_t;
 }
 pub type ares_callback = ::std::option::Option<
@@ -1085,6 +1085,8 @@ pub type ares_server_state_callback = ::std::option::Option<
     ),
 >;
 pub type ares_pending_write_cb =
+    ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void)>;
+pub type ares_query_enqueue_cb =
     ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void)>;
 unsafe extern "C" {
     pub fn ares_library_init(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
@@ -1188,6 +1190,13 @@ unsafe extern "C" {
     pub fn ares_set_pending_write_cb(
         channel: *mut ares_channel_t,
         callback: ares_pending_write_cb,
+        user_data: *mut ::std::os::raw::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn ares_set_query_enqueue_cb(
+        channel: *mut ares_channel_t,
+        callback: ares_query_enqueue_cb,
         user_data: *mut ::std::os::raw::c_void,
     );
 }

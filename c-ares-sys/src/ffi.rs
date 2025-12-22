@@ -504,6 +504,10 @@ pub enum ares_svcb_param_t {
     ARES_SVCB_PARAM_ECH = 5,
     #[doc = " IPv6 address hints (RFC 9460 Section 7.3)"]
     ARES_SVCB_PARAM_IPV6HINT = 6,
+    #[doc = " DNS over HTTPS path (RFC 9461 Section 5)"]
+    ARES_SVCB_PARAM_DOHPATH = 7,
+    #[doc = " Oblivious HTTP (RFC 9540 Section 4)"]
+    ARES_SVCB_PARAM_OHTTP = 8,
 }
 #[repr(u32)]
 #[doc = " OPT RR known parameters"]
@@ -564,6 +568,8 @@ pub enum ares_dns_opt_datatype_t {
     ARES_OPT_DATATYPE_BIN = 10,
     #[doc = " DNS Domain Name Format"]
     ARES_OPT_DATATYPE_NAME = 11,
+    #[doc = " UTF-8 encoded string"]
+    ARES_OPT_DATATYPE_UTF8_STR = 12,
 }
 #[repr(u32)]
 #[doc = " Data type for flags to ares_dns_parse()"]
@@ -821,6 +827,13 @@ unsafe extern "C" {
     pub fn ares_dns_rr_get_ttl(rr: *const ares_dns_rr_t) -> ::core::ffi::c_uint;
 }
 unsafe extern "C" {
+    #[doc = " Overwrite the resource record TTL\n\n \\param[in] dns_rr Pointer to resource record\n \\param[in] ttl    TTL\n \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_ttl(
+        dns_rr: *mut ares_dns_rr_t,
+        ttl: ::core::ffi::c_uint,
+    ) -> ares_status_t;
+}
+unsafe extern "C" {
     #[doc = " Set ipv4 address data type for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_INADDR\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] addr   Pointer to ipv4 address to use.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_rr_set_addr(
         dns_rr: *mut ares_dns_rr_t,
@@ -1009,7 +1022,7 @@ unsafe extern "C" {
     ) -> ares_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Write a complete DNS message\n\n  \\param[in]  dnsrec   Pointer to initialized and filled DNS record object.\n  \\param[out] buf      Pointer passed by reference to be filled in with with\n                       DNS message.  Must be ares_free()'d by caller.\n  \\param[out] buf_len  Length of returned buffer containing DNS message.\n  \\return ARES_SUCCESS on success"]
+    #[doc = " Write a complete DNS message\n\n  \\param[in]  dnsrec   Pointer to initialized and filled DNS record object.\n  \\param[out] buf      Pointer passed by reference to be filled in with with\n                       DNS message.  Must be ares_free_string()'d by caller.\n  \\param[out] buf_len  Length of returned buffer containing DNS message.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_write(
         dnsrec: *const ares_dns_record_t,
         buf: *mut *mut ::core::ffi::c_uchar,
@@ -1017,7 +1030,7 @@ unsafe extern "C" {
     ) -> ares_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
+    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  Returns NULL if \\p dnsrec is NULL.\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
     pub fn ares_dns_record_duplicate(dnsrec: *const ares_dns_record_t) -> *mut ares_dns_record_t;
 }
 pub type ares_callback = ::core::option::Option<
@@ -1025,7 +1038,7 @@ pub type ares_callback = ::core::option::Option<
         arg: *mut ::core::ffi::c_void,
         status: ::core::ffi::c_int,
         timeouts: ::core::ffi::c_int,
-        abuf: *mut ::core::ffi::c_uchar,
+        abuf: *const ::core::ffi::c_uchar,
         alen: ::core::ffi::c_int,
     ),
 >;
@@ -1042,7 +1055,7 @@ pub type ares_host_callback = ::core::option::Option<
         arg: *mut ::core::ffi::c_void,
         status: ::core::ffi::c_int,
         timeouts: ::core::ffi::c_int,
-        hostent: *mut hostent,
+        hostent: *const hostent,
     ),
 >;
 pub type ares_nameinfo_callback = ::core::option::Option<
@@ -1050,8 +1063,8 @@ pub type ares_nameinfo_callback = ::core::option::Option<
         arg: *mut ::core::ffi::c_void,
         status: ::core::ffi::c_int,
         timeouts: ::core::ffi::c_int,
-        node: *mut ::core::ffi::c_char,
-        service: *mut ::core::ffi::c_char,
+        node: *const ::core::ffi::c_char,
+        service: *const ::core::ffi::c_char,
     ),
 >;
 pub type ares_sock_create_callback = ::core::option::Option<
@@ -1085,6 +1098,8 @@ pub type ares_server_state_callback = ::core::option::Option<
     ),
 >;
 pub type ares_pending_write_cb =
+    ::core::option::Option<unsafe extern "C" fn(data: *mut ::core::ffi::c_void)>;
+pub type ares_query_enqueue_cb =
     ::core::option::Option<unsafe extern "C" fn(data: *mut ::core::ffi::c_void)>;
 unsafe extern "C" {
     pub fn ares_library_init(flags: ::core::ffi::c_int) -> ::core::ffi::c_int;
@@ -1185,6 +1200,13 @@ unsafe extern "C" {
     pub fn ares_set_pending_write_cb(
         channel: *mut ares_channel_t,
         callback: ares_pending_write_cb,
+        user_data: *mut ::core::ffi::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn ares_set_query_enqueue_cb(
+        channel: *mut ares_channel_t,
+        callback: ares_query_enqueue_cb,
         user_data: *mut ::core::ffi::c_void,
     );
 }

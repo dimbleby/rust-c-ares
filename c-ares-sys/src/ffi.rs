@@ -821,6 +821,13 @@ unsafe extern "C" {
     pub fn ares_dns_rr_get_ttl(rr: *const ares_dns_rr_t) -> ::std::os::raw::c_uint;
 }
 unsafe extern "C" {
+    #[doc = " Overwrite the resource record TTL\n\n \\param[in] dns_rr Pointer to resource record\n \\param[in] ttl    TTL\n \\return ARES_SUCCESS on success"]
+    pub fn ares_dns_rr_set_ttl(
+        dns_rr: *mut ares_dns_rr_t,
+        ttl: ::std::os::raw::c_uint,
+    ) -> ares_status_t;
+}
+unsafe extern "C" {
     #[doc = " Set ipv4 address data type for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_INADDR\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] addr   Pointer to ipv4 address to use.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_rr_set_addr(
         dns_rr: *mut ares_dns_rr_t,
@@ -1017,7 +1024,7 @@ unsafe extern "C" {
     ) -> ares_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
+    #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  Returns NULL if \\p dnsrec is NULL.\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
     pub fn ares_dns_record_duplicate(dnsrec: *const ares_dns_record_t) -> *mut ares_dns_record_t;
 }
 pub type ares_callback = ::std::option::Option<
@@ -1025,7 +1032,7 @@ pub type ares_callback = ::std::option::Option<
         arg: *mut ::std::os::raw::c_void,
         status: ::std::os::raw::c_int,
         timeouts: ::std::os::raw::c_int,
-        abuf: *mut ::std::os::raw::c_uchar,
+        abuf: *const ::std::os::raw::c_uchar,
         alen: ::std::os::raw::c_int,
     ),
 >;
@@ -1042,7 +1049,7 @@ pub type ares_host_callback = ::std::option::Option<
         arg: *mut ::std::os::raw::c_void,
         status: ::std::os::raw::c_int,
         timeouts: ::std::os::raw::c_int,
-        hostent: *mut hostent,
+        hostent: *const hostent,
     ),
 >;
 pub type ares_nameinfo_callback = ::std::option::Option<
@@ -1050,8 +1057,8 @@ pub type ares_nameinfo_callback = ::std::option::Option<
         arg: *mut ::std::os::raw::c_void,
         status: ::std::os::raw::c_int,
         timeouts: ::std::os::raw::c_int,
-        node: *mut ::std::os::raw::c_char,
-        service: *mut ::std::os::raw::c_char,
+        node: *const ::std::os::raw::c_char,
+        service: *const ::std::os::raw::c_char,
     ),
 >;
 pub type ares_sock_create_callback = ::std::option::Option<
@@ -1085,6 +1092,8 @@ pub type ares_server_state_callback = ::std::option::Option<
     ),
 >;
 pub type ares_pending_write_cb =
+    ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void)>;
+pub type ares_query_enqueue_cb =
     ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void)>;
 unsafe extern "C" {
     pub fn ares_library_init(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
@@ -1188,6 +1197,13 @@ unsafe extern "C" {
     pub fn ares_set_pending_write_cb(
         channel: *mut ares_channel_t,
         callback: ares_pending_write_cb,
+        user_data: *mut ::std::os::raw::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn ares_set_query_enqueue_cb(
+        channel: *mut ares_channel_t,
+        callback: ares_query_enqueue_cb,
         user_data: *mut ::std::os::raw::c_void,
     );
 }

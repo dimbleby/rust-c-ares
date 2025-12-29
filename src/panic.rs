@@ -4,15 +4,13 @@ use std::panic::{self, AssertUnwindSafe};
 
 thread_local! {
     static LAST_ERROR: RefCell<Option<Box<dyn Any + Send>>> = RefCell::new(None);
-    static UNWINDING: RefCell<bool> = const { RefCell::new(false) }
 }
 
 pub fn catch<T, F: FnOnce() -> T>(f: F) -> Option<T> {
-    if LAST_ERROR.with(|slot| slot.borrow().is_some()) {
-        return None;
-    }
-
-    if UNWINDING.with(|slot| *slot.borrow()) {
+    if LAST_ERROR
+        .try_with(|slot| slot.borrow().is_some())
+        .unwrap_or(false)
+    {
         return None;
     }
 
@@ -26,8 +24,7 @@ pub fn catch<T, F: FnOnce() -> T>(f: F) -> Option<T> {
 }
 
 pub fn propagate() {
-    if let Some(t) = LAST_ERROR.with(|slot| slot.borrow_mut().take()) {
-        UNWINDING.with(|slot| *slot.borrow_mut() = true);
-        panic::resume_unwind(t);
+    if let Ok(Some(t)) = LAST_ERROR.try_with(|slot| slot.borrow_mut().take()) {
+        panic::resume_unwind(t)
     }
 }

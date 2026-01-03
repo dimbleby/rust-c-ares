@@ -75,16 +75,6 @@ const fn make() -> &'static str {
 }
 
 #[cfg(not(feature = "build-cmake"))]
-fn nmake(target: &str) -> Command {
-    // cargo messes with the environment in a way that nmake does not like -
-    // see https://github.com/rust-lang/cargo/issues/4156.  Explicitly remove
-    // the unwanted variables.
-    let mut cmd = cc::windows_registry::find(target, "nmake.exe").unwrap();
-    cmd.env_remove("MAKEFLAGS").env_remove("MFLAGS");
-    cmd
-}
-
-#[cfg(not(feature = "build-cmake"))]
 fn compile() {
     // MSVC builds are different.
     let target = env::var("TARGET").unwrap();
@@ -163,14 +153,14 @@ fn build_msvc(target: &str) {
         .arg("buildconf.bat"));
 
     // Compile.
-    let mut cmd = nmake(target);
+    let mut cmd = cc::windows_registry::find(target, "nmake.exe").unwrap();
     cmd.current_dir(&c_ares_dir);
     cmd.args(["/f", "Makefile.msvc", "CFG=lib-release", "c-ares"]);
     run(&mut cmd);
 
     // Install library.
     let build = outdir.join("build");
-    let mut cmd = nmake(target);
+    let mut cmd = cc::windows_registry::find(target, "nmake.exe").unwrap();
     cmd.current_dir(&c_ares_dir);
     cmd.args(["/f", "Makefile.msvc", "/a", "CFG=lib-release", "install"]);
     cmd.env("INSTALL_DIR", format!("{}", build.display()));

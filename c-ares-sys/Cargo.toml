@@ -2,7 +2,6 @@
 name = "c-ares-sys"
 license = "MIT"
 version = "11.0.0"
-authors = ["David Hotham"]
 build = "build/main.rs"
 links = "cares"
 description = "Low-level bindings to the c-ares library"

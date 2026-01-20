@@ -45,8 +45,8 @@ pub(crate) unsafe extern "C" fn get_name_info_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,
-    node: *mut c_char,
-    service: *mut c_char,
+    node: *const c_char,
+    service: *const c_char,
 ) where
     F: FnOnce(Result<NameInfoResult>) + Send + 'static,
 {

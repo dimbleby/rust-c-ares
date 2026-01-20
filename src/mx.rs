@@ -115,7 +115,7 @@ pub(crate) unsafe extern "C" fn query_mx_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,
-    abuf: *mut c_uchar,
+    abuf: *const c_uchar,
     alen: c_int,
 ) where
     F: FnOnce(Result<MXResults>) + Send + 'static,

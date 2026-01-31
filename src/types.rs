@@ -44,3 +44,58 @@ pub enum DnsClass {
 }
 
 pub const MAX_ADDRTTLS: usize = 32;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    #[test]
+    fn socket_bad_is_defined() {
+        let _bad = SOCKET_BAD;
+    }
+
+    #[test]
+    fn address_family_values() {
+        assert_ne!(AddressFamily::INET as isize, AddressFamily::INET6 as isize);
+        assert_ne!(AddressFamily::INET as isize, AddressFamily::UNSPEC as isize);
+        assert_ne!(AddressFamily::INET6 as isize, AddressFamily::UNSPEC as isize);
+    }
+
+    #[test]
+    fn address_family_clone_copy() {
+        let af = AddressFamily::INET;
+        let cloned = af.clone();
+        let copied = af;
+        assert_eq!(af, cloned);
+        assert_eq!(af, copied);
+    }
+
+    #[test]
+    fn address_family_debug() {
+        let af = AddressFamily::INET6;
+        let debug = format!("{:?}", af);
+        assert!(debug.contains("INET6"));
+    }
+
+    #[test]
+    fn address_family_eq_hash() {
+        let mut set = HashSet::new();
+        set.insert(AddressFamily::INET);
+        set.insert(AddressFamily::INET6);
+        set.insert(AddressFamily::INET);
+        assert_eq!(set.len(), 2);
+    }
+
+    #[test]
+    fn address_family_ord() {
+        let families = [
+            AddressFamily::INET,
+            AddressFamily::INET6,
+            AddressFamily::UNSPEC,
+        ];
+        let mut sorted = families.clone();
+        sorted.sort();
+        assert_eq!(sorted.len(), 3);
+    }
+}

@@ -122,3 +122,30 @@ pub(crate) unsafe extern "C" fn query_mx_callback<F>(
 {
     ares_callback!(arg.cast::<F>(), status, abuf, alen, MXResults::parse_from);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_invalid_data() {
+        let result = MXResults::parse_from(&[]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<MXResult>();
+        assert_send::<MXResults>();
+        assert_send::<MXResultsIter>();
+    }
+
+    #[test]
+    fn is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<MXResult>();
+        assert_sync::<MXResults>();
+        assert_sync::<MXResultsIter>();
+    }
+}

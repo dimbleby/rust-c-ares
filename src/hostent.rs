@@ -181,3 +181,22 @@ impl<'a> Iterator for HostAliasResultsIter<'a> {
 
 unsafe impl Send for HostAliasResultsIter<'_> {}
 unsafe impl Sync for HostAliasResultsIter<'_> {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<HostAddressResultsIter<'_>>();
+        assert_send::<HostAliasResultsIter<'_>>();
+    }
+
+    #[test]
+    fn is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<HostAddressResultsIter<'_>>();
+        assert_sync::<HostAliasResultsIter<'_>>();
+    }
+}

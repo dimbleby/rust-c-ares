@@ -152,3 +152,30 @@ pub(crate) unsafe extern "C" fn query_naptr_callback<F>(
         NAPTRResults::parse_from
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_invalid_data() {
+        let result = NAPTRResults::parse_from(&[]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<NAPTRResult>();
+        assert_send::<NAPTRResults>();
+        assert_send::<NAPTRResultsIter>();
+    }
+
+    #[test]
+    fn is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<NAPTRResult>();
+        assert_sync::<NAPTRResults>();
+        assert_sync::<NAPTRResultsIter>();
+    }
+}

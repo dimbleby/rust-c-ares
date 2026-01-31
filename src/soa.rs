@@ -100,3 +100,14 @@ pub(crate) unsafe extern "C" fn query_soa_callback<F>(
 {
     ares_callback!(arg.cast::<F>(), status, abuf, alen, SOAResult::parse_from);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_invalid_data() {
+        let result = SOAResult::parse_from(&[]);
+        assert!(result.is_err());
+    }
+}

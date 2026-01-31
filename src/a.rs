@@ -117,3 +117,30 @@ pub(crate) unsafe extern "C" fn query_a_callback<F>(
 {
     ares_callback!(arg.cast::<F>(), status, abuf, alen, AResults::parse_from);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_invalid_data() {
+        let result = AResults::parse_from(&[]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<AResult>();
+        assert_send::<AResults>();
+        assert_send::<AResultsIter>();
+    }
+
+    #[test]
+    fn is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<AResult>();
+        assert_sync::<AResults>();
+        assert_sync::<AResultsIter>();
+    }
+}

@@ -6,11 +6,11 @@
 #![cfg(all(unix, any(target_os = "linux", target_os = "android")))]
 
 use c_ares::*;
-use nix::sys::select::{select, FdSet};
+use nix::sys::select::{FdSet, select};
 use nix::sys::time::TimeVal;
 use std::os::fd::BorrowedFd;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 /// Helper function to process DNS queries using select.
@@ -45,7 +45,13 @@ fn process_channel(channel: &mut Channel, timeout: Duration) {
 
         let mut tv = TimeVal::new(0, 100_000); // 100ms
 
-        let result = select(None, Some(&mut read_fds), Some(&mut write_fds), None, Some(&mut tv));
+        let result = select(
+            None,
+            Some(&mut read_fds),
+            Some(&mut write_fds),
+            None,
+            Some(&mut tv),
+        );
 
         match result {
             Ok(0) => {
@@ -98,7 +104,10 @@ fn query_a_record() {
     process_channel(&mut channel, Duration::from_secs(10));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(success.load(Ordering::SeqCst), "Query did not return A records");
+    assert!(
+        success.load(Ordering::SeqCst),
+        "Query did not return A records"
+    );
 }
 
 #[test]
@@ -335,12 +344,18 @@ fn multiple_concurrent_queries() {
 
     process_channel(&mut channel, Duration::from_secs(15));
 
-    assert!(a_completed.load(Ordering::SeqCst), "A query did not complete");
+    assert!(
+        a_completed.load(Ordering::SeqCst),
+        "A query did not complete"
+    );
     assert!(
         aaaa_completed.load(Ordering::SeqCst),
         "AAAA query did not complete"
     );
-    assert!(mx_completed.load(Ordering::SeqCst), "MX query did not complete");
+    assert!(
+        mx_completed.load(Ordering::SeqCst),
+        "MX query did not complete"
+    );
 }
 
 #[test]
@@ -540,10 +555,7 @@ fn query_naptr_record() {
 #[ignore]
 fn search_a_record() {
     let mut options = Options::new();
-    options
-        .set_timeout(2000)
-        .set_tries(2)
-        .set_domains(&["com"]);
+    options.set_timeout(2000).set_tries(2).set_domains(&["com"]);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -1181,17 +1193,21 @@ fn get_name_info_ipv4() {
     let success_clone = success.clone();
 
     let addr: SocketAddr = "8.8.8.8:53".parse().unwrap();
-    channel.get_name_info(&addr, NIFlags::LOOKUPHOST | NIFlags::LOOKUPSERVICE, move |result| {
-        completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(name_info) = result {
-            // Test accessors
-            if name_info.node().is_some() || name_info.service().is_some() {
-                success_clone.store(true, Ordering::SeqCst);
+    channel.get_name_info(
+        &addr,
+        NIFlags::LOOKUPHOST | NIFlags::LOOKUPSERVICE,
+        move |result| {
+            completed_clone.store(true, Ordering::SeqCst);
+            if let Ok(name_info) = result {
+                // Test accessors
+                if name_info.node().is_some() || name_info.service().is_some() {
+                    success_clone.store(true, Ordering::SeqCst);
+                }
+                // Test Display trait
+                let _display = format!("{}", name_info);
             }
-            // Test Display trait
-            let _display = format!("{}", name_info);
-        }
-    });
+        },
+    );
 
     process_channel(&mut channel, Duration::from_secs(10));
 
@@ -1519,15 +1535,21 @@ fn server_state_callback_invoked() {
     let callback_count = Arc::new(AtomicUsize::new(0));
     let callback_count_clone = callback_count.clone();
 
-    channel.set_server_state_callback(move |server: &str, success: bool, flags: ServerStateFlags| {
-        callback_count_clone.fetch_add(1, Ordering::SeqCst);
-        // Verify callback receives valid data
-        assert!(!server.is_empty(), "Server should not be empty");
-        // flags should contain UDP or TCP
-        let has_transport = flags.contains(ServerStateFlags::UDP) || flags.contains(ServerStateFlags::TCP);
-        assert!(has_transport || flags.is_empty(), "Flags should indicate transport");
-        let _ = success; // success can be true or false
-    });
+    channel.set_server_state_callback(
+        move |server: &str, success: bool, flags: ServerStateFlags| {
+            callback_count_clone.fetch_add(1, Ordering::SeqCst);
+            // Verify callback receives valid data
+            assert!(!server.is_empty(), "Server should not be empty");
+            // flags should contain UDP or TCP
+            let has_transport =
+                flags.contains(ServerStateFlags::UDP) || flags.contains(ServerStateFlags::TCP);
+            assert!(
+                has_transport || flags.is_empty(),
+                "Flags should indicate transport"
+            );
+            let _ = success; // success can be true or false
+        },
+    );
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -1540,7 +1562,10 @@ fn server_state_callback_invoked() {
     process_channel(&mut channel, Duration::from_secs(10));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(callback_count.load(Ordering::SeqCst) > 0, "Server state callback should be invoked");
+    assert!(
+        callback_count.load(Ordering::SeqCst) > 0,
+        "Server state callback should be invoked"
+    );
 }
 
 // ============================================================================
@@ -1602,17 +1627,24 @@ fn get_host_by_name_nonexistent() {
     let got_error = Arc::new(AtomicBool::new(false));
     let got_error_clone = got_error.clone();
 
-    channel.get_host_by_name("this-domain-does-not-exist-12345.invalid", AddressFamily::INET, move |result| {
-        completed_clone.store(true, Ordering::SeqCst);
-        if result.is_err() {
-            got_error_clone.store(true, Ordering::SeqCst);
-        }
-    });
+    channel.get_host_by_name(
+        "this-domain-does-not-exist-12345.invalid",
+        AddressFamily::INET,
+        move |result| {
+            completed_clone.store(true, Ordering::SeqCst);
+            if result.is_err() {
+                got_error_clone.store(true, Ordering::SeqCst);
+            }
+        },
+    );
 
     process_channel(&mut channel, Duration::from_secs(10));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(got_error.load(Ordering::SeqCst), "Should have returned error for nonexistent domain");
+    assert!(
+        got_error.load(Ordering::SeqCst),
+        "Should have returned error for nonexistent domain"
+    );
 }
 
 #[test]
@@ -1805,10 +1837,13 @@ fn query_srv_nonexistent() {
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
 
-    channel.query_srv("_sip._tcp.this-domain-does-not-exist-12345.invalid", move |result| {
-        completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
-    });
+    channel.query_srv(
+        "_sip._tcp.this-domain-does-not-exist-12345.invalid",
+        move |result| {
+            completed_clone.store(true, Ordering::SeqCst);
+            let _ = result;
+        },
+    );
 
     process_channel(&mut channel, Duration::from_secs(10));
 

@@ -59,7 +59,10 @@ mod tests {
     fn address_family_values() {
         assert_ne!(AddressFamily::INET as isize, AddressFamily::INET6 as isize);
         assert_ne!(AddressFamily::INET as isize, AddressFamily::UNSPEC as isize);
-        assert_ne!(AddressFamily::INET6 as isize, AddressFamily::UNSPEC as isize);
+        assert_ne!(
+            AddressFamily::INET6 as isize,
+            AddressFamily::UNSPEC as isize
+        );
     }
 
     #[test]

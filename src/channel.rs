@@ -1541,7 +1541,7 @@ mod tests {
     fn channel_get_sock() {
         let channel = Channel::new().unwrap();
         let get_sock = channel.get_sock();
-        assert_eq!(get_sock.iter().count(),0);
+        assert_eq!(get_sock.iter().count(), 0);
     }
 
     #[test]
@@ -1775,9 +1775,11 @@ mod tests {
     fn channel_set_server_state_callback() {
         use crate::ServerStateFlags;
         let mut channel = Channel::new().unwrap();
-        channel.set_server_state_callback(|_server: &str, _success: bool, _flags: ServerStateFlags| {
-            // Callback for server state changes
-        });
+        channel.set_server_state_callback(
+            |_server: &str, _success: bool, _flags: ServerStateFlags| {
+                // Callback for server state changes
+            },
+        );
     }
 
     #[cfg(cares1_34)]

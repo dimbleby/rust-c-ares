@@ -209,9 +209,18 @@ mod tests {
         assert_eq!(Error::from(Error::EBADFLAGS as i32), Error::EBADFLAGS);
         assert_eq!(Error::from(Error::ENONAME as i32), Error::ENONAME);
         assert_eq!(Error::from(Error::EBADHINTS as i32), Error::EBADHINTS);
-        assert_eq!(Error::from(Error::ENOTINITIALIZED as i32), Error::ENOTINITIALIZED);
-        assert_eq!(Error::from(Error::ELOADIPHLPAPI as i32), Error::ELOADIPHLPAPI);
-        assert_eq!(Error::from(Error::EADDRGETNETWORKPARAMS as i32), Error::EADDRGETNETWORKPARAMS);
+        assert_eq!(
+            Error::from(Error::ENOTINITIALIZED as i32),
+            Error::ENOTINITIALIZED
+        );
+        assert_eq!(
+            Error::from(Error::ELOADIPHLPAPI as i32),
+            Error::ELOADIPHLPAPI
+        );
+        assert_eq!(
+            Error::from(Error::EADDRGETNETWORKPARAMS as i32),
+            Error::EADDRGETNETWORKPARAMS
+        );
         assert_eq!(Error::from(Error::ECANCELLED as i32), Error::ECANCELLED);
         assert_eq!(Error::from(Error::ESERVICE as i32), Error::ESERVICE);
         assert_eq!(Error::from(Error::ENOSERVER as i32), Error::ENOSERVER);
@@ -226,32 +235,110 @@ mod tests {
     #[test]
     fn try_from_status() {
         assert!(Error::try_from(c_ares_sys::ares_status_t::ARES_SUCCESS).is_err());
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENODATA), Ok(Error::ENODATA));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EFORMERR), Ok(Error::EFORMERR));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ESERVFAIL), Ok(Error::ESERVFAIL));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOTFOUND), Ok(Error::ENOTFOUND));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOTIMP), Ok(Error::ENOTIMP));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EREFUSED), Ok(Error::EREFUSED));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADQUERY), Ok(Error::EBADQUERY));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADNAME), Ok(Error::EBADNAME));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADFAMILY), Ok(Error::EBADFAMILY));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADRESP), Ok(Error::EBADRESP));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ECONNREFUSED), Ok(Error::ECONNREFUSED));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ETIMEOUT), Ok(Error::ETIMEOUT));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EOF), Ok(Error::EOF));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EFILE), Ok(Error::EFILE));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOMEM), Ok(Error::ENOMEM));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EDESTRUCTION), Ok(Error::EDESTRUCTION));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADSTR), Ok(Error::EBADSTR));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADFLAGS), Ok(Error::EBADFLAGS));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENONAME), Ok(Error::ENONAME));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADHINTS), Ok(Error::EBADHINTS));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOTINITIALIZED), Ok(Error::ENOTINITIALIZED));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ELOADIPHLPAPI), Ok(Error::ELOADIPHLPAPI));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EADDRGETNETWORKPARAMS), Ok(Error::EADDRGETNETWORKPARAMS));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ECANCELLED), Ok(Error::ECANCELLED));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ESERVICE), Ok(Error::ESERVICE));
-        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOSERVER), Ok(Error::ENOSERVER));
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ENODATA),
+            Ok(Error::ENODATA)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EFORMERR),
+            Ok(Error::EFORMERR)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ESERVFAIL),
+            Ok(Error::ESERVFAIL)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ENOTFOUND),
+            Ok(Error::ENOTFOUND)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ENOTIMP),
+            Ok(Error::ENOTIMP)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EREFUSED),
+            Ok(Error::EREFUSED)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EBADQUERY),
+            Ok(Error::EBADQUERY)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EBADNAME),
+            Ok(Error::EBADNAME)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EBADFAMILY),
+            Ok(Error::EBADFAMILY)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EBADRESP),
+            Ok(Error::EBADRESP)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ECONNREFUSED),
+            Ok(Error::ECONNREFUSED)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ETIMEOUT),
+            Ok(Error::ETIMEOUT)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EOF),
+            Ok(Error::EOF)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EFILE),
+            Ok(Error::EFILE)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ENOMEM),
+            Ok(Error::ENOMEM)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EDESTRUCTION),
+            Ok(Error::EDESTRUCTION)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EBADSTR),
+            Ok(Error::EBADSTR)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EBADFLAGS),
+            Ok(Error::EBADFLAGS)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ENONAME),
+            Ok(Error::ENONAME)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EBADHINTS),
+            Ok(Error::EBADHINTS)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ENOTINITIALIZED),
+            Ok(Error::ENOTINITIALIZED)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ELOADIPHLPAPI),
+            Ok(Error::ELOADIPHLPAPI)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_EADDRGETNETWORKPARAMS),
+            Ok(Error::EADDRGETNETWORKPARAMS)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ECANCELLED),
+            Ok(Error::ECANCELLED)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ESERVICE),
+            Ok(Error::ESERVICE)
+        );
+        assert_eq!(
+            Error::try_from(c_ares_sys::ares_status_t::ARES_ENOSERVER),
+            Ok(Error::ENOSERVER)
+        );
     }
 
     #[test]
@@ -263,13 +350,33 @@ mod tests {
     #[test]
     fn display_all_variants() {
         let errors = [
-            Error::ENODATA, Error::EFORMERR, Error::ESERVFAIL, Error::ENOTFOUND,
-            Error::ENOTIMP, Error::EREFUSED, Error::EBADQUERY, Error::EBADNAME,
-            Error::EBADFAMILY, Error::EBADRESP, Error::ECONNREFUSED, Error::ETIMEOUT,
-            Error::EOF, Error::EFILE, Error::ENOMEM, Error::EDESTRUCTION,
-            Error::EBADSTR, Error::EBADFLAGS, Error::ENONAME, Error::EBADHINTS,
-            Error::ENOTINITIALIZED, Error::ELOADIPHLPAPI, Error::EADDRGETNETWORKPARAMS,
-            Error::ECANCELLED, Error::ESERVICE, Error::ENOSERVER, Error::UNKNOWN,
+            Error::ENODATA,
+            Error::EFORMERR,
+            Error::ESERVFAIL,
+            Error::ENOTFOUND,
+            Error::ENOTIMP,
+            Error::EREFUSED,
+            Error::EBADQUERY,
+            Error::EBADNAME,
+            Error::EBADFAMILY,
+            Error::EBADRESP,
+            Error::ECONNREFUSED,
+            Error::ETIMEOUT,
+            Error::EOF,
+            Error::EFILE,
+            Error::ENOMEM,
+            Error::EDESTRUCTION,
+            Error::EBADSTR,
+            Error::EBADFLAGS,
+            Error::ENONAME,
+            Error::EBADHINTS,
+            Error::ENOTINITIALIZED,
+            Error::ELOADIPHLPAPI,
+            Error::EADDRGETNETWORKPARAMS,
+            Error::ECANCELLED,
+            Error::ESERVICE,
+            Error::ENOSERVER,
+            Error::UNKNOWN,
         ];
         for error in &errors {
             let display = format!("{}", error);

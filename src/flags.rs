@@ -48,3 +48,90 @@ bitflags!(
         const DNS_0X20 = c_ares_sys::ARES_FLAG_DNS0x20;
     }
 );
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    #[test]
+    fn empty() {
+        let flags = Flags::empty();
+        assert!(flags.is_empty());
+    }
+
+    #[test]
+    fn single() {
+        let flags = Flags::USEVC;
+        assert!(flags.contains(Flags::USEVC));
+        assert!(!flags.contains(Flags::PRIMARY));
+    }
+
+    #[test]
+    fn combine() {
+        let flags = Flags::USEVC | Flags::PRIMARY;
+        assert!(flags.contains(Flags::USEVC));
+        assert!(flags.contains(Flags::PRIMARY));
+        assert!(!flags.contains(Flags::IGNTC));
+    }
+
+    #[test]
+    fn all() {
+        let flags = Flags::all();
+        assert!(flags.contains(Flags::USEVC));
+        assert!(flags.contains(Flags::PRIMARY));
+        assert!(flags.contains(Flags::IGNTC));
+        assert!(flags.contains(Flags::NORECURSE));
+        assert!(flags.contains(Flags::STAYOPEN));
+        assert!(flags.contains(Flags::NOSEARCH));
+        assert!(flags.contains(Flags::NOALIASES));
+        assert!(flags.contains(Flags::NOCHECKRESP));
+        assert!(flags.contains(Flags::EDNS));
+        assert!(flags.contains(Flags::NO_DFLT_SVR));
+        assert!(flags.contains(Flags::DNS_0X20));
+    }
+
+    #[test]
+    fn remove() {
+        let mut flags = Flags::USEVC | Flags::PRIMARY;
+        flags.remove(Flags::USEVC);
+        assert!(!flags.contains(Flags::USEVC));
+        assert!(flags.contains(Flags::PRIMARY));
+    }
+
+    #[test]
+    fn insert() {
+        let mut flags = Flags::empty();
+        flags.insert(Flags::STAYOPEN);
+        assert!(flags.contains(Flags::STAYOPEN));
+    }
+
+    #[test]
+    fn toggle() {
+        let mut flags = Flags::USEVC;
+        flags.toggle(Flags::USEVC);
+        assert!(!flags.contains(Flags::USEVC));
+        flags.toggle(Flags::USEVC);
+        assert!(flags.contains(Flags::USEVC));
+    }
+
+    #[test]
+    fn debug() {
+        let flags = Flags::USEVC | Flags::PRIMARY;
+        let debug = format!("{:?}", flags);
+        assert!(debug.contains("USEVC"));
+        assert!(debug.contains("PRIMARY"));
+    }
+
+    #[test]
+    fn clone_eq_hash() {
+        let flags = Flags::USEVC | Flags::PRIMARY;
+        let cloned = flags.clone();
+        assert_eq!(flags, cloned);
+
+        let mut set = HashSet::new();
+        set.insert(flags);
+        set.insert(cloned);
+        assert_eq!(set.len(), 1);
+    }
+}

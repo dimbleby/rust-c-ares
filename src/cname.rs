@@ -74,3 +74,26 @@ pub(crate) unsafe extern "C" fn query_cname_callback<F>(
         CNameResults::parse_from
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_invalid_data() {
+        let result = CNameResults::parse_from(&[]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<CNameResults>();
+    }
+
+    #[test]
+    fn is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<CNameResults>();
+    }
+}

@@ -203,3 +203,58 @@ pub fn thread_safety() -> bool {
     let safety = unsafe { c_ares_sys::ares_threadsafety() };
     safety != c_ares_sys::ares_bool_t::ARES_FALSE
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn version_returns_string_and_int() {
+        let (version_str, version_int) = version();
+        assert!(!version_str.is_empty());
+        assert!(version_int > 0);
+    }
+
+    #[test]
+    fn version_string_format() {
+        let (version_str, _) = version();
+        assert!(version_str.contains('.'));
+    }
+
+    #[test]
+    fn version_int_format() {
+        let (_, version_int) = version();
+        assert!(version_int >= 0x010000);
+    }
+
+    #[cfg(cares1_23)]
+    #[test]
+    fn thread_safety_returns_bool() {
+        let _safety = thread_safety();
+    }
+
+    #[test]
+    fn address_family_inet() {
+        let result = address_family(c_types::AF_INET);
+        assert_eq!(result, Some(AddressFamily::INET));
+    }
+
+    #[test]
+    fn address_family_inet6() {
+        let result = address_family(c_types::AF_INET6);
+        assert_eq!(result, Some(AddressFamily::INET6));
+    }
+
+    #[test]
+    fn address_family_unspec() {
+        let result = address_family(c_types::AF_UNSPEC);
+        assert_eq!(result, Some(AddressFamily::UNSPEC));
+    }
+
+    #[test]
+    fn address_family_unknown() {
+        // Use an invalid address family value
+        let result = address_family(255);
+        assert_eq!(result, None);
+    }
+}

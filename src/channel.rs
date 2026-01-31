@@ -1300,3 +1300,492 @@ impl<'a> IntoIterator for &'a GetSock {
         self.iter()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::SOCKET_BAD;
+    use std::net::{Ipv4Addr, Ipv6Addr};
+
+    #[test]
+    fn options_default() {
+        let options = Options::new();
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_flags() {
+        let mut options = Options::new();
+        options.set_flags(Flags::USEVC | Flags::STAYOPEN);
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_timeout() {
+        let mut options = Options::new();
+        options.set_timeout(5000);
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_tries() {
+        let mut options = Options::new();
+        options.set_tries(5);
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_ndots() {
+        let mut options = Options::new();
+        options.set_ndots(2);
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_ports() {
+        let mut options = Options::new();
+        options.set_udp_port(53);
+        options.set_tcp_port(53);
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_domains() {
+        let mut options = Options::new();
+        options.set_domains(&["example.com", "test.local"]);
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_lookups() {
+        let mut options = Options::new();
+        options.set_lookups("bf");
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_socket_state_callback() {
+        let mut options = Options::new();
+        options.set_socket_state_callback(|_socket, _read, _write| {});
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_sock_buffer_sizes() {
+        let mut options = Options::new();
+        options.set_sock_send_buffer_size(65536);
+        options.set_sock_receive_buffer_size(65536);
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_rotate() {
+        let mut options = Options::new();
+        options.set_rotate();
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_no_rotate() {
+        let mut options = Options::new();
+        options.set_no_rotate();
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_ednspsz() {
+        let mut options = Options::new();
+        options.set_ednspsz(4096);
+        drop(options);
+    }
+
+    #[test]
+    fn options_set_resolvconf_path() {
+        let mut options = Options::new();
+        options.set_resolvconf_path("/etc/resolv.conf");
+        drop(options);
+    }
+
+    #[cfg(cares1_19)]
+    #[test]
+    fn options_set_hosts_path() {
+        let mut options = Options::new();
+        options.set_hosts_path("/etc/hosts");
+        drop(options);
+    }
+
+    #[cfg(cares1_20)]
+    #[test]
+    fn options_set_udp_max_queries() {
+        let mut options = Options::new();
+        options.set_udp_max_queries(100);
+        drop(options);
+    }
+
+    #[cfg(cares1_22)]
+    #[test]
+    fn options_set_max_timeout() {
+        let mut options = Options::new();
+        options.set_max_timeout(30000);
+        drop(options);
+    }
+
+    #[cfg(cares1_23)]
+    #[test]
+    fn options_set_query_cache_max_ttl() {
+        let mut options = Options::new();
+        options.set_query_cache_max_ttl(3600);
+        drop(options);
+    }
+
+    #[cfg(cares1_29)]
+    #[test]
+    fn options_set_server_failover_options() {
+        let mut options = Options::new();
+        let mut failover_opts = ServerFailoverOptions::new();
+        failover_opts.set_retry_chance(5).set_retry_delay(10000);
+        options.set_server_failover_options(&failover_opts);
+        drop(options);
+    }
+
+    #[test]
+    fn options_builder_chain() {
+        let mut options = Options::new();
+        options
+            .set_flags(Flags::USEVC)
+            .set_timeout(3000)
+            .set_tries(2)
+            .set_ndots(1)
+            .set_udp_port(53)
+            .set_tcp_port(53)
+            .set_lookups("b");
+        drop(options);
+    }
+
+    #[test]
+    fn options_full_builder_chain() {
+        let mut options = Options::new();
+        options
+            .set_flags(Flags::USEVC | Flags::STAYOPEN)
+            .set_timeout(2000)
+            .set_tries(3)
+            .set_ndots(2)
+            .set_udp_port(53)
+            .set_tcp_port(53)
+            .set_domains(&["example.com"])
+            .set_lookups("b")
+            .set_sock_send_buffer_size(32768)
+            .set_sock_receive_buffer_size(32768)
+            .set_rotate()
+            .set_ednspsz(4096)
+            .set_resolvconf_path("/etc/resolv.conf");
+        let channel = Channel::with_options(options);
+        assert!(channel.is_ok());
+    }
+
+    #[test]
+    fn options_is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Options>();
+    }
+
+    #[test]
+    fn options_is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Options>();
+    }
+
+    #[test]
+    fn channel_new_default() {
+        let channel = Channel::new();
+        assert!(channel.is_ok());
+    }
+
+    #[test]
+    fn channel_with_options() {
+        let mut options = Options::new();
+        options.set_flags(Flags::STAYOPEN).set_tries(2);
+        let channel = Channel::with_options(options);
+        assert!(channel.is_ok());
+    }
+
+    #[test]
+    fn channel_set_servers_empty() {
+        let mut channel = Channel::new().unwrap();
+        let result = channel.set_servers(&[]);
+        drop(result);
+    }
+
+    #[test]
+    fn channel_set_servers_ipv4() {
+        let mut channel = Channel::new().unwrap();
+        let result = channel.set_servers(&["8.8.8.8", "8.8.4.4"]);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn channel_set_servers_ipv6() {
+        let mut channel = Channel::new().unwrap();
+        let result = channel.set_servers(&["[2001:4860:4860::8888]"]);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn channel_set_servers_with_port() {
+        let mut channel = Channel::new().unwrap();
+        let result = channel.set_servers(&["8.8.8.8:53", "[2001:4860:4860::8888]:53"]);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn channel_get_sock() {
+        let channel = Channel::new().unwrap();
+        let get_sock = channel.get_sock();
+        assert_eq!(get_sock.iter().count(),0);
+    }
+
+    #[test]
+    fn channel_cancel() {
+        let mut channel = Channel::new().unwrap();
+        channel.cancel();
+    }
+
+    #[test]
+    fn channel_process_fd_bad_socket() {
+        let mut channel = Channel::new().unwrap();
+        channel.process_fd(SOCKET_BAD, SOCKET_BAD);
+    }
+
+    #[test]
+    fn channel_try_clone() {
+        let channel = Channel::new().unwrap();
+        let cloned = channel.try_clone();
+        assert!(cloned.is_ok());
+    }
+
+    #[test]
+    fn channel_set_local_ipv4() {
+        let mut channel = Channel::new().unwrap();
+        channel.set_local_ipv4(Ipv4Addr::new(0, 0, 0, 0));
+    }
+
+    #[test]
+    fn channel_set_local_ipv6() {
+        let mut channel = Channel::new().unwrap();
+        channel.set_local_ipv6(&Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0));
+    }
+
+    #[test]
+    fn channel_set_local_device() {
+        let mut channel = Channel::new().unwrap();
+        channel.set_local_device("lo");
+    }
+
+    #[test]
+    fn channel_set_sortlist() {
+        let mut channel = Channel::new().unwrap();
+        let result = channel.set_sortlist(&["130.155.160.0/255.255.240.0", "130.155.0.0"]);
+        drop(result);
+    }
+
+    #[cfg(cares1_22)]
+    #[test]
+    fn channel_reinit() {
+        let mut channel = Channel::new().unwrap();
+        let result = channel.reinit();
+        drop(result);
+    }
+
+    #[cfg(cares1_24)]
+    #[test]
+    fn channel_get_servers() {
+        let mut channel = Channel::new().unwrap();
+        channel.set_servers(&["8.8.8.8"]).unwrap();
+        let servers = channel.get_servers();
+        assert!(!servers.is_empty());
+    }
+
+    #[cfg(cares1_34)]
+    #[test]
+    fn channel_process_fds_empty() {
+        use crate::ProcessFlags;
+        let mut channel = Channel::new().unwrap();
+        let result = channel.process_fds(&[], ProcessFlags::empty());
+        assert!(result.is_ok());
+    }
+
+    #[cfg(cares1_34)]
+    #[test]
+    fn channel_process_pending_write() {
+        let mut channel = Channel::new().unwrap();
+        channel.process_pending_write();
+    }
+
+    #[test]
+    fn channel_is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Channel>();
+    }
+
+    #[test]
+    fn channel_is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Channel>();
+    }
+
+    #[test]
+    fn get_sock_iter_empty() {
+        let channel = Channel::new().unwrap();
+        let get_sock = channel.get_sock();
+        let mut iter = get_sock.iter();
+        assert!(iter.next().is_none());
+    }
+
+    #[test]
+    fn get_sock_iter_clone() {
+        let channel = Channel::new().unwrap();
+        let get_sock = channel.get_sock();
+        let iter = get_sock.iter();
+        let _cloned = iter.clone();
+    }
+
+    #[test]
+    fn get_sock_is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<GetSock>();
+    }
+
+    #[test]
+    fn get_sock_is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<GetSock>();
+    }
+
+    #[test]
+    fn get_sock_iter_is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<GetSockIter<'_>>();
+    }
+
+    #[test]
+    fn get_sock_iter_is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<GetSockIter<'_>>();
+    }
+
+    #[test]
+    fn get_sock_into_iter() {
+        let channel = Channel::new().unwrap();
+        let get_sock = channel.get_sock();
+        // Use the IntoIterator implementation
+        for (_socket, _readable, _writable) in &get_sock {
+            // Empty channel should have no sockets
+            panic!("Should not have any sockets");
+        }
+    }
+
+    #[test]
+    fn get_sock_iter_exhausted() {
+        // Test that GetSockIter returns None when index >= ARES_GETSOCK_MAXNUM
+        let channel = Channel::new().unwrap();
+        let get_sock = channel.get_sock();
+        let mut iter = get_sock.iter();
+        // Exhaust the iterator
+        while iter.next().is_some() {}
+        // After exhaustion, should continue returning None
+        assert!(iter.next().is_none());
+        assert!(iter.next().is_none());
+    }
+
+    #[test]
+    fn get_sock_debug() {
+        let channel = Channel::new().unwrap();
+        let get_sock = channel.get_sock();
+        let debug_str = format!("{:?}", get_sock);
+        assert!(debug_str.contains("GetSock"));
+    }
+
+    #[test]
+    fn get_sock_iter_debug() {
+        let channel = Channel::new().unwrap();
+        let get_sock = channel.get_sock();
+        let iter = get_sock.iter();
+        let debug_str = format!("{:?}", iter);
+        assert!(debug_str.contains("GetSockIter"));
+    }
+
+    #[test]
+    fn get_sock_clone() {
+        let channel = Channel::new().unwrap();
+        let get_sock = channel.get_sock();
+        let _cloned = get_sock.clone();
+    }
+
+    #[test]
+    fn get_sock_copy() {
+        let channel = Channel::new().unwrap();
+        let get_sock = channel.get_sock();
+        let copied: GetSock = get_sock;
+        let _ = copied;
+    }
+
+    #[test]
+    fn channel_fds() {
+        use std::mem::MaybeUninit;
+        let channel = Channel::new().unwrap();
+        unsafe {
+            let mut read_fds: c_types::fd_set = MaybeUninit::zeroed().assume_init();
+            let mut write_fds: c_types::fd_set = MaybeUninit::zeroed().assume_init();
+            let nfds = channel.fds(&mut read_fds, &mut write_fds);
+            // No queries started, so should be 0
+            assert_eq!(nfds, 0);
+        }
+    }
+
+    #[test]
+    fn set_servers_invalid() {
+        let mut channel = Channel::new().unwrap();
+        // Invalid server format
+        let result = channel.set_servers(&["not-a-valid-ip"]);
+        // c-ares may accept or reject this depending on version
+        drop(result);
+    }
+
+    #[test]
+    fn set_sortlist_invalid() {
+        let mut channel = Channel::new().unwrap();
+        // Invalid sortlist format
+        let result = channel.set_sortlist(&["not-a-valid-address"]);
+        // Should fail
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn options_with_socket_callback_creates_channel() {
+        let mut options = Options::new();
+        options.set_socket_state_callback(|_socket, _read, _write| {
+            // This callback would be invoked when socket state changes
+        });
+        let channel = Channel::with_options(options);
+        assert!(channel.is_ok());
+    }
+
+    #[cfg(cares1_29)]
+    #[test]
+    fn channel_set_server_state_callback() {
+        use crate::ServerStateFlags;
+        let mut channel = Channel::new().unwrap();
+        channel.set_server_state_callback(|_server: &str, _success: bool, _flags: ServerStateFlags| {
+            // Callback for server state changes
+        });
+    }
+
+    #[cfg(cares1_34)]
+    #[test]
+    fn channel_set_pending_write_callback() {
+        let mut channel = Channel::new().unwrap();
+        channel.set_pending_write_callback(|| {
+            // Callback for pending writes
+        });
+    }
+}

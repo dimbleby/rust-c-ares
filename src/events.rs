@@ -35,3 +35,53 @@ impl FdEvents {
         FdEvents(events)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fd_event_flags_empty() {
+        let flags = FdEventFlags::empty();
+        assert!(flags.is_empty());
+    }
+
+    #[test]
+    fn fd_event_flags_read() {
+        let flags = FdEventFlags::Read;
+        assert!(flags.contains(FdEventFlags::Read));
+        assert!(!flags.contains(FdEventFlags::Write));
+    }
+
+    #[test]
+    fn fd_event_flags_write() {
+        let flags = FdEventFlags::Write;
+        assert!(flags.contains(FdEventFlags::Write));
+        assert!(!flags.contains(FdEventFlags::Read));
+    }
+
+    #[test]
+    fn fd_event_flags_combined() {
+        let flags = FdEventFlags::Read | FdEventFlags::Write;
+        assert!(flags.contains(FdEventFlags::Read));
+        assert!(flags.contains(FdEventFlags::Write));
+    }
+
+    #[test]
+    fn process_flags_empty() {
+        let flags = ProcessFlags::empty();
+        assert!(flags.is_empty());
+    }
+
+    #[test]
+    fn process_flags_skip_non_fd() {
+        let flags = ProcessFlags::SkipNonFd;
+        assert!(flags.contains(ProcessFlags::SkipNonFd));
+    }
+
+    #[test]
+    fn fd_events_new() {
+        let events = FdEvents::new(0, FdEventFlags::Read);
+        drop(events);
+    }
+}

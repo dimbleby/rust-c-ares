@@ -57,3 +57,20 @@ pub(crate) unsafe extern "C" fn get_host_callback<F>(
     let handler = unsafe { Box::from_raw(arg.cast::<F>()) };
     panic::catch(|| handler(result));
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<HostResults>();
+    }
+
+    #[test]
+    fn is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<HostResults>();
+    }
+}

@@ -177,3 +177,145 @@ impl TryFrom<c_ares_sys::ares_status_t> for Error {
 
 /// The type used by this library for methods that might fail.
 pub type Result<T> = result::Result<T, Error>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    #[test]
+    fn from_i32_known_codes() {
+        assert_eq!(Error::from(1), Error::ENODATA);
+        assert_eq!(Error::from(2), Error::EFORMERR);
+        assert_eq!(Error::from(3), Error::ESERVFAIL);
+        assert_eq!(Error::from(4), Error::ENOTFOUND);
+        assert_eq!(Error::from(5), Error::ENOTIMP);
+        assert_eq!(Error::from(6), Error::EREFUSED);
+    }
+
+    #[test]
+    fn from_i32_all_known_codes() {
+        assert_eq!(Error::from(Error::EBADQUERY as i32), Error::EBADQUERY);
+        assert_eq!(Error::from(Error::EBADNAME as i32), Error::EBADNAME);
+        assert_eq!(Error::from(Error::EBADFAMILY as i32), Error::EBADFAMILY);
+        assert_eq!(Error::from(Error::EBADRESP as i32), Error::EBADRESP);
+        assert_eq!(Error::from(Error::ECONNREFUSED as i32), Error::ECONNREFUSED);
+        assert_eq!(Error::from(Error::ETIMEOUT as i32), Error::ETIMEOUT);
+        assert_eq!(Error::from(Error::EOF as i32), Error::EOF);
+        assert_eq!(Error::from(Error::EFILE as i32), Error::EFILE);
+        assert_eq!(Error::from(Error::ENOMEM as i32), Error::ENOMEM);
+        assert_eq!(Error::from(Error::EDESTRUCTION as i32), Error::EDESTRUCTION);
+        assert_eq!(Error::from(Error::EBADSTR as i32), Error::EBADSTR);
+        assert_eq!(Error::from(Error::EBADFLAGS as i32), Error::EBADFLAGS);
+        assert_eq!(Error::from(Error::ENONAME as i32), Error::ENONAME);
+        assert_eq!(Error::from(Error::EBADHINTS as i32), Error::EBADHINTS);
+        assert_eq!(Error::from(Error::ENOTINITIALIZED as i32), Error::ENOTINITIALIZED);
+        assert_eq!(Error::from(Error::ELOADIPHLPAPI as i32), Error::ELOADIPHLPAPI);
+        assert_eq!(Error::from(Error::EADDRGETNETWORKPARAMS as i32), Error::EADDRGETNETWORKPARAMS);
+        assert_eq!(Error::from(Error::ECANCELLED as i32), Error::ECANCELLED);
+        assert_eq!(Error::from(Error::ESERVICE as i32), Error::ESERVICE);
+        assert_eq!(Error::from(Error::ENOSERVER as i32), Error::ENOSERVER);
+    }
+
+    #[test]
+    fn from_i32_unknown_code() {
+        assert_eq!(Error::from(9999), Error::UNKNOWN);
+        assert_eq!(Error::from(-9999), Error::UNKNOWN);
+    }
+
+    #[test]
+    fn try_from_status() {
+        assert!(Error::try_from(c_ares_sys::ares_status_t::ARES_SUCCESS).is_err());
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENODATA), Ok(Error::ENODATA));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EFORMERR), Ok(Error::EFORMERR));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ESERVFAIL), Ok(Error::ESERVFAIL));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOTFOUND), Ok(Error::ENOTFOUND));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOTIMP), Ok(Error::ENOTIMP));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EREFUSED), Ok(Error::EREFUSED));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADQUERY), Ok(Error::EBADQUERY));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADNAME), Ok(Error::EBADNAME));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADFAMILY), Ok(Error::EBADFAMILY));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADRESP), Ok(Error::EBADRESP));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ECONNREFUSED), Ok(Error::ECONNREFUSED));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ETIMEOUT), Ok(Error::ETIMEOUT));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EOF), Ok(Error::EOF));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EFILE), Ok(Error::EFILE));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOMEM), Ok(Error::ENOMEM));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EDESTRUCTION), Ok(Error::EDESTRUCTION));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADSTR), Ok(Error::EBADSTR));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADFLAGS), Ok(Error::EBADFLAGS));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENONAME), Ok(Error::ENONAME));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EBADHINTS), Ok(Error::EBADHINTS));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOTINITIALIZED), Ok(Error::ENOTINITIALIZED));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ELOADIPHLPAPI), Ok(Error::ELOADIPHLPAPI));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_EADDRGETNETWORKPARAMS), Ok(Error::EADDRGETNETWORKPARAMS));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ECANCELLED), Ok(Error::ECANCELLED));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ESERVICE), Ok(Error::ESERVICE));
+        assert_eq!(Error::try_from(c_ares_sys::ares_status_t::ARES_ENOSERVER), Ok(Error::ENOSERVER));
+    }
+
+    #[test]
+    fn is_std_error() {
+        fn assert_std_error<T: std::error::Error>() {}
+        assert_std_error::<Error>();
+    }
+
+    #[test]
+    fn display_all_variants() {
+        let errors = [
+            Error::ENODATA, Error::EFORMERR, Error::ESERVFAIL, Error::ENOTFOUND,
+            Error::ENOTIMP, Error::EREFUSED, Error::EBADQUERY, Error::EBADNAME,
+            Error::EBADFAMILY, Error::EBADRESP, Error::ECONNREFUSED, Error::ETIMEOUT,
+            Error::EOF, Error::EFILE, Error::ENOMEM, Error::EDESTRUCTION,
+            Error::EBADSTR, Error::EBADFLAGS, Error::ENONAME, Error::EBADHINTS,
+            Error::ENOTINITIALIZED, Error::ELOADIPHLPAPI, Error::EADDRGETNETWORKPARAMS,
+            Error::ECANCELLED, Error::ESERVICE, Error::ENOSERVER, Error::UNKNOWN,
+        ];
+        for error in &errors {
+            let display = format!("{}", error);
+            assert!(!display.is_empty(), "Error {:?} has empty display", error);
+        }
+    }
+
+    #[test]
+    fn debug_format() {
+        let error = Error::ETIMEOUT;
+        let debug = format!("{:?}", error);
+        assert!(debug.contains("ETIMEOUT"));
+    }
+
+    #[test]
+    fn clone_and_copy() {
+        let error = Error::EBADNAME;
+        let cloned = error.clone();
+        let copied = error;
+        assert_eq!(error, cloned);
+        assert_eq!(error, copied);
+    }
+
+    #[test]
+    fn eq_and_hash() {
+        let mut set = HashSet::new();
+        set.insert(Error::ENODATA);
+        set.insert(Error::ENOTFOUND);
+        set.insert(Error::ENODATA);
+        assert_eq!(set.len(), 2);
+    }
+
+    #[test]
+    fn ord() {
+        assert!(Error::ENODATA < Error::UNKNOWN);
+    }
+
+    #[test]
+    fn is_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Error>();
+    }
+
+    #[test]
+    fn is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Error>();
+    }
+}

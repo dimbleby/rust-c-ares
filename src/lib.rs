@@ -65,9 +65,6 @@ mod types;
 mod uri;
 mod utils;
 
-#[cfg(test)]
-mod tests;
-
 // Re-export public interfaces.
 pub use crate::a::{AResult, AResults, AResultsIter};
 pub use crate::aaaa::{AAAAResult, AAAAResults, AAAAResultsIter};

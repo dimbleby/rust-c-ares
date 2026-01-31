@@ -37,3 +37,42 @@ bitflags!(
         const LOOKUPSERVICE = c_ares_sys::ARES_NI_LOOKUPSERVICE;
     }
 );
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        let flags = NIFlags::empty();
+        assert!(flags.is_empty());
+    }
+
+    #[test]
+    fn single() {
+        let flags = NIFlags::NOFQDN;
+        assert!(flags.contains(NIFlags::NOFQDN));
+        assert!(!flags.contains(NIFlags::NUMERICHOST));
+    }
+
+    #[test]
+    fn combine() {
+        let flags = NIFlags::NUMERICHOST | NIFlags::NUMERICSERV;
+        assert!(flags.contains(NIFlags::NUMERICHOST));
+        assert!(flags.contains(NIFlags::NUMERICSERV));
+    }
+
+    #[test]
+    fn protocol_flags() {
+        let tcp_flags = NIFlags::TCP | NIFlags::LOOKUPSERVICE;
+        assert!(tcp_flags.contains(NIFlags::TCP));
+        assert!(!tcp_flags.contains(NIFlags::UDP));
+    }
+
+    #[test]
+    fn debug() {
+        let flags = NIFlags::TCP | NIFlags::LOOKUPHOST;
+        let debug = format!("{:?}", flags);
+        assert!(!debug.is_empty());
+    }
+}

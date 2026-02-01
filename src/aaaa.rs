@@ -12,7 +12,7 @@ use crate::panic;
 use crate::types::MAX_ADDRTTLS;
 
 /// The result of a successful AAAA lookup.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct AAAAResults {
     naddr6ttls: usize,
     addr6ttls: [c_ares_sys::ares_addr6ttl; MAX_ADDRTTLS],

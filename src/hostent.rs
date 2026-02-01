@@ -92,6 +92,12 @@ pub struct HostentBorrowed<'a> {
     inner: &'a c_types::hostent,
 }
 
+impl fmt::Debug for HostentBorrowed<'_> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write!(f, "HostentBorrowed {{ inner: opaque }}")
+    }
+}
+
 impl<'a> HostentBorrowed<'a> {
     pub fn new(hostent: &'a c_types::hostent) -> Self {
         HostentBorrowed { inner: hostent }

@@ -143,6 +143,16 @@ pub struct ares_in6_addr {
 pub union ares_in6_addr__bindgen_ty_1 {
     pub _S6_u8: [::core::ffi::c_uchar; 16usize],
 }
+impl ::core::fmt::Debug for ares_in6_addr__bindgen_ty_1 {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(f, "ares_in6_addr__bindgen_ty_1 {{ union }}")
+    }
+}
+impl ::core::fmt::Debug for ares_in6_addr {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(f, "ares_in6_addr {{ _S6_un: {:?} }}", self._S6_un)
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ares_addr {
@@ -154,6 +164,20 @@ pub struct ares_addr {
 pub union ares_addr__bindgen_ty_1 {
     pub addr4: in_addr,
     pub addr6: ares_in6_addr,
+}
+impl ::core::fmt::Debug for ares_addr__bindgen_ty_1 {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(f, "ares_addr__bindgen_ty_1 {{ union }}")
+    }
+}
+impl ::core::fmt::Debug for ares_addr {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(
+            f,
+            "ares_addr {{ family: {:?}, addr: {:?} }}",
+            self.family, self.addr
+        )
+    }
 }
 #[repr(u32)]
 #[doc = " DNS Record types handled by c-ares.  Some record types may only be valid\n  on requests (e.g. ARES_REC_TYPE_ANY), and some may only be valid on\n  responses"]
@@ -1552,6 +1576,11 @@ pub struct ares_fd_events_t {
     #[doc = "< Mask of ares_fd_eventflag_t"]
     pub events: ::core::ffi::c_uint,
 }
+impl ::core::fmt::Debug for ares_fd_events_t {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(f, "ares_fd_events_t {{ events: {:?} }}", self.events)
+    }
+}
 #[repr(u32)]
 #[doc = " Flags used by ares_process_fds()"]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -1619,15 +1648,10 @@ unsafe extern "C" {
     ) -> ::core::ffi::c_int;
 }
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct ares_addrttl {
     pub ipaddr: in_addr,
     pub ttl: ::core::ffi::c_int,
-}
-impl ::std::fmt::Debug for ares_addrttl {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        write!(f, "ares_addrttl {{ ipaddr: union, ttl: {:?} }}", self.ttl)
-    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -1635,9 +1659,13 @@ pub struct ares_addr6ttl {
     pub ip6addr: ares_in6_addr,
     pub ttl: ::core::ffi::c_int,
 }
-impl ::std::fmt::Debug for ares_addr6ttl {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        write!(f, "ares_addr6ttl {{ ip6addr: union, ttl: {:?} }}", self.ttl)
+impl ::core::fmt::Debug for ares_addr6ttl {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(
+            f,
+            "ares_addr6ttl {{ ip6addr: {:?}, ttl: {:?} }}",
+            self.ip6addr, self.ttl
+        )
     }
 }
 #[repr(C)]
@@ -1722,6 +1750,21 @@ pub struct ares_addrinfo_node {
     pub ai_addrlen: ares_socklen_t,
     pub ai_addr: *mut sockaddr,
     pub ai_next: *mut ares_addrinfo_node,
+}
+impl ::core::fmt::Debug for ares_addrinfo_node {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(
+            f,
+            "ares_addrinfo_node {{ ai_ttl: {:?}, ai_flags: {:?}, ai_family: {:?}, ai_socktype: {:?}, ai_protocol: {:?}, ai_addr: {:?}, ai_next: {:?} }}",
+            self.ai_ttl,
+            self.ai_flags,
+            self.ai_family,
+            self.ai_socktype,
+            self.ai_protocol,
+            self.ai_addr,
+            self.ai_next
+        )
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1862,6 +1905,20 @@ pub union ares_addr_node__bindgen_ty_1 {
     pub addr4: in_addr,
     pub addr6: ares_in6_addr,
 }
+impl ::core::fmt::Debug for ares_addr_node__bindgen_ty_1 {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(f, "ares_addr_node__bindgen_ty_1 {{ union }}")
+    }
+}
+impl ::core::fmt::Debug for ares_addr_node {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(
+            f,
+            "ares_addr_node {{ next: {:?}, family: {:?}, addr: {:?} }}",
+            self.next, self.family, self.addr
+        )
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ares_addr_port_node {
@@ -1876,6 +1933,20 @@ pub struct ares_addr_port_node {
 pub union ares_addr_port_node__bindgen_ty_1 {
     pub addr4: in_addr,
     pub addr6: ares_in6_addr,
+}
+impl ::core::fmt::Debug for ares_addr_port_node__bindgen_ty_1 {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(f, "ares_addr_port_node__bindgen_ty_1 {{ union }}")
+    }
+}
+impl ::core::fmt::Debug for ares_addr_port_node {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        write!(
+            f,
+            "ares_addr_port_node {{ next: {:?}, family: {:?}, addr: {:?}, udp_port: {:?}, tcp_port: {:?} }}",
+            self.next, self.family, self.addr, self.udp_port, self.tcp_port
+        )
+    }
 }
 unsafe extern "C" {
     pub fn ares_set_servers(

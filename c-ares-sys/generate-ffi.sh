@@ -25,7 +25,7 @@ bindgen --allowlist-function="ares.*" \
         --blocklist-type="socklen_t" \
         --blocklist-type="timeval" \
         --default-enum-style="rust" \
-        --no-debug="ares_addrttl" \
+        --impl-debug \
         --no-layout-tests \
         --output=src/ffi.rs \
         --use-core \

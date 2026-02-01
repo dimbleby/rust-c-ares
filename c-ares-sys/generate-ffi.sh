@@ -28,6 +28,7 @@ bindgen --allowlist-function="ares.*" \
         --no-debug="ares_addrttl" \
         --no-layout-tests \
         --output=src/ffi.rs \
+        --use-core \
         c-ares/include/ares.h \
         -- \
         -Ic-ares/build

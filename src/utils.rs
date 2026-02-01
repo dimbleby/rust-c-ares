@@ -1,8 +1,8 @@
 use crate::types::AddressFamily;
-use std::ffi::{CStr, c_char};
+use core::ffi::{c_char, c_int};
+use std::ffi::CStr;
 use std::mem;
 use std::net::{Ipv4Addr, Ipv6Addr, SocketAddrV4, SocketAddrV6};
-use std::os::raw::c_int;
 use std::str;
 
 // Convert an address family into a more strongly typed AddressFamily.

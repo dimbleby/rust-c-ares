@@ -1,5 +1,5 @@
 use crate::ffi::ares_socket_t;
-use std::os::raw::c_int;
+use core::ffi::c_int;
 
 // Library initialization flags
 pub const ARES_LIB_INIT_NONE: c_int = 0;

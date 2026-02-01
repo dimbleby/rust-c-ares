@@ -1,5 +1,5 @@
+use core::ffi::{c_int, c_uchar, c_void};
 use std::fmt;
-use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 

@@ -1,7 +1,7 @@
+use core::ffi::{c_int, c_uchar, c_void};
 use std::fmt;
 use std::mem;
 use std::net::Ipv6Addr;
-use std::os::raw::{c_int, c_uchar, c_void};
 use std::ptr;
 use std::slice;
 

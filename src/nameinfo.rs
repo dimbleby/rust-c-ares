@@ -1,4 +1,4 @@
-use std::os::raw::{c_char, c_int, c_void};
+use core::ffi::{c_char, c_int, c_void};
 use std::{fmt, str};
 
 use crate::error::{Error, Result};

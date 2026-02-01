@@ -1,8 +1,8 @@
+#[allow(unused_imports)]
+use core::ffi::{c_char, c_int, c_void};
 use std::ffi::CString;
 use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
-#[allow(unused_imports)]
-use std::os::raw::{c_char, c_int, c_void};
 use std::ptr;
 use std::sync::Arc;
 

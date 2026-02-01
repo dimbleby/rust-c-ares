@@ -40,7 +40,7 @@ s#/\*.*?\*/##gs for @lines;
 s/\s+$// for @lines;
 
 print "use crate::ffi::ares_socket_t;\n";
-print "use std::os::raw::c_int;\n";
+print "use core::ffi::c_int;\n";
 
 print "\n";
 print "// Library initialization flags\n";

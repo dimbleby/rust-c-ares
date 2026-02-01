@@ -72,12 +72,12 @@ pub enum ares_evsys_t {
     #[doc = " last fallback on Unix-like systems, select()"]
     ARES_EVSYS_SELECT = 5,
 }
-pub type ares_sock_state_cb = ::std::option::Option<
+pub type ares_sock_state_cb = ::core::option::Option<
     unsafe extern "C" fn(
-        data: *mut ::std::os::raw::c_void,
+        data: *mut ::core::ffi::c_void,
         socket_fd: ares_socket_t,
-        readable: ::std::os::raw::c_int,
-        writable: ::std::os::raw::c_int,
+        readable: ::core::ffi::c_int,
+        writable: ::core::ffi::c_int,
     ),
 >;
 #[repr(C)]
@@ -88,39 +88,39 @@ pub struct apattern {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_server_failover_options {
-    pub retry_chance: ::std::os::raw::c_ushort,
+    pub retry_chance: ::core::ffi::c_ushort,
     pub retry_delay: usize,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_options {
-    pub flags: ::std::os::raw::c_int,
-    pub timeout: ::std::os::raw::c_int,
-    pub tries: ::std::os::raw::c_int,
-    pub ndots: ::std::os::raw::c_int,
-    pub udp_port: ::std::os::raw::c_ushort,
-    pub tcp_port: ::std::os::raw::c_ushort,
-    pub socket_send_buffer_size: ::std::os::raw::c_int,
-    pub socket_receive_buffer_size: ::std::os::raw::c_int,
+    pub flags: ::core::ffi::c_int,
+    pub timeout: ::core::ffi::c_int,
+    pub tries: ::core::ffi::c_int,
+    pub ndots: ::core::ffi::c_int,
+    pub udp_port: ::core::ffi::c_ushort,
+    pub tcp_port: ::core::ffi::c_ushort,
+    pub socket_send_buffer_size: ::core::ffi::c_int,
+    pub socket_receive_buffer_size: ::core::ffi::c_int,
     pub servers: *mut in_addr,
-    pub nservers: ::std::os::raw::c_int,
-    pub domains: *mut *mut ::std::os::raw::c_char,
-    pub ndomains: ::std::os::raw::c_int,
-    pub lookups: *mut ::std::os::raw::c_char,
+    pub nservers: ::core::ffi::c_int,
+    pub domains: *mut *mut ::core::ffi::c_char,
+    pub ndomains: ::core::ffi::c_int,
+    pub lookups: *mut ::core::ffi::c_char,
     pub sock_state_cb: ares_sock_state_cb,
-    pub sock_state_cb_data: *mut ::std::os::raw::c_void,
+    pub sock_state_cb_data: *mut ::core::ffi::c_void,
     pub sortlist: *mut apattern,
-    pub nsort: ::std::os::raw::c_int,
-    pub ednspsz: ::std::os::raw::c_int,
-    pub resolvconf_path: *mut ::std::os::raw::c_char,
+    pub nsort: ::core::ffi::c_int,
+    pub ednspsz: ::core::ffi::c_int,
+    pub resolvconf_path: *mut ::core::ffi::c_char,
     #[cfg(cares1_19)]
-    pub hosts_path: *mut ::std::os::raw::c_char,
+    pub hosts_path: *mut ::core::ffi::c_char,
     #[cfg(cares1_20)]
-    pub udp_max_queries: ::std::os::raw::c_int,
+    pub udp_max_queries: ::core::ffi::c_int,
     #[cfg(cares1_22)]
-    pub maxtimeout: ::std::os::raw::c_int,
+    pub maxtimeout: ::core::ffi::c_int,
     #[cfg(cares1_23)]
-    pub qcache_max_ttl: ::std::os::raw::c_uint,
+    pub qcache_max_ttl: ::core::ffi::c_uint,
     #[cfg(cares1_26)]
     pub evsys: ares_evsys_t,
     #[cfg(cares1_29)]
@@ -141,12 +141,12 @@ pub struct ares_in6_addr {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union ares_in6_addr__bindgen_ty_1 {
-    pub _S6_u8: [::std::os::raw::c_uchar; 16usize],
+    pub _S6_u8: [::core::ffi::c_uchar; 16usize],
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ares_addr {
-    pub family: ::std::os::raw::c_int,
+    pub family: ::core::ffi::c_int,
     pub addr: ares_addr__bindgen_ty_1,
 }
 #[repr(C)]
@@ -584,67 +584,67 @@ pub enum ares_dns_parse_flags_t {
 }
 unsafe extern "C" {
     #[doc = " String representation of DNS Record Type\n\n  \\param[in] type  DNS Record Type\n  \\return string"]
-    pub fn ares_dns_rec_type_tostr(type_: ares_dns_rec_type_t) -> *const ::std::os::raw::c_char;
+    pub fn ares_dns_rec_type_tostr(type_: ares_dns_rec_type_t) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " String representation of DNS Class\n\n  \\param[in] qclass  DNS Class\n  \\return string"]
-    pub fn ares_dns_class_tostr(qclass: ares_dns_class_t) -> *const ::std::os::raw::c_char;
+    pub fn ares_dns_class_tostr(qclass: ares_dns_class_t) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " String representation of DNS OpCode\n\n  \\param[in] opcode  DNS OpCode\n  \\return string"]
-    pub fn ares_dns_opcode_tostr(opcode: ares_dns_opcode_t) -> *const ::std::os::raw::c_char;
+    pub fn ares_dns_opcode_tostr(opcode: ares_dns_opcode_t) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " String representation of DNS Resource Record Parameter\n\n  \\param[in] key  DNS Resource Record parameter\n  \\return string"]
-    pub fn ares_dns_rr_key_tostr(key: ares_dns_rr_key_t) -> *const ::std::os::raw::c_char;
+    pub fn ares_dns_rr_key_tostr(key: ares_dns_rr_key_t) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " String representation of DNS Resource Record section\n\n \\param[in] section  Section\n \\return string"]
-    pub fn ares_dns_section_tostr(section: ares_dns_section_t) -> *const ::std::os::raw::c_char;
+    pub fn ares_dns_section_tostr(section: ares_dns_section_t) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " Convert DNS class name as string to ares_dns_class_t\n\n  \\param[out] qclass  Pointer passed by reference to write class\n  \\param[in]  str     String to convert\n  \\return ARES_TRUE on success"]
     pub fn ares_dns_class_fromstr(
         qclass: *mut ares_dns_class_t,
-        str_: *const ::std::os::raw::c_char,
+        str_: *const ::core::ffi::c_char,
     ) -> ares_bool_t;
 }
 unsafe extern "C" {
     #[doc = " Convert DNS record type as string to ares_dns_rec_type_t\n\n  \\param[out] qtype   Pointer passed by reference to write record type\n  \\param[in]  str     String to convert\n  \\return ARES_TRUE on success"]
     pub fn ares_dns_rec_type_fromstr(
         qtype: *mut ares_dns_rec_type_t,
-        str_: *const ::std::os::raw::c_char,
+        str_: *const ::core::ffi::c_char,
     ) -> ares_bool_t;
 }
 unsafe extern "C" {
     #[doc = " Convert DNS response code as string to from ares_dns_rcode_t\n\n  \\param[in] rcode  Response code to convert\n  \\return ARES_TRUE on success"]
-    pub fn ares_dns_rcode_tostr(rcode: ares_dns_rcode_t) -> *const ::std::os::raw::c_char;
+    pub fn ares_dns_rcode_tostr(rcode: ares_dns_rcode_t) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " Convert any valid ip address (ipv4 or ipv6) into struct ares_addr and\n  return the starting pointer of the network byte order address and the\n  length of the address (4 or 16).\n\n  \\param[in]     ipaddr  ASCII string form of the ip address\n  \\param[in,out] addr    Must set \"family\" member to one of AF_UNSPEC,\n                         AF_INET, AF_INET6 on input.\n  \\param[out]    out_len Length of binary form address\n  \\return Pointer to start of binary address or NULL on error."]
     pub fn ares_dns_pton(
-        ipaddr: *const ::std::os::raw::c_char,
+        ipaddr: *const ::core::ffi::c_char,
         addr: *mut ares_addr,
         out_len: *mut usize,
-    ) -> *const ::std::os::raw::c_void;
+    ) -> *const ::core::ffi::c_void;
 }
 unsafe extern "C" {
     #[doc = " Convert an ip address into the PTR format for in-addr.arpa or in6.arpa\n\n  \\param[in]  addr  properly filled address structure\n  \\return  String representing PTR, use ares_free_string() to free"]
-    pub fn ares_dns_addr_to_ptr(addr: *const ares_addr) -> *mut ::std::os::raw::c_char;
+    pub fn ares_dns_addr_to_ptr(addr: *const ares_addr) -> *mut ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " The options/parameters extensions to some RRs can be somewhat opaque, this\n  is a helper to return the best match for a datatype for interpreting the\n  option record.\n\n  \\param[in] key  Key associated with options/parameters\n  \\param[in] opt  Option Key/Parameter\n  \\return Datatype"]
     pub fn ares_dns_opt_get_datatype(
         key: ares_dns_rr_key_t,
-        opt: ::std::os::raw::c_ushort,
+        opt: ::core::ffi::c_ushort,
     ) -> ares_dns_opt_datatype_t;
 }
 unsafe extern "C" {
     #[doc = " The options/parameters extensions to some RRs can be somewhat opaque, this\n  is a helper to return the name if the option is known.\n\n  \\param[in] key  Key associated with options/parameters\n  \\param[in] opt  Option Key/Parameter\n  \\return name, or NULL if not known."]
     pub fn ares_dns_opt_get_name(
         key: ares_dns_rr_key_t,
-        opt: ::std::os::raw::c_ushort,
-    ) -> *const ::std::os::raw::c_char;
+        opt: ::core::ffi::c_ushort,
+    ) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " Retrieve a list of Resource Record keys that can be set or retrieved for\n  the Resource record type.\n\n  \\param[in]  type  Record Type\n  \\param[out] cnt   Number of keys returned\n  \\return array of keys associated with Resource Record"]
@@ -689,8 +689,8 @@ unsafe extern "C" {
     #[doc = " Create a new DNS record object\n\n  \\param[out] dnsrec  Pointer passed by reference for a newly allocated\n                      record object.  Must be ares_dns_record_destroy()'d by\n                      caller.\n  \\param[in]  id      DNS Query ID.  If structuring a new query to be sent\n                      with ares_send(), this value should be zero.\n  \\param[in]  flags   DNS Flags from \\ares_dns_flags_t\n  \\param[in]  opcode  DNS OpCode (typically ARES_OPCODE_QUERY)\n  \\param[in]  rcode   DNS RCode\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_record_create(
         dnsrec: *mut *mut ares_dns_record_t,
-        id: ::std::os::raw::c_ushort,
-        flags: ::std::os::raw::c_ushort,
+        id: ::core::ffi::c_ushort,
+        flags: ::core::ffi::c_ushort,
         opcode: ares_dns_opcode_t,
         rcode: ares_dns_rcode_t,
     ) -> ares_status_t;
@@ -701,18 +701,18 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     #[doc = " Get the DNS Query ID\n\n  \\param[in] dnsrec  Initialized record object\n  \\return DNS query id"]
-    pub fn ares_dns_record_get_id(dnsrec: *const ares_dns_record_t) -> ::std::os::raw::c_ushort;
+    pub fn ares_dns_record_get_id(dnsrec: *const ares_dns_record_t) -> ::core::ffi::c_ushort;
 }
 unsafe extern "C" {
     #[doc = " Overwrite the DNS query id\n\n \\param[in] dnsrec  Initialized record object\n \\param[in] id      DNS query id\n \\return ARES_TRUE on success, ARES_FALSE on usage error"]
     pub fn ares_dns_record_set_id(
         dnsrec: *mut ares_dns_record_t,
-        id: ::std::os::raw::c_ushort,
+        id: ::core::ffi::c_ushort,
     ) -> ares_bool_t;
 }
 unsafe extern "C" {
     #[doc = " Get the DNS Record Flags\n\n  \\param[in] dnsrec  Initialized record object\n  \\return One or more \\ares_dns_flags_t"]
-    pub fn ares_dns_record_get_flags(dnsrec: *const ares_dns_record_t) -> ::std::os::raw::c_ushort;
+    pub fn ares_dns_record_get_flags(dnsrec: *const ares_dns_record_t) -> ::core::ffi::c_ushort;
 }
 unsafe extern "C" {
     #[doc = " Get the DNS Record OpCode\n\n  \\param[in] dnsrec  Initialized record object\n  \\return opcode"]
@@ -726,7 +726,7 @@ unsafe extern "C" {
     #[doc = " Add a query to the DNS Record.  Typically a record will have only 1\n  query. Most DNS servers will reject queries with more than 1 question.\n\n \\param[in] dnsrec  Initialized record object\n \\param[in] name    Name/Hostname of request\n \\param[in] qtype   Type of query\n \\param[in] qclass  Class of query (typically ARES_CLASS_IN)\n \\return ARES_SUCCESS on success"]
     pub fn ares_dns_record_query_add(
         dnsrec: *mut ares_dns_record_t,
-        name: *const ::std::os::raw::c_char,
+        name: *const ::core::ffi::c_char,
         qtype: ares_dns_rec_type_t,
         qclass: ares_dns_class_t,
     ) -> ares_status_t;
@@ -736,7 +736,7 @@ unsafe extern "C" {
     pub fn ares_dns_record_query_set_name(
         dnsrec: *mut ares_dns_record_t,
         idx: usize,
-        name: *const ::std::os::raw::c_char,
+        name: *const ::core::ffi::c_char,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
@@ -756,7 +756,7 @@ unsafe extern "C" {
     pub fn ares_dns_record_query_get(
         dnsrec: *const ares_dns_record_t,
         idx: usize,
-        name: *mut *const ::std::os::raw::c_char,
+        name: *mut *const ::core::ffi::c_char,
         qtype: *mut ares_dns_rec_type_t,
         qclass: *mut ares_dns_class_t,
     ) -> ares_status_t;
@@ -774,10 +774,10 @@ unsafe extern "C" {
         rr_out: *mut *mut ares_dns_rr_t,
         dnsrec: *mut ares_dns_record_t,
         sect: ares_dns_section_t,
-        name: *const ::std::os::raw::c_char,
+        name: *const ::core::ffi::c_char,
         type_: ares_dns_rec_type_t,
         rclass: ares_dns_class_t,
-        ttl: ::std::os::raw::c_uint,
+        ttl: ::core::ffi::c_uint,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
@@ -806,7 +806,7 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     #[doc = " Retrieve the resource record Name/Hostname\n\n  \\param[in] rr  Pointer to resource record\n  \\return Name"]
-    pub fn ares_dns_rr_get_name(rr: *const ares_dns_rr_t) -> *const ::std::os::raw::c_char;
+    pub fn ares_dns_rr_get_name(rr: *const ares_dns_rr_t) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " Retrieve the resource record type\n\n  \\param[in] rr  Pointer to resource record\n  \\return type"]
@@ -818,7 +818,7 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     #[doc = " Retrieve the resource record TTL\n\n  \\param[in] rr  Pointer to resource record\n  \\return TTL"]
-    pub fn ares_dns_rr_get_ttl(rr: *const ares_dns_rr_t) -> ::std::os::raw::c_uint;
+    pub fn ares_dns_rr_get_ttl(rr: *const ares_dns_rr_t) -> ::core::ffi::c_uint;
 }
 unsafe extern "C" {
     #[doc = " Set ipv4 address data type for specified resource record and key.  Can\n  only be used on keys with datatype ARES_DATATYPE_INADDR\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\param[in] addr   Pointer to ipv4 address to use.\n  \\return ARES_SUCCESS on success"]
@@ -841,7 +841,7 @@ unsafe extern "C" {
     pub fn ares_dns_rr_set_str(
         dns_rr: *mut ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-        val: *const ::std::os::raw::c_char,
+        val: *const ::core::ffi::c_char,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
@@ -849,7 +849,7 @@ unsafe extern "C" {
     pub fn ares_dns_rr_set_u8(
         dns_rr: *mut ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-        val: ::std::os::raw::c_uchar,
+        val: ::core::ffi::c_uchar,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
@@ -857,7 +857,7 @@ unsafe extern "C" {
     pub fn ares_dns_rr_set_u16(
         dns_rr: *mut ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-        val: ::std::os::raw::c_ushort,
+        val: ::core::ffi::c_ushort,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
@@ -865,7 +865,7 @@ unsafe extern "C" {
     pub fn ares_dns_rr_set_u32(
         dns_rr: *mut ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-        val: ::std::os::raw::c_uint,
+        val: ::core::ffi::c_uint,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
@@ -873,7 +873,7 @@ unsafe extern "C" {
     pub fn ares_dns_rr_set_bin(
         dns_rr: *mut ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-        val: *const ::std::os::raw::c_uchar,
+        val: *const ::core::ffi::c_uchar,
         len: usize,
     ) -> ares_status_t;
 }
@@ -882,7 +882,7 @@ unsafe extern "C" {
     pub fn ares_dns_rr_add_abin(
         dns_rr: *mut ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-        val: *const ::std::os::raw::c_uchar,
+        val: *const ::core::ffi::c_uchar,
         len: usize,
     ) -> ares_status_t;
 }
@@ -899,8 +899,8 @@ unsafe extern "C" {
     pub fn ares_dns_rr_set_opt(
         dns_rr: *mut ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-        opt: ::std::os::raw::c_ushort,
-        val: *const ::std::os::raw::c_uchar,
+        opt: ::core::ffi::c_ushort,
+        val: *const ::core::ffi::c_uchar,
         val_len: usize,
     ) -> ares_status_t;
 }
@@ -909,7 +909,7 @@ unsafe extern "C" {
     pub fn ares_dns_rr_del_opt_byid(
         dns_rr: *mut ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-        opt: ::std::os::raw::c_ushort,
+        opt: ::core::ffi::c_ushort,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
@@ -931,28 +931,28 @@ unsafe extern "C" {
     pub fn ares_dns_rr_get_str(
         dns_rr: *const ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-    ) -> *const ::std::os::raw::c_char;
+    ) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     #[doc = " Retrieve an 8bit unsigned integer.  Can only be used on keys with\n  datatype ARES_DATATYPE_U8.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return 8bit unsigned integer"]
     pub fn ares_dns_rr_get_u8(
         dns_rr: *const ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-    ) -> ::std::os::raw::c_uchar;
+    ) -> ::core::ffi::c_uchar;
 }
 unsafe extern "C" {
     #[doc = " Retrieve an 16bit unsigned integer.  Can only be used on keys with\n  datatype ARES_DATATYPE_U16.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return 16bit unsigned integer"]
     pub fn ares_dns_rr_get_u16(
         dns_rr: *const ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-    ) -> ::std::os::raw::c_ushort;
+    ) -> ::core::ffi::c_ushort;
 }
 unsafe extern "C" {
     #[doc = " Retrieve an 32bit unsigned integer.  Can only be used on keys with\n  datatype ARES_DATATYPE_U32.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return 32bit unsigned integer"]
     pub fn ares_dns_rr_get_u32(
         dns_rr: *const ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-    ) -> ::std::os::raw::c_uint;
+    ) -> ::core::ffi::c_uint;
 }
 unsafe extern "C" {
     #[doc = " Retrieve a pointer to the binary data.  Can only be used on keys with\n  datatype ARES_DATATYPE_BIN, ARES_DATATYPE_BINP, or ARES_DATATYPE_ABINP.\n  If BINP or ABINP, the data is guaranteed to have a NULL terminator which\n  is NOT included in the length.\n\n  \\param[in]  dns_rr Pointer to resource record\n  \\param[in]  key    DNS Resource Record Key\n  \\param[out] len    Length of binary data returned\n  \\return pointer binary data or NULL on error"]
@@ -960,7 +960,7 @@ unsafe extern "C" {
         dns_rr: *const ares_dns_rr_t,
         key: ares_dns_rr_key_t,
         len: *mut usize,
-    ) -> *const ::std::os::raw::c_uchar;
+    ) -> *const ::core::ffi::c_uchar;
 }
 unsafe extern "C" {
     #[doc = " Retrieve the count of the array of stored binary values. Can only be used on\n  keys with datatype ARES_DATATYPE_ABINP.\n\n  \\param[in]  dns_rr Pointer to resource record\n  \\param[in]  key    DNS Resource Record Key\n  \\return count of values"]
@@ -973,7 +973,7 @@ unsafe extern "C" {
         key: ares_dns_rr_key_t,
         idx: usize,
         len: *mut usize,
-    ) -> *const ::std::os::raw::c_uchar;
+    ) -> *const ::core::ffi::c_uchar;
 }
 unsafe extern "C" {
     #[doc = " Retrieve the number of options stored for the RR.\n\n  \\param[in] dns_rr Pointer to resource record\n  \\param[in] key    DNS Resource Record Key\n  \\return count, or 0 if none."]
@@ -985,26 +985,26 @@ unsafe extern "C" {
         dns_rr: *const ares_dns_rr_t,
         key: ares_dns_rr_key_t,
         idx: usize,
-        val: *mut *const ::std::os::raw::c_uchar,
+        val: *mut *const ::core::ffi::c_uchar,
         val_len: *mut usize,
-    ) -> ::std::os::raw::c_ushort;
+    ) -> ::core::ffi::c_ushort;
 }
 unsafe extern "C" {
     #[doc = " Retrieve the option for the RR by the option key/id.\n\n  \\param[in]  dns_rr  Pointer to resource record\n  \\param[in]  key     DNS Resource Record Key\n  \\param[in]  opt     Option record key id (this is not the index).\n  \\param[out] val     Optional. Pointer passed by reference to hold value.\n                      Options may not have values. Value if returned is\n                      guaranteed to be NULL terminated, however in most cases\n                      it is not printable.\n  \\param[out] val_len Optional. Pointer passed by reference to hold value\n                      length.\n  \\return ARES_TRUE on success, ARES_FALSE on misuse."]
     pub fn ares_dns_rr_get_opt_byid(
         dns_rr: *const ares_dns_rr_t,
         key: ares_dns_rr_key_t,
-        opt: ::std::os::raw::c_ushort,
-        val: *mut *const ::std::os::raw::c_uchar,
+        opt: ::core::ffi::c_ushort,
+        val: *mut *const ::core::ffi::c_uchar,
         val_len: *mut usize,
     ) -> ares_bool_t;
 }
 unsafe extern "C" {
     #[doc = " Parse a complete DNS message.\n\n  \\param[in]  buf      pointer to bytes to be parsed\n  \\param[in]  buf_len  Length of buf provided\n  \\param[in]  flags    Flags dictating how the message should be parsed.\n  \\param[out] dnsrec   Pointer passed by reference for a new DNS record object\n                       that must be ares_dns_record_destroy()'d by caller.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_parse(
-        buf: *const ::std::os::raw::c_uchar,
+        buf: *const ::core::ffi::c_uchar,
         buf_len: usize,
-        flags: ::std::os::raw::c_uint,
+        flags: ::core::ffi::c_uint,
         dnsrec: *mut *mut ares_dns_record_t,
     ) -> ares_status_t;
 }
@@ -1012,7 +1012,7 @@ unsafe extern "C" {
     #[doc = " Write a complete DNS message\n\n  \\param[in]  dnsrec   Pointer to initialized and filled DNS record object.\n  \\param[out] buf      Pointer passed by reference to be filled in with with\n                       DNS message.  Must be ares_free()'d by caller.\n  \\param[out] buf_len  Length of returned buffer containing DNS message.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_write(
         dnsrec: *const ares_dns_record_t,
-        buf: *mut *mut ::std::os::raw::c_uchar,
+        buf: *mut *mut ::core::ffi::c_uchar,
         buf_len: *mut usize,
     ) -> ares_status_t;
 }
@@ -1020,115 +1020,115 @@ unsafe extern "C" {
     #[doc = " Duplicate a complete DNS message.  This does not copy internal members\n  (such as the ttl decrement capability).\n\n  \\param[in] dnsrec Pointer to initialized and filled DNS record object.\n  \\return duplicated DNS record object, or NULL on out of memory."]
     pub fn ares_dns_record_duplicate(dnsrec: *const ares_dns_record_t) -> *mut ares_dns_record_t;
 }
-pub type ares_callback = ::std::option::Option<
+pub type ares_callback = ::core::option::Option<
     unsafe extern "C" fn(
-        arg: *mut ::std::os::raw::c_void,
-        status: ::std::os::raw::c_int,
-        timeouts: ::std::os::raw::c_int,
-        abuf: *mut ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        arg: *mut ::core::ffi::c_void,
+        status: ::core::ffi::c_int,
+        timeouts: ::core::ffi::c_int,
+        abuf: *mut ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
     ),
 >;
-pub type ares_callback_dnsrec = ::std::option::Option<
+pub type ares_callback_dnsrec = ::core::option::Option<
     unsafe extern "C" fn(
-        arg: *mut ::std::os::raw::c_void,
+        arg: *mut ::core::ffi::c_void,
         status: ares_status_t,
         timeouts: usize,
         dnsrec: *const ares_dns_record_t,
     ),
 >;
-pub type ares_host_callback = ::std::option::Option<
+pub type ares_host_callback = ::core::option::Option<
     unsafe extern "C" fn(
-        arg: *mut ::std::os::raw::c_void,
-        status: ::std::os::raw::c_int,
-        timeouts: ::std::os::raw::c_int,
+        arg: *mut ::core::ffi::c_void,
+        status: ::core::ffi::c_int,
+        timeouts: ::core::ffi::c_int,
         hostent: *mut hostent,
     ),
 >;
-pub type ares_nameinfo_callback = ::std::option::Option<
+pub type ares_nameinfo_callback = ::core::option::Option<
     unsafe extern "C" fn(
-        arg: *mut ::std::os::raw::c_void,
-        status: ::std::os::raw::c_int,
-        timeouts: ::std::os::raw::c_int,
-        node: *mut ::std::os::raw::c_char,
-        service: *mut ::std::os::raw::c_char,
+        arg: *mut ::core::ffi::c_void,
+        status: ::core::ffi::c_int,
+        timeouts: ::core::ffi::c_int,
+        node: *mut ::core::ffi::c_char,
+        service: *mut ::core::ffi::c_char,
     ),
 >;
-pub type ares_sock_create_callback = ::std::option::Option<
+pub type ares_sock_create_callback = ::core::option::Option<
     unsafe extern "C" fn(
         socket_fd: ares_socket_t,
-        type_: ::std::os::raw::c_int,
-        data: *mut ::std::os::raw::c_void,
-    ) -> ::std::os::raw::c_int,
+        type_: ::core::ffi::c_int,
+        data: *mut ::core::ffi::c_void,
+    ) -> ::core::ffi::c_int,
 >;
-pub type ares_sock_config_callback = ::std::option::Option<
+pub type ares_sock_config_callback = ::core::option::Option<
     unsafe extern "C" fn(
         socket_fd: ares_socket_t,
-        type_: ::std::os::raw::c_int,
-        data: *mut ::std::os::raw::c_void,
-    ) -> ::std::os::raw::c_int,
+        type_: ::core::ffi::c_int,
+        data: *mut ::core::ffi::c_void,
+    ) -> ::core::ffi::c_int,
 >;
-pub type ares_addrinfo_callback = ::std::option::Option<
+pub type ares_addrinfo_callback = ::core::option::Option<
     unsafe extern "C" fn(
-        arg: *mut ::std::os::raw::c_void,
-        status: ::std::os::raw::c_int,
-        timeouts: ::std::os::raw::c_int,
+        arg: *mut ::core::ffi::c_void,
+        status: ::core::ffi::c_int,
+        timeouts: ::core::ffi::c_int,
         res: *mut ares_addrinfo,
     ),
 >;
-pub type ares_server_state_callback = ::std::option::Option<
+pub type ares_server_state_callback = ::core::option::Option<
     unsafe extern "C" fn(
-        server_string: *const ::std::os::raw::c_char,
+        server_string: *const ::core::ffi::c_char,
         success: ares_bool_t,
-        flags: ::std::os::raw::c_int,
-        data: *mut ::std::os::raw::c_void,
+        flags: ::core::ffi::c_int,
+        data: *mut ::core::ffi::c_void,
     ),
 >;
 pub type ares_pending_write_cb =
-    ::std::option::Option<unsafe extern "C" fn(data: *mut ::std::os::raw::c_void)>;
+    ::core::option::Option<unsafe extern "C" fn(data: *mut ::core::ffi::c_void)>;
 unsafe extern "C" {
-    pub fn ares_library_init(flags: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+    pub fn ares_library_init(flags: ::core::ffi::c_int) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_library_init_mem(
-        flags: ::std::os::raw::c_int,
-        amalloc: ::std::option::Option<
-            unsafe extern "C" fn(size: usize) -> *mut ::std::os::raw::c_void,
+        flags: ::core::ffi::c_int,
+        amalloc: ::core::option::Option<
+            unsafe extern "C" fn(size: usize) -> *mut ::core::ffi::c_void,
         >,
-        afree: ::std::option::Option<unsafe extern "C" fn(ptr: *mut ::std::os::raw::c_void)>,
-        arealloc: ::std::option::Option<
+        afree: ::core::option::Option<unsafe extern "C" fn(ptr: *mut ::core::ffi::c_void)>,
+        arealloc: ::core::option::Option<
             unsafe extern "C" fn(
-                ptr: *mut ::std::os::raw::c_void,
+                ptr: *mut ::core::ffi::c_void,
                 size: usize,
-            ) -> *mut ::std::os::raw::c_void,
+            ) -> *mut ::core::ffi::c_void,
         >,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
-    pub fn ares_library_initialized() -> ::std::os::raw::c_int;
+    pub fn ares_library_initialized() -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_library_cleanup();
 }
 unsafe extern "C" {
-    pub fn ares_version(version: *mut ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
+    pub fn ares_version(version: *mut ::core::ffi::c_int) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
-    pub fn ares_init(channelptr: *mut *mut ares_channel_t) -> ::std::os::raw::c_int;
+    pub fn ares_init(channelptr: *mut *mut ares_channel_t) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_init_options(
         channelptr: *mut *mut ares_channel_t,
         options: *const ares_options,
-        optmask: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
+        optmask: ::core::ffi::c_int,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_save_options(
         channel: *const ares_channel_t,
         options: *mut ares_options,
-        optmask: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
+        optmask: *mut ::core::ffi::c_int,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_destroy_options(options: *mut ares_options);
@@ -1137,7 +1137,7 @@ unsafe extern "C" {
     pub fn ares_dup(
         dest: *mut *mut ares_channel_t,
         src: *const ares_channel_t,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_reinit(channel: *mut ares_channel_t) -> ares_status_t;
@@ -1149,46 +1149,43 @@ unsafe extern "C" {
     pub fn ares_cancel(channel: *mut ares_channel_t);
 }
 unsafe extern "C" {
-    pub fn ares_set_local_ip4(channel: *mut ares_channel_t, local_ip: ::std::os::raw::c_uint);
+    pub fn ares_set_local_ip4(channel: *mut ares_channel_t, local_ip: ::core::ffi::c_uint);
 }
 unsafe extern "C" {
-    pub fn ares_set_local_ip6(
-        channel: *mut ares_channel_t,
-        local_ip6: *const ::std::os::raw::c_uchar,
-    );
+    pub fn ares_set_local_ip6(channel: *mut ares_channel_t, local_ip6: *const ::core::ffi::c_uchar);
 }
 unsafe extern "C" {
     pub fn ares_set_local_dev(
         channel: *mut ares_channel_t,
-        local_dev_name: *const ::std::os::raw::c_char,
+        local_dev_name: *const ::core::ffi::c_char,
     );
 }
 unsafe extern "C" {
     pub fn ares_set_socket_callback(
         channel: *mut ares_channel_t,
         callback: ares_sock_create_callback,
-        user_data: *mut ::std::os::raw::c_void,
+        user_data: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
     pub fn ares_set_socket_configure_callback(
         channel: *mut ares_channel_t,
         callback: ares_sock_config_callback,
-        user_data: *mut ::std::os::raw::c_void,
+        user_data: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
     pub fn ares_set_server_state_callback(
         channel: *mut ares_channel_t,
         callback: ares_server_state_callback,
-        user_data: *mut ::std::os::raw::c_void,
+        user_data: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
     pub fn ares_set_pending_write_cb(
         channel: *mut ares_channel_t,
         callback: ares_pending_write_cb,
-        user_data: *mut ::std::os::raw::c_void,
+        user_data: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
@@ -1197,17 +1194,17 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn ares_set_sortlist(
         channel: *mut ares_channel_t,
-        sortstr: *const ::std::os::raw::c_char,
-    ) -> ::std::os::raw::c_int;
+        sortstr: *const ::core::ffi::c_char,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_getaddrinfo(
         channel: *mut ares_channel_t,
-        node: *const ::std::os::raw::c_char,
-        service: *const ::std::os::raw::c_char,
+        node: *const ::core::ffi::c_char,
+        service: *const ::core::ffi::c_char,
         hints: *const ares_addrinfo_hints,
         callback: ares_addrinfo_callback,
-        arg: *mut ::std::os::raw::c_void,
+        arg: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
@@ -1216,45 +1213,45 @@ unsafe extern "C" {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_socket_functions {
-    pub asocket: ::std::option::Option<
+    pub asocket: ::core::option::Option<
         unsafe extern "C" fn(
-            arg1: ::std::os::raw::c_int,
-            arg2: ::std::os::raw::c_int,
-            arg3: ::std::os::raw::c_int,
-            arg4: *mut ::std::os::raw::c_void,
+            arg1: ::core::ffi::c_int,
+            arg2: ::core::ffi::c_int,
+            arg3: ::core::ffi::c_int,
+            arg4: *mut ::core::ffi::c_void,
         ) -> ares_socket_t,
     >,
-    pub aclose: ::std::option::Option<
+    pub aclose: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: ares_socket_t,
-            arg2: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
+            arg2: *mut ::core::ffi::c_void,
+        ) -> ::core::ffi::c_int,
     >,
-    pub aconnect: ::std::option::Option<
+    pub aconnect: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: ares_socket_t,
             arg2: *const sockaddr,
             arg3: ares_socklen_t,
-            arg4: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
+            arg4: *mut ::core::ffi::c_void,
+        ) -> ::core::ffi::c_int,
     >,
-    pub arecvfrom: ::std::option::Option<
+    pub arecvfrom: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: ares_socket_t,
-            arg2: *mut ::std::os::raw::c_void,
+            arg2: *mut ::core::ffi::c_void,
             arg3: usize,
-            arg4: ::std::os::raw::c_int,
+            arg4: ::core::ffi::c_int,
             arg5: *mut sockaddr,
             arg6: *mut ares_socklen_t,
-            arg7: *mut ::std::os::raw::c_void,
+            arg7: *mut ::core::ffi::c_void,
         ) -> ares_ssize_t,
     >,
-    pub asendv: ::std::option::Option<
+    pub asendv: ::core::option::Option<
         unsafe extern "C" fn(
             arg1: ares_socket_t,
             arg2: *const iovec,
-            arg3: ::std::os::raw::c_int,
-            arg4: *mut ::std::os::raw::c_void,
+            arg3: ::core::ffi::c_int,
+            arg4: *mut ::core::ffi::c_void,
         ) -> ares_ssize_t,
     >,
 }
@@ -1262,7 +1259,7 @@ unsafe extern "C" {
     pub fn ares_set_socket_functions(
         channel: *mut ares_channel_t,
         funcs: *const ares_socket_functions,
-        user_data: *mut ::std::os::raw::c_void,
+        user_data: *mut ::core::ffi::c_void,
     );
 }
 #[repr(u32)]
@@ -1306,101 +1303,101 @@ pub enum ares_socket_bind_flags_t {
 #[derive(Debug, Copy, Clone)]
 pub struct ares_socket_functions_ex {
     #[doc = " ABI Version: must be \"1\""]
-    pub version: ::std::os::raw::c_uint,
+    pub version: ::core::ffi::c_uint,
     #[doc = " Flags indicating behavior of the subsystem. One or more\n ares_sockfunc_flags_t"]
-    pub flags: ::std::os::raw::c_uint,
+    pub flags: ::core::ffi::c_uint,
     #[doc = " REQUIRED. Create a new socket file descriptor.  The file descriptor must\n be opened in non-blocking mode (so that reads and writes never block).\n Recommended other options would be to disable signals on write errors\n (SO_NOSIGPIPE), Disable the Nagle algorithm on SOCK_STREAM (TCP_NODELAY),\n and to automatically close file descriptors on exec (FD_CLOEXEC).\n\n  \\param[in] domain      Socket domain. Valid values are AF_INET, AF_INET6.\n  \\param[in] type       Socket type. Valid values are SOCK_STREAM (tcp) and\n                        SOCK_DGRAM (udp).\n  \\param[in] protocol   In general this should be ignored, may be passed as\n                        0 (use as default for type), or may be IPPROTO_UDP\n                        or IPPROTO_TCP.\n  \\param[in] user_data  Pointer provided to ares_set_socket_functions_ex().\n  \\return ARES_SOCKET_BAD on error, or socket file descriptor on success.\n          On error, it is expected to set errno (or WSASetLastError()) to an\n          appropriate reason code such as EAFNOSUPPORT / WSAAFNOSUPPORT."]
-    pub asocket: ::std::option::Option<
+    pub asocket: ::core::option::Option<
         unsafe extern "C" fn(
-            domain: ::std::os::raw::c_int,
-            type_: ::std::os::raw::c_int,
-            protocol: ::std::os::raw::c_int,
-            user_data: *mut ::std::os::raw::c_void,
+            domain: ::core::ffi::c_int,
+            type_: ::core::ffi::c_int,
+            protocol: ::core::ffi::c_int,
+            user_data: *mut ::core::ffi::c_void,
         ) -> ares_socket_t,
     >,
     #[doc = " REQUIRED. Close a socket file descriptor.\n  \\param[in] sock      Socket file descriptor returned from asocket.\n  \\param[in] user_data Pointer provided to ares_set_socket_functions_ex().\n  \\return 0 on success.  On failure, should set errno (or WSASetLastError)\n          to an appropriate code such as EBADF / WSAEBADF"]
-    pub aclose: ::std::option::Option<
+    pub aclose: ::core::option::Option<
         unsafe extern "C" fn(
             sock: ares_socket_t,
-            user_data: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
+            user_data: *mut ::core::ffi::c_void,
+        ) -> ::core::ffi::c_int,
     >,
     #[doc = " REQUIRED. Set socket option.  This shares a similar syntax to the BSD\n  setsockopt() call, however we use our own options.  The value is typically\n  a pointer to the desired value and each option has its own data type it\n  will express in the documentation.\n\n \\param[in] sock         Socket file descriptor returned from asocket.\n \\param[in] opt          Option to set.\n \\param[in] val          Pointer to value for option.\n \\param[in] val_size     Size of value.\n \\param[in] user_data    Pointer provided to\n ares_set_socket_functions_ex().\n \\return Return 0 on success, otherwise -1 should be returned with an\n         appropriate errno (or WSASetLastError()) set.  If error is ENOSYS /\n         WSAEOPNOTSUPP an error will not be propagated as it will take it\n         to mean it is an intentional decision to not support the feature."]
-    pub asetsockopt: ::std::option::Option<
+    pub asetsockopt: ::core::option::Option<
         unsafe extern "C" fn(
             sock: ares_socket_t,
             opt: ares_socket_opt_t,
-            val: *const ::std::os::raw::c_void,
+            val: *const ::core::ffi::c_void,
             val_size: ares_socklen_t,
-            user_data: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
+            user_data: *mut ::core::ffi::c_void,
+        ) -> ::core::ffi::c_int,
     >,
     #[doc = " REQUIRED. Connect to the remote using the supplied address.  For UDP\n sockets this will bind the file descriptor to only send and receive packets\n from the remote address provided.\n\n  \\param[in] sock         Socket file descriptor returned from asocket.\n  \\param[in] address      Address to connect to\n  \\param[in] address_len  Size of address structure passed\n  \\param[in] flags        One or more ares_socket_connect_flags_t\n  \\param[in] user_data    Pointer provided to\n ares_set_socket_functions_ex().\n  \\return Return 0 upon successful establishement, otherwise -1 should be\n          returned with an appropriate errno (or WSASetLastError()) set.  It\n is generally expected that most TCP connections (not using TCP Fast Open)\n will return -1 with an error of EINPROGRESS / WSAEINPROGRESS due to the\n non-blocking nature of the connection.  It is then the responsibility of\n the implementation to notify of writability on the socket to indicate the\n connection has succeeded (or readability on failure to retrieve the\n appropriate error)."]
-    pub aconnect: ::std::option::Option<
+    pub aconnect: ::core::option::Option<
         unsafe extern "C" fn(
             sock: ares_socket_t,
             address: *const sockaddr,
             address_len: ares_socklen_t,
-            flags: ::std::os::raw::c_uint,
-            user_data: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
+            flags: ::core::ffi::c_uint,
+            user_data: *mut ::core::ffi::c_void,
+        ) -> ::core::ffi::c_int,
     >,
     #[doc = " REQUIRED. Attempt to read data from the remote.\n\n  \\param[in]     sock        Socket file descriptor returned from asocket.\n  \\param[in,out] buffer      Allocated buffer to place data read from\n socket.\n  \\param[in]     length      Size of buffer\n  \\param[in]     flags       Unused, always 0.\n  \\param[in,out] address     Buffer to hold address data was received from.\n                             May be NULL if address not desired.\n  \\param[in,out] address_len Input size of address buffer, output actual\n                             written size. Must be NULL if address is NULL.\n  \\param[in]     user_data   Pointer provided to\n ares_set_socket_functions_ex().\n  \\return -1 on error with appropriate errno (or WSASetLastError()) set,\n such as EWOULDBLOCK / EAGAIN / WSAEWOULDBLOCK, or ECONNRESET /\n WSAECONNRESET."]
-    pub arecvfrom: ::std::option::Option<
+    pub arecvfrom: ::core::option::Option<
         unsafe extern "C" fn(
             sock: ares_socket_t,
-            buffer: *mut ::std::os::raw::c_void,
+            buffer: *mut ::core::ffi::c_void,
             length: usize,
-            flags: ::std::os::raw::c_int,
+            flags: ::core::ffi::c_int,
             address: *mut sockaddr,
             address_len: *mut ares_socklen_t,
-            user_data: *mut ::std::os::raw::c_void,
+            user_data: *mut ::core::ffi::c_void,
         ) -> ares_ssize_t,
     >,
     #[doc = " REQUIRED. Attempt to send data to the remote.  Optional address may be\n specified which may be useful on unbound UDP sockets (though currently not\n used), and TCP FastOpen where the connection is delayed until first write.\n\n  \\param[in]     sock        Socket file descriptor returned from asocket.\n  \\param[in]     buffer      Containing data to place onto wire.\n  \\param[in]     length      Size of buffer\n  \\param[in]     flags       Flags for writing.  Currently only used flag is\n                             MSG_NOSIGNAL if the host OS has such a flag. In\n                             general flags can be ignored.\n  \\param[in]     address     Buffer containing address to send data to.  May\n                             be NULL.\n  \\param[in,out] address_len Size of address buffer.  Must be 0 if address\n                             is NULL.\n  \\param[in]     user_data   Pointer provided to\n ares_set_socket_functions_ex().\n  \\return Number of bytes written. -1 on error with appropriate errno (or\n WSASetLastError()) set."]
-    pub asendto: ::std::option::Option<
+    pub asendto: ::core::option::Option<
         unsafe extern "C" fn(
             sock: ares_socket_t,
-            buffer: *const ::std::os::raw::c_void,
+            buffer: *const ::core::ffi::c_void,
             length: usize,
-            flags: ::std::os::raw::c_int,
+            flags: ::core::ffi::c_int,
             address: *const sockaddr,
             address_len: ares_socklen_t,
-            user_data: *mut ::std::os::raw::c_void,
+            user_data: *mut ::core::ffi::c_void,
         ) -> ares_ssize_t,
     >,
     #[doc = " Optional. Retrieve the local address of the socket.\n\n  \\param[in]     sock        Socket file descriptor returned from asocket\n  \\param[in,out] address     Buffer to hold address\n  \\param[in,out] address_len Size of address buffer on input, written size\n on output.\n  \\param[in]     user_data   Pointer provided to\n ares_set_socket_functions_ex().\n  \\return 0 on success. -1 on error with an appropriate errno (or\n WSASetLastError()) set."]
-    pub agetsockname: ::std::option::Option<
+    pub agetsockname: ::core::option::Option<
         unsafe extern "C" fn(
             sock: ares_socket_t,
             address: *mut sockaddr,
             address_len: *mut ares_socklen_t,
-            user_data: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
+            user_data: *mut ::core::ffi::c_void,
+        ) -> ::core::ffi::c_int,
     >,
     #[doc = " Optional. Bind the socket to an address.  This can be used for client\n  connections to bind the source address for packets before connect, or\n  for server connections to bind to an address and port before listening.\n  Currently c-ares only supports client connections.\n\n  \\param[in] sock        Socket file descriptor returned from asocket\n  \\param[in] flags       ares_socket_bind_flags_t flags.\n  \\param[in] address     Buffer containing address.\n  \\param[in] address_len Size of address buffer.\n  \\param[in] user_data   Pointer provided to\n ares_set_socket_functions_ex().\n  \\return 0 on success. -1 on error with an appropriate errno (or\n WSASetLastError()) set."]
-    pub abind: ::std::option::Option<
+    pub abind: ::core::option::Option<
         unsafe extern "C" fn(
             sock: ares_socket_t,
-            flags: ::std::os::raw::c_uint,
+            flags: ::core::ffi::c_uint,
             address: *const sockaddr,
             address_len: socklen_t,
-            user_data: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_int,
+            user_data: *mut ::core::ffi::c_void,
+        ) -> ::core::ffi::c_int,
     >,
-    pub aif_nametoindex: ::std::option::Option<
+    pub aif_nametoindex: ::core::option::Option<
         unsafe extern "C" fn(
-            ifname: *const ::std::os::raw::c_char,
-            user_data: *mut ::std::os::raw::c_void,
-        ) -> ::std::os::raw::c_uint,
+            ifname: *const ::core::ffi::c_char,
+            user_data: *mut ::core::ffi::c_void,
+        ) -> ::core::ffi::c_uint,
     >,
-    pub aif_indextoname: ::std::option::Option<
+    pub aif_indextoname: ::core::option::Option<
         unsafe extern "C" fn(
-            ifindex: ::std::os::raw::c_uint,
-            ifname_buf: *mut ::std::os::raw::c_char,
+            ifindex: ::core::ffi::c_uint,
+            ifname_buf: *mut ::core::ffi::c_char,
             ifname_buf_len: usize,
-            user_data: *mut ::std::os::raw::c_void,
-        ) -> *const ::std::os::raw::c_char,
+            user_data: *mut ::core::ffi::c_void,
+        ) -> *const ::core::ffi::c_char,
     >,
 }
 unsafe extern "C" {
@@ -1408,16 +1405,16 @@ unsafe extern "C" {
     pub fn ares_set_socket_functions_ex(
         channel: *mut ares_channel_t,
         funcs: *const ares_socket_functions_ex,
-        user_data: *mut ::std::os::raw::c_void,
+        user_data: *mut ::core::ffi::c_void,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
     pub fn ares_send(
         channel: *mut ares_channel_t,
-        qbuf: *const ::std::os::raw::c_uchar,
-        qlen: ::std::os::raw::c_int,
+        qbuf: *const ::core::ffi::c_uchar,
+        qlen: ::core::ffi::c_int,
         callback: ares_callback,
-        arg: *mut ::std::os::raw::c_void,
+        arg: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
@@ -1426,40 +1423,40 @@ unsafe extern "C" {
         channel: *mut ares_channel_t,
         dnsrec: *const ares_dns_record_t,
         callback: ares_callback_dnsrec,
-        arg: *mut ::std::os::raw::c_void,
-        qid: *mut ::std::os::raw::c_ushort,
+        arg: *mut ::core::ffi::c_void,
+        qid: *mut ::core::ffi::c_ushort,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
     pub fn ares_query(
         channel: *mut ares_channel_t,
-        name: *const ::std::os::raw::c_char,
-        dnsclass: ::std::os::raw::c_int,
-        type_: ::std::os::raw::c_int,
+        name: *const ::core::ffi::c_char,
+        dnsclass: ::core::ffi::c_int,
+        type_: ::core::ffi::c_int,
         callback: ares_callback,
-        arg: *mut ::std::os::raw::c_void,
+        arg: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
     #[doc = " Perform a DNS query with a callback containing the parsed DNS record.\n\n  \\param[in]  channel  Pointer to channel on which queries will be sent.\n  \\param[in]  name     Query name\n  \\param[in]  dnsclass DNS Class\n  \\param[in]  type     DNS Record Type\n  \\param[in]  callback Callback function invoked on completion or failure of\n                       the query sequence.\n  \\param[in]  arg      Additional argument passed to the callback function.\n  \\param[out] qid      Query ID\n  \\return One of the c-ares status codes."]
     pub fn ares_query_dnsrec(
         channel: *mut ares_channel_t,
-        name: *const ::std::os::raw::c_char,
+        name: *const ::core::ffi::c_char,
         dnsclass: ares_dns_class_t,
         type_: ares_dns_rec_type_t,
         callback: ares_callback_dnsrec,
-        arg: *mut ::std::os::raw::c_void,
-        qid: *mut ::std::os::raw::c_ushort,
+        arg: *mut ::core::ffi::c_void,
+        qid: *mut ::core::ffi::c_ushort,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
     pub fn ares_search(
         channel: *mut ares_channel_t,
-        name: *const ::std::os::raw::c_char,
-        dnsclass: ::std::os::raw::c_int,
-        type_: ::std::os::raw::c_int,
+        name: *const ::core::ffi::c_char,
+        dnsclass: ::core::ffi::c_int,
+        type_: ::core::ffi::c_int,
         callback: ares_callback,
-        arg: *mut ::std::os::raw::c_void,
+        arg: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
@@ -1468,34 +1465,34 @@ unsafe extern "C" {
         channel: *mut ares_channel_t,
         dnsrec: *const ares_dns_record_t,
         callback: ares_callback_dnsrec,
-        arg: *mut ::std::os::raw::c_void,
+        arg: *mut ::core::ffi::c_void,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
     pub fn ares_gethostbyname(
         channel: *mut ares_channel_t,
-        name: *const ::std::os::raw::c_char,
-        family: ::std::os::raw::c_int,
+        name: *const ::core::ffi::c_char,
+        family: ::core::ffi::c_int,
         callback: ares_host_callback,
-        arg: *mut ::std::os::raw::c_void,
+        arg: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
     pub fn ares_gethostbyname_file(
         channel: *mut ares_channel_t,
-        name: *const ::std::os::raw::c_char,
-        family: ::std::os::raw::c_int,
+        name: *const ::core::ffi::c_char,
+        family: ::core::ffi::c_int,
         host: *mut *mut hostent,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_gethostbyaddr(
         channel: *mut ares_channel_t,
-        addr: *const ::std::os::raw::c_void,
-        addrlen: ::std::os::raw::c_int,
-        family: ::std::os::raw::c_int,
+        addr: *const ::core::ffi::c_void,
+        addrlen: ::core::ffi::c_int,
+        family: ::core::ffi::c_int,
         callback: ares_host_callback,
-        arg: *mut ::std::os::raw::c_void,
+        arg: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
@@ -1503,9 +1500,9 @@ unsafe extern "C" {
         channel: *mut ares_channel_t,
         sa: *const sockaddr,
         salen: ares_socklen_t,
-        flags: ::std::os::raw::c_int,
+        flags: ::core::ffi::c_int,
         callback: ares_nameinfo_callback,
-        arg: *mut ::std::os::raw::c_void,
+        arg: *mut ::core::ffi::c_void,
     );
 }
 unsafe extern "C" {
@@ -1513,14 +1510,14 @@ unsafe extern "C" {
         channel: *const ares_channel_t,
         read_fds: *mut fd_set,
         write_fds: *mut fd_set,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_getsock(
         channel: *const ares_channel_t,
         socks: *mut ares_socket_t,
-        numsocks: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
+        numsocks: ::core::ffi::c_int,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_timeout(
@@ -1553,7 +1550,7 @@ pub struct ares_fd_events_t {
     #[doc = "< File descriptor"]
     pub fd: ares_socket_t,
     #[doc = "< Mask of ares_fd_eventflag_t"]
-    pub events: ::std::os::raw::c_uint,
+    pub events: ::core::ffi::c_uint,
 }
 #[repr(u32)]
 #[doc = " Flags used by ares_process_fds()"]
@@ -1570,7 +1567,7 @@ unsafe extern "C" {
         channel: *mut ares_channel_t,
         events: *const ares_fd_events_t,
         nevents: usize,
-        flags: ::std::os::raw::c_uint,
+        flags: ::core::ffi::c_uint,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
@@ -1582,50 +1579,50 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn ares_create_query(
-        name: *const ::std::os::raw::c_char,
-        dnsclass: ::std::os::raw::c_int,
-        type_: ::std::os::raw::c_int,
-        id: ::std::os::raw::c_ushort,
-        rd: ::std::os::raw::c_int,
-        buf: *mut *mut ::std::os::raw::c_uchar,
-        buflen: *mut ::std::os::raw::c_int,
-        max_udp_size: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
+        name: *const ::core::ffi::c_char,
+        dnsclass: ::core::ffi::c_int,
+        type_: ::core::ffi::c_int,
+        id: ::core::ffi::c_ushort,
+        rd: ::core::ffi::c_int,
+        buf: *mut *mut ::core::ffi::c_uchar,
+        buflen: *mut ::core::ffi::c_int,
+        max_udp_size: ::core::ffi::c_int,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_mkquery(
-        name: *const ::std::os::raw::c_char,
-        dnsclass: ::std::os::raw::c_int,
-        type_: ::std::os::raw::c_int,
-        id: ::std::os::raw::c_ushort,
-        rd: ::std::os::raw::c_int,
-        buf: *mut *mut ::std::os::raw::c_uchar,
-        buflen: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
+        name: *const ::core::ffi::c_char,
+        dnsclass: ::core::ffi::c_int,
+        type_: ::core::ffi::c_int,
+        id: ::core::ffi::c_ushort,
+        rd: ::core::ffi::c_int,
+        buf: *mut *mut ::core::ffi::c_uchar,
+        buflen: *mut ::core::ffi::c_int,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_expand_name(
-        encoded: *const ::std::os::raw::c_uchar,
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        s: *mut *mut ::std::os::raw::c_char,
-        enclen: *mut ::std::os::raw::c_long,
-    ) -> ::std::os::raw::c_int;
+        encoded: *const ::core::ffi::c_uchar,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
+        s: *mut *mut ::core::ffi::c_char,
+        enclen: *mut ::core::ffi::c_long,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_expand_string(
-        encoded: *const ::std::os::raw::c_uchar,
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        s: *mut *mut ::std::os::raw::c_uchar,
-        enclen: *mut ::std::os::raw::c_long,
-    ) -> ::std::os::raw::c_int;
+        encoded: *const ::core::ffi::c_uchar,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
+        s: *mut *mut ::core::ffi::c_uchar,
+        enclen: *mut ::core::ffi::c_long,
+    ) -> ::core::ffi::c_int;
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ares_addrttl {
     pub ipaddr: in_addr,
-    pub ttl: ::std::os::raw::c_int,
+    pub ttl: ::core::ffi::c_int,
 }
 impl ::std::fmt::Debug for ares_addrttl {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
@@ -1636,7 +1633,7 @@ impl ::std::fmt::Debug for ares_addrttl {
 #[derive(Copy, Clone)]
 pub struct ares_addr6ttl {
     pub ip6addr: ares_in6_addr,
-    pub ttl: ::std::os::raw::c_int,
+    pub ttl: ::core::ffi::c_int,
 }
 impl ::std::fmt::Debug for ares_addr6ttl {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
@@ -1647,81 +1644,81 @@ impl ::std::fmt::Debug for ares_addr6ttl {
 #[derive(Debug, Copy, Clone)]
 pub struct ares_caa_reply {
     pub next: *mut ares_caa_reply,
-    pub critical: ::std::os::raw::c_int,
-    pub property: *mut ::std::os::raw::c_uchar,
+    pub critical: ::core::ffi::c_int,
+    pub property: *mut ::core::ffi::c_uchar,
     pub plength: usize,
-    pub value: *mut ::std::os::raw::c_uchar,
+    pub value: *mut ::core::ffi::c_uchar,
     pub length: usize,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_srv_reply {
     pub next: *mut ares_srv_reply,
-    pub host: *mut ::std::os::raw::c_char,
-    pub priority: ::std::os::raw::c_ushort,
-    pub weight: ::std::os::raw::c_ushort,
-    pub port: ::std::os::raw::c_ushort,
+    pub host: *mut ::core::ffi::c_char,
+    pub priority: ::core::ffi::c_ushort,
+    pub weight: ::core::ffi::c_ushort,
+    pub port: ::core::ffi::c_ushort,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_mx_reply {
     pub next: *mut ares_mx_reply,
-    pub host: *mut ::std::os::raw::c_char,
-    pub priority: ::std::os::raw::c_ushort,
+    pub host: *mut ::core::ffi::c_char,
+    pub priority: ::core::ffi::c_ushort,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_txt_reply {
     pub next: *mut ares_txt_reply,
-    pub txt: *mut ::std::os::raw::c_uchar,
+    pub txt: *mut ::core::ffi::c_uchar,
     pub length: usize,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_txt_ext {
     pub next: *mut ares_txt_ext,
-    pub txt: *mut ::std::os::raw::c_uchar,
+    pub txt: *mut ::core::ffi::c_uchar,
     pub length: usize,
-    pub record_start: ::std::os::raw::c_uchar,
+    pub record_start: ::core::ffi::c_uchar,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_naptr_reply {
     pub next: *mut ares_naptr_reply,
-    pub flags: *mut ::std::os::raw::c_uchar,
-    pub service: *mut ::std::os::raw::c_uchar,
-    pub regexp: *mut ::std::os::raw::c_uchar,
-    pub replacement: *mut ::std::os::raw::c_char,
-    pub order: ::std::os::raw::c_ushort,
-    pub preference: ::std::os::raw::c_ushort,
+    pub flags: *mut ::core::ffi::c_uchar,
+    pub service: *mut ::core::ffi::c_uchar,
+    pub regexp: *mut ::core::ffi::c_uchar,
+    pub replacement: *mut ::core::ffi::c_char,
+    pub order: ::core::ffi::c_ushort,
+    pub preference: ::core::ffi::c_ushort,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_soa_reply {
-    pub nsname: *mut ::std::os::raw::c_char,
-    pub hostmaster: *mut ::std::os::raw::c_char,
-    pub serial: ::std::os::raw::c_uint,
-    pub refresh: ::std::os::raw::c_uint,
-    pub retry: ::std::os::raw::c_uint,
-    pub expire: ::std::os::raw::c_uint,
-    pub minttl: ::std::os::raw::c_uint,
+    pub nsname: *mut ::core::ffi::c_char,
+    pub hostmaster: *mut ::core::ffi::c_char,
+    pub serial: ::core::ffi::c_uint,
+    pub refresh: ::core::ffi::c_uint,
+    pub retry: ::core::ffi::c_uint,
+    pub expire: ::core::ffi::c_uint,
+    pub minttl: ::core::ffi::c_uint,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_uri_reply {
     pub next: *mut ares_uri_reply,
-    pub priority: ::std::os::raw::c_ushort,
-    pub weight: ::std::os::raw::c_ushort,
-    pub uri: *mut ::std::os::raw::c_char,
-    pub ttl: ::std::os::raw::c_int,
+    pub priority: ::core::ffi::c_ushort,
+    pub weight: ::core::ffi::c_ushort,
+    pub uri: *mut ::core::ffi::c_char,
+    pub ttl: ::core::ffi::c_int,
 }
 #[repr(C)]
 pub struct ares_addrinfo_node {
-    pub ai_ttl: ::std::os::raw::c_int,
-    pub ai_flags: ::std::os::raw::c_int,
-    pub ai_family: ::std::os::raw::c_int,
-    pub ai_socktype: ::std::os::raw::c_int,
-    pub ai_protocol: ::std::os::raw::c_int,
+    pub ai_ttl: ::core::ffi::c_int,
+    pub ai_flags: ::core::ffi::c_int,
+    pub ai_family: ::core::ffi::c_int,
+    pub ai_socktype: ::core::ffi::c_int,
+    pub ai_protocol: ::core::ffi::c_int,
     pub ai_addrlen: ares_socklen_t,
     pub ai_addr: *mut sockaddr,
     pub ai_next: *mut ares_addrinfo_node,
@@ -1729,9 +1726,9 @@ pub struct ares_addrinfo_node {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_addrinfo_cname {
-    pub ttl: ::std::os::raw::c_int,
-    pub alias: *mut ::std::os::raw::c_char,
-    pub name: *mut ::std::os::raw::c_char,
+    pub ttl: ::core::ffi::c_int,
+    pub alias: *mut ::core::ffi::c_char,
+    pub name: *mut ::core::ffi::c_char,
     pub next: *mut ares_addrinfo_cname,
 }
 #[repr(C)]
@@ -1739,124 +1736,124 @@ pub struct ares_addrinfo_cname {
 pub struct ares_addrinfo {
     pub cnames: *mut ares_addrinfo_cname,
     pub nodes: *mut ares_addrinfo_node,
-    pub name: *mut ::std::os::raw::c_char,
+    pub name: *mut ::core::ffi::c_char,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ares_addrinfo_hints {
-    pub ai_flags: ::std::os::raw::c_int,
-    pub ai_family: ::std::os::raw::c_int,
-    pub ai_socktype: ::std::os::raw::c_int,
-    pub ai_protocol: ::std::os::raw::c_int,
+    pub ai_flags: ::core::ffi::c_int,
+    pub ai_family: ::core::ffi::c_int,
+    pub ai_socktype: ::core::ffi::c_int,
+    pub ai_protocol: ::core::ffi::c_int,
 }
 unsafe extern "C" {
     pub fn ares_parse_a_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         host: *mut *mut hostent,
         addrttls: *mut ares_addrttl,
-        naddrttls: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
+        naddrttls: *mut ::core::ffi::c_int,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_aaaa_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         host: *mut *mut hostent,
         addrttls: *mut ares_addr6ttl,
-        naddrttls: *mut ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
+        naddrttls: *mut ::core::ffi::c_int,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_caa_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         caa_out: *mut *mut ares_caa_reply,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_ptr_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
-        addr: *const ::std::os::raw::c_void,
-        addrlen: ::std::os::raw::c_int,
-        family: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
+        addr: *const ::core::ffi::c_void,
+        addrlen: ::core::ffi::c_int,
+        family: ::core::ffi::c_int,
         host: *mut *mut hostent,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_ns_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         host: *mut *mut hostent,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_srv_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         srv_out: *mut *mut ares_srv_reply,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_mx_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         mx_out: *mut *mut ares_mx_reply,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_txt_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         txt_out: *mut *mut ares_txt_reply,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_txt_reply_ext(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         txt_out: *mut *mut ares_txt_ext,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_naptr_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         naptr_out: *mut *mut ares_naptr_reply,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_soa_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         soa_out: *mut *mut ares_soa_reply,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_parse_uri_reply(
-        abuf: *const ::std::os::raw::c_uchar,
-        alen: ::std::os::raw::c_int,
+        abuf: *const ::core::ffi::c_uchar,
+        alen: ::core::ffi::c_int,
         uri_out: *mut *mut ares_uri_reply,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
-    pub fn ares_free_string(str_: *mut ::std::os::raw::c_void);
+    pub fn ares_free_string(str_: *mut ::core::ffi::c_void);
 }
 unsafe extern "C" {
     pub fn ares_free_hostent(host: *mut hostent);
 }
 unsafe extern "C" {
-    pub fn ares_free_data(dataptr: *mut ::std::os::raw::c_void);
+    pub fn ares_free_data(dataptr: *mut ::core::ffi::c_void);
 }
 unsafe extern "C" {
-    pub fn ares_strerror(code: ::std::os::raw::c_int) -> *const ::std::os::raw::c_char;
+    pub fn ares_strerror(code: ::core::ffi::c_int) -> *const ::core::ffi::c_char;
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ares_addr_node {
     pub next: *mut ares_addr_node,
-    pub family: ::std::os::raw::c_int,
+    pub family: ::core::ffi::c_int,
     pub addr: ares_addr_node__bindgen_ty_1,
 }
 #[repr(C)]
@@ -1869,10 +1866,10 @@ pub union ares_addr_node__bindgen_ty_1 {
 #[derive(Copy, Clone)]
 pub struct ares_addr_port_node {
     pub next: *mut ares_addr_port_node,
-    pub family: ::std::os::raw::c_int,
+    pub family: ::core::ffi::c_int,
     pub addr: ares_addr_port_node__bindgen_ty_1,
-    pub udp_port: ::std::os::raw::c_int,
-    pub tcp_port: ::std::os::raw::c_int,
+    pub udp_port: ::core::ffi::c_int,
+    pub tcp_port: ::core::ffi::c_int,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -1884,55 +1881,55 @@ unsafe extern "C" {
     pub fn ares_set_servers(
         channel: *mut ares_channel_t,
         servers: *const ares_addr_node,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_set_servers_ports(
         channel: *mut ares_channel_t,
         servers: *const ares_addr_port_node,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_set_servers_csv(
         channel: *mut ares_channel_t,
-        servers: *const ::std::os::raw::c_char,
-    ) -> ::std::os::raw::c_int;
+        servers: *const ::core::ffi::c_char,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_set_servers_ports_csv(
         channel: *mut ares_channel_t,
-        servers: *const ::std::os::raw::c_char,
-    ) -> ::std::os::raw::c_int;
+        servers: *const ::core::ffi::c_char,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
-    pub fn ares_get_servers_csv(channel: *const ares_channel_t) -> *mut ::std::os::raw::c_char;
+    pub fn ares_get_servers_csv(channel: *const ares_channel_t) -> *mut ::core::ffi::c_char;
 }
 unsafe extern "C" {
     pub fn ares_get_servers(
         channel: *const ares_channel_t,
         servers: *mut *mut ares_addr_node,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_get_servers_ports(
         channel: *const ares_channel_t,
         servers: *mut *mut ares_addr_port_node,
-    ) -> ::std::os::raw::c_int;
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     pub fn ares_inet_ntop(
-        af: ::std::os::raw::c_int,
-        src: *const ::std::os::raw::c_void,
-        dst: *mut ::std::os::raw::c_char,
+        af: ::core::ffi::c_int,
+        src: *const ::core::ffi::c_void,
+        dst: *mut ::core::ffi::c_char,
         size: ares_socklen_t,
-    ) -> *const ::std::os::raw::c_char;
+    ) -> *const ::core::ffi::c_char;
 }
 unsafe extern "C" {
     pub fn ares_inet_pton(
-        af: ::std::os::raw::c_int,
-        src: *const ::std::os::raw::c_char,
-        dst: *mut ::std::os::raw::c_void,
-    ) -> ::std::os::raw::c_int;
+        af: ::core::ffi::c_int,
+        src: *const ::core::ffi::c_char,
+        dst: *mut ::core::ffi::c_void,
+    ) -> ::core::ffi::c_int;
 }
 unsafe extern "C" {
     #[doc = " Whether or not the c-ares library was built with threadsafety\n\n  \\return ARES_TRUE if built with threadsafety, ARES_FALSE if not"]
@@ -1942,7 +1939,7 @@ unsafe extern "C" {
     #[doc = " Block until notified that there are no longer any queries in queue, or\n  the specified timeout has expired.\n\n  \\param[in] channel    Initialized ares channel\n  \\param[in] timeout_ms Number of milliseconds to wait for the queue to be\n                        empty. -1 for Infinite.\n  \\return ARES_ENOTIMP if not built with threading support, ARES_ETIMEOUT\n          if requested timeout expires, ARES_SUCCESS when queue is empty."]
     pub fn ares_queue_wait_empty(
         channel: *mut ares_channel_t,
-        timeout_ms: ::std::os::raw::c_int,
+        timeout_ms: ::core::ffi::c_int,
     ) -> ares_status_t;
 }
 unsafe extern "C" {
@@ -1955,11 +1952,9 @@ extern "C" {
 }
 #[cfg(target_os = "android")]
 extern "C" {
-    pub fn ares_library_init_android(
-        connectivity_manager: jni_sys::jobject,
-    ) -> ::std::os::raw::c_int;
+    pub fn ares_library_init_android(connectivity_manager: jni_sys::jobject) -> ::core::ffi::c_int;
 }
 #[cfg(target_os = "android")]
 extern "C" {
-    pub fn ares_library_android_initialized() -> ::std::os::raw::c_int;
+    pub fn ares_library_android_initialized() -> ::core::ffi::c_int;
 }

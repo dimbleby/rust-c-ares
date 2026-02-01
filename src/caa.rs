@@ -1,4 +1,4 @@
-use std::os::raw::{c_int, c_uchar, c_void};
+use core::ffi::{c_int, c_uchar, c_void};
 use std::{fmt, ptr, slice, str};
 
 use itertools::Itertools;

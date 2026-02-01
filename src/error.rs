@@ -1,6 +1,6 @@
+use core::ffi::c_int;
 use std::error;
 use std::fmt;
-use std::os::raw::c_int;
 use std::result;
 
 use crate::utils::c_string_as_str_unchecked;

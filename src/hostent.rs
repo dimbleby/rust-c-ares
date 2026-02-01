@@ -1,5 +1,5 @@
+use core::ffi::c_char;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::os::raw::c_char;
 use std::{fmt, ptr, slice};
 
 use itertools::Itertools;

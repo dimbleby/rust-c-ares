@@ -1,5 +1,5 @@
+use core::ffi::c_char;
 use std::ops::Deref;
-use std::os::raw::c_char;
 use std::str;
 
 use crate::utils::c_string_as_str_unchecked;

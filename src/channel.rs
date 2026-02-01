@@ -1790,4 +1790,24 @@ mod tests {
             // Callback for pending writes
         });
     }
+
+    #[test]
+    fn channel_process() {
+        use std::mem::MaybeUninit;
+        let mut channel = Channel::new().unwrap();
+        unsafe {
+            let mut read_fds: c_types::fd_set = MaybeUninit::zeroed().assume_init();
+            let mut write_fds: c_types::fd_set = MaybeUninit::zeroed().assume_init();
+            channel.process(&mut read_fds, &mut write_fds);
+        }
+    }
+
+    #[cfg(cares1_19)]
+    #[test]
+    fn options_hosts_path_creates_channel() {
+        let mut options = Options::new();
+        options.set_hosts_path("/etc/hosts");
+        let channel = Channel::with_options(options);
+        assert!(channel.is_ok());
+    }
 }

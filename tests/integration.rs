@@ -54,12 +54,9 @@ fn process_channel(channel: &mut Channel, timeout: Duration) {
         );
 
         match result {
-            Ok(0) => {
-                // Timeout - still call process_fd to handle c-ares timeouts
-                channel.process_fd(SOCKET_BAD, SOCKET_BAD);
-            }
             Ok(_) => {
                 // Process active file descriptors
+                let mut called = false;
                 for (fd, _, _) in &socks {
                     let borrowed_fd = unsafe { BorrowedFd::borrow_raw(*fd) };
                     let readable = read_fds.contains(borrowed_fd);
@@ -68,7 +65,12 @@ fn process_channel(channel: &mut Channel, timeout: Duration) {
                         let rfd = if readable { *fd } else { SOCKET_BAD };
                         let wfd = if writable { *fd } else { SOCKET_BAD };
                         channel.process_fd(rfd, wfd);
+                        called = true;
                     }
+                }
+                // Always call process_fd at least once to handle c-ares timeouts
+                if !called {
+                    channel.process_fd(SOCKET_BAD, SOCKET_BAD);
                 }
             }
             Err(_) => break,
@@ -77,7 +79,7 @@ fn process_channel(channel: &mut Channel, timeout: Duration) {
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_a_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -88,30 +90,20 @@ fn query_a_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     channel.query_a("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            let count = results.iter().count();
-            if count > 0 {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-        }
+        let results = result.expect("Query failed");
+        assert!(results.iter().count() > 0, "No A records returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        success.load(Ordering::SeqCst),
-        "Query did not return A records"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_aaaa_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -122,30 +114,20 @@ fn query_aaaa_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     channel.query_aaaa("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            let count = results.iter().count();
-            if count > 0 {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-        }
+        let results = result.expect("Query failed");
+        assert!(results.iter().count() > 0, "No AAAA records returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        success.load(Ordering::SeqCst),
-        "Query did not return AAAA records"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_mx_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -156,32 +138,23 @@ fn query_mx_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     channel.query_mx("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            for mx in &results {
-                if !mx.host().is_empty() {
-                    success_clone.store(true, Ordering::SeqCst);
-                    break;
-                }
-            }
-        }
+        let results = result.expect("Query failed");
+        assert!(
+            results.iter().any(|mx| !mx.host().is_empty()),
+            "No MX records with host returned"
+        );
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        success.load(Ordering::SeqCst),
-        "Query did not return MX records"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_ns_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -192,29 +165,20 @@ fn query_ns_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     channel.query_ns("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            if !results.hostname().is_empty() {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-        }
+        let results = result.expect("Query failed");
+        assert!(!results.hostname().is_empty(), "No NS hostname returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        success.load(Ordering::SeqCst),
-        "Query did not return NS records"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_txt_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -225,32 +189,23 @@ fn query_txt_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     channel.query_txt("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            for txt in &results {
-                if !txt.text().is_empty() {
-                    success_clone.store(true, Ordering::SeqCst);
-                    break;
-                }
-            }
-        }
+        let results = result.expect("Query failed");
+        assert!(
+            results.iter().any(|txt| !txt.text().is_empty()),
+            "No TXT records with text returned"
+        );
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        success.load(Ordering::SeqCst),
-        "Query did not return TXT records"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_soa_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -261,29 +216,20 @@ fn query_soa_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     channel.query_soa("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(soa) = result {
-            if !soa.name_server().is_empty() {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-        }
+        let soa = result.expect("Query failed");
+        assert!(!soa.name_server().is_empty(), "No SOA name server returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        success.load(Ordering::SeqCst),
-        "Query did not return SOA record"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_nonexistent_domain() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -294,27 +240,19 @@ fn query_nonexistent_domain() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let got_error = Arc::new(AtomicBool::new(false));
-    let got_error_clone = got_error.clone();
 
     channel.query_a("this-domain-does-not-exist-12345.invalid", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if result.is_err() {
-            got_error_clone.store(true, Ordering::SeqCst);
-        }
+        assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        got_error.load(Ordering::SeqCst),
-        "Query should have returned an error for nonexistent domain"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn multiple_concurrent_queries() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -359,7 +297,7 @@ fn multiple_concurrent_queries() {
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_cancel() {
     let mut options = Options::new();
     options.set_timeout(5000).set_tries(3);
@@ -390,7 +328,7 @@ fn query_cancel() {
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_srv_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -401,33 +339,26 @@ fn query_srv_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     // Query a well-known SRV record
     channel.query_srv("_imaps._tcp.gmail.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            for srv in &results {
-                if !srv.host().is_empty() && srv.port() > 0 {
-                    success_clone.store(true, Ordering::SeqCst);
-                    break;
-                }
-            }
-        }
+        let results = result.expect("Query failed");
+        assert!(
+            results
+                .iter()
+                .any(|srv| !srv.host().is_empty() && srv.port() > 0),
+            "No SRV records with host and port returned"
+        );
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        success.load(Ordering::SeqCst),
-        "Query did not return SRV records"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_cname_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -438,27 +369,20 @@ fn query_cname_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
-    // www.google.com typically has a CNAME
-    channel.query_cname("www.google.com", move |result| {
+    channel.query_cname("www.github.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            if !results.hostname().is_empty() {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-        }
+        let results = result.expect("Query failed");
+        assert!(!results.hostname().is_empty(), "No CNAME hostname returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    // Note: CNAME might not always be present, so we just check completion
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_ptr_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -469,30 +393,20 @@ fn query_ptr_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
-    // Query reverse DNS for Google's DNS server
     channel.query_ptr("8.8.8.8.in-addr.arpa", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            if !results.hostname().is_empty() {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-        }
+        let results = result.expect("Query failed");
+        assert!(!results.hostname().is_empty(), "No PTR hostname returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        success.load(Ordering::SeqCst),
-        "Query did not return PTR record"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_caa_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -503,29 +417,23 @@ fn query_caa_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     channel.query_caa("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            for caa in &results {
-                if !caa.property().is_empty() {
-                    success_clone.store(true, Ordering::SeqCst);
-                    break;
-                }
-            }
-        }
+        let results = result.expect("Query failed");
+        assert!(
+            results.iter().any(|caa| !caa.property().is_empty()),
+            "No CAA records with property returned"
+        );
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    // CAA records might not always be present
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_naptr_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -537,22 +445,19 @@ fn query_naptr_record() {
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
 
-    // sip2sip.info has NAPTR records for SIP services
     channel.query_naptr("sip2sip.info", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            // Should have NAPTR records
-            assert!(results.iter().count() > 0, "Expected NAPTR records");
-        }
+        let results = result.expect("Query failed");
+        assert!(results.iter().count() > 0, "No NAPTR records returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_a_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2).set_domains(&["com"]);
@@ -563,26 +468,20 @@ fn search_a_record() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
-    // search_a will try appending search domains
     channel.search_a("google", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            if results.iter().count() > 0 {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-        }
+        let results = result.expect("Search failed");
+        assert!(results.iter().count() > 0, "No A records returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_aaaa_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -599,13 +498,13 @@ fn search_aaaa_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_caa_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -622,13 +521,13 @@ fn search_caa_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_cname_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -645,13 +544,13 @@ fn search_cname_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_mx_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -668,13 +567,13 @@ fn search_mx_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_naptr_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -691,13 +590,13 @@ fn search_naptr_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_ns_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -714,13 +613,13 @@ fn search_ns_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_ptr_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -737,13 +636,13 @@ fn search_ptr_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_soa_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -760,13 +659,13 @@ fn search_soa_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_srv_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -783,13 +682,13 @@ fn search_srv_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn search_txt_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -806,13 +705,13 @@ fn search_txt_record() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn a_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -823,45 +722,39 @@ fn a_result_accessors() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let ipv4_valid = Arc::new(AtomicBool::new(false));
-    let ipv4_valid_clone = ipv4_valid.clone();
-    let ttl_valid = Arc::new(AtomicBool::new(false));
-    let ttl_valid_clone = ttl_valid.clone();
 
     channel.query_a("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            // Test Display trait
-            let _display = format!("{}", results);
+        let results = result.expect("Query failed");
 
-            for a_result in &results {
-                // Test ipv4() accessor
-                let ipv4 = a_result.ipv4();
-                if !ipv4.is_unspecified() {
-                    ipv4_valid_clone.store(true, Ordering::SeqCst);
-                }
+        // Test Display trait
+        let _display = format!("{}", results);
 
-                // Test ttl() accessor
-                let ttl = a_result.ttl();
-                if ttl >= 0 {
-                    ttl_valid_clone.store(true, Ordering::SeqCst);
-                }
-
-                // Test Display trait on individual result
-                let _display = format!("{}", a_result);
+        let mut ipv4_valid = false;
+        let mut ttl_valid = false;
+        for a_result in &results {
+            // Test ipv4() accessor
+            if !a_result.ipv4().is_unspecified() {
+                ipv4_valid = true;
             }
+            // Test ttl() accessor
+            if a_result.ttl() >= 0 {
+                ttl_valid = true;
+            }
+            // Test Display trait on individual result
+            let _display = format!("{}", a_result);
         }
+        assert!(ipv4_valid, "No valid IPv4 address");
+        assert!(ttl_valid, "No valid TTL");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(ipv4_valid.load(Ordering::SeqCst), "No valid IPv4 address");
-    assert!(ttl_valid.load(Ordering::SeqCst), "No valid TTL");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn aaaa_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -872,39 +765,35 @@ fn aaaa_result_accessors() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let ipv6_valid = Arc::new(AtomicBool::new(false));
-    let ipv6_valid_clone = ipv6_valid.clone();
 
     channel.query_aaaa("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            // Test Display trait
-            let _display = format!("{}", results);
+        let results = result.expect("Query failed");
 
-            for aaaa_result in &results {
-                // Test ipv6() accessor
-                let ipv6 = aaaa_result.ipv6();
-                if !ipv6.is_unspecified() {
-                    ipv6_valid_clone.store(true, Ordering::SeqCst);
-                }
+        // Test Display trait
+        let _display = format!("{}", results);
 
-                // Test ttl() accessor
-                let _ttl = aaaa_result.ttl();
-
-                // Test Display trait
-                let _display = format!("{}", aaaa_result);
+        let mut ipv6_valid = false;
+        for aaaa_result in &results {
+            // Test ipv6() accessor
+            if !aaaa_result.ipv6().is_unspecified() {
+                ipv6_valid = true;
             }
+            // Test ttl() accessor
+            let _ttl = aaaa_result.ttl();
+            // Test Display trait
+            let _display = format!("{}", aaaa_result);
         }
+        assert!(ipv6_valid, "No valid IPv6 address");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(ipv6_valid.load(Ordering::SeqCst), "No valid IPv6 address");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn mx_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -918,28 +807,27 @@ fn mx_result_accessors() {
 
     channel.query_mx("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
+        let results = result.expect("Query failed");
+
+        // Test Display trait
+        let _display = format!("{}", results);
+
+        for mx_result in &results {
+            // Test host() and priority() accessors
+            let _host = mx_result.host();
+            let _priority = mx_result.priority();
             // Test Display trait
-            let _display = format!("{}", results);
-
-            for mx_result in &results {
-                // Test host() and priority() accessors
-                let _host = mx_result.host();
-                let _priority = mx_result.priority();
-
-                // Test Display trait
-                let _display = format!("{}", mx_result);
-            }
+            let _display = format!("{}", mx_result);
         }
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn srv_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -953,30 +841,29 @@ fn srv_result_accessors() {
 
     channel.query_srv("_imaps._tcp.gmail.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
+        let results = result.expect("Query failed");
+
+        // Test Display trait
+        let _display = format!("{}", results);
+
+        for srv_result in &results {
+            // Test all accessors
+            let _host = srv_result.host();
+            let _port = srv_result.port();
+            let _priority = srv_result.priority();
+            let _weight = srv_result.weight();
             // Test Display trait
-            let _display = format!("{}", results);
-
-            for srv_result in &results {
-                // Test all accessors
-                let _host = srv_result.host();
-                let _port = srv_result.port();
-                let _priority = srv_result.priority();
-                let _weight = srv_result.weight();
-
-                // Test Display trait
-                let _display = format!("{}", srv_result);
-            }
+            let _display = format!("{}", srv_result);
         }
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn soa_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -990,28 +877,28 @@ fn soa_result_accessors() {
 
     channel.query_soa("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(soa) = result {
-            // Test all accessors
-            let _ns = soa.name_server();
-            let _hostmaster = soa.hostmaster();
-            let _serial = soa.serial();
-            let _refresh = soa.refresh();
-            let _retry = soa.retry();
-            let _expire = soa.expire();
-            let _min_ttl = soa.min_ttl();
+        let soa = result.expect("Query failed");
 
-            // Test Display trait
-            let _display = format!("{}", soa);
-        }
+        // Test all accessors
+        let _ns = soa.name_server();
+        let _hostmaster = soa.hostmaster();
+        let _serial = soa.serial();
+        let _refresh = soa.refresh();
+        let _retry = soa.retry();
+        let _expire = soa.expire();
+        let _min_ttl = soa.min_ttl();
+
+        // Test Display trait
+        let _display = format!("{}", soa);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn txt_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1025,28 +912,27 @@ fn txt_result_accessors() {
 
     channel.query_txt("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
+        let results = result.expect("Query failed");
+
+        // Test Display trait
+        let _display = format!("{}", results);
+
+        for txt_result in &results {
+            // Test accessors
+            let _record_start = txt_result.record_start();
+            let _text = txt_result.text();
             // Test Display trait
-            let _display = format!("{}", results);
-
-            for txt_result in &results {
-                // Test accessors
-                let _record_start = txt_result.record_start();
-                let _text = txt_result.text();
-
-                // Test Display trait
-                let _display = format!("{}", txt_result);
-            }
+            let _display = format!("{}", txt_result);
         }
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn get_host_by_name_ipv4() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1057,37 +943,28 @@ fn get_host_by_name_ipv4() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     channel.get_host_by_name("google.com", AddressFamily::INET, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(host_results) = result {
-            // Test hostname accessor
-            if !host_results.hostname().is_empty() {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-            // Test addresses iterator
-            for _addr in host_results.addresses() {
-                // Just iterate
-            }
-            // Test aliases iterator
-            for _alias in host_results.aliases() {
-                // Just iterate
-            }
-            // Test Display trait
-            let _display = format!("{}", host_results);
-        }
+        let host_results = result.expect("Query failed");
+
+        // Test hostname accessor
+        assert!(!host_results.hostname().is_empty(), "No hostname returned");
+        // Test addresses iterator
+        for _addr in host_results.addresses() {}
+        // Test aliases iterator
+        for _alias in host_results.aliases() {}
+        // Test Display trait
+        let _display = format!("{}", host_results);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(success.load(Ordering::SeqCst), "No hostname returned");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn get_host_by_name_ipv6() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1101,19 +978,18 @@ fn get_host_by_name_ipv6() {
 
     channel.get_host_by_name("google.com", AddressFamily::INET6, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(host_results) = result {
-            let _hostname = host_results.hostname();
-            for _addr in host_results.addresses() {}
-        }
+        let host_results = result.expect("Query failed");
+        let _hostname = host_results.hostname();
+        for _addr in host_results.addresses() {}
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn get_host_by_address_ipv4() {
     use std::net::IpAddr;
 
@@ -1126,28 +1002,21 @@ fn get_host_by_address_ipv4() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
-    // Reverse lookup for Google's DNS server
     let addr: IpAddr = "8.8.8.8".parse().unwrap();
     channel.get_host_by_address(&addr, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(host_results) = result {
-            if !host_results.hostname().is_empty() {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-        }
+        let host_results = result.expect("Query failed");
+        assert!(!host_results.hostname().is_empty(), "No hostname returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(success.load(Ordering::SeqCst), "No hostname returned");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn get_host_by_address_ipv6() {
     use std::net::IpAddr;
 
@@ -1161,22 +1030,20 @@ fn get_host_by_address_ipv6() {
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
 
-    // Reverse lookup for Google's IPv6 DNS server
     let addr: IpAddr = "2001:4860:4860::8888".parse().unwrap();
     channel.get_host_by_address(&addr, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(host_results) = result {
-            let _hostname = host_results.hostname();
-        }
+        let host_results = result.expect("Query failed");
+        let _hostname = host_results.hostname();
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn get_name_info_ipv4() {
     use std::net::SocketAddr;
 
@@ -1189,8 +1056,6 @@ fn get_name_info_ipv4() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     let addr: SocketAddr = "8.8.8.8:53".parse().unwrap();
     channel.get_name_info(
@@ -1198,25 +1063,23 @@ fn get_name_info_ipv4() {
         NIFlags::LOOKUPHOST | NIFlags::LOOKUPSERVICE,
         move |result| {
             completed_clone.store(true, Ordering::SeqCst);
-            if let Ok(name_info) = result {
-                // Test accessors
-                if name_info.node().is_some() || name_info.service().is_some() {
-                    success_clone.store(true, Ordering::SeqCst);
-                }
-                // Test Display trait
-                let _display = format!("{}", name_info);
-            }
+            let name_info = result.expect("Query failed");
+            assert!(
+                name_info.node().is_some() || name_info.service().is_some(),
+                "No name info returned"
+            );
+            // Test Display trait
+            let _display = format!("{}", name_info);
         },
     );
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(success.load(Ordering::SeqCst), "No name info returned");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn get_name_info_ipv6() {
     use std::net::SocketAddr;
 
@@ -1233,19 +1096,18 @@ fn get_name_info_ipv6() {
     let addr: SocketAddr = "[2001:4860:4860::8888]:53".parse().unwrap();
     channel.get_name_info(&addr, NIFlags::LOOKUPHOST, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(name_info) = result {
-            let _node = name_info.node();
-            let _service = name_info.service();
-        }
+        let name_info = result.expect("Query failed");
+        let _node = name_info.node();
+        let _service = name_info.service();
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn raw_query() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1256,27 +1118,21 @@ fn raw_query() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let success = Arc::new(AtomicBool::new(false));
-    let success_clone = success.clone();
 
     // DNS class IN = 1, type A = 1
     channel.query("google.com", 1, 1, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(data) = result {
-            if !data.is_empty() {
-                success_clone.store(true, Ordering::SeqCst);
-            }
-        }
+        let data = result.expect("Query failed");
+        assert!(!data.is_empty(), "No data returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(success.load(Ordering::SeqCst), "No data returned");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn raw_search() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2).set_domains(&["com"]);
@@ -1291,18 +1147,17 @@ fn raw_search() {
     // DNS class IN = 1, type A = 1
     channel.search("google", 1, 1, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(data) = result {
-            let _len = data.len();
-        }
+        let data = result.expect("Search failed");
+        let _len = data.len();
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_uri_record() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1316,30 +1171,29 @@ fn query_uri_record() {
 
     channel.query_uri("_kerberos.fedoraproject.org", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
+        let results = result.expect("Query failed");
+
+        // Test Display trait
+        let _display = format!("{}", results);
+
+        for uri_result in &results {
+            // Test all accessors
+            let _uri = uri_result.uri();
+            let _priority = uri_result.priority();
+            let _weight = uri_result.weight();
+            let _ttl = uri_result.ttl();
             // Test Display trait
-            let _display = format!("{}", results);
-
-            for uri_result in &results {
-                // Test all accessors
-                let _uri = uri_result.uri();
-                let _priority = uri_result.priority();
-                let _weight = uri_result.weight();
-                let _ttl = uri_result.ttl();
-
-                // Test Display trait
-                let _display = format!("{}", uri_result);
-            }
+            let _display = format!("{}", uri_result);
         }
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn naptr_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1353,32 +1207,31 @@ fn naptr_result_accessors() {
 
     channel.query_naptr("sip2sip.info", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
+        let results = result.expect("Query failed");
+
+        // Test Display trait
+        let _display = format!("{}", results);
+
+        for naptr_result in &results {
+            // Test all accessors
+            let _flags = naptr_result.flags();
+            let _service = naptr_result.service_name();
+            let _regexp = naptr_result.reg_exp();
+            let _replacement = naptr_result.replacement_pattern();
+            let _order = naptr_result.order();
+            let _preference = naptr_result.preference();
             // Test Display trait
-            let _display = format!("{}", results);
-
-            for naptr_result in &results {
-                // Test all accessors
-                let _flags = naptr_result.flags();
-                let _service = naptr_result.service_name();
-                let _regexp = naptr_result.reg_exp();
-                let _replacement = naptr_result.replacement_pattern();
-                let _order = naptr_result.order();
-                let _preference = naptr_result.preference();
-
-                // Test Display trait
-                let _display = format!("{}", naptr_result);
-            }
+            let _display = format!("{}", naptr_result);
         }
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn cname_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1392,27 +1245,23 @@ fn cname_result_accessors() {
 
     channel.query_cname("www.github.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            // Test hostname accessor
-            let _hostname = results.hostname();
+        let results = result.expect("Query failed");
 
-            // Test aliases iterator
-            for _alias in results.aliases() {
-                // Just iterate
-            }
-
-            // Test Display trait
-            let _display = format!("{}", results);
-        }
+        // Test hostname accessor
+        let _hostname = results.hostname();
+        // Test aliases iterator
+        for _alias in results.aliases() {}
+        // Test Display trait
+        let _display = format!("{}", results);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn ptr_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1426,27 +1275,23 @@ fn ptr_result_accessors() {
 
     channel.query_ptr("8.8.8.8.in-addr.arpa", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            // Test hostname accessor
-            let _hostname = results.hostname();
+        let results = result.expect("Query failed");
 
-            // Test aliases iterator
-            for _alias in results.aliases() {
-                // Just iterate
-            }
-
-            // Test Display trait
-            let _display = format!("{}", results);
-        }
+        // Test hostname accessor
+        let _hostname = results.hostname();
+        // Test aliases iterator
+        for _alias in results.aliases() {}
+        // Test Display trait
+        let _display = format!("{}", results);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn ns_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1460,27 +1305,23 @@ fn ns_result_accessors() {
 
     channel.query_ns("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
-            // Test hostname accessor
-            let _hostname = results.hostname();
+        let results = result.expect("Query failed");
 
-            // Test aliases iterator
-            for _alias in results.aliases() {
-                // Just iterate
-            }
-
-            // Test Display trait
-            let _display = format!("{}", results);
-        }
+        // Test hostname accessor
+        let _hostname = results.hostname();
+        // Test aliases iterator
+        for _alias in results.aliases() {}
+        // Test Display trait
+        let _display = format!("{}", results);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn caa_result_accessors() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1494,23 +1335,22 @@ fn caa_result_accessors() {
 
     channel.query_caa("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        if let Ok(results) = result {
+        let results = result.expect("Query failed");
+
+        // Test Display trait
+        let _display = format!("{}", results);
+
+        for caa_result in &results {
+            // Test all accessors
+            let _critical = caa_result.critical();
+            let _property = caa_result.property();
+            let _value = caa_result.value();
             // Test Display trait
-            let _display = format!("{}", results);
-
-            for caa_result in &results {
-                // Test all accessors
-                let _critical = caa_result.critical();
-                let _property = caa_result.property();
-                let _value = caa_result.value();
-
-                // Test Display trait
-                let _display = format!("{}", caa_result);
-            }
+            let _display = format!("{}", caa_result);
         }
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -1521,7 +1361,7 @@ fn caa_result_accessors() {
 
 #[cfg(cares1_29)]
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn server_state_callback_invoked() {
     use std::sync::atomic::AtomicUsize;
 
@@ -1559,7 +1399,7 @@ fn server_state_callback_invoked() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
     assert!(
@@ -1574,7 +1414,7 @@ fn server_state_callback_invoked() {
 
 #[cfg(cares1_34)]
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn pending_write_callback_setup() {
     use std::sync::atomic::AtomicUsize;
 
@@ -1602,7 +1442,7 @@ fn pending_write_callback_setup() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
     // Note: The callback may or may not be invoked - we just test that setting it works
@@ -1613,7 +1453,7 @@ fn pending_write_callback_setup() {
 // ============================================================================
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn get_host_by_name_nonexistent() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1624,31 +1464,23 @@ fn get_host_by_name_nonexistent() {
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
-    let got_error = Arc::new(AtomicBool::new(false));
-    let got_error_clone = got_error.clone();
 
     channel.get_host_by_name(
         "this-domain-does-not-exist-12345.invalid",
         AddressFamily::INET,
         move |result| {
             completed_clone.store(true, Ordering::SeqCst);
-            if result.is_err() {
-                got_error_clone.store(true, Ordering::SeqCst);
-            }
+            assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
         },
     );
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
-    assert!(
-        got_error.load(Ordering::SeqCst),
-        "Should have returned error for nonexistent domain"
-    );
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn get_host_by_address_nonexistent() {
     use std::net::IpAddr;
 
@@ -1667,17 +1499,16 @@ fn get_host_by_address_nonexistent() {
 
     channel.get_host_by_address(&addr, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        // Either success or error is fine - we just want the callback to be called
-        let _ = result;
+        assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn get_name_info_nonexistent() {
     use std::net::SocketAddr;
 
@@ -1692,14 +1523,18 @@ fn get_name_info_nonexistent() {
     let completed_clone = completed.clone();
 
     // Use a reserved IP that won't have reverse DNS
+    // NAMEREQD flag requires a name to be found (no numeric fallback)
     let addr: SocketAddr = "192.0.2.1:12345".parse().unwrap();
-    channel.get_name_info(&addr, NIFlags::LOOKUPHOST, move |result| {
-        completed_clone.store(true, Ordering::SeqCst);
-        // Either success or error is fine
-        let _ = result;
-    });
+    channel.get_name_info(
+        &addr,
+        NIFlags::LOOKUPHOST | NIFlags::NAMEREQD,
+        move |result| {
+            completed_clone.store(true, Ordering::SeqCst);
+            assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
+        },
+    );
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -1709,7 +1544,7 @@ fn get_name_info_nonexistent() {
 // ============================================================================
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_cname_nonexistent() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1723,17 +1558,16 @@ fn query_cname_nonexistent() {
 
     channel.query_cname("this-domain-does-not-exist-12345.invalid", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        // Should return error for nonexistent domain
-        let _ = result;
+        assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_mx_nonexistent() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1747,16 +1581,16 @@ fn query_mx_nonexistent() {
 
     channel.query_mx("this-domain-does-not-exist-12345.invalid", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_ns_nonexistent() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1770,16 +1604,16 @@ fn query_ns_nonexistent() {
 
     channel.query_ns("this-domain-does-not-exist-12345.invalid", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_txt_nonexistent() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1793,16 +1627,16 @@ fn query_txt_nonexistent() {
 
     channel.query_txt("this-domain-does-not-exist-12345.invalid", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_soa_nonexistent() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1816,16 +1650,16 @@ fn query_soa_nonexistent() {
 
     channel.query_soa("this-domain-does-not-exist-12345.invalid", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_srv_nonexistent() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1841,17 +1675,17 @@ fn query_srv_nonexistent() {
         "_sip._tcp.this-domain-does-not-exist-12345.invalid",
         move |result| {
             completed_clone.store(true, Ordering::SeqCst);
-            let _ = result;
+            assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
         },
     );
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
-#[ignore]
+#[ignore = "requires network"]
 fn query_caa_nonexistent() {
     let mut options = Options::new();
     options.set_timeout(2000).set_tries(2);
@@ -1865,10 +1699,10 @@ fn query_caa_nonexistent() {
 
     channel.query_caa("this-domain-does-not-exist-12345.invalid", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(10));
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }

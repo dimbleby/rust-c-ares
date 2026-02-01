@@ -13,7 +13,7 @@ use crate::types::MAX_ADDRTTLS;
 use crate::utils::ipv4_from_in_addr;
 
 /// The result of a successful A lookup.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct AResults {
     naddrttls: usize,
     addrttls: [c_ares_sys::ares_addrttl; MAX_ADDRTTLS],

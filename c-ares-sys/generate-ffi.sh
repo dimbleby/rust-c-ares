@@ -9,7 +9,9 @@ fi
 
 # Prepare for bindgen, and do it.
 mkdir -p c-ares/build
+
 (cd c-ares/build && cmake ..)
+
 bindgen --allowlist-function="ares.*" \
         --allowlist-type="apattern" \
         --allowlist-type="ares.*" \
@@ -23,13 +25,13 @@ bindgen --allowlist-function="ares.*" \
         --blocklist-type="socklen_t" \
         --blocklist-type="timeval" \
         --default-enum-style="rust" \
-        --opaque-type="in_addr_t" \
         --no-debug="ares_addrttl" \
         --no-layout-tests \
         --output=src/ffi.rs \
         c-ares/include/ares.h \
         -- \
         -Ic-ares/build
+
 rm -fr c-ares/build
 
 # Apply manual patches.
@@ -37,3 +39,5 @@ patch -p0 < ffi.patch
 
 # Generate constants.
 ./generate-constants.pl > src/constants.rs
+
+cargo fmt

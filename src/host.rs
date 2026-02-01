@@ -6,7 +6,7 @@ use crate::hostent::{HasHostent, HostAddressResultsIter, HostAliasResultsIter, H
 use crate::panic;
 
 /// The result of a successful host lookup.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct HostResults<'a> {
     hostent: HostentBorrowed<'a>,
 }

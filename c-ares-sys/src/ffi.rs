@@ -1627,11 +1627,21 @@ pub struct ares_addrttl {
     pub ipaddr: in_addr,
     pub ttl: ::std::os::raw::c_int,
 }
+impl ::std::fmt::Debug for ares_addrttl {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write!(f, "ares_addrttl {{ ipaddr: union, ttl: {:?} }}", self.ttl)
+    }
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ares_addr6ttl {
     pub ip6addr: ares_in6_addr,
     pub ttl: ::std::os::raw::c_int,
+}
+impl ::std::fmt::Debug for ares_addr6ttl {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        write!(f, "ares_addr6ttl {{ ip6addr: union, ttl: {:?} }}", self.ttl)
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

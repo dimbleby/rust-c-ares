@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Derive Debug where it was previously missing
+
 ## 11.0.0 (14 December 2025)
 
 - c-ares 1.34.6

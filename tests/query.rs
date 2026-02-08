@@ -434,10 +434,10 @@ fn raw_query() {
     channel.query("google.com", 1, 1, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
         let data = result.expect("Query failed");
-        assert!(!data.is_empty(), "Nodatareturned");
+        assert!(!data.is_empty(), "No data returned");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
 
-    assert!(completed.load(Ordering::SeqCst), "Querydidnotcomplete");
+    assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }

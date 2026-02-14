@@ -275,6 +275,14 @@ mod tests {
     }
 
     #[test]
+    fn parse_str_list_final_element_overshoots() {
+        // First element "hi" is valid, second element's length byte says 5 but
+        // only 2 bytes follow.
+        let data = [2, b'h', b'i', 5, b'a', b'b'];
+        assert!(parse_str_list(&data).is_err());
+    }
+
+    #[test]
     fn parse_u16_basic() {
         assert_eq!(parse_u16(&[0x01, 0x00]).unwrap(), 256);
     }

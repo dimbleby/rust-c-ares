@@ -163,6 +163,91 @@ mod inner {
                     println!("      Data: {hex}");
                 }
             }
+            DnsRecordType::DS => {
+                let key_tag = rr.get_u16(DnsRrKey::DS_KEY_TAG);
+                let algorithm = rr.get_u8(DnsRrKey::DS_ALGORITHM);
+                let digest_type = rr.get_u8(DnsRrKey::DS_DIGEST_TYPE);
+                println!(
+                    "      Key tag: {key_tag}, Algorithm: {algorithm}, Digest type: {digest_type}"
+                );
+                if let Some(digest) = rr.get_bin(DnsRrKey::DS_DIGEST) {
+                    let hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
+                    println!("      Digest: {hex}");
+                }
+            }
+            DnsRecordType::SSHFP => {
+                let algorithm = rr.get_u8(DnsRrKey::SSHFP_ALGORITHM);
+                let fp_type = rr.get_u8(DnsRrKey::SSHFP_FP_TYPE);
+                println!("      Algorithm: {algorithm}, Fingerprint type: {fp_type}");
+                if let Some(fp) = rr.get_bin(DnsRrKey::SSHFP_FINGERPRINT) {
+                    let hex: String = fp.iter().map(|b| format!("{b:02x}")).collect();
+                    println!("      Fingerprint: {hex}");
+                }
+            }
+            DnsRecordType::RRSIG => {
+                let type_covered = rr.get_u16(DnsRrKey::RRSIG_TYPE_COVERED);
+                let algorithm = rr.get_u8(DnsRrKey::RRSIG_ALGORITHM);
+                let labels = rr.get_u8(DnsRrKey::RRSIG_LABELS);
+                let original_ttl = rr.get_u32(DnsRrKey::RRSIG_ORIGINAL_TTL);
+                let expiration = rr.get_u32(DnsRrKey::RRSIG_EXPIRATION);
+                let inception = rr.get_u32(DnsRrKey::RRSIG_INCEPTION);
+                let key_tag = rr.get_u16(DnsRrKey::RRSIG_KEY_TAG);
+                let signer = rr.get_str(DnsRrKey::RRSIG_SIGNERS_NAME).unwrap_or("<none>");
+                println!("      Type covered: {type_covered}, Algorithm: {algorithm}");
+                println!("      Labels: {labels}, Original TTL: {original_ttl}");
+                println!("      Expiration: {expiration}, Inception: {inception}");
+                println!("      Key tag: {key_tag}, Signer: {signer}");
+            }
+            DnsRecordType::NSEC => {
+                let next = rr.get_str(DnsRrKey::NSEC_NEXT_DOMAIN).unwrap_or("<none>");
+                println!("      Next domain: {next}");
+                if let Some(maps) = rr.get_bin(DnsRrKey::NSEC_TYPE_BIT_MAPS) {
+                    let hex: String = maps.iter().map(|b| format!("{b:02x}")).collect();
+                    println!("      Type bit maps: {hex}");
+                }
+            }
+            DnsRecordType::DNSKEY => {
+                let flags = rr.get_u16(DnsRrKey::DNSKEY_FLAGS);
+                let protocol = rr.get_u8(DnsRrKey::DNSKEY_PROTOCOL);
+                let algorithm = rr.get_u8(DnsRrKey::DNSKEY_ALGORITHM);
+                println!("      Flags: {flags}, Protocol: {protocol}, Algorithm: {algorithm}");
+                if let Some(key) = rr.get_bin(DnsRrKey::DNSKEY_PUBLIC_KEY) {
+                    let hex: String = key.iter().map(|b| format!("{b:02x}")).collect();
+                    println!("      Public key: {hex}");
+                }
+            }
+            DnsRecordType::NSEC3 => {
+                let hash_alg = rr.get_u8(DnsRrKey::NSEC3_HASH_ALGORITHM);
+                let flags = rr.get_u8(DnsRrKey::NSEC3_FLAGS);
+                let iterations = rr.get_u16(DnsRrKey::NSEC3_ITERATIONS);
+                println!(
+                    "      Hash algorithm: {hash_alg}, Flags: {flags}, Iterations: {iterations}"
+                );
+                if let Some(salt) = rr.get_bin(DnsRrKey::NSEC3_SALT) {
+                    let hex: String = salt.iter().map(|b| format!("{b:02x}")).collect();
+                    println!("      Salt: {hex}");
+                }
+                if let Some(next) = rr.get_bin(DnsRrKey::NSEC3_NEXT_HASHED_OWNER) {
+                    let hex: String = next.iter().map(|b| format!("{b:02x}")).collect();
+                    println!("      Next hashed owner: {hex}");
+                }
+                if let Some(maps) = rr.get_bin(DnsRrKey::NSEC3_TYPE_BIT_MAPS) {
+                    let hex: String = maps.iter().map(|b| format!("{b:02x}")).collect();
+                    println!("      Type bit maps: {hex}");
+                }
+            }
+            DnsRecordType::NSEC3PARAM => {
+                let hash_alg = rr.get_u8(DnsRrKey::NSEC3PARAM_HASH_ALGORITHM);
+                let flags = rr.get_u8(DnsRrKey::NSEC3PARAM_FLAGS);
+                let iterations = rr.get_u16(DnsRrKey::NSEC3PARAM_ITERATIONS);
+                println!(
+                    "      Hash algorithm: {hash_alg}, Flags: {flags}, Iterations: {iterations}"
+                );
+                if let Some(salt) = rr.get_bin(DnsRrKey::NSEC3PARAM_SALT) {
+                    let hex: String = salt.iter().map(|b| format!("{b:02x}")).collect();
+                    println!("      Salt: {hex}");
+                }
+            }
             DnsRecordType::TXT => {
                 for (j, data) in rr.abins(DnsRrKey::TXT_DATA).enumerate() {
                     let text = std::str::from_utf8(data).unwrap_or("<not utf-8>");

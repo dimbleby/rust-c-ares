@@ -1,3 +1,5 @@
+use crate::error::{Error, Result};
+use crate::string::{AresBuf, AresString};
 use crate::types::AddressFamily;
 use core::ffi::{c_char, c_int};
 use std::ffi::CStr;
@@ -180,6 +182,14 @@ pub unsafe fn dns_string_as_str<'a>(hostname: *const c_char) -> &'a str {
     unsafe { c_string_as_str_unchecked(hostname) }
 }
 
+/// Helper to convert an `ares_status_t` to our `Result`.
+pub fn status_to_result(status: c_ares_sys::ares_status_t) -> Result<()> {
+    match Error::try_from(status) {
+        Ok(err) => Err(err),
+        Err(()) => Ok(()),
+    }
+}
+
 /// Get the version number of the underlying `c-ares` library.
 ///
 /// The version is returned as both a string and an integer.  The integer is built up as 24bit
@@ -202,6 +212,55 @@ pub fn version() -> (&'static str, u32) {
 pub fn thread_safety() -> bool {
     let safety = unsafe { c_ares_sys::ares_threadsafety() };
     safety != c_ares_sys::ares_bool_t::ARES_FALSE
+}
+
+/// Expand a DNS-encoded domain name from a DNS message.
+///
+/// `encoded` must point within the message buffer `abuf`.  Returns the
+/// expanded name and the number of bytes consumed from the encoded input.
+pub fn expand_name(encoded: &[u8], abuf: &[u8]) -> Result<(AresString, usize)> {
+    let mut s: *mut c_char = std::ptr::null_mut();
+    let mut enclen: core::ffi::c_long = 0;
+    let status = unsafe {
+        c_ares_sys::ares_expand_name(
+            encoded.as_ptr(),
+            abuf.as_ptr(),
+            abuf.len() as c_int,
+            &mut s,
+            &mut enclen,
+        )
+    };
+    if status != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
+        return Err(Error::from(status));
+    }
+    Ok((AresString::new(s), enclen as usize))
+}
+
+/// Expand a single DNS-encoded string from a DNS message.
+///
+/// `encoded` must point within the message buffer `abuf`.  Returns the
+/// expanded string as bytes and the number of bytes consumed from the encoded
+/// input.
+pub fn expand_string(encoded: &[u8], abuf: &[u8]) -> Result<(AresBuf, usize)> {
+    let mut s: *mut core::ffi::c_uchar = std::ptr::null_mut();
+    let mut enclen: core::ffi::c_long = 0;
+    let status = unsafe {
+        c_ares_sys::ares_expand_string(
+            encoded.as_ptr(),
+            abuf.as_ptr(),
+            abuf.len() as c_int,
+            &mut s,
+            &mut enclen,
+        )
+    };
+    if status != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
+        return Err(Error::from(status));
+    }
+
+    // enclen includes the 1-byte length prefix; the decoded data is the rest.
+    // We cannot use CStr::from_ptr because the data may contain embedded nulls.
+    let len = (enclen - 1) as usize;
+    Ok((AresBuf::new(s, len), enclen as usize))
 }
 
 #[cfg(test)]
@@ -256,5 +315,48 @@ mod tests {
         // Use an invalid address family value
         let result = address_family(255);
         assert_eq!(result, None);
+    }
+
+    #[test]
+    fn expand_name_simple() {
+        // A minimal DNS-like buffer containing the encoded name
+        // "\x07example\x03com\x00" at offset 0.
+        let buf: &[u8] = b"\x07example\x03com\x00";
+        let (name, enclen) = expand_name(buf, buf).expect("expand_name");
+        assert_eq!(&*name, "example.com");
+        assert_eq!(enclen, buf.len());
+    }
+
+    #[test]
+    fn expand_name_invalid() {
+        // A truncated buffer should fail
+        let buf: &[u8] = b"\x07exam";
+        assert!(expand_name(buf, buf).is_err());
+    }
+
+    #[test]
+    fn expand_string_simple() {
+        // A length-prefixed string: \x05hello
+        let buf: &[u8] = b"\x05hello";
+        let (data, enclen) = expand_string(buf, buf).expect("expand_string");
+        assert_eq!(&*data, b"hello");
+        assert_eq!(enclen, buf.len());
+    }
+
+    #[test]
+    fn expand_string_invalid() {
+        // Length prefix says 10 but only 3 bytes follow
+        let buf: &[u8] = b"\x0aabc";
+        assert!(expand_string(buf, buf).is_err());
+    }
+
+    #[test]
+    fn expand_string_embedded_null() {
+        // Binary data with an embedded null: length 4, then "a\x00bc"
+        let buf: &[u8] = b"\x04a\x00bc";
+        let (data, enclen) = expand_string(buf, buf).expect("expand_string");
+        assert_eq!(&*data, b"a\x00bc");
+        assert_eq!(data.len(), 4);
+        assert_eq!(enclen, buf.len());
     }
 }

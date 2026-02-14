@@ -81,6 +81,7 @@ jobs:
         if: matrix.rust == 'nightly'
         name: Check minimal versions
       - run: |
+          cargo run -p c-ares --example dnsrec
           cargo run -p c-ares --example epoll
           cargo run -p c-ares --example select
           cargo run -p c-ares --example version
@@ -89,4 +90,5 @@ jobs:
           cargo run -p c-ares-resolver --example blocking
           cargo run -p c-ares-resolver --example callback
           cargo run -p c-ares-resolver --example futures
+          cargo run -p c-ares-resolver --example send_dnsrec
         name: Run c-ares-resolver examples

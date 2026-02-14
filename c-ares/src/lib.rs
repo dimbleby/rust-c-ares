@@ -42,6 +42,8 @@ mod aaaa;
 mod caa;
 mod channel;
 mod cname;
+#[cfg(cares1_28)]
+mod dns;
 mod error;
 #[cfg(cares1_34)]
 mod events;
@@ -73,6 +75,11 @@ pub use crate::caa::{CAAResult, CAAResults, CAAResultsIter};
 pub use crate::channel::ServerFailoverOptions;
 pub use crate::channel::{Channel, GetSock, GetSockIter, Options};
 pub use crate::cname::CNameResults;
+#[cfg(cares1_28)]
+pub use crate::dns::{
+    DnsCls, DnsDataType, DnsFlags, DnsOpcode, DnsOptDataType, DnsParseFlags, DnsRcode, DnsRecord,
+    DnsRecordType, DnsRr, DnsRrKey, DnsSection,
+};
 pub use crate::error::{Error, Result};
 #[cfg(cares1_34)]
 pub use crate::events::{FdEventFlags, FdEvents, ProcessFlags};
@@ -89,10 +96,12 @@ pub use crate::ptr::PTRResults;
 pub use crate::server_state_flags::ServerStateFlags;
 pub use crate::soa::SOAResult;
 pub use crate::srv::{SRVResult, SRVResults, SRVResultsIter};
-pub use crate::string::AresString;
+pub use crate::string::{AresBuf, AresString};
 pub use crate::txt::{TXTResult, TXTResults, TXTResultsIter};
 pub use crate::types::{AddressFamily, SOCKET_BAD, Socket};
 pub use crate::uri::{URIResult, URIResults, URIResultsIter};
 #[cfg(cares1_23)]
+pub use crate::utils::expand_name;
+pub use crate::utils::expand_string;
 pub use crate::utils::thread_safety;
 pub use crate::utils::version;

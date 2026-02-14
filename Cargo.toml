@@ -9,3 +9,4 @@ repository = "https://github.com/dimbleby/rust-c-ares"
 
 [workspace.dependencies]
 c-types = "6.0.0"
+itertools = "0.14.0"

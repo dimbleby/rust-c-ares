@@ -11,6 +11,8 @@
   - `Resolver::set_local_device`
   - `BlockingResolver::set_local_device`
   - `FutureResolver::set_local_device`
+- Wrap the "new" \- but really not so new any more \- c-ares APIs, based around
+  a `DnsRecord` type.
 
 ## 11.0.0 (14 December 2025)
 

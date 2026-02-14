@@ -13,6 +13,10 @@ use crate::a::{AResults, query_a_callback};
 use crate::aaaa::{AAAAResults, query_aaaa_callback};
 use crate::caa::{CAAResults, query_caa_callback};
 use crate::cname::{CNameResults, query_cname_callback};
+#[cfg(cares1_28)]
+use crate::dns::callback::dnsrec_callback;
+#[cfg(cares1_28)]
+use crate::dns::{DnsCls, DnsRecord, DnsRecordType};
 use crate::error::{Error, Result};
 #[cfg(cares1_34)]
 use crate::events::{FdEvents, ProcessFlags};
@@ -35,7 +39,7 @@ use crate::uri::{URIResults, query_uri_callback};
 #[allow(unused_imports)]
 use crate::utils::{
     c_string_as_str_unchecked, ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in,
-    socket_addrv6_as_sockaddr_in6,
+    socket_addrv6_as_sockaddr_in6, status_to_result,
 };
 use std::sync::Mutex;
 
@@ -402,10 +406,7 @@ impl Channel {
     pub fn reinit(&mut self) -> Result<&mut Self> {
         let rc = unsafe { c_ares_sys::ares_reinit(self.ares_channel) };
         panic::propagate();
-
-        if let Ok(err) = Error::try_from(rc) {
-            return Err(err);
-        }
+        status_to_result(rc)?;
         Ok(self)
     }
 
@@ -468,11 +469,7 @@ impl Channel {
             )
         };
         panic::propagate();
-
-        if let Ok(err) = Error::try_from(rc) {
-            return Err(err);
-        }
-        Ok(())
+        status_to_result(rc)
     }
 
     /// Retrieve the set of socket descriptors which the calling application should wait on for
@@ -1166,6 +1163,90 @@ impl Channel {
         );
     }
 
+    /// Send a DNS query using a pre-built [`DnsRecord`].
+    ///
+    /// On completion, `handler` is called with a `Result<DnsRecord>` containing
+    /// the parsed response.
+    ///
+    /// Returns the query ID on success.
+    #[cfg(cares1_28)]
+    pub fn send_dnsrec<F>(&mut self, dnsrec: &DnsRecord, handler: F) -> Result<u16>
+    where
+        F: FnOnce(Result<&DnsRecord>) + Send + 'static,
+    {
+        let mut qid: u16 = 0;
+        let c_arg = Box::into_raw(Box::new(handler));
+        let status = unsafe {
+            c_ares_sys::ares_send_dnsrec(
+                self.ares_channel,
+                dnsrec.as_raw(),
+                Some(dnsrec_callback::<F>),
+                c_arg.cast(),
+                &mut qid,
+            )
+        };
+        panic::propagate();
+
+        status_to_result(status)?;
+        Ok(qid)
+    }
+
+    /// Initiate a DNS query for `name` with the given class and type, receiving
+    /// a parsed [`DnsRecord`] in the callback.
+    ///
+    /// Returns the query ID on success.
+    #[cfg(cares1_28)]
+    pub fn query_dnsrec<F>(
+        &mut self,
+        name: &str,
+        dns_class: DnsCls,
+        query_type: DnsRecordType,
+        handler: F,
+    ) -> Result<u16>
+    where
+        F: FnOnce(Result<&DnsRecord>) + Send + 'static,
+    {
+        let c_name = CString::new(name).map_err(|_| Error::EBADSTR)?;
+        let mut qid: u16 = 0;
+        let c_arg = Box::into_raw(Box::new(handler));
+        let status = unsafe {
+            c_ares_sys::ares_query_dnsrec(
+                self.ares_channel,
+                c_name.as_ptr(),
+                dns_class.into(),
+                query_type.into(),
+                Some(dnsrec_callback::<F>),
+                c_arg.cast(),
+                &mut qid,
+            )
+        };
+        panic::propagate();
+
+        status_to_result(status)?;
+        Ok(qid)
+    }
+
+    /// Initiate a series of DNS queries using a pre-built [`DnsRecord`],
+    /// receiving a parsed [`DnsRecord`] in the callback.
+    #[cfg(cares1_28)]
+    pub fn search_dnsrec<F>(&mut self, dnsrec: &DnsRecord, handler: F) -> Result<()>
+    where
+        F: FnOnce(Result<&DnsRecord>) + Send + 'static,
+    {
+        let c_arg = Box::into_raw(Box::new(handler));
+        let status = unsafe {
+            c_ares_sys::ares_search_dnsrec(
+                self.ares_channel,
+                dnsrec.as_raw(),
+                Some(dnsrec_callback::<F>),
+                c_arg.cast(),
+            )
+        };
+        panic::propagate();
+
+        status_to_result(status)
+    }
+
     /// Cancel all requests made on this `Channel`.
     ///
     /// Callbacks will be invoked for each pending query, passing a result
@@ -1180,6 +1261,28 @@ impl Channel {
     pub fn process_pending_write(&mut self) {
         unsafe { c_ares_sys::ares_process_pending_write(self.ares_channel) }
         panic::propagate();
+    }
+
+    /// Block until notified that there are no longer any queries in queue, or
+    /// the specified timeout has expired.
+    ///
+    /// `timeout_ms` is the number of milliseconds to wait for the queue to be
+    /// empty.  Use -1 for infinite.
+    #[cfg(cares1_27)]
+    pub fn queue_wait_empty(&self, timeout_ms: c_int) -> Result<()> {
+        let rc = unsafe { c_ares_sys::ares_queue_wait_empty(self.ares_channel, timeout_ms) };
+        panic::propagate();
+        status_to_result(rc)
+    }
+
+    /// Retrieve the total number of active queries pending answers from servers.
+    ///
+    /// Some c-ares requests may spawn multiple queries, such as
+    /// `get_addr_info()` when using `AddressFamily::UNSPEC`, which will be
+    /// reflected in this number.
+    #[cfg(cares1_27)]
+    pub fn queue_active_queries(&self) -> usize {
+        unsafe { c_ares_sys::ares_queue_active_queries(self.ares_channel) }
     }
 }
 
@@ -1797,5 +1900,22 @@ mod tests {
         options.set_hosts_path("/etc/hosts").unwrap();
         let channel = Channel::with_options(options);
         assert!(channel.is_ok());
+    }
+
+    #[cfg(cares1_27)]
+    #[test]
+    fn channel_queue_active_queries() {
+        let channel = Channel::new().unwrap();
+        assert_eq!(channel.queue_active_queries(), 0);
+    }
+
+    #[cfg(cares1_27)]
+    #[test]
+    fn channel_queue_wait_empty() {
+        let channel = Channel::new().unwrap();
+        // No pending queries, should return immediately.
+        // Returns ENOTIMP if c-ares was not built with threading support.
+        let result = channel.queue_wait_empty(0);
+        assert!(result.is_ok() || result == Err(Error::ENOTIMP));
     }
 }

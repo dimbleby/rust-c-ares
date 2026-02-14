@@ -10,6 +10,8 @@
   - `Options::set_resolvconf_path`
   - `Options::set_hosts_path`
   - `Channel::set_local_device`
+- Wrap the "new" \- but really not so new any more \- c-ares APIs, based around
+  a `DnsRecord` type.
 
 ## 12.0.0 (14 December 2025)
 

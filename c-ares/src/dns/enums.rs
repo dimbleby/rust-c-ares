@@ -37,6 +37,20 @@ pub enum DnsRecordType {
     NAPTR,
     /// EDNS0 option (OPT, RFC 6891).
     OPT,
+    /// Delegation signer (DS, RFC 4034).
+    DS,
+    /// SSH fingerprint (SSHFP, RFC 4255).
+    SSHFP,
+    /// DNSSEC signature (RRSIG, RFC 4034).
+    RRSIG,
+    /// Next secure record (NSEC, RFC 4034).
+    NSEC,
+    /// DNS public key (DNSKEY, RFC 4034).
+    DNSKEY,
+    /// NSEC3 (RFC 5155).
+    NSEC3,
+    /// NSEC3PARAM (RFC 5155).
+    NSEC3PARAM,
     /// DANE TLSA (RFC 6698).
     TLSA,
     /// General purpose service binding (SVCB, RFC 9460).
@@ -69,6 +83,13 @@ impl From<DnsRecordType> for c_ares_sys::ares_dns_rec_type_t {
             DnsRecordType::SRV => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_SRV,
             DnsRecordType::NAPTR => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_NAPTR,
             DnsRecordType::OPT => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_OPT,
+            DnsRecordType::DS => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_DS,
+            DnsRecordType::SSHFP => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_SSHFP,
+            DnsRecordType::RRSIG => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_RRSIG,
+            DnsRecordType::NSEC => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_NSEC,
+            DnsRecordType::DNSKEY => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_DNSKEY,
+            DnsRecordType::NSEC3 => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_NSEC3,
+            DnsRecordType::NSEC3PARAM => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_NSEC3PARAM,
             DnsRecordType::TLSA => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_TLSA,
             DnsRecordType::SVCB => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_SVCB,
             DnsRecordType::HTTPS => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_HTTPS,
@@ -96,6 +117,13 @@ impl From<c_ares_sys::ares_dns_rec_type_t> for DnsRecordType {
             c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_SRV => DnsRecordType::SRV,
             c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_NAPTR => DnsRecordType::NAPTR,
             c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_OPT => DnsRecordType::OPT,
+            c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_DS => DnsRecordType::DS,
+            c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_SSHFP => DnsRecordType::SSHFP,
+            c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_RRSIG => DnsRecordType::RRSIG,
+            c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_NSEC => DnsRecordType::NSEC,
+            c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_DNSKEY => DnsRecordType::DNSKEY,
+            c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_NSEC3 => DnsRecordType::NSEC3,
+            c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_NSEC3PARAM => DnsRecordType::NSEC3PARAM,
             c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_TLSA => DnsRecordType::TLSA,
             c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_SVCB => DnsRecordType::SVCB,
             c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_HTTPS => DnsRecordType::HTTPS,
@@ -508,6 +536,70 @@ pub enum DnsRrKey {
     OPT_FLAGS,
     /// OPT record: options (OPT).
     OPT_OPTIONS,
+    /// DS record: key tag (U16).
+    DS_KEY_TAG,
+    /// DS record: algorithm (U8).
+    DS_ALGORITHM,
+    /// DS record: digest type (U8).
+    DS_DIGEST_TYPE,
+    /// DS record: digest (BIN).
+    DS_DIGEST,
+    /// SSHFP record: algorithm (U8).
+    SSHFP_ALGORITHM,
+    /// SSHFP record: fingerprint type (U8).
+    SSHFP_FP_TYPE,
+    /// SSHFP record: fingerprint (BIN).
+    SSHFP_FINGERPRINT,
+    /// RRSIG record: type covered (U16).
+    RRSIG_TYPE_COVERED,
+    /// RRSIG record: algorithm (U8).
+    RRSIG_ALGORITHM,
+    /// RRSIG record: labels (U8).
+    RRSIG_LABELS,
+    /// RRSIG record: original TTL (U32).
+    RRSIG_ORIGINAL_TTL,
+    /// RRSIG record: signature expiration (U32).
+    RRSIG_EXPIRATION,
+    /// RRSIG record: signature inception (U32).
+    RRSIG_INCEPTION,
+    /// RRSIG record: key tag (U16).
+    RRSIG_KEY_TAG,
+    /// RRSIG record: signer's name (NAME).
+    RRSIG_SIGNERS_NAME,
+    /// RRSIG record: signature (BIN).
+    RRSIG_SIGNATURE,
+    /// NSEC record: next domain name (NAME).
+    NSEC_NEXT_DOMAIN,
+    /// NSEC record: type bit maps (BIN).
+    NSEC_TYPE_BIT_MAPS,
+    /// DNSKEY record: flags (U16).
+    DNSKEY_FLAGS,
+    /// DNSKEY record: protocol (U8).
+    DNSKEY_PROTOCOL,
+    /// DNSKEY record: algorithm (U8).
+    DNSKEY_ALGORITHM,
+    /// DNSKEY record: public key (BIN).
+    DNSKEY_PUBLIC_KEY,
+    /// NSEC3 record: hash algorithm (U8).
+    NSEC3_HASH_ALGORITHM,
+    /// NSEC3 record: flags (U8).
+    NSEC3_FLAGS,
+    /// NSEC3 record: iterations (U16).
+    NSEC3_ITERATIONS,
+    /// NSEC3 record: salt (BIN).
+    NSEC3_SALT,
+    /// NSEC3 record: next hashed owner name (BIN).
+    NSEC3_NEXT_HASHED_OWNER,
+    /// NSEC3 record: type bit maps (BIN).
+    NSEC3_TYPE_BIT_MAPS,
+    /// NSEC3PARAM record: hash algorithm (U8).
+    NSEC3PARAM_HASH_ALGORITHM,
+    /// NSEC3PARAM record: flags (U8).
+    NSEC3PARAM_FLAGS,
+    /// NSEC3PARAM record: iterations (U16).
+    NSEC3PARAM_ITERATIONS,
+    /// NSEC3PARAM record: salt (BIN).
+    NSEC3PARAM_SALT,
     /// TLSA record: certificate usage (U8).
     TLSA_CERT_USAGE,
     /// TLSA record: selector (U8).
@@ -589,6 +681,56 @@ impl From<DnsRrKey> for c_ares_sys::ares_dns_rr_key_t {
             DnsRrKey::OPT_VERSION => c_ares_sys::ares_dns_rr_key_t::ARES_RR_OPT_VERSION,
             DnsRrKey::OPT_FLAGS => c_ares_sys::ares_dns_rr_key_t::ARES_RR_OPT_FLAGS,
             DnsRrKey::OPT_OPTIONS => c_ares_sys::ares_dns_rr_key_t::ARES_RR_OPT_OPTIONS,
+            DnsRrKey::DS_KEY_TAG => c_ares_sys::ares_dns_rr_key_t::ARES_RR_DS_KEY_TAG,
+            DnsRrKey::DS_ALGORITHM => c_ares_sys::ares_dns_rr_key_t::ARES_RR_DS_ALGORITHM,
+            DnsRrKey::DS_DIGEST_TYPE => c_ares_sys::ares_dns_rr_key_t::ARES_RR_DS_DIGEST_TYPE,
+            DnsRrKey::DS_DIGEST => c_ares_sys::ares_dns_rr_key_t::ARES_RR_DS_DIGEST,
+            DnsRrKey::SSHFP_ALGORITHM => c_ares_sys::ares_dns_rr_key_t::ARES_RR_SSHFP_ALGORITHM,
+            DnsRrKey::SSHFP_FP_TYPE => c_ares_sys::ares_dns_rr_key_t::ARES_RR_SSHFP_FP_TYPE,
+            DnsRrKey::SSHFP_FINGERPRINT => c_ares_sys::ares_dns_rr_key_t::ARES_RR_SSHFP_FINGERPRINT,
+            DnsRrKey::RRSIG_TYPE_COVERED => {
+                c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_TYPE_COVERED
+            }
+            DnsRrKey::RRSIG_ALGORITHM => c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_ALGORITHM,
+            DnsRrKey::RRSIG_LABELS => c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_LABELS,
+            DnsRrKey::RRSIG_ORIGINAL_TTL => {
+                c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_ORIGINAL_TTL
+            }
+            DnsRrKey::RRSIG_EXPIRATION => c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_EXPIRATION,
+            DnsRrKey::RRSIG_INCEPTION => c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_INCEPTION,
+            DnsRrKey::RRSIG_KEY_TAG => c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_KEY_TAG,
+            DnsRrKey::RRSIG_SIGNERS_NAME => {
+                c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_SIGNERS_NAME
+            }
+            DnsRrKey::RRSIG_SIGNATURE => c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_SIGNATURE,
+            DnsRrKey::NSEC_NEXT_DOMAIN => c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC_NEXT_DOMAIN,
+            DnsRrKey::NSEC_TYPE_BIT_MAPS => {
+                c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC_TYPE_BIT_MAPS
+            }
+            DnsRrKey::DNSKEY_FLAGS => c_ares_sys::ares_dns_rr_key_t::ARES_RR_DNSKEY_FLAGS,
+            DnsRrKey::DNSKEY_PROTOCOL => c_ares_sys::ares_dns_rr_key_t::ARES_RR_DNSKEY_PROTOCOL,
+            DnsRrKey::DNSKEY_ALGORITHM => c_ares_sys::ares_dns_rr_key_t::ARES_RR_DNSKEY_ALGORITHM,
+            DnsRrKey::DNSKEY_PUBLIC_KEY => c_ares_sys::ares_dns_rr_key_t::ARES_RR_DNSKEY_PUBLIC_KEY,
+            DnsRrKey::NSEC3_HASH_ALGORITHM => {
+                c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_HASH_ALGORITHM
+            }
+            DnsRrKey::NSEC3_FLAGS => c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_FLAGS,
+            DnsRrKey::NSEC3_ITERATIONS => c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_ITERATIONS,
+            DnsRrKey::NSEC3_SALT => c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_SALT,
+            DnsRrKey::NSEC3_NEXT_HASHED_OWNER => {
+                c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_NEXT_HASHED_OWNER
+            }
+            DnsRrKey::NSEC3_TYPE_BIT_MAPS => {
+                c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_TYPE_BIT_MAPS
+            }
+            DnsRrKey::NSEC3PARAM_HASH_ALGORITHM => {
+                c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3PARAM_HASH_ALGORITHM
+            }
+            DnsRrKey::NSEC3PARAM_FLAGS => c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3PARAM_FLAGS,
+            DnsRrKey::NSEC3PARAM_ITERATIONS => {
+                c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3PARAM_ITERATIONS
+            }
+            DnsRrKey::NSEC3PARAM_SALT => c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3PARAM_SALT,
             DnsRrKey::TLSA_CERT_USAGE => c_ares_sys::ares_dns_rr_key_t::ARES_RR_TLSA_CERT_USAGE,
             DnsRrKey::TLSA_SELECTOR => c_ares_sys::ares_dns_rr_key_t::ARES_RR_TLSA_SELECTOR,
             DnsRrKey::TLSA_MATCH => c_ares_sys::ares_dns_rr_key_t::ARES_RR_TLSA_MATCH,
@@ -654,6 +796,56 @@ impl From<c_ares_sys::ares_dns_rr_key_t> for DnsRrKey {
             c_ares_sys::ares_dns_rr_key_t::ARES_RR_OPT_VERSION => DnsRrKey::OPT_VERSION,
             c_ares_sys::ares_dns_rr_key_t::ARES_RR_OPT_FLAGS => DnsRrKey::OPT_FLAGS,
             c_ares_sys::ares_dns_rr_key_t::ARES_RR_OPT_OPTIONS => DnsRrKey::OPT_OPTIONS,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_DS_KEY_TAG => DnsRrKey::DS_KEY_TAG,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_DS_ALGORITHM => DnsRrKey::DS_ALGORITHM,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_DS_DIGEST_TYPE => DnsRrKey::DS_DIGEST_TYPE,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_DS_DIGEST => DnsRrKey::DS_DIGEST,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_SSHFP_ALGORITHM => DnsRrKey::SSHFP_ALGORITHM,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_SSHFP_FP_TYPE => DnsRrKey::SSHFP_FP_TYPE,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_SSHFP_FINGERPRINT => DnsRrKey::SSHFP_FINGERPRINT,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_TYPE_COVERED => {
+                DnsRrKey::RRSIG_TYPE_COVERED
+            }
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_ALGORITHM => DnsRrKey::RRSIG_ALGORITHM,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_LABELS => DnsRrKey::RRSIG_LABELS,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_ORIGINAL_TTL => {
+                DnsRrKey::RRSIG_ORIGINAL_TTL
+            }
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_EXPIRATION => DnsRrKey::RRSIG_EXPIRATION,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_INCEPTION => DnsRrKey::RRSIG_INCEPTION,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_KEY_TAG => DnsRrKey::RRSIG_KEY_TAG,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_SIGNERS_NAME => {
+                DnsRrKey::RRSIG_SIGNERS_NAME
+            }
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_RRSIG_SIGNATURE => DnsRrKey::RRSIG_SIGNATURE,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC_NEXT_DOMAIN => DnsRrKey::NSEC_NEXT_DOMAIN,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC_TYPE_BIT_MAPS => {
+                DnsRrKey::NSEC_TYPE_BIT_MAPS
+            }
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_DNSKEY_FLAGS => DnsRrKey::DNSKEY_FLAGS,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_DNSKEY_PROTOCOL => DnsRrKey::DNSKEY_PROTOCOL,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_DNSKEY_ALGORITHM => DnsRrKey::DNSKEY_ALGORITHM,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_DNSKEY_PUBLIC_KEY => DnsRrKey::DNSKEY_PUBLIC_KEY,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_HASH_ALGORITHM => {
+                DnsRrKey::NSEC3_HASH_ALGORITHM
+            }
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_FLAGS => DnsRrKey::NSEC3_FLAGS,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_ITERATIONS => DnsRrKey::NSEC3_ITERATIONS,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_SALT => DnsRrKey::NSEC3_SALT,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_NEXT_HASHED_OWNER => {
+                DnsRrKey::NSEC3_NEXT_HASHED_OWNER
+            }
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3_TYPE_BIT_MAPS => {
+                DnsRrKey::NSEC3_TYPE_BIT_MAPS
+            }
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3PARAM_HASH_ALGORITHM => {
+                DnsRrKey::NSEC3PARAM_HASH_ALGORITHM
+            }
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3PARAM_FLAGS => DnsRrKey::NSEC3PARAM_FLAGS,
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3PARAM_ITERATIONS => {
+                DnsRrKey::NSEC3PARAM_ITERATIONS
+            }
+            c_ares_sys::ares_dns_rr_key_t::ARES_RR_NSEC3PARAM_SALT => DnsRrKey::NSEC3PARAM_SALT,
             c_ares_sys::ares_dns_rr_key_t::ARES_RR_TLSA_CERT_USAGE => DnsRrKey::TLSA_CERT_USAGE,
             c_ares_sys::ares_dns_rr_key_t::ARES_RR_TLSA_SELECTOR => DnsRrKey::TLSA_SELECTOR,
             c_ares_sys::ares_dns_rr_key_t::ARES_RR_TLSA_MATCH => DnsRrKey::TLSA_MATCH,
@@ -837,6 +1029,13 @@ mod tests {
             DnsRecordType::SRV,
             DnsRecordType::NAPTR,
             DnsRecordType::OPT,
+            DnsRecordType::DS,
+            DnsRecordType::SSHFP,
+            DnsRecordType::RRSIG,
+            DnsRecordType::NSEC,
+            DnsRecordType::DNSKEY,
+            DnsRecordType::NSEC3,
+            DnsRecordType::NSEC3PARAM,
             DnsRecordType::TLSA,
             DnsRecordType::SVCB,
             DnsRecordType::HTTPS,
@@ -972,6 +1171,38 @@ mod tests {
             DnsRrKey::OPT_VERSION,
             DnsRrKey::OPT_FLAGS,
             DnsRrKey::OPT_OPTIONS,
+            DnsRrKey::DS_KEY_TAG,
+            DnsRrKey::DS_ALGORITHM,
+            DnsRrKey::DS_DIGEST_TYPE,
+            DnsRrKey::DS_DIGEST,
+            DnsRrKey::SSHFP_ALGORITHM,
+            DnsRrKey::SSHFP_FP_TYPE,
+            DnsRrKey::SSHFP_FINGERPRINT,
+            DnsRrKey::RRSIG_TYPE_COVERED,
+            DnsRrKey::RRSIG_ALGORITHM,
+            DnsRrKey::RRSIG_LABELS,
+            DnsRrKey::RRSIG_ORIGINAL_TTL,
+            DnsRrKey::RRSIG_EXPIRATION,
+            DnsRrKey::RRSIG_INCEPTION,
+            DnsRrKey::RRSIG_KEY_TAG,
+            DnsRrKey::RRSIG_SIGNERS_NAME,
+            DnsRrKey::RRSIG_SIGNATURE,
+            DnsRrKey::NSEC_NEXT_DOMAIN,
+            DnsRrKey::NSEC_TYPE_BIT_MAPS,
+            DnsRrKey::DNSKEY_FLAGS,
+            DnsRrKey::DNSKEY_PROTOCOL,
+            DnsRrKey::DNSKEY_ALGORITHM,
+            DnsRrKey::DNSKEY_PUBLIC_KEY,
+            DnsRrKey::NSEC3_HASH_ALGORITHM,
+            DnsRrKey::NSEC3_FLAGS,
+            DnsRrKey::NSEC3_ITERATIONS,
+            DnsRrKey::NSEC3_SALT,
+            DnsRrKey::NSEC3_NEXT_HASHED_OWNER,
+            DnsRrKey::NSEC3_TYPE_BIT_MAPS,
+            DnsRrKey::NSEC3PARAM_HASH_ALGORITHM,
+            DnsRrKey::NSEC3PARAM_FLAGS,
+            DnsRrKey::NSEC3PARAM_ITERATIONS,
+            DnsRrKey::NSEC3PARAM_SALT,
             DnsRrKey::TLSA_CERT_USAGE,
             DnsRrKey::TLSA_SELECTOR,
             DnsRrKey::TLSA_MATCH,
@@ -1102,5 +1333,48 @@ mod tests {
         assert_eq!(DnsRrKey::MX_EXCHANGE.record_type(), DnsRecordType::MX);
         assert_eq!(DnsRrKey::SOA_MNAME.record_type(), DnsRecordType::SOA);
         assert_eq!(DnsRrKey::CAA_TAG.record_type(), DnsRecordType::CAA);
+    }
+
+    #[test]
+    fn enum_round_trip_datatype() {
+        use c_ares_sys::ares_dns_datatype_t::*;
+        let cases = [
+            (ARES_DATATYPE_INADDR, DnsDataType::InAddr),
+            (ARES_DATATYPE_INADDR6, DnsDataType::InAddr6),
+            (ARES_DATATYPE_U8, DnsDataType::U8),
+            (ARES_DATATYPE_U16, DnsDataType::U16),
+            (ARES_DATATYPE_U32, DnsDataType::U32),
+            (ARES_DATATYPE_NAME, DnsDataType::Name),
+            (ARES_DATATYPE_STR, DnsDataType::Str),
+            (ARES_DATATYPE_BIN, DnsDataType::Bin),
+            (ARES_DATATYPE_BINP, DnsDataType::BinP),
+            (ARES_DATATYPE_OPT, DnsDataType::Opt),
+            (ARES_DATATYPE_ABINP, DnsDataType::ABinP),
+        ];
+        for (sys, expected) in cases {
+            assert_eq!(DnsDataType::from(sys), expected);
+        }
+    }
+
+    #[test]
+    fn enum_round_trip_opt_datatype() {
+        use c_ares_sys::ares_dns_opt_datatype_t::*;
+        let cases = [
+            (ARES_OPT_DATATYPE_NONE, DnsOptDataType::None),
+            (ARES_OPT_DATATYPE_STR_LIST, DnsOptDataType::StrList),
+            (ARES_OPT_DATATYPE_U8_LIST, DnsOptDataType::U8List),
+            (ARES_OPT_DATATYPE_U16, DnsOptDataType::U16),
+            (ARES_OPT_DATATYPE_U16_LIST, DnsOptDataType::U16List),
+            (ARES_OPT_DATATYPE_U32, DnsOptDataType::U32),
+            (ARES_OPT_DATATYPE_U32_LIST, DnsOptDataType::U32List),
+            (ARES_OPT_DATATYPE_INADDR4_LIST, DnsOptDataType::InAddr4List),
+            (ARES_OPT_DATATYPE_INADDR6_LIST, DnsOptDataType::InAddr6List),
+            (ARES_OPT_DATATYPE_BIN, DnsOptDataType::Bin),
+            (ARES_OPT_DATATYPE_NAME, DnsOptDataType::Name),
+            (ARES_OPT_DATATYPE_UTF8_STR, DnsOptDataType::Utf8Str),
+        ];
+        for (sys, expected) in cases {
+            assert_eq!(DnsOptDataType::from(sys), expected);
+        }
     }
 }

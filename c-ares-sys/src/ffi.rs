@@ -185,6 +185,20 @@ pub enum ares_dns_rec_type_t {
     ARES_REC_TYPE_NAPTR = 35,
     #[doc = "< RFC 6891. EDNS0 option (meta-RR)"]
     ARES_REC_TYPE_OPT = 41,
+    #[doc = "< RFC 4034. Delegation Signer"]
+    ARES_REC_TYPE_DS = 43,
+    #[doc = "< RFC 4255. SSH Key Fingerprint"]
+    ARES_REC_TYPE_SSHFP = 44,
+    #[doc = "< RFC 4034. Resource Record Signature"]
+    ARES_REC_TYPE_RRSIG = 46,
+    #[doc = "< RFC 4034. Next Secure"]
+    ARES_REC_TYPE_NSEC = 47,
+    #[doc = "< RFC 4034. DNS Public Key"]
+    ARES_REC_TYPE_DNSKEY = 48,
+    #[doc = "< RFC 5155. NSEC3"]
+    ARES_REC_TYPE_NSEC3 = 50,
+    #[doc = "< RFC 5155. NSEC3 Parameters"]
+    ARES_REC_TYPE_NSEC3PARAM = 51,
     #[doc = "< RFC 6698. DNS-Based Authentication of Named\n   Entities (DANE) Transport Layer Security\n   (TLS) Protocol: TLSA"]
     ARES_REC_TYPE_TLSA = 52,
     #[doc = "< RFC 9460. General Purpose Service Binding"]
@@ -416,6 +430,70 @@ pub enum ares_dns_rr_key_t {
     ARES_RR_OPT_FLAGS = 4104,
     #[doc = " OPT Record. Options. Datatype: OPT"]
     ARES_RR_OPT_OPTIONS = 4105,
+    #[doc = " DS Record. Key Tag. Datatype: U16"]
+    ARES_RR_DS_KEY_TAG = 4301,
+    #[doc = " DS Record. Algorithm. Datatype: U8"]
+    ARES_RR_DS_ALGORITHM = 4302,
+    #[doc = " DS Record. Digest Type. Datatype: U8"]
+    ARES_RR_DS_DIGEST_TYPE = 4303,
+    #[doc = " DS Record. Digest. Datatype: BIN"]
+    ARES_RR_DS_DIGEST = 4304,
+    #[doc = " SSHFP Record. Algorithm. Datatype: U8"]
+    ARES_RR_SSHFP_ALGORITHM = 4401,
+    #[doc = " SSHFP Record. Fingerprint Type. Datatype: U8"]
+    ARES_RR_SSHFP_FP_TYPE = 4402,
+    #[doc = " SSHFP Record. Fingerprint. Datatype: BIN"]
+    ARES_RR_SSHFP_FINGERPRINT = 4403,
+    #[doc = " RRSIG Record. Type Covered. Datatype: U16"]
+    ARES_RR_RRSIG_TYPE_COVERED = 4601,
+    #[doc = " RRSIG Record. Algorithm. Datatype: U8"]
+    ARES_RR_RRSIG_ALGORITHM = 4602,
+    #[doc = " RRSIG Record. Labels. Datatype: U8"]
+    ARES_RR_RRSIG_LABELS = 4603,
+    #[doc = " RRSIG Record. Original TTL. Datatype: U32"]
+    ARES_RR_RRSIG_ORIGINAL_TTL = 4604,
+    #[doc = " RRSIG Record. Signature Expiration. Datatype: U32"]
+    ARES_RR_RRSIG_EXPIRATION = 4605,
+    #[doc = " RRSIG Record. Signature Inception. Datatype: U32"]
+    ARES_RR_RRSIG_INCEPTION = 4606,
+    #[doc = " RRSIG Record. Key Tag. Datatype: U16"]
+    ARES_RR_RRSIG_KEY_TAG = 4607,
+    #[doc = " RRSIG Record. Signers Name. Datatype: NAME"]
+    ARES_RR_RRSIG_SIGNERS_NAME = 4608,
+    #[doc = " RRSIG Record. Signature. Datatype: BIN"]
+    ARES_RR_RRSIG_SIGNATURE = 4609,
+    #[doc = " NSEC Record. Next Domain Name. Datatype: NAME"]
+    ARES_RR_NSEC_NEXT_DOMAIN = 4701,
+    #[doc = " NSEC Record. Type Bit Maps. Datatype: BIN"]
+    ARES_RR_NSEC_TYPE_BIT_MAPS = 4702,
+    #[doc = " DNSKEY Record. Flags. Datatype: U16"]
+    ARES_RR_DNSKEY_FLAGS = 4801,
+    #[doc = " DNSKEY Record. Protocol. Datatype: U8"]
+    ARES_RR_DNSKEY_PROTOCOL = 4802,
+    #[doc = " DNSKEY Record. Algorithm. Datatype: U8"]
+    ARES_RR_DNSKEY_ALGORITHM = 4803,
+    #[doc = " DNSKEY Record. Public Key. Datatype: BIN"]
+    ARES_RR_DNSKEY_PUBLIC_KEY = 4804,
+    #[doc = " NSEC3 Record. Hash Algorithm. Datatype: U8"]
+    ARES_RR_NSEC3_HASH_ALGORITHM = 5001,
+    #[doc = " NSEC3 Record. Flags. Datatype: U8"]
+    ARES_RR_NSEC3_FLAGS = 5002,
+    #[doc = " NSEC3 Record. Iterations. Datatype: U16"]
+    ARES_RR_NSEC3_ITERATIONS = 5003,
+    #[doc = " NSEC3 Record. Salt. Datatype: BIN"]
+    ARES_RR_NSEC3_SALT = 5004,
+    #[doc = " NSEC3 Record. Next Hashed Owner Name. Datatype: BIN"]
+    ARES_RR_NSEC3_NEXT_HASHED_OWNER = 5005,
+    #[doc = " NSEC3 Record. Type Bit Maps. Datatype: BIN"]
+    ARES_RR_NSEC3_TYPE_BIT_MAPS = 5006,
+    #[doc = " NSEC3PARAM Record. Hash Algorithm. Datatype: U8"]
+    ARES_RR_NSEC3PARAM_HASH_ALGORITHM = 5101,
+    #[doc = " NSEC3PARAM Record. Flags. Datatype: U8"]
+    ARES_RR_NSEC3PARAM_FLAGS = 5102,
+    #[doc = " NSEC3PARAM Record. Iterations. Datatype: U16"]
+    ARES_RR_NSEC3PARAM_ITERATIONS = 5103,
+    #[doc = " NSEC3PARAM Record. Salt. Datatype: BIN"]
+    ARES_RR_NSEC3PARAM_SALT = 5104,
     #[doc = " TLSA Record. Certificate Usage. Datatype: U8"]
     ARES_RR_TLSA_CERT_USAGE = 5201,
     #[doc = " TLSA Record. Selector. Datatype: U8"]
@@ -485,6 +563,87 @@ pub enum ares_tlsa_match_t {
     ARES_TLSA_MATCH_SHA256 = 1,
     #[doc = " Sha512 match"]
     ARES_TLSA_MATCH_SHA512 = 2,
+}
+#[repr(u32)]
+#[doc = " SSHFP Record ARES_RR_SSHFP_ALGORITHM known values (RFC 4255, RFC 6594,\n  RFC 7479, RFC 8709)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_sshfp_algorithm_t {
+    #[doc = " RSA"]
+    ARES_SSHFP_ALGORITHM_RSA = 1,
+    #[doc = " DSA"]
+    ARES_SSHFP_ALGORITHM_DSA = 2,
+    #[doc = " ECDSA"]
+    ARES_SSHFP_ALGORITHM_ECDSA = 3,
+    #[doc = " Ed25519 (RFC 7479)"]
+    ARES_SSHFP_ALGORITHM_ED25519 = 4,
+    #[doc = " Ed448 (RFC 8709)"]
+    ARES_SSHFP_ALGORITHM_ED448 = 6,
+}
+#[repr(u32)]
+#[doc = " SSHFP Record ARES_RR_SSHFP_FP_TYPE known values (RFC 4255, RFC 6594)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_sshfp_fp_type_t {
+    #[doc = " SHA-1"]
+    ARES_SSHFP_FP_SHA1 = 1,
+    #[doc = " SHA-256"]
+    ARES_SSHFP_FP_SHA256 = 2,
+}
+#[repr(u32)]
+#[doc = " DNSSEC Algorithm Numbers (RFC 4034, RFC 8624)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_dnssec_algorithm_t {
+    #[doc = " RSA/MD5 (deprecated, RFC 6725)"]
+    ARES_DNSSEC_ALGORITHM_RSAMD5 = 1,
+    #[doc = " Diffie-Hellman (RFC 2539)"]
+    ARES_DNSSEC_ALGORITHM_DH = 2,
+    #[doc = " DSA/SHA1 (RFC 3755, NOT RECOMMENDED)"]
+    ARES_DNSSEC_ALGORITHM_DSA = 3,
+    #[doc = " RSA/SHA-1 (RFC 3110, NOT RECOMMENDED)"]
+    ARES_DNSSEC_ALGORITHM_RSASHA1 = 5,
+    #[doc = " DSA-NSEC3-SHA1 (RFC 5155, NOT RECOMMENDED)"]
+    ARES_DNSSEC_ALGORITHM_DSA_NSEC3_SHA1 = 6,
+    #[doc = " RSASHA1-NSEC3-SHA1 (RFC 5155, NOT RECOMMENDED)"]
+    ARES_DNSSEC_ALGORITHM_RSASHA1_NSEC3_SHA1 = 7,
+    #[doc = " RSA/SHA-256 (RFC 5702)"]
+    ARES_DNSSEC_ALGORITHM_RSASHA256 = 8,
+    #[doc = " RSA/SHA-512 (RFC 5702)"]
+    ARES_DNSSEC_ALGORITHM_RSASHA512 = 10,
+    #[doc = " GOST R 34.10-2001 (RFC 5933)"]
+    ARES_DNSSEC_ALGORITHM_ECC_GOST = 12,
+    #[doc = " ECDSA Curve P-256 with SHA-256 (RFC 6605)"]
+    ARES_DNSSEC_ALGORITHM_ECDSAP256SHA256 = 13,
+    #[doc = " ECDSA Curve P-384 with SHA-384 (RFC 6605)"]
+    ARES_DNSSEC_ALGORITHM_ECDSAP384SHA384 = 14,
+    #[doc = " Ed25519 (RFC 8080)"]
+    ARES_DNSSEC_ALGORITHM_ED25519 = 15,
+    #[doc = " Ed448 (RFC 8080)"]
+    ARES_DNSSEC_ALGORITHM_ED448 = 16,
+    #[doc = " Indirect (RFC 4034)"]
+    ARES_DNSSEC_ALGORITHM_INDIRECT = 252,
+    #[doc = " Private algorithm (domain name) (RFC 4034)"]
+    ARES_DNSSEC_ALGORITHM_PRIVATEDNS = 253,
+    #[doc = " Private algorithm (OID) (RFC 4034)"]
+    ARES_DNSSEC_ALGORITHM_PRIVATEOID = 254,
+}
+#[repr(u32)]
+#[doc = " DS Record Digest Type known values (RFC 4034, RFC 4509, RFC 6605)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_ds_digest_t {
+    #[doc = " SHA-1 (RFC 3658)"]
+    ARES_DS_DIGEST_SHA1 = 1,
+    #[doc = " SHA-256 (RFC 4509)"]
+    ARES_DS_DIGEST_SHA256 = 2,
+    #[doc = " GOST R 34.11-94 (RFC 5933)"]
+    ARES_DS_DIGEST_GOST = 3,
+    #[doc = " SHA-384 (RFC 6605)"]
+    ARES_DS_DIGEST_SHA384 = 4,
+}
+#[repr(u32)]
+#[doc = " NSEC3 Hash Algorithm known values (RFC 5155)"]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum ares_nsec3_hash_t {
+    #[doc = " SHA-1"]
+    ARES_NSEC3_HASH_SHA1 = 1,
 }
 #[repr(u32)]
 #[doc = " SVCB (and HTTPS) RR known parameters"]

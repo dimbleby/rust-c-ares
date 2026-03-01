@@ -5,7 +5,7 @@ description = """
 A Rust wrapper for the c-ares library, for asynchronous DNS requests.
 """
 documentation = "https://docs.rs/c-ares"
-readme = "../README.md"
+readme = "README.md"
 keywords = ["DNS", "c-ares"]
 categories = ["api-bindings", "asynchronous", "network-programming"]
 include = [

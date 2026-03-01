@@ -81,7 +81,8 @@ mod tests {
 
     #[test]
     fn fd_events_new() {
-        let events = FdEvents::new(0, FdEventFlags::Read);
-        drop(events);
+        let events = FdEvents::new(42, FdEventFlags::Read);
+        assert_eq!(events.0.fd, 42);
+        assert_eq!(events.0.events, FdEventFlags::Read.bits());
     }
 }

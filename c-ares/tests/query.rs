@@ -28,8 +28,7 @@ fn query_a_record() {
         completed_clone.store(true, Ordering::SeqCst);
         let results = result.expect("Query failed");
         assert!(results.iter().count() > 0, "No A records returned");
-
-        let _display = format!("{}", results);
+        assert!(!format!("{}", results).is_empty());
 
         let mut ipv4_valid = false;
         let mut ttl_valid = false;
@@ -40,7 +39,7 @@ fn query_a_record() {
             if a_result.ttl() >= 0 {
                 ttl_valid = true;
             }
-            let _display = format!("{}", a_result);
+            assert!(!format!("{}", a_result).is_empty());
         }
         assert!(ipv4_valid, "No valid IPv4 address");
         assert!(ttl_valid, "No valid TTL");
@@ -68,16 +67,15 @@ fn query_aaaa_record() {
         completed_clone.store(true, Ordering::SeqCst);
         let results = result.expect("Query failed");
         assert!(results.iter().count() > 0, "No AAAA records returned");
-
-        let _display = format!("{}", results);
+        assert!(!format!("{}", results).is_empty());
 
         let mut ipv6_valid = false;
         for aaaa_result in &results {
             if !aaaa_result.ipv6().is_unspecified() {
                 ipv6_valid = true;
             }
-            let _ttl = aaaa_result.ttl();
-            let _display = format!("{}", aaaa_result);
+            assert!(aaaa_result.ttl() >= 0);
+            assert!(!format!("{}", aaaa_result).is_empty());
         }
         assert!(ipv6_valid, "No valid IPv6 address");
     });
@@ -108,13 +106,13 @@ fn query_caa_record() {
             "No CAA records with property returned"
         );
 
-        let _display = format!("{}", results);
+        assert!(!format!("{}", results).is_empty());
 
         for caa_result in &results {
-            let _critical = caa_result.critical();
-            let _property = caa_result.property();
-            let _value = caa_result.value();
-            let _display = format!("{}", caa_result);
+            assert!(!caa_result.critical());
+            assert!(!caa_result.property().is_empty());
+            assert!(!caa_result.value().is_empty());
+            assert!(!format!("{}", caa_result).is_empty());
         }
     });
 
@@ -140,9 +138,8 @@ fn query_cname_record() {
         completed_clone.store(true, Ordering::SeqCst);
         let results = result.expect("Query failed");
         assert!(!results.hostname().is_empty(), "No CNAME hostname returned");
-
-        for _alias in results.aliases() {}
-        let _display = format!("{}", results);
+        assert!(results.aliases().count() > 0, "No aliases returned");
+        assert!(!format!("{}", results).is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -171,12 +168,12 @@ fn query_mx_record() {
             "No MX records with host returned"
         );
 
-        let _display = format!("{}", results);
+        assert!(!format!("{}", results).is_empty());
 
         for mx_result in &results {
-            let _host = mx_result.host();
-            let _priority = mx_result.priority();
-            let _display = format!("{}", mx_result);
+            assert!(!mx_result.host().is_empty());
+            assert!(mx_result.priority() > 0);
+            assert!(!format!("{}", mx_result).is_empty());
         }
     });
 
@@ -203,16 +200,16 @@ fn query_naptr_record() {
         let results = result.expect("Query failed");
         assert!(results.iter().count() > 0, "No NAPTR records returned");
 
-        let _display = format!("{}", results);
+        assert!(!format!("{}", results).is_empty());
 
         for naptr_result in &results {
-            let _flags = naptr_result.flags();
-            let _service = naptr_result.service_name();
-            let _regexp = naptr_result.reg_exp();
-            let _replacement = naptr_result.replacement_pattern();
+            assert!(!naptr_result.flags().is_empty());
+            assert!(!naptr_result.service_name().is_empty());
+            assert!(naptr_result.reg_exp().is_empty());
+            assert!(!naptr_result.replacement_pattern().is_empty());
             let _order = naptr_result.order();
             let _preference = naptr_result.preference();
-            let _display = format!("{}", naptr_result);
+            assert!(!format!("{}", naptr_result).is_empty());
         }
     });
 
@@ -238,9 +235,8 @@ fn query_ns_record() {
         completed_clone.store(true, Ordering::SeqCst);
         let results = result.expect("Query failed");
         assert!(!results.hostname().is_empty(), "No NS hostname returned");
-
-        for _alias in results.aliases() {}
-        let _display = format!("{}", results);
+        assert!(results.aliases().count() > 0, "No NS aliases returned");
+        assert!(!format!("{}", results).is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -265,9 +261,8 @@ fn query_ptr_record() {
         completed_clone.store(true, Ordering::SeqCst);
         let results = result.expect("Query failed");
         assert!(!results.hostname().is_empty(), "No PTR hostname returned");
-
-        for _alias in results.aliases() {}
-        let _display = format!("{}", results);
+        assert!(results.aliases().count() > 0, "No PTR aliases returned");
+        assert!(!format!("{}", results).is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -292,14 +287,13 @@ fn query_soa_record() {
         completed_clone.store(true, Ordering::SeqCst);
         let soa = result.expect("Query failed");
         assert!(!soa.name_server().is_empty(), "No SOA name server returned");
-
-        let _hostmaster = soa.hostmaster();
-        let _serial = soa.serial();
-        let _refresh = soa.refresh();
-        let _retry = soa.retry();
-        let _expire = soa.expire();
-        let _min_ttl = soa.min_ttl();
-        let _display = format!("{}", soa);
+        assert!(!soa.hostmaster().is_empty());
+        assert!(soa.serial() > 0);
+        assert!(soa.refresh() > 0);
+        assert!(soa.retry() > 0);
+        assert!(soa.expire() > 0);
+        assert!(soa.min_ttl() > 0);
+        assert!(!format!("{}", soa).is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -330,14 +324,14 @@ fn query_srv_record() {
             "No SRV records with host and port returned"
         );
 
-        let _display = format!("{}", results);
+        assert!(!format!("{}", results).is_empty());
 
         for srv_result in &results {
-            let _host = srv_result.host();
-            let _port = srv_result.port();
+            assert!(!srv_result.host().is_empty());
+            assert!(srv_result.port() > 0);
             let _priority = srv_result.priority();
             let _weight = srv_result.weight();
-            let _display = format!("{}", srv_result);
+            assert!(!format!("{}", srv_result).is_empty());
         }
     });
 
@@ -367,12 +361,12 @@ fn query_txt_record() {
             "No TXT records with text returned"
         );
 
-        let _display = format!("{}", results);
+        assert!(!format!("{}", results).is_empty());
 
         for txt_result in &results {
+            assert!(!txt_result.text().is_empty());
             let _record_start = txt_result.record_start();
-            let _text = txt_result.text();
-            let _display = format!("{}", txt_result);
+            assert!(!format!("{}", txt_result).is_empty());
         }
     });
 
@@ -397,18 +391,15 @@ fn query_uri_record() {
     channel.query_uri("_kerberos.fedoraproject.org", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
         let results = result.expect("Query failed");
-
-        // Test Display trait
-        let _display = format!("{}", results);
+        assert!(results.iter().count() > 0, "No URI records returned");
+        assert!(!format!("{}", results).is_empty());
 
         for uri_result in &results {
-            // Test all accessors
-            let _uri = uri_result.uri();
+            assert!(!uri_result.uri().is_empty());
             let _priority = uri_result.priority();
             let _weight = uri_result.weight();
-            let _ttl = uri_result.ttl();
-            // Test Display trait
-            let _display = format!("{}", uri_result);
+            assert!(uri_result.ttl() >= 0);
+            assert!(!format!("{}", uri_result).is_empty());
         }
     });
 

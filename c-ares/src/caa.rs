@@ -146,4 +146,12 @@ mod tests {
         assert_send::<CAAResults>();
         assert_send::<CAAResultsIter>();
     }
+
+    #[test]
+    fn is_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<CAAResult>();
+        assert_sync::<CAAResults>();
+        assert_sync::<CAAResultsIter>();
+    }
 }

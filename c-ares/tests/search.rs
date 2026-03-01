@@ -31,7 +31,7 @@ fn raw_search() {
     channel.search("google", 1, 1, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
         let data = result.expect("Search failed");
-        let _len = data.len();
+        assert!(!data.is_empty(), "No data returned");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -82,7 +82,7 @@ fn search_aaaa_record() {
 
     channel.search_aaaa("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -105,7 +105,7 @@ fn search_caa_record() {
 
     channel.search_caa("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -126,9 +126,9 @@ fn search_cname_record() {
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
 
-    channel.search_cname("www.google.com", move |result| {
+    channel.search_cname("www.github.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -151,7 +151,7 @@ fn search_mx_record() {
 
     channel.search_mx("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -174,7 +174,7 @@ fn search_naptr_record() {
 
     channel.search_naptr("sip2sip.info", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -197,7 +197,7 @@ fn search_ns_record() {
 
     channel.search_ns("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -220,7 +220,7 @@ fn search_ptr_record() {
 
     channel.search_ptr("8.8.8.8.in-addr.arpa", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -243,7 +243,7 @@ fn search_soa_record() {
 
     channel.search_soa("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -266,7 +266,7 @@ fn search_srv_record() {
 
     channel.search_srv("_xmpp-server._tcp.jabber.org", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -289,7 +289,7 @@ fn search_txt_record() {
 
     channel.search_txt("google.com", move |result| {
         completed_clone.store(true, Ordering::SeqCst);
-        let _ = result;
+        result.expect("Search failed");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));

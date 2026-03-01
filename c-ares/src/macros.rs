@@ -9,7 +9,10 @@ macro_rules! ares_call {
         $callback:expr,
         $handler:expr
     ) => {{
-        let c_name = CString::new($name).unwrap();
+        let Ok(c_name) = CString::new($name) else {
+            $handler(Err(Error::EBADNAME));
+            return;
+        };
         let c_arg = Box::into_raw(Box::new($handler));
         unsafe {
             c_ares_sys::$ares_call(

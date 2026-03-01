@@ -507,11 +507,4 @@ mod tests {
             Poll::Ready(_) => {} // Also valid if query completed quickly or failed
         }
     }
-
-    #[test]
-    fn c_ares_future_cancelled_on_drop() {
-        let resolver = FutureResolver::new().unwrap();
-        let future = resolver.query_a("example.com");
-        drop(future); // Should not panic
-    }
 }

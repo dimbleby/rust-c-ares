@@ -293,6 +293,36 @@ fn query_srv_nonexistent() {
 }
 
 #[test]
+fn get_host_by_name_null_byte() {
+    let mut channel = Channel::new().expect("Failed to create channel");
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    channel.get_host_by_name("bad\0name", AddressFamily::INET, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        assert_eq!(result.unwrap_err(), Error::EBADNAME);
+    });
+
+    assert!(completed.load(Ordering::SeqCst), "Handler was not called");
+}
+
+#[test]
+fn query_a_null_byte() {
+    let mut channel = Channel::new().expect("Failed to create channel");
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    channel.query_a("bad\0name", move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        assert_eq!(result.unwrap_err(), Error::EBADNAME);
+    });
+
+    assert!(completed.load(Ordering::SeqCst), "Handler was not called");
+}
+
+#[test]
 #[ignore = "requires network"]
 fn query_txt_nonexistent() {
     let mut options = Options::new();

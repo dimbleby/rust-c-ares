@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "c-ares-sys-[0-9]*"
+      - "c-ares-resolver-[0-9]*"
+      - "c-ares-[0-9]*"
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    environment: publish
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          submodules: true
+
+      - name: Install Rust
+        run: rustup update stable --no-self-update && rustup default stable
+
+      - name: Determine crate
+        id: crate
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          if [[ "$TAG" =~ ^c-ares-sys-(.+)$ ]]; then
+            CRATE="c-ares-sys"
+            VERSION="${BASH_REMATCH[1]}"
+          elif [[ "$TAG" =~ ^c-ares-resolver-(.+)$ ]]; then
+            CRATE="c-ares-resolver"
+            VERSION="${BASH_REMATCH[1]}"
+          elif [[ "$TAG" =~ ^c-ares-(.+)$ ]]; then
+            CRATE="c-ares"
+            VERSION="${BASH_REMATCH[1]}"
+          else
+            echo "::error::Unrecognized tag format: $TAG"
+            exit 1
+          fi
+          echo "crate=$CRATE" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Verify version
+        run: |
+          CRATE="${{ steps.crate.outputs.crate }}"
+          EXPECTED="${{ steps.crate.outputs.version }}"
+          ACTUAL=$(cargo metadata --no-deps --format-version 1 | jq -r --arg crate "$CRATE" '.packages[] | select(.name == $crate) | .version')
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error::Tag version ($EXPECTED) does not match Cargo.toml version ($ACTUAL) for $CRATE"
+            exit 1
+          fi
+
+      - name: Authenticate with crates.io
+        uses: rust-lang/crates-io-auth-action@b7e9a28eded4986ec6b1fa40eeee8f8f165559ec # v1.0.3
+        id: auth
+
+      - name: Publish
+        run: cargo publish -p ${{ steps.crate.outputs.crate }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}

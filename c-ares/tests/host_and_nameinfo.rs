@@ -56,7 +56,7 @@ fn get_host_by_address_ipv6() {
     channel.get_host_by_address(&addr, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
         let host_results = result.expect("Query failed");
-        let _hostname = host_results.hostname();
+        assert!(!host_results.hostname().is_empty(), "No hostname returned");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -81,14 +81,13 @@ fn get_host_by_name_ipv4() {
         completed_clone.store(true, Ordering::SeqCst);
         let host_results = result.expect("Query failed");
 
-        // Test hostname accessor
         assert!(!host_results.hostname().is_empty(), "No hostname returned");
-        // Test addresses iterator
-        for _addr in host_results.addresses() {}
-        // Test aliases iterator
-        for _alias in host_results.aliases() {}
-        // Test Display trait
-        let _display = format!("{}", host_results);
+        assert!(
+            host_results.addresses().count() > 0,
+            "No addresses returned"
+        );
+        assert_eq!(host_results.aliases().count(), 0);
+        assert!(!format!("{}", host_results).is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -112,8 +111,11 @@ fn get_host_by_name_ipv6() {
     channel.get_host_by_name("google.com", AddressFamily::INET6, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
         let host_results = result.expect("Query failed");
-        let _hostname = host_results.hostname();
-        for _addr in host_results.addresses() {}
+        assert!(!host_results.hostname().is_empty(), "No hostname returned");
+        assert!(
+            host_results.addresses().count() > 0,
+            "No addresses returned"
+        );
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -147,8 +149,7 @@ fn get_name_info_ipv4() {
                 name_info.node().is_some() || name_info.service().is_some(),
                 "No name info returned"
             );
-            // Test Display trait
-            let _display = format!("{}", name_info);
+            assert!(!format!("{}", name_info).is_empty());
         },
     );
 
@@ -176,8 +177,8 @@ fn get_name_info_ipv6() {
     channel.get_name_info(&addr, NIFlags::LOOKUPHOST, move |result| {
         completed_clone.store(true, Ordering::SeqCst);
         let name_info = result.expect("Query failed");
-        let _node = name_info.node();
-        let _service = name_info.service();
+        assert!(name_info.node().is_some(), "No name info node returned");
+        assert!(name_info.service().is_none(), "Name info service returned");
     });
 
     process_channel(&mut channel, Duration::from_secs(3));

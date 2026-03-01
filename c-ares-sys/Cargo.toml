@@ -1,15 +1,15 @@
 [package]
 name = "c-ares-sys"
-license = "MIT"
 version = "11.0.0"
 build = "build/main.rs"
 links = "cares"
 description = "Low-level bindings to the c-ares library"
-repository = "https://github.com/dimbleby/rust-c-ares"
 readme = "README.md"
 keywords = ["DNS", "c-ares"]
 categories = ["external-ffi-bindings", "network-programming"]
-edition = "2024"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
 include = [
   "/CHANGELOG.md",
   "/LICENSE.txt",
@@ -31,7 +31,7 @@ cmake = { version = "0.1", optional = true }
 
 [dependencies]
 libc = "0.2"
-c-types = "6.0.0"
+c-types.workspace = true
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni-sys = "0.4"

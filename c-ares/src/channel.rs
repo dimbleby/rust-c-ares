@@ -179,20 +179,23 @@ impl Options {
 
     /// Set the domains to search, instead of the domains specified in resolv.conf or the domain
     /// derived from the kernel hostname variable.
-    pub fn set_domains(&mut self, domains: &[&str]) -> &mut Self {
-        self.domains = domains.iter().map(|&s| CString::new(s).unwrap()).collect();
+    pub fn set_domains(&mut self, domains: &[&str]) -> Result<&mut Self> {
+        self.domains = domains
+            .iter()
+            .map(|&s| CString::new(s).map_err(|_| Error::EBADSTR))
+            .collect::<Result<Vec<_>>>()?;
         self.optmask |= c_ares_sys::ARES_OPT_DOMAINS;
-        self
+        Ok(self)
     }
 
     /// Set the lookups to perform for host queries. `lookups` should be set to a string of the
     /// characters "b" or "f", where "b" indicates a DNS lookup and "f" indicates a lookup in the
     /// hosts file.
-    pub fn set_lookups(&mut self, lookups: &str) -> &mut Self {
-        let c_lookups = CString::new(lookups).unwrap();
+    pub fn set_lookups(&mut self, lookups: &str) -> Result<&mut Self> {
+        let c_lookups = CString::new(lookups).map_err(|_| Error::EBADSTR)?;
         self.lookups = Some(c_lookups);
         self.optmask |= c_ares_sys::ARES_OPT_LOOKUPS;
-        self
+        Ok(self)
     }
 
     /// Set the callback function to be invoked when a socket changes state.
@@ -251,21 +254,21 @@ impl Options {
     /// Set the path to use for reading the resolv.conf file.  The `resolvconf_path` should be set
     /// to a path string, and will be honoured on *nix like systems.  The default is
     /// /etc/resolv.conf.
-    pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
-        let c_resolvconf_path = CString::new(resolvconf_path).unwrap();
+    pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> Result<&mut Self> {
+        let c_resolvconf_path = CString::new(resolvconf_path).map_err(|_| Error::EBADSTR)?;
         self.resolvconf_path = Some(c_resolvconf_path);
         self.optmask |= c_ares_sys::ARES_OPT_RESOLVCONF;
-        self
+        Ok(self)
     }
 
     /// Set the path to use for reading the hosts file.  The `hosts_path` should be set to a path
     /// string, and will be honoured on *nix like systems.  The default is /etc/hosts.
     #[cfg(cares1_19)]
-    pub fn set_hosts_path(&mut self, hosts_path: &str) -> &mut Self {
-        let c_hosts_path = CString::new(hosts_path).unwrap();
+    pub fn set_hosts_path(&mut self, hosts_path: &str) -> Result<&mut Self> {
+        let c_hosts_path = CString::new(hosts_path).map_err(|_| Error::EBADSTR)?;
         self.hosts_path = Some(c_hosts_path);
         self.optmask |= c_ares_sys::ARES_OPT_HOSTS_FILE;
-        self
+        Ok(self)
     }
 
     /// Set the maximum number of udp queries that can be sent on a single ephemeral port to a
@@ -533,10 +536,10 @@ impl Channel {
     }
 
     /// Set the local device from which to make queries.
-    pub fn set_local_device(&mut self, device: &str) -> &mut Self {
-        let c_dev = CString::new(device).unwrap();
+    pub fn set_local_device(&mut self, device: &str) -> Result<&mut Self> {
+        let c_dev = CString::new(device).map_err(|_| Error::EBADSTR)?;
         unsafe { c_ares_sys::ares_set_local_dev(self.ares_channel, c_dev.as_ptr()) }
-        self
+        Ok(self)
     }
 
     /// Initializes an address sortlist configuration, so that addresses returned by
@@ -1355,14 +1358,14 @@ mod tests {
     #[test]
     fn options_set_domains() {
         let mut options = Options::new();
-        options.set_domains(&["example.com", "test.local"]);
+        options.set_domains(&["example.com", "test.local"]).unwrap();
         drop(options);
     }
 
     #[test]
     fn options_set_lookups() {
         let mut options = Options::new();
-        options.set_lookups("bf");
+        options.set_lookups("bf").unwrap();
         drop(options);
     }
 
@@ -1405,7 +1408,7 @@ mod tests {
     #[test]
     fn options_set_resolvconf_path() {
         let mut options = Options::new();
-        options.set_resolvconf_path("/etc/resolv.conf");
+        options.set_resolvconf_path("/etc/resolv.conf").unwrap();
         drop(options);
     }
 
@@ -1413,7 +1416,7 @@ mod tests {
     #[test]
     fn options_set_hosts_path() {
         let mut options = Options::new();
-        options.set_hosts_path("/etc/hosts");
+        options.set_hosts_path("/etc/hosts").unwrap();
         drop(options);
     }
 
@@ -1461,7 +1464,8 @@ mod tests {
             .set_ndots(1)
             .set_udp_port(53)
             .set_tcp_port(53)
-            .set_lookups("b");
+            .set_lookups("b")
+            .unwrap();
         drop(options);
     }
 
@@ -1476,12 +1480,15 @@ mod tests {
             .set_udp_port(53)
             .set_tcp_port(53)
             .set_domains(&["example.com"])
+            .unwrap()
             .set_lookups("b")
+            .unwrap()
             .set_sock_send_buffer_size(32768)
             .set_sock_receive_buffer_size(32768)
             .set_rotate()
             .set_ednspsz(4096)
-            .set_resolvconf_path("/etc/resolv.conf");
+            .set_resolvconf_path("/etc/resolv.conf")
+            .unwrap();
         let channel = Channel::with_options(options);
         assert!(channel.is_ok());
     }
@@ -1581,7 +1588,7 @@ mod tests {
     #[test]
     fn channel_set_local_device() {
         let mut channel = Channel::new().unwrap();
-        channel.set_local_device("lo");
+        channel.set_local_device("lo").unwrap();
     }
 
     #[test]
@@ -1809,7 +1816,7 @@ mod tests {
     #[test]
     fn options_hosts_path_creates_channel() {
         let mut options = Options::new();
-        options.set_hosts_path("/etc/hosts");
+        options.set_hosts_path("/etc/hosts").unwrap();
         let channel = Channel::with_options(options);
         assert!(channel.is_ok());
     }

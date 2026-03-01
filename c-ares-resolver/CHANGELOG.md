@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Return errors instead of panicking when string arguments contain null bytes.
+  The following methods now return `Result`s:
+  - `Options::set_domains`
+  - `Options::set_lookups`
+  - `Options::set_resolvconf_path`
+  - `Options::set_hosts_path`
+  - `Resolver::set_local_device`
+  - `BlockingResolver::set_local_device`
+  - `FutureResolver::set_local_device`
+
 ## 11.0.0 (14 December 2025)
 
 - c-ares 1.34.6

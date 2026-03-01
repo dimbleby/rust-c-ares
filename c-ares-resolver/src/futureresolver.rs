@@ -123,9 +123,9 @@ impl FutureResolver {
     }
 
     /// Set the local device from which to make queries.
-    pub fn set_local_device(&self, device: &str) -> &Self {
-        self.inner.set_local_device(device);
-        self
+    pub fn set_local_device(&self, device: &str) -> c_ares::Result<&Self> {
+        self.inner.set_local_device(device)?;
+        Ok(self)
     }
 
     /// Initializes an address sortlist configuration, so that addresses returned by
@@ -436,7 +436,7 @@ mod tests {
     #[test]
     fn future_resolver_set_local_device() {
         let resolver = FutureResolver::new().unwrap();
-        let result = resolver.set_local_device("lo");
+        let result = resolver.set_local_device("lo").unwrap();
         assert!(std::ptr::eq(result, &resolver));
     }
 

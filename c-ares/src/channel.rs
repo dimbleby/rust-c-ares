@@ -1315,36 +1315,31 @@ mod tests {
 
     #[test]
     fn options_default() {
-        let options = Options::new();
-        drop(options);
+        let _options = Options::new();
     }
 
     #[test]
     fn options_set_flags() {
         let mut options = Options::new();
         options.set_flags(Flags::USEVC | Flags::STAYOPEN);
-        drop(options);
     }
 
     #[test]
     fn options_set_timeout() {
         let mut options = Options::new();
         options.set_timeout(5000);
-        drop(options);
     }
 
     #[test]
     fn options_set_tries() {
         let mut options = Options::new();
         options.set_tries(5);
-        drop(options);
     }
 
     #[test]
     fn options_set_ndots() {
         let mut options = Options::new();
         options.set_ndots(2);
-        drop(options);
     }
 
     #[test]
@@ -1352,28 +1347,24 @@ mod tests {
         let mut options = Options::new();
         options.set_udp_port(53);
         options.set_tcp_port(53);
-        drop(options);
     }
 
     #[test]
     fn options_set_domains() {
         let mut options = Options::new();
         options.set_domains(&["example.com", "test.local"]).unwrap();
-        drop(options);
     }
 
     #[test]
     fn options_set_lookups() {
         let mut options = Options::new();
         options.set_lookups("bf").unwrap();
-        drop(options);
     }
 
     #[test]
     fn options_set_socket_state_callback() {
         let mut options = Options::new();
         options.set_socket_state_callback(|_socket, _read, _write| {});
-        drop(options);
     }
 
     #[test]
@@ -1381,35 +1372,30 @@ mod tests {
         let mut options = Options::new();
         options.set_sock_send_buffer_size(65536);
         options.set_sock_receive_buffer_size(65536);
-        drop(options);
     }
 
     #[test]
     fn options_set_rotate() {
         let mut options = Options::new();
         options.set_rotate();
-        drop(options);
     }
 
     #[test]
     fn options_set_no_rotate() {
         let mut options = Options::new();
         options.set_no_rotate();
-        drop(options);
     }
 
     #[test]
     fn options_set_ednspsz() {
         let mut options = Options::new();
         options.set_ednspsz(4096);
-        drop(options);
     }
 
     #[test]
     fn options_set_resolvconf_path() {
         let mut options = Options::new();
         options.set_resolvconf_path("/etc/resolv.conf").unwrap();
-        drop(options);
     }
 
     #[cfg(cares1_19)]
@@ -1417,7 +1403,6 @@ mod tests {
     fn options_set_hosts_path() {
         let mut options = Options::new();
         options.set_hosts_path("/etc/hosts").unwrap();
-        drop(options);
     }
 
     #[cfg(cares1_20)]
@@ -1425,7 +1410,6 @@ mod tests {
     fn options_set_udp_max_queries() {
         let mut options = Options::new();
         options.set_udp_max_queries(100);
-        drop(options);
     }
 
     #[cfg(cares1_22)]
@@ -1433,7 +1417,6 @@ mod tests {
     fn options_set_max_timeout() {
         let mut options = Options::new();
         options.set_max_timeout(30000);
-        drop(options);
     }
 
     #[cfg(cares1_23)]
@@ -1441,7 +1424,6 @@ mod tests {
     fn options_set_query_cache_max_ttl() {
         let mut options = Options::new();
         options.set_query_cache_max_ttl(3600);
-        drop(options);
     }
 
     #[cfg(cares1_29)]
@@ -1451,7 +1433,6 @@ mod tests {
         let mut failover_opts = ServerFailoverOptions::new();
         failover_opts.set_retry_chance(5).set_retry_delay(10000);
         options.set_server_failover_options(&failover_opts);
-        drop(options);
     }
 
     #[test]
@@ -1466,7 +1447,6 @@ mod tests {
             .set_tcp_port(53)
             .set_lookups("b")
             .unwrap();
-        drop(options);
     }
 
     #[test]
@@ -1523,7 +1503,7 @@ mod tests {
     fn channel_set_servers_empty() {
         let mut channel = Channel::new().unwrap();
         let result = channel.set_servers(&[]);
-        drop(result);
+        assert!(result.is_ok());
     }
 
     #[test]
@@ -1595,7 +1575,7 @@ mod tests {
     fn channel_set_sortlist() {
         let mut channel = Channel::new().unwrap();
         let result = channel.set_sortlist(&["130.155.160.0/255.255.240.0", "130.155.0.0"]);
-        drop(result);
+        assert!(result.is_ok());
     }
 
     #[cfg(cares1_22)]
@@ -1603,7 +1583,7 @@ mod tests {
     fn channel_reinit() {
         let mut channel = Channel::new().unwrap();
         let result = channel.reinit();
-        drop(result);
+        assert!(result.is_ok());
     }
 
     #[cfg(cares1_24)]
@@ -1756,8 +1736,7 @@ mod tests {
         let mut channel = Channel::new().unwrap();
         // Invalid server format
         let result = channel.set_servers(&["not-a-valid-ip"]);
-        // c-ares may accept or reject this depending on version
-        drop(result);
+        assert!(result.is_err());
     }
 
     #[test]

@@ -499,7 +499,7 @@ impl Channel {
     /// `[2001:4860:4860::8888]:53`.
     pub fn set_servers(&mut self, servers: &[&str]) -> Result<&mut Self> {
         let servers_csv = servers.join(",");
-        let c_servers = CString::new(servers_csv).unwrap();
+        let c_servers = CString::new(servers_csv).map_err(|_| Error::EBADSTR)?;
         let ares_rc = unsafe {
             c_ares_sys::ares_set_servers_ports_csv(self.ares_channel, c_servers.as_ptr())
         };
@@ -547,7 +547,7 @@ impl Channel {
     /// or "130.155.0.0".
     pub fn set_sortlist(&mut self, sortlist: &[&str]) -> Result<&mut Self> {
         let sortlist_str = sortlist.join(" ");
-        let c_sortlist = CString::new(sortlist_str).unwrap();
+        let c_sortlist = CString::new(sortlist_str).map_err(|_| Error::EBADSTR)?;
         let ares_rc =
             unsafe { c_ares_sys::ares_set_sortlist(self.ares_channel, c_sortlist.as_ptr()) };
         if ares_rc == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {

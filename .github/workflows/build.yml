@@ -66,22 +66,22 @@ jobs:
       - run: brew install automake
         if: matrix.build == 'macos'
         name: Install automake
-      - run: cargo fmt -- --check
+      - run: cargo fmt --all -- --check
         if: matrix.build == 'x86_64'
         name: Check formatting
-      - run: cargo clippy -- -D warnings
+      - run: cargo clippy --workspace -- -D warnings
         name: Run clippy
-      - run: cargo build
+      - run: cargo build --workspace
         name: Build
-      - run: cargo test
+      - run: cargo test --workspace
         name: Run tests
       - run: |
           cargo update -Z minimal-versions
-          cargo build
+          cargo build --workspace
         if: matrix.rust == 'nightly'
         name: Check minimal versions
       - run: |
-          cargo run --example epoll
-          cargo run --example select
-          cargo run --example version
+          cargo run -p c-ares --example epoll
+          cargo run -p c-ares --example select
+          cargo run -p c-ares --example version
         name: Run examples

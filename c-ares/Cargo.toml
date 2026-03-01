@@ -1,0 +1,41 @@
+[package]
+name = "c-ares"
+version = "12.0.0"
+description = """
+A Rust wrapper for the c-ares library, for asynchronous DNS requests.
+"""
+documentation = "https://docs.rs/c-ares"
+readme = "../README.md"
+keywords = ["DNS", "c-ares"]
+categories = ["api-bindings", "asynchronous", "network-programming"]
+include = [
+  "/CHANGELOG.md",
+  "/LICENSE.txt",
+  "/README.md",
+  "/build.rs",
+  "/src",
+]
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[package.metadata.docs.rs]
+features = ["vendored"]
+
+[dependencies]
+bitflags = "2.0"
+c-ares-sys = { version = "11.0.0", path = "../c-ares-sys", default-features = false }
+c-types.workspace = true
+itertools = "0.14"
+
+[target.'cfg(unix)'.dev-dependencies]
+nix = { version = "0.31", default-features = false, features = ["event"] }
+
+[target.'cfg(windows)'.dev-dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Networking_WinSock"] }
+
+[features]
+default = ["maybe-vendored"]
+maybe-vendored = ["c-ares-sys/maybe-vendored"]
+vendored = ["c-ares-sys/vendored"]
+build-cmake = ["c-ares-sys/build-cmake"]

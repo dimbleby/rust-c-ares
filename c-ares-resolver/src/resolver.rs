@@ -67,17 +67,17 @@ impl Options {
 
     /// Set the domains to search, instead of the domains specified in resolv.conf or the domain
     /// derived from the kernel hostname variable.
-    pub fn set_domains(&mut self, domains: &[&str]) -> &mut Self {
-        self.inner.set_domains(domains);
-        self
+    pub fn set_domains(&mut self, domains: &[&str]) -> c_ares::Result<&mut Self> {
+        self.inner.set_domains(domains)?;
+        Ok(self)
     }
 
     /// Set the lookups to perform for host queries. `lookups` should be set to a string of the
     /// characters "b" or "f", where "b" indicates a DNS lookup and "f" indicates a lookup in the
     /// hosts file.
-    pub fn set_lookups(&mut self, lookups: &str) -> &mut Self {
-        self.inner.set_lookups(lookups);
-        self
+    pub fn set_lookups(&mut self, lookups: &str) -> c_ares::Result<&mut Self> {
+        self.inner.set_lookups(lookups)?;
+        Ok(self)
     }
 
     /// Set the socket send buffer size.
@@ -113,17 +113,17 @@ impl Options {
     /// Set the path to use for reading the resolv.conf file.  The `resolvconf_path` should be set
     /// to a path string, and will be honoured on *nix like systems.  The default is
     /// /etc/resolv.conf.
-    pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> &mut Self {
-        self.inner.set_resolvconf_path(resolvconf_path);
-        self
+    pub fn set_resolvconf_path(&mut self, resolvconf_path: &str) -> c_ares::Result<&mut Self> {
+        self.inner.set_resolvconf_path(resolvconf_path)?;
+        Ok(self)
     }
 
     /// Set the path to use for reading the hosts file.  The `hosts_path` should be set to a path
     /// string, and will be honoured on *nix like systems.  The default is /etc/hosts.
     #[cfg(cares1_19)]
-    pub fn set_hosts_path(&mut self, hosts_path: &str) -> &mut Self {
-        self.inner.set_hosts_path(hosts_path);
-        self
+    pub fn set_hosts_path(&mut self, hosts_path: &str) -> c_ares::Result<&mut Self> {
+        self.inner.set_hosts_path(hosts_path)?;
+        Ok(self)
     }
 
     /// Set the maximum number of udp queries that can be sent on a single ephemeral port to a
@@ -244,9 +244,9 @@ impl Resolver {
     }
 
     /// Set the local device from which to make queries.
-    pub fn set_local_device(&self, device: &str) -> &Self {
-        self.ares_channel.lock().unwrap().set_local_device(device);
-        self
+    pub fn set_local_device(&self, device: &str) -> c_ares::Result<&Self> {
+        self.ares_channel.lock().unwrap().set_local_device(device)?;
+        Ok(self)
     }
 
     /// Initializes an address sortlist configuration, so that addresses returned by
@@ -691,14 +691,14 @@ mod tests {
     #[test]
     fn options_set_domains() {
         let mut options = Options::new();
-        let result = options.set_domains(&["example.com", "test.com"]);
+        let result = options.set_domains(&["example.com", "test.com"]).unwrap();
         assert!(std::ptr::eq(result, &mut options));
     }
 
     #[test]
     fn options_set_lookups() {
         let mut options = Options::new();
-        let result = options.set_lookups("bf");
+        let result = options.set_lookups("bf").unwrap();
         assert!(std::ptr::eq(result, &mut options));
     }
 
@@ -740,7 +740,7 @@ mod tests {
     #[test]
     fn options_set_resolvconf_path() {
         let mut options = Options::new();
-        let result = options.set_resolvconf_path("/etc/resolv.conf");
+        let result = options.set_resolvconf_path("/etc/resolv.conf").unwrap();
         assert!(std::ptr::eq(result, &mut options));
     }
 
@@ -748,7 +748,7 @@ mod tests {
     #[cfg(cares1_19)]
     fn options_set_hosts_path() {
         let mut options = Options::new();
-        let result = options.set_hosts_path("/etc/hosts");
+        let result = options.set_hosts_path("/etc/hosts").unwrap();
         assert!(std::ptr::eq(result, &mut options));
     }
 
@@ -815,7 +815,7 @@ mod tests {
     #[test]
     fn resolver_set_local_device() {
         let resolver = Resolver::new().unwrap();
-        let result = resolver.set_local_device("lo");
+        let result = resolver.set_local_device("lo").unwrap();
         assert!(std::ptr::eq(result, &resolver));
     }
 

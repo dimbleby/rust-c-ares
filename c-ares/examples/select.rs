@@ -59,6 +59,7 @@ mod example {
         let mut options = c_ares::Options::new();
         options
             .set_domains(&["example.com"])
+            .unwrap()
             .set_flags(c_ares::Flags::STAYOPEN)
             .set_timeout(500)
             .set_tries(3);

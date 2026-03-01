@@ -14,7 +14,11 @@ use std::time::Duration;
 #[ignore = "requires network"]
 fn raw_search() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2).set_domains(&["com"]);
+    options
+        .set_timeout(2000)
+        .set_tries(2)
+        .set_domains(&["com"])
+        .unwrap();
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -39,7 +43,11 @@ fn raw_search() {
 #[ignore = "requires network"]
 fn search_a_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2).set_domains(&["com"]);
+    options
+        .set_timeout(2000)
+        .set_tries(2)
+        .set_domains(&["com"])
+        .unwrap();
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])

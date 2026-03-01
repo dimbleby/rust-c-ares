@@ -657,91 +657,91 @@ mod tests {
     fn options_set_timeout() {
         let mut options = Options::new();
         let result = options.set_timeout(1000);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_tries() {
         let mut options = Options::new();
         let result = options.set_tries(3);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_ndots() {
         let mut options = Options::new();
         let result = options.set_ndots(2);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_udp_port() {
         let mut options = Options::new();
         let result = options.set_udp_port(5353);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_tcp_port() {
         let mut options = Options::new();
         let result = options.set_tcp_port(5353);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_domains() {
         let mut options = Options::new();
         let result = options.set_domains(&["example.com", "test.com"]).unwrap();
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_lookups() {
         let mut options = Options::new();
         let result = options.set_lookups("bf").unwrap();
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_sock_send_buffer_size() {
         let mut options = Options::new();
         let result = options.set_sock_send_buffer_size(65536);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_sock_receive_buffer_size() {
         let mut options = Options::new();
         let result = options.set_sock_receive_buffer_size(65536);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_rotate() {
         let mut options = Options::new();
         let result = options.set_rotate();
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_no_rotate() {
         let mut options = Options::new();
         let result = options.set_no_rotate();
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_ednspsz() {
         let mut options = Options::new();
         let result = options.set_ednspsz(4096);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
     fn options_set_resolvconf_path() {
         let mut options = Options::new();
         let result = options.set_resolvconf_path("/etc/resolv.conf").unwrap();
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
@@ -749,7 +749,7 @@ mod tests {
     fn options_set_hosts_path() {
         let mut options = Options::new();
         let result = options.set_hosts_path("/etc/hosts").unwrap();
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
@@ -757,7 +757,7 @@ mod tests {
     fn options_set_udp_max_queries() {
         let mut options = Options::new();
         let result = options.set_udp_max_queries(100);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
@@ -765,7 +765,7 @@ mod tests {
     fn options_set_max_timeout() {
         let mut options = Options::new();
         let result = options.set_max_timeout(30000);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
@@ -773,7 +773,7 @@ mod tests {
     fn options_set_query_cache_max_ttl() {
         let mut options = Options::new();
         let result = options.set_query_cache_max_ttl(3600);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 
     #[test]
@@ -884,6 +884,6 @@ mod tests {
         let mut options = Options::new();
         let failover_opts = c_ares::ServerFailoverOptions::new();
         let result = options.set_server_failover_options(&failover_opts);
-        assert!(std::ptr::eq(result, &mut options));
+        assert!(std::ptr::eq(result, &options));
     }
 }

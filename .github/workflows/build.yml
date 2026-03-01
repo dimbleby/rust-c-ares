@@ -69,7 +69,7 @@ jobs:
       - run: cargo fmt --all -- --check
         if: matrix.build == 'x86_64'
         name: Check formatting
-      - run: cargo clippy --workspace -- -D warnings
+      - run: cargo clippy --workspace --tests --examples -- -D warnings
         name: Run clippy
       - run: cargo build --workspace
         name: Build

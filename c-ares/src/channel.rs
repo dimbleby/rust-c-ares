@@ -1652,6 +1652,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::clone_on_copy)]
     fn get_sock_iter_clone() {
         let channel = Channel::new().unwrap();
         let get_sock = channel.get_sock();
@@ -1687,11 +1688,8 @@ mod tests {
     fn get_sock_into_iter() {
         let channel = Channel::new().unwrap();
         let get_sock = channel.get_sock();
-        // Use the IntoIterator implementation
-        for (_socket, _readable, _writable) in &get_sock {
-            // Empty channel should have no sockets
-            panic!("Should not have any sockets");
-        }
+        // Use the IntoIterator implementation - empty channel should have no sockets
+        assert_eq!(get_sock.into_iter().count(), 0);
     }
 
     #[test]
@@ -1725,6 +1723,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::clone_on_copy)]
     fn get_sock_clone() {
         let channel = Channel::new().unwrap();
         let get_sock = channel.get_sock();

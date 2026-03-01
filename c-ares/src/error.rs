@@ -392,6 +392,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::clone_on_copy)]
     fn clone_and_copy() {
         let error = Error::EBADNAME;
         let cloned = error.clone();

@@ -1,0 +1,38 @@
+[package]
+name = "c-ares-resolver"
+version = "11.0.0"
+description = """
+An asynchronous DNS resolver, backed by c-ares.
+"""
+documentation = "https://docs.rs/c-ares-resolver"
+readme = "README.md"
+keywords = ["DNS", "c-ares", "futures"]
+categories = ["asynchronous", "network-programming"]
+include = [
+  "/CHANGELOG.md",
+  "/LICENSE.txt",
+  "/README.md",
+  "/build.rs",
+  "/src",
+]
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[package.metadata.docs.rs]
+features = ["vendored"]
+
+[dependencies]
+c-ares = { version = "12.0.0", path = "../c-ares", default-features = false }
+c-ares-sys = { version = "11.0.0", path = "../c-ares-sys", default-features = false }
+futures-channel = "0.3.9"
+polling = "3.1.0"
+
+[dev-dependencies]
+futures-executor = "0.3.9"
+
+[features]
+default = ["maybe-vendored"]
+vendored = ["c-ares/vendored"]
+maybe-vendored = ["c-ares/maybe-vendored"]
+build-cmake = ["c-ares/build-cmake"]

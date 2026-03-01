@@ -84,4 +84,9 @@ jobs:
           cargo run -p c-ares --example epoll
           cargo run -p c-ares --example select
           cargo run -p c-ares --example version
-        name: Run examples
+        name: Run c-ares examples
+      - run: |
+          cargo run -p c-ares-resolver --example blocking
+          cargo run -p c-ares-resolver --example callback
+          cargo run -p c-ares-resolver --example futures
+        name: Run c-ares-resolver examples

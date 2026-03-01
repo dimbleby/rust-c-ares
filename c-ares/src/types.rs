@@ -66,6 +66,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::clone_on_copy)]
     fn address_family_clone_copy() {
         let af = AddressFamily::INET;
         let cloned = af.clone();
@@ -91,6 +92,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::clone_on_copy)]
     fn address_family_ord() {
         let families = [
             AddressFamily::INET,

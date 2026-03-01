@@ -92,7 +92,7 @@ mod tests {
 
     #[test]
     fn from_io_error() {
-        let io_err = io::Error::new(io::ErrorKind::Other, "test");
+        let io_err = io::Error::other("test");
         let err: Error = io_err.into();
         assert!(matches!(err, Error::Io(_)));
     }
@@ -106,7 +106,7 @@ mod tests {
 
     #[test]
     fn debug_format() {
-        let io_err = io::Error::new(io::ErrorKind::Other, "test");
+        let io_err = io::Error::other("test");
         let err = Error::Io(io_err);
         let debug = format!("{:?}", err);
         assert!(debug.contains("Io"));

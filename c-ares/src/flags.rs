@@ -124,6 +124,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::clone_on_copy)]
     fn clone_eq_hash() {
         let flags = Flags::USEVC | Flags::PRIMARY;
         let cloned = flags.clone();

@@ -39,4 +39,4 @@ fn main() {
 ```
 
 Further example programs can be found
-[here](https://github.com/dimbleby/rust-c-ares/tree/main/c-ares-reolver/examples).
+[here](https://github.com/dimbleby/rust-c-ares/tree/main/c-ares-resolver/examples).

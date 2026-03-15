@@ -40,6 +40,7 @@ macro_rules! ares_search {
 macro_rules! ares_callback {
     ($arg:expr, $status:expr, $abuf:expr, $alen:expr, $parser:expr) => {{
         let result = if $status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
+            debug_assert!($alen >= 0, "ares_callback received negative alen on success");
             let data = unsafe { slice::from_raw_parts($abuf, $alen as usize) };
             $parser(data)
         } else {

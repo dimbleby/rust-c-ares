@@ -214,8 +214,7 @@ impl Options {
     {
         let boxed_callback: Arc<Mutex<F>> = Arc::new(Mutex::new(callback));
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
-        self.ares_options.sock_state_cb_data =
-            Arc::as_ptr(&boxed_callback).cast_mut().cast();
+        self.ares_options.sock_state_cb_data = Arc::as_ptr(&boxed_callback).cast_mut().cast();
         self.socket_state_callback = Some(boxed_callback);
         self.optmask |= c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         self
@@ -1293,7 +1292,9 @@ impl Drop for Channel {
         let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
         unsafe { c_ares_sys::ares_library_cleanup() }
         std::mem::drop(ares_library_lock);
-        panic::propagate();
+        if !std::thread::panicking() {
+            panic::propagate();
+        }
     }
 }
 

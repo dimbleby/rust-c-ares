@@ -1344,7 +1344,7 @@ where
 {
     let mutex = unsafe { &*data.cast::<Mutex<F>>() };
     let mut handler = mutex.lock().unwrap();
-    panic::catch(|| handler());
+    panic::catch(|| (*handler)());
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as returned by

@@ -30,7 +30,9 @@ pub struct BlockingResolver {
 macro_rules! blockify {
     ($resolver:expr, $query:ident, $question:expr) => {{
         let (tx, rx) = mpsc::sync_channel(1);
-        $resolver.$query($question, move |result| { let _ = tx.send(result); });
+        $resolver.$query($question, move |result| {
+            let _ = tx.send(result);
+        });
         rx.recv().unwrap()
     }};
 }

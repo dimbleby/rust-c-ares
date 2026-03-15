@@ -259,7 +259,10 @@ pub fn expand_string(encoded: &[u8], abuf: &[u8]) -> Result<(AresBuf, usize)> {
 
     // enclen includes the 1-byte length prefix; the decoded data is the rest.
     // We cannot use CStr::from_ptr because the data may contain embedded nulls.
-    debug_assert!(enclen >= 1, "ares_expand_string returned enclen < 1 on success");
+    debug_assert!(
+        enclen >= 1,
+        "ares_expand_string returned enclen < 1 on success"
+    );
     let len = (enclen - 1) as usize;
     Ok((AresBuf::new(s, len), enclen as usize))
 }

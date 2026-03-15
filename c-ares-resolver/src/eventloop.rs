@@ -33,7 +33,7 @@ impl EventLoopStopper {
 impl Drop for EventLoopStopper {
     fn drop(&mut self) {
         self.quit.store(true, Ordering::Release);
-        self.poller.notify().expect("Failed to notify poller");
+        let _ = self.poller.notify();
     }
 }
 

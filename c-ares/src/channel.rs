@@ -46,13 +46,13 @@ use std::sync::Mutex;
 // ares_library_init is not thread-safe, so we put a lock around it.
 static ARES_LIBRARY_LOCK: Mutex<()> = Mutex::new(());
 
-type SocketStateCallback = dyn FnMut(Socket, bool, bool) + Send + 'static;
+type SocketStateCallback = Mutex<dyn FnMut(Socket, bool, bool) + Send + 'static>;
 
 #[cfg(cares1_29)]
-type ServerStateCallback = dyn FnMut(&str, bool, ServerStateFlags) + Send + 'static;
+type ServerStateCallback = Mutex<dyn FnMut(&str, bool, ServerStateFlags) + Send + 'static>;
 
 #[cfg(cares1_34)]
-type PendingWriteCallback = dyn FnMut() + Send + 'static;
+type PendingWriteCallback = Mutex<dyn FnMut() + Send + 'static>;
 
 /// Server failover options.
 ///
@@ -212,9 +212,10 @@ impl Options {
     where
         F: FnMut(Socket, bool, bool) + Send + 'static,
     {
-        let boxed_callback = Arc::new(callback);
+        let boxed_callback: Arc<Mutex<F>> = Arc::new(Mutex::new(callback));
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
-        self.ares_options.sock_state_cb_data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
+        self.ares_options.sock_state_cb_data =
+            Arc::as_ptr(&boxed_callback).cast_mut().cast();
         self.socket_state_callback = Some(boxed_callback);
         self.optmask |= c_ares_sys::ARES_OPT_SOCK_STATE_CB;
         self
@@ -569,8 +570,8 @@ impl Channel {
     where
         F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
     {
-        let boxed_callback = Arc::new(callback);
-        let data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
+        let boxed_callback: Arc<Mutex<F>> = Arc::new(Mutex::new(callback));
+        let data = Arc::as_ptr(&boxed_callback).cast_mut().cast();
         unsafe {
             c_ares_sys::ares_set_server_state_callback(
                 self.ares_channel,
@@ -589,8 +590,8 @@ impl Channel {
     where
         F: FnMut() + Send + 'static,
     {
-        let boxed_callback = Arc::new(callback);
-        let data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
+        let boxed_callback: Arc<Mutex<F>> = Arc::new(Mutex::new(callback));
+        let data = Arc::as_ptr(&boxed_callback).cast_mut().cast();
         unsafe {
             c_ares_sys::ares_set_pending_write_cb(
                 self.ares_channel,
@@ -1309,8 +1310,8 @@ unsafe extern "C" fn socket_state_callback<F>(
 ) where
     F: FnMut(Socket, bool, bool) + Send + 'static,
 {
-    let handler = data.cast::<F>();
-    let handler = unsafe { &mut *handler };
+    let mutex = unsafe { &*data.cast::<Mutex<F>>() };
+    let mut handler = mutex.lock().unwrap();
     panic::catch(|| handler(socket_fd, readable != 0, writable != 0));
 }
 
@@ -1323,8 +1324,8 @@ unsafe extern "C" fn server_state_callback<F>(
 ) where
     F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
 {
-    let handler = data.cast::<F>();
-    let handler = unsafe { &mut *handler };
+    let mutex = unsafe { &*data.cast::<Mutex<F>>() };
+    let mut handler = mutex.lock().unwrap();
     let server = unsafe { c_string_as_str_unchecked(server_string) };
     panic::catch(|| {
         handler(
@@ -1340,9 +1341,9 @@ unsafe extern "C" fn pending_write_callback<F>(data: *mut c_void)
 where
     F: FnMut() + Send + 'static,
 {
-    let handler = data.cast::<F>();
-    let handler = unsafe { &mut *handler };
-    panic::catch(handler);
+    let mutex = unsafe { &*data.cast::<Mutex<F>>() };
+    let mut handler = mutex.lock().unwrap();
+    panic::catch(|| handler());
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as returned by

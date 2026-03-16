@@ -46,13 +46,13 @@ use std::sync::Mutex;
 // ares_library_init is not thread-safe, so we put a lock around it.
 static ARES_LIBRARY_LOCK: Mutex<()> = Mutex::new(());
 
-type SocketStateCallback = dyn FnMut(Socket, bool, bool) + Send + 'static;
+type SocketStateCallback = dyn Fn(Socket, bool, bool) + Send + 'static;
 
 #[cfg(cares1_29)]
-type ServerStateCallback = dyn FnMut(&str, bool, ServerStateFlags) + Send + 'static;
+type ServerStateCallback = dyn Fn(&str, bool, ServerStateFlags) + Send + 'static;
 
 #[cfg(cares1_34)]
-type PendingWriteCallback = dyn FnMut() + Send + 'static;
+type PendingWriteCallback = dyn Fn() + Send + 'static;
 
 /// Server failover options.
 ///
@@ -210,7 +210,7 @@ impl Options {
     /// - `write` is set to true if the socket should listen for write events.
     pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
     where
-        F: FnMut(Socket, bool, bool) + Send + 'static,
+        F: Fn(Socket, bool, bool) + Send + 'static,
     {
         let boxed_callback = Arc::new(callback);
         self.ares_options.sock_state_cb = Some(socket_state_callback::<F>);
@@ -567,7 +567,7 @@ impl Channel {
     #[cfg(cares1_29)]
     pub fn set_server_state_callback<F>(&mut self, callback: F) -> &mut Self
     where
-        F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
+        F: Fn(&str, bool, ServerStateFlags) + Send + 'static,
     {
         let boxed_callback = Arc::new(callback);
         let data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
@@ -587,7 +587,7 @@ impl Channel {
     #[cfg(cares1_34)]
     pub fn set_pending_write_callback<F>(&mut self, callback: F) -> &mut Self
     where
-        F: FnMut() + Send + 'static,
+        F: Fn() + Send + 'static,
     {
         let boxed_callback = Arc::new(callback);
         let data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
@@ -1309,10 +1309,10 @@ unsafe extern "C" fn socket_state_callback<F>(
     readable: c_int,
     writable: c_int,
 ) where
-    F: FnMut(Socket, bool, bool) + Send + 'static,
+    F: Fn(Socket, bool, bool) + Send + 'static,
 {
     let handler = data.cast::<F>();
-    let handler = unsafe { &mut *handler };
+    let handler = unsafe { &*handler };
     panic::catch(|| handler(socket_fd, readable != 0, writable != 0));
 }
 
@@ -1323,10 +1323,10 @@ unsafe extern "C" fn server_state_callback<F>(
     flags: c_int,
     data: *mut c_void,
 ) where
-    F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
+    F: Fn(&str, bool, ServerStateFlags) + Send + 'static,
 {
     let handler = data.cast::<F>();
-    let handler = unsafe { &mut *handler };
+    let handler = unsafe { &*handler };
     let server = unsafe { c_string_as_str_unchecked(server_string) };
     panic::catch(|| {
         handler(
@@ -1340,10 +1340,10 @@ unsafe extern "C" fn server_state_callback<F>(
 #[cfg(cares1_34)]
 unsafe extern "C" fn pending_write_callback<F>(data: *mut c_void)
 where
-    F: FnMut() + Send + 'static,
+    F: Fn() + Send + 'static,
 {
     let handler = data.cast::<F>();
-    let handler = unsafe { &mut *handler };
+    let handler = unsafe { &*handler };
     panic::catch(handler);
 }
 

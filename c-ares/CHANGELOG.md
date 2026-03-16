@@ -11,7 +11,9 @@
   - `Options::set_hosts_path`
   - `Channel::set_local_device`
 - Wrap the "new" \- but really not so new any more \- c-ares APIs, based around
-  a `DnsRecord` type.
+  a `DnsRecord` type
+- Callbacks must be `Fn`, not `FnMut`, fixing a possible soundness bug around
+  cloning a channel
 
 ## 12.0.0 (14 December 2025)
 

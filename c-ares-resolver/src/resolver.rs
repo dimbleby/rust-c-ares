@@ -270,7 +270,7 @@ impl Resolver {
     #[cfg(cares1_29)]
     pub fn set_server_state_callback<F>(&self, callback: F) -> &Self
     where
-        F: FnMut(&str, bool, ServerStateFlags) + Send + 'static,
+        F: Fn(&str, bool, ServerStateFlags) + Send + 'static,
     {
         self.ares_channel
             .lock()

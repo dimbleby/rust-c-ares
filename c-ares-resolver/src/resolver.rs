@@ -604,15 +604,14 @@ impl Resolver {
     ///
     /// On completion, `handler` is called with the result.
     #[cfg(cares1_28)]
-    pub fn send_dnsrec<F>(&self, dnsrec: &c_ares::DnsRecord, handler: F) -> c_ares::Result<()>
+    pub fn send_dnsrec<F>(&self, dnsrec: &c_ares::DnsRecord, handler: F) -> c_ares::Result<u16>
     where
         F: FnOnce(c_ares::Result<&c_ares::DnsRecord>) + Send + 'static,
     {
         self.ares_channel
             .lock()
             .unwrap()
-            .send_dnsrec(dnsrec, handler)?;
-        Ok(())
+            .send_dnsrec(dnsrec, handler)
     }
 
     /// Initiate a DNS query for `name` with the given class and type, receiving a parsed
@@ -624,15 +623,14 @@ impl Resolver {
         dns_class: c_ares::DnsCls,
         query_type: c_ares::DnsRecordType,
         handler: F,
-    ) -> c_ares::Result<()>
+    ) -> c_ares::Result<u16>
     where
         F: FnOnce(c_ares::Result<&c_ares::DnsRecord>) + Send + 'static,
     {
         self.ares_channel
             .lock()
             .unwrap()
-            .query_dnsrec(name, dns_class, query_type, handler)?;
-        Ok(())
+            .query_dnsrec(name, dns_class, query_type, handler)
     }
 
     /// Initiate a series of DNS queries using a pre-built [`c_ares::DnsRecord`], receiving a

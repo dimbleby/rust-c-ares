@@ -570,7 +570,7 @@ impl Channel {
         F: Fn(&str, bool, ServerStateFlags) + Send + 'static,
     {
         let boxed_callback = Arc::new(callback);
-        let data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
+        let data = Arc::as_ptr(&boxed_callback).cast_mut().cast();
         unsafe {
             c_ares_sys::ares_set_server_state_callback(
                 self.ares_channel,
@@ -590,7 +590,7 @@ impl Channel {
         F: Fn() + Send + 'static,
     {
         let boxed_callback = Arc::new(callback);
-        let data = ptr::from_ref(&*boxed_callback).cast_mut().cast();
+        let data = Arc::as_ptr(&boxed_callback).cast_mut().cast();
         unsafe {
             c_ares_sys::ares_set_pending_write_cb(
                 self.ares_channel,

@@ -13,6 +13,7 @@
   - `FutureResolver::set_local_device`
 - Wrap the "new" \- but really not so new any more \- c-ares APIs, based around
   a `DnsRecord` type.
+- Callbacks must be `Fn`, not `FnMut`, fixing a possible soundness bug around
 
 ## 11.0.0 (14 December 2025)
 

@@ -66,7 +66,7 @@ mod example {
                         }
                         c_ares::DnsRecordType::TXT => {
                             for (j, data) in rr.abins(c_ares::DnsRrKey::TXT_DATA).enumerate() {
-                                let text = String::from_utf8_lossy(data);
+                                let text = std::str::from_utf8(data).unwrap_or("<not utf-8>");
                                 println!("       TXT[{}]: {}", j, text);
                             }
                         }

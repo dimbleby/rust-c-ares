@@ -41,8 +41,8 @@ mod inner {
                 let tag = rr.get_str(DnsRrKey::CAA_TAG).unwrap_or("<none>");
                 let value = rr
                     .get_bin(DnsRrKey::CAA_VALUE)
-                    .map(String::from_utf8_lossy)
-                    .unwrap_or_else(|| "<invalid UTF-8>".into());
+                    .and_then(|b| std::str::from_utf8(b).ok())
+                    .unwrap_or("<not utf-8>");
                 println!("      Critical: {critical}, Tag: {tag}, Value: {value}");
             }
             DnsRecordType::CNAME => {
@@ -165,7 +165,7 @@ mod inner {
             }
             DnsRecordType::TXT => {
                 for (j, data) in rr.abins(DnsRrKey::TXT_DATA).enumerate() {
-                    let text = String::from_utf8_lossy(data);
+                    let text = std::str::from_utf8(data).unwrap_or("<not utf-8>");
                     println!("      TXT[{j}]: {text}");
                 }
             }

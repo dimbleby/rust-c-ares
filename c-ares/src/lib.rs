@@ -19,7 +19,7 @@
 //! - Have `c-ares` tell you what file descriptors to listen on for read and / or write events.
 //!   You can do this either by providing a callback, which is called whenever the set of
 //!   interesting file descriptors changes, or by querying the `Channel` directly either with
-//!   `get_sock()` or with `fds()`.
+//!   `sockets()` or with `fds()`.
 //!
 //! - Do as `c-ares` asks.  That is, listen for the events that it requests, on the file
 //!   descriptors that it cares about.
@@ -73,7 +73,7 @@ pub use crate::aaaa::{AAAAResult, AAAAResults, AAAAResultsIter};
 pub use crate::caa::{CAAResult, CAAResults, CAAResultsIter};
 #[cfg(cares1_29)]
 pub use crate::channel::ServerFailoverOptions;
-pub use crate::channel::{Channel, GetSock, GetSockIter, Options};
+pub use crate::channel::{Channel, Options, Sockets, SocketsIter};
 pub use crate::cname::CNameResults;
 #[cfg(cares1_28)]
 pub use crate::dns::{

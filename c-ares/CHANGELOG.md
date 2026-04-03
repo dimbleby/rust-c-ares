@@ -14,6 +14,8 @@
 - Rename `NAPTRResult::reg_exp()` to `regexp()`
 - Rename `get_servers()` to `servers()` and return `Vec<String>` instead of
   `AresString`
+- Rename `get_sock()` to `sockets()`, `GetSock` to `Sockets`, `GetSockIter`
+  to `SocketsIter`
 - Derive Debug where it was previously missing
 - Return errors instead of panicking when string arguments contain null bytes.
   The following methods now return `Result`s:

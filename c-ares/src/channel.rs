@@ -481,7 +481,7 @@ impl Channel {
 
     /// Retrieve the set of socket descriptors which the calling application should wait on for
     /// reading and / or writing.
-    pub fn get_sock(&self) -> GetSock {
+    pub fn sockets(&self) -> Sockets {
         let mut socks = [0; c_ares_sys::ARES_GETSOCK_MAXNUM];
         let bitmask = unsafe {
             c_ares_sys::ares_getsock(
@@ -490,7 +490,7 @@ impl Channel {
                 c_ares_sys::ARES_GETSOCK_MAXNUM as c_int,
             )
         };
-        GetSock::new(socks, bitmask as u32)
+        Sockets::new(socks, bitmask as u32)
     }
 
     /// Retrieve the set of socket descriptors which the calling application should wait on for
@@ -1367,26 +1367,29 @@ where
 }
 
 /// Information about the set of sockets that `c-ares` is interested in, as returned by
-/// `get_sock()`.
+/// `sockets()`.
 #[derive(Clone, Copy, Debug)]
-pub struct GetSock {
-    socks: [c_ares_sys::ares_socket_t; c_ares_sys::ARES_GETSOCK_MAXNUM],
+pub struct Sockets {
+    sockets: [c_ares_sys::ares_socket_t; c_ares_sys::ARES_GETSOCK_MAXNUM],
     bitmask: u32,
 }
 
-impl GetSock {
+impl Sockets {
     fn new(
         socks: [c_ares_sys::ares_socket_t; c_ares_sys::ARES_GETSOCK_MAXNUM],
         bitmask: u32,
     ) -> Self {
-        GetSock { socks, bitmask }
+        Sockets {
+            sockets: socks,
+            bitmask,
+        }
     }
 
     /// Returns an iterator over the sockets that `c-ares` is interested in.
-    pub fn iter(&self) -> GetSockIter<'_> {
-        GetSockIter {
+    pub fn iter(&self) -> SocketsIter<'_> {
+        SocketsIter {
             next: 0,
-            getsock: self,
+            sockets: self,
         }
     }
 }
@@ -1395,12 +1398,12 @@ impl GetSock {
 ///
 /// Iterator items are `(socket, readable, writable)`.
 #[derive(Clone, Copy, Debug)]
-pub struct GetSockIter<'a> {
+pub struct SocketsIter<'a> {
     next: usize,
-    getsock: &'a GetSock,
+    sockets: &'a Sockets,
 }
 
-impl Iterator for GetSockIter<'_> {
+impl Iterator for SocketsIter<'_> {
     type Item = (Socket, bool, bool);
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.next;
@@ -1409,11 +1412,11 @@ impl Iterator for GetSockIter<'_> {
             None
         } else {
             let bit = 1 << index;
-            let readable = (self.getsock.bitmask & bit) != 0;
+            let readable = (self.sockets.bitmask & bit) != 0;
             let bit = bit << c_ares_sys::ARES_GETSOCK_MAXNUM;
-            let writable = (self.getsock.bitmask & bit) != 0;
+            let writable = (self.sockets.bitmask & bit) != 0;
             if readable || writable {
-                let fd = self.getsock.socks[index];
+                let fd = self.sockets.sockets[index];
                 Some((fd, readable, writable))
             } else {
                 None
@@ -1422,9 +1425,9 @@ impl Iterator for GetSockIter<'_> {
     }
 }
 
-impl<'a> IntoIterator for &'a GetSock {
+impl<'a> IntoIterator for &'a Sockets {
     type Item = (Socket, bool, bool);
-    type IntoIter = GetSockIter<'a>;
+    type IntoIter = SocketsIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -1651,10 +1654,10 @@ mod tests {
     }
 
     #[test]
-    fn channel_get_sock() {
+    fn channel_sockets() {
         let channel = Channel::new().unwrap();
-        let get_sock = channel.get_sock();
-        assert_eq!(get_sock.iter().count(), 0);
+        let sockets = channel.sockets();
+        assert_eq!(sockets.iter().count(), 0);
     }
 
     #[test]
@@ -1747,60 +1750,60 @@ mod tests {
     }
 
     #[test]
-    fn get_sock_iter_empty() {
+    fn sockets_iter_empty() {
         let channel = Channel::new().unwrap();
-        let get_sock = channel.get_sock();
-        let mut iter = get_sock.iter();
+        let sockets = channel.sockets();
+        let mut iter = sockets.iter();
         assert!(iter.next().is_none());
     }
 
     #[test]
     #[allow(clippy::clone_on_copy)]
-    fn get_sock_iter_clone() {
+    fn sockets_iter_clone() {
         let channel = Channel::new().unwrap();
-        let get_sock = channel.get_sock();
-        let iter = get_sock.iter();
+        let sockets = channel.sockets();
+        let iter = sockets.iter();
         let _cloned = iter.clone();
     }
 
     #[test]
-    fn get_sock_is_send() {
+    fn sockets_is_send() {
         fn assert_send<T: Send>() {}
-        assert_send::<GetSock>();
+        assert_send::<Sockets>();
     }
 
     #[test]
-    fn get_sock_is_sync() {
+    fn sockets_is_sync() {
         fn assert_sync<T: Sync>() {}
-        assert_sync::<GetSock>();
+        assert_sync::<Sockets>();
     }
 
     #[test]
-    fn get_sock_iter_is_send() {
+    fn sockets_iter_is_send() {
         fn assert_send<T: Send>() {}
-        assert_send::<GetSockIter<'_>>();
+        assert_send::<SocketsIter<'_>>();
     }
 
     #[test]
-    fn get_sock_iter_is_sync() {
+    fn sockets_iter_is_sync() {
         fn assert_sync<T: Sync>() {}
-        assert_sync::<GetSockIter<'_>>();
+        assert_sync::<SocketsIter<'_>>();
     }
 
     #[test]
-    fn get_sock_into_iter() {
+    fn sockets_into_iter() {
         let channel = Channel::new().unwrap();
-        let get_sock = channel.get_sock();
+        let sockets = channel.sockets();
         // Use the IntoIterator implementation - empty channel should have no sockets
-        assert_eq!(get_sock.into_iter().count(), 0);
+        assert_eq!(sockets.into_iter().count(), 0);
     }
 
     #[test]
-    fn get_sock_iter_exhausted() {
+    fn sockets_iter_exhausted() {
         // Test that GetSockIter returns None when index >= ARES_GETSOCK_MAXNUM
         let channel = Channel::new().unwrap();
-        let get_sock = channel.get_sock();
-        let mut iter = get_sock.iter();
+        let sockets = channel.sockets();
+        let mut iter = sockets.iter();
         // Exhaust the iterator
         while iter.next().is_some() {}
         // After exhaustion, should continue returning None
@@ -1809,35 +1812,35 @@ mod tests {
     }
 
     #[test]
-    fn get_sock_debug() {
+    fn sockets_debug() {
         let channel = Channel::new().unwrap();
-        let get_sock = channel.get_sock();
-        let debug_str = format!("{:?}", get_sock);
-        assert!(debug_str.contains("GetSock"));
+        let sockets = channel.sockets();
+        let debug_str = format!("{:?}", sockets);
+        assert!(debug_str.contains("Sockets"));
     }
 
     #[test]
-    fn get_sock_iter_debug() {
+    fn sockets_iter_debug() {
         let channel = Channel::new().unwrap();
-        let get_sock = channel.get_sock();
-        let iter = get_sock.iter();
+        let sockets = channel.sockets();
+        let iter = sockets.iter();
         let debug_str = format!("{:?}", iter);
-        assert!(debug_str.contains("GetSockIter"));
+        assert!(debug_str.contains("SocketsIter"));
     }
 
     #[test]
     #[allow(clippy::clone_on_copy)]
-    fn get_sock_clone() {
+    fn sockets_clone() {
         let channel = Channel::new().unwrap();
-        let get_sock = channel.get_sock();
-        let _cloned = get_sock.clone();
+        let sockets = channel.sockets();
+        let _cloned = sockets.clone();
     }
 
     #[test]
-    fn get_sock_copy() {
+    fn sockets_copy() {
         let channel = Channel::new().unwrap();
-        let get_sock = channel.get_sock();
-        let copied: GetSock = get_sock;
+        let sockets = channel.sockets();
+        let copied: Sockets = sockets;
         let _ = copied;
     }
 

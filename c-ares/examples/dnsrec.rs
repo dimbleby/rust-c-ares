@@ -130,7 +130,7 @@ mod example {
         let mut tracked_fds = HashSet::<c_ares::Socket>::new();
         loop {
             let mut new_tracked_fds = HashSet::new();
-            for (fd, readable, writable) in &ares_channel.get_sock() {
+            for (fd, readable, writable) in &ares_channel.sockets() {
                 let borrowed_fd = unsafe { BorrowedFd::borrow_raw(fd) };
                 let mut interest = EpollFlags::empty();
                 if readable {

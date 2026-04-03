@@ -14,8 +14,8 @@ pub fn process_channel(channel: &mut Channel, timeout: Duration) {
             break;
         }
 
-        let get_sock = channel.get_sock();
-        let socks: Vec<_> = get_sock.iter().collect();
+        let sockets = channel.sockets();
+        let socks: Vec<_> = sockets.iter().collect();
 
         if socks.is_empty() {
             break;

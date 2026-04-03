@@ -216,16 +216,21 @@ pub fn thread_safety() -> bool {
 
 /// Expand a DNS-encoded domain name from a DNS message.
 ///
-/// `encoded` must point within the message buffer `abuf`.  Returns the
-/// expanded name and the number of bytes consumed from the encoded input.
-pub fn expand_name(encoded: &[u8], abuf: &[u8]) -> Result<(AresString, usize)> {
+/// The encoded name starts at `buf[offset]`.  Returns the expanded name and
+/// the number of bytes consumed from the encoded input.
+///
+/// # Panics
+///
+/// Panics if `offset` is out of bounds.
+pub fn expand_name(buf: &[u8], offset: usize) -> Result<(AresString, usize)> {
+    let encoded = &buf[offset..];
     let mut s: *mut c_char = std::ptr::null_mut();
     let mut enclen: core::ffi::c_long = 0;
     let status = unsafe {
         c_ares_sys::ares_expand_name(
             encoded.as_ptr(),
-            abuf.as_ptr(),
-            abuf.len() as c_int,
+            buf.as_ptr(),
+            buf.len() as c_int,
             &mut s,
             &mut enclen,
         )
@@ -238,17 +243,21 @@ pub fn expand_name(encoded: &[u8], abuf: &[u8]) -> Result<(AresString, usize)> {
 
 /// Expand a single DNS-encoded string from a DNS message.
 ///
-/// `encoded` must point within the message buffer `abuf`.  Returns the
-/// expanded string as bytes and the number of bytes consumed from the encoded
-/// input.
-pub fn expand_string(encoded: &[u8], abuf: &[u8]) -> Result<(AresBuf, usize)> {
+/// The encoded string starts at `buf[offset]`.  Returns the expanded string
+/// as bytes and the number of bytes consumed from the encoded input.
+///
+/// # Panics
+///
+/// Panics if `offset` is out of bounds.
+pub fn expand_string(buf: &[u8], offset: usize) -> Result<(AresBuf, usize)> {
+    let encoded = &buf[offset..];
     let mut s: *mut core::ffi::c_uchar = std::ptr::null_mut();
     let mut enclen: core::ffi::c_long = 0;
     let status = unsafe {
         c_ares_sys::ares_expand_string(
             encoded.as_ptr(),
-            abuf.as_ptr(),
-            abuf.len() as c_int,
+            buf.as_ptr(),
+            buf.len() as c_int,
             &mut s,
             &mut enclen,
         )
@@ -326,7 +335,7 @@ mod tests {
         // A minimal DNS-like buffer containing the encoded name
         // "\x07example\x03com\x00" at offset 0.
         let buf: &[u8] = b"\x07example\x03com\x00";
-        let (name, enclen) = expand_name(buf, buf).expect("expand_name");
+        let (name, enclen) = expand_name(buf, 0).expect("expand_name");
         assert_eq!(&*name, "example.com");
         assert_eq!(enclen, buf.len());
     }
@@ -335,14 +344,21 @@ mod tests {
     fn expand_name_invalid() {
         // A truncated buffer should fail
         let buf: &[u8] = b"\x07exam";
-        assert!(expand_name(buf, buf).is_err());
+        assert!(expand_name(buf, 0).is_err());
+    }
+
+    #[test]
+    #[should_panic]
+    fn expand_name_out_of_bounds() {
+        let buf: &[u8] = b"\x07example\x03com\x00";
+        let _ = expand_name(buf, buf.len() + 1);
     }
 
     #[test]
     fn expand_string_simple() {
         // A length-prefixed string: \x05hello
         let buf: &[u8] = b"\x05hello";
-        let (data, enclen) = expand_string(buf, buf).expect("expand_string");
+        let (data, enclen) = expand_string(buf, 0).expect("expand_string");
         assert_eq!(&*data, b"hello");
         assert_eq!(enclen, buf.len());
     }
@@ -351,16 +367,23 @@ mod tests {
     fn expand_string_invalid() {
         // Length prefix says 10 but only 3 bytes follow
         let buf: &[u8] = b"\x0aabc";
-        assert!(expand_string(buf, buf).is_err());
+        assert!(expand_string(buf, 0).is_err());
     }
 
     #[test]
     fn expand_string_embedded_null() {
         // Binary data with an embedded null: length 4, then "a\x00bc"
         let buf: &[u8] = b"\x04a\x00bc";
-        let (data, enclen) = expand_string(buf, buf).expect("expand_string");
+        let (data, enclen) = expand_string(buf, 0).expect("expand_string");
         assert_eq!(&*data, b"a\x00bc");
         assert_eq!(data.len(), 4);
         assert_eq!(enclen, buf.len());
+    }
+
+    #[test]
+    #[should_panic]
+    fn expand_string_out_of_bounds() {
+        let buf: &[u8] = b"\x05hello";
+        let _ = expand_string(buf, buf.len() + 1);
     }
 }

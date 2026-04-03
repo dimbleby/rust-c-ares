@@ -276,12 +276,16 @@ impl Options {
         Ok(self)
     }
 
-    /// Set the maximum number of udp queries that can be sent on a single ephemeral port to a
-    /// given DNS server before a new ephemeral port is assigned.  Any value of 0 or less will be
-    /// considered unlimited, and is the default.
+    /// Set the maximum number of UDP queries that can be sent on a single ephemeral port to a
+    /// given DNS server before a new ephemeral port is assigned.
+    ///
+    /// Pass `None` for unlimited (the default).
     #[cfg(cares1_20)]
-    pub fn set_udp_max_queries(&mut self, udp_max_queries: i32) -> &mut Self {
-        self.ares_options.udp_max_queries = udp_max_queries;
+    pub fn set_udp_max_queries(&mut self, udp_max_queries: Option<u32>) -> &mut Self {
+        self.ares_options.udp_max_queries = match udp_max_queries {
+            None => 0,
+            Some(n) => n as i32,
+        };
         self.optmask |= c_ares_sys::ARES_OPT_UDP_MAX_QUERIES;
         self
     }
@@ -1519,7 +1523,7 @@ mod tests {
     #[test]
     fn options_set_udp_max_queries() {
         let mut options = Options::new();
-        options.set_udp_max_queries(100);
+        options.set_udp_max_queries(Some(100));
     }
 
     #[cfg(cares1_22)]

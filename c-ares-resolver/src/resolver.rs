@@ -126,11 +126,12 @@ impl Options {
         Ok(self)
     }
 
-    /// Set the maximum number of udp queries that can be sent on a single ephemeral port to a
-    /// given DNS server before a new ephemeral port is assigned.  Any value of 0 or less will be
-    /// considered unlimited, and is the default.
+    /// Set the maximum number of UDP queries that can be sent on a single ephemeral port to a
+    /// given DNS server before a new ephemeral port is assigned.
+    ///
+    /// Pass `None` for unlimited (the default).
     #[cfg(cares1_20)]
-    pub fn set_udp_max_queries(&mut self, udp_max_queries: i32) -> &mut Self {
+    pub fn set_udp_max_queries(&mut self, udp_max_queries: Option<u32>) -> &mut Self {
         self.inner.set_udp_max_queries(udp_max_queries);
         self
     }
@@ -817,7 +818,7 @@ mod tests {
     #[cfg(cares1_20)]
     fn options_set_udp_max_queries() {
         let mut options = Options::new();
-        let result = options.set_udp_max_queries(100);
+        let result = options.set_udp_max_queries(Some(100));
         assert!(std::ptr::eq(result, &options));
     }
 

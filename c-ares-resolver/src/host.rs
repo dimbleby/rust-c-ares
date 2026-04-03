@@ -1,3 +1,4 @@
+use std::fmt;
 use std::net::IpAddr;
 
 /// An owned version of `c_ares::HostResults`.
@@ -23,6 +24,19 @@ impl From<c_ares::HostResults<'_>> for HostResults {
                 .map(std::borrow::ToOwned::to_owned)
                 .collect(),
         }
+    }
+}
+
+impl fmt::Display for HostResults {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "Hostname: {}, ", self.hostname)?;
+        for address in &self.addresses {
+            write!(fmt, "Address: {address}, ")?;
+        }
+        for alias in &self.aliases {
+            write!(fmt, "Alias: {alias}, ")?;
+        }
+        Ok(())
     }
 }
 
@@ -139,5 +153,17 @@ mod tests {
         };
         assert_eq!(results.addresses.len(), 2);
         assert_eq!(results.aliases.len(), 1);
+    }
+
+    #[test]
+    fn host_results_display() {
+        let results = HostResults {
+            hostname: "example.com".to_string(),
+            addresses: vec!["127.0.0.1".parse().unwrap()],
+            aliases: vec!["www.example.com".to_string()],
+        };
+        let display = format!("{results}");
+        assert!(display.contains("example.com"));
+        assert!(display.contains("127.0.0.1"));
     }
 }

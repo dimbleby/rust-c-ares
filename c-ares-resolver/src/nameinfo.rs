@@ -1,3 +1,5 @@
+use std::fmt;
+
 /// An owned version of `c_ares::NameInfoResult`.
 #[derive(Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub struct NameInfoResult {
@@ -14,6 +16,15 @@ impl From<c_ares::NameInfoResult<'_>> for NameInfoResult {
             node: result.node().map(std::borrow::ToOwned::to_owned),
             service: result.service().map(std::borrow::ToOwned::to_owned),
         }
+    }
+}
+
+impl fmt::Display for NameInfoResult {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        let node = self.node.as_deref().unwrap_or("<None>");
+        write!(fmt, "Node: {node}, ")?;
+        let service = self.service.as_deref().unwrap_or("<None>");
+        write!(fmt, "Service: {service}")
     }
 }
 
@@ -121,5 +132,26 @@ mod tests {
         };
         assert!(result.node.is_none());
         assert!(result.service.is_none());
+    }
+
+    #[test]
+    fn name_info_result_display() {
+        let result = NameInfoResult {
+            node: Some("example.com".to_string()),
+            service: Some("https".to_string()),
+        };
+        let display = format!("{result}");
+        assert!(display.contains("example.com"));
+        assert!(display.contains("https"));
+    }
+
+    #[test]
+    fn name_info_result_display_none() {
+        let result = NameInfoResult {
+            node: None,
+            service: None,
+        };
+        let display = format!("{result}");
+        assert!(display.contains("<None>"));
     }
 }

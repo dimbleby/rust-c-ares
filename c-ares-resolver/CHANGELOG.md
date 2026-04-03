@@ -5,6 +5,8 @@
 - `queue_wait_empty()` now takes `Option<Duration>`
 - `Options::set_udp_max_queries()` now takes `Option<u32>`
 - `set_local_ipv6()` now takes `Ipv6Addr` by value
+- Rename `get_servers()` to `servers()` and return `Vec<String>` instead of
+  `AresString`
 - Return errors instead of panicking when string arguments contain null bytes.
   The following methods now return `Result`s:
   - `Options::set_domains`

@@ -5,9 +5,6 @@ use crate::host::HostResults;
 use crate::nameinfo::NameInfoResult;
 use crate::resolver::{Options, Resolver};
 
-#[cfg(cares1_24)]
-use c_ares::AresString;
-
 #[cfg(cares1_29)]
 use c_ares::ServerStateFlags;
 
@@ -68,10 +65,13 @@ impl BlockingResolver {
         Ok(self)
     }
 
-    /// Retrieves the list of servers in comma delimited format.
+    /// Retrieves the list of configured servers.
+    ///
+    /// Each entry is in `host[:port]` format, matching what [`set_servers`](Self::set_servers)
+    /// accepts.
     #[cfg(cares1_24)]
-    pub fn get_servers(&self) -> AresString {
-        self.inner.get_servers()
+    pub fn servers(&self) -> Vec<String> {
+        self.inner.servers()
     }
 
     /// Set the local IPv4 address from which to make queries.
@@ -442,10 +442,10 @@ mod tests {
 
     #[test]
     #[cfg(cares1_24)]
-    fn blocking_resolver_get_servers() {
+    fn blocking_resolver_servers() {
         let resolver = BlockingResolver::new().unwrap();
         let _ = resolver.set_servers(&["8.8.8.8"]);
-        let servers = resolver.get_servers();
+        let servers = resolver.servers();
         assert!(!servers.is_empty());
     }
 

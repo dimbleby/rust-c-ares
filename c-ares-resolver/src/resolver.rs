@@ -4,9 +4,6 @@ use std::sync::{Arc, Mutex};
 use crate::error::Error;
 use crate::eventloop::{EventLoop, EventLoopStopper};
 
-#[cfg(cares1_24)]
-use c_ares::AresString;
-
 #[cfg(cares1_29)]
 use c_ares::{ServerFailoverOptions, ServerStateFlags};
 
@@ -226,10 +223,13 @@ impl Resolver {
         Ok(self)
     }
 
-    /// Retrieves the list of servers in comma delimited format.
+    /// Retrieves the list of configured servers.
+    ///
+    /// Each entry is in `host[:port]` format, matching what [`set_servers`](Self::set_servers)
+    /// accepts.
     #[cfg(cares1_24)]
-    pub fn get_servers(&self) -> AresString {
-        self.ares_channel.lock().unwrap().get_servers()
+    pub fn servers(&self) -> Vec<String> {
+        self.ares_channel.lock().unwrap().servers()
     }
 
     /// Set the local IPv4 address from which to make queries.
@@ -925,10 +925,10 @@ mod tests {
 
     #[test]
     #[cfg(cares1_24)]
-    fn resolver_get_servers() {
+    fn resolver_servers() {
         let resolver = Resolver::new().unwrap();
         let _ = resolver.set_servers(&["8.8.8.8"]);
-        let servers = resolver.get_servers();
+        let servers = resolver.servers();
         assert!(!servers.is_empty());
     }
 

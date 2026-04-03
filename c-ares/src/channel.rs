@@ -517,11 +517,20 @@ impl Channel {
         }
     }
 
-    /// Retrieves the list of servers in comma delimited format.
+    /// Retrieves the list of configured servers.
+    ///
+    /// Each entry is in `host[:port]` format, matching what [`set_servers`](Self::set_servers)
+    /// accepts.
     #[cfg(cares1_24)]
-    pub fn get_servers(&self) -> AresString {
-        let servers = unsafe { c_ares_sys::ares_get_servers_csv(self.ares_channel) };
-        AresString::new(servers)
+    pub fn servers(&self) -> Vec<String> {
+        let csv = unsafe { c_ares_sys::ares_get_servers_csv(self.ares_channel) };
+        let csv = AresString::new(csv);
+        let csv: &str = &csv;
+        if csv.is_empty() {
+            Vec::new()
+        } else {
+            csv.split(',').map(String::from).collect()
+        }
     }
 
     /// Set the local IPv4 address from which to make queries.
@@ -1702,10 +1711,10 @@ mod tests {
 
     #[cfg(cares1_24)]
     #[test]
-    fn channel_get_servers() {
+    fn channel_servers() {
         let mut channel = Channel::new().unwrap();
         channel.set_servers(&["8.8.8.8"]).unwrap();
-        let servers = channel.get_servers();
+        let servers = channel.servers();
         assert!(!servers.is_empty());
     }
 

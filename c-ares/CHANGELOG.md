@@ -7,8 +7,8 @@
 - `Channel::queue_wait_empty()` now takes `Option<Duration>`
 - `Options::set_udp_max_queries()` now takes `Option<u32>`
 - `Ipv4Addr` and `Ipv6Addr` parameters are now passed by value consistently
-- `AresString` now implements `Display` and `AsRef<str>`
-- `AresBuf` now implements `AsRef<[u8]>`
+- `AresString` now implements `Display`, `AsRef<str>`, and `From<AresString> for String`
+- `AresBuf` now implements `AsRef<[u8]>` and `From<AresBuf> for Vec<u8>`
 - Result iterators now implement `FusedIterator`; `AResultsIter` and
   `AAAAResultsIter` also implement `ExactSizeIterator`
 - Rename `NAPTRResult::reg_exp()` to `regexp()`

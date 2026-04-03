@@ -51,6 +51,12 @@ impl AsRef<str> for AresString {
     }
 }
 
+impl From<AresString> for String {
+    fn from(s: AresString) -> Self {
+        (*s).to_owned()
+    }
+}
+
 /// A smart pointer wrapping a byte buffer as allocated by c-ares.
 pub struct AresBuf {
     buf: *mut u8,
@@ -89,6 +95,12 @@ impl fmt::Debug for AresBuf {
 impl AsRef<[u8]> for AresBuf {
     fn as_ref(&self) -> &[u8] {
         self
+    }
+}
+
+impl From<AresBuf> for Vec<u8> {
+    fn from(b: AresBuf) -> Self {
+        (*b).to_vec()
     }
 }
 
@@ -156,5 +168,23 @@ mod tests {
             .0;
         let bytes: &[u8] = data.as_ref();
         assert_eq!(bytes, b"hello");
+    }
+
+    #[test]
+    fn ares_string_into_string() {
+        let name = crate::expand_name(b"\x07example\x03com\x00", 0)
+            .expect("expand_name")
+            .0;
+        let owned: String = name.into();
+        assert_eq!(owned, "example.com");
+    }
+
+    #[test]
+    fn ares_buf_into_vec() {
+        let data = crate::expand_string(b"\x05hello", 0)
+            .expect("expand_string")
+            .0;
+        let owned: Vec<u8> = data.into();
+        assert_eq!(owned, b"hello");
     }
 }

@@ -79,6 +79,8 @@ impl<'a> IntoIterator for &'a MXResults {
     }
 }
 
+impl std::iter::FusedIterator for MXResultsIter<'_> {}
+
 impl Drop for MXResults {
     fn drop(&mut self) {
         unsafe { c_ares_sys::ares_free_data(self.mx_reply.cast()) }

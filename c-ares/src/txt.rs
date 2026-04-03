@@ -79,6 +79,8 @@ impl<'a> IntoIterator for &'a TXTResults {
     }
 }
 
+impl std::iter::FusedIterator for TXTResultsIter<'_> {}
+
 impl Drop for TXTResults {
     fn drop(&mut self) {
         unsafe { c_ares_sys::ares_free_data(self.txt_reply.cast()) }

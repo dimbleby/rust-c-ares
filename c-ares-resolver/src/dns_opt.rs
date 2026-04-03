@@ -126,7 +126,7 @@ fn parse_str_list(data: &[u8]) -> Result<Vec<String>, OptParseError> {
     let mut result = Vec::new();
     let mut pos = 0;
     while pos < data.len() {
-        let (buf, consumed) = c_ares::expand_string(&data[pos..], data)
+        let (buf, consumed) = c_ares::expand_string(data, pos)
             .map_err(|e| OptParseError(format!("invalid string in list: {e}")))?;
         let s = std::str::from_utf8(&buf)
             .map_err(|e| OptParseError(format!("invalid UTF-8 in string list: {e}")))?;
@@ -209,7 +209,7 @@ fn parse_inaddr6_list(data: &[u8]) -> Result<Vec<Ipv6Addr>, OptParseError> {
 }
 
 fn parse_name(data: &[u8]) -> Result<String, OptParseError> {
-    let (name, consumed) = c_ares::expand_name(data, data)
+    let (name, consumed) = c_ares::expand_name(data, 0)
         .map_err(|e| OptParseError(format!("invalid DNS name: {e}")))?;
     if consumed != data.len() {
         return Err(OptParseError(format!(

@@ -649,14 +649,10 @@ impl Resolver {
     /// Block until notified that there are no longer any queries in queue, or the specified
     /// timeout has expired.
     ///
-    /// `timeout_ms` is the number of milliseconds to wait for the queue to be empty.  Use -1 for
-    /// infinite.
+    /// Pass `None` to wait indefinitely.
     #[cfg(cares1_27)]
-    pub fn queue_wait_empty(&self, timeout_ms: i32) -> c_ares::Result<()> {
-        self.ares_channel
-            .lock()
-            .unwrap()
-            .queue_wait_empty(timeout_ms)
+    pub fn queue_wait_empty(&self, timeout: Option<std::time::Duration>) -> c_ares::Result<()> {
+        self.ares_channel.lock().unwrap().queue_wait_empty(timeout)
     }
 
     /// Retrieve the total number of active queries pending answers from servers.
@@ -963,7 +959,7 @@ mod tests {
     #[cfg(cares1_27)]
     fn resolver_queue_wait_empty() {
         let resolver = Resolver::new().unwrap();
-        let result = resolver.queue_wait_empty(0);
+        let result = resolver.queue_wait_empty(Some(std::time::Duration::ZERO));
         assert!(result.is_ok() || result == Err(c_ares::Error::ENOTIMP));
     }
 }

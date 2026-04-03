@@ -5,6 +5,7 @@ use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::ptr;
 use std::sync::Arc;
+use std::time::Duration;
 
 use crate::Flags;
 #[cfg(cares1_29)]
@@ -1268,10 +1269,13 @@ impl Channel {
     /// Block until notified that there are no longer any queries in queue, or
     /// the specified timeout has expired.
     ///
-    /// `timeout_ms` is the number of milliseconds to wait for the queue to be
-    /// empty.  Use -1 for infinite.
+    /// Pass `None` to wait indefinitely.
     #[cfg(cares1_27)]
-    pub fn queue_wait_empty(&self, timeout_ms: c_int) -> Result<()> {
+    pub fn queue_wait_empty(&self, timeout: Option<Duration>) -> Result<()> {
+        let timeout_ms = match timeout {
+            None => -1,
+            Some(d) => d.as_millis().try_into().unwrap_or(c_int::MAX),
+        };
         let rc = unsafe { c_ares_sys::ares_queue_wait_empty(self.ares_channel, timeout_ms) };
         panic::propagate();
         status_to_result(rc)
@@ -1918,7 +1922,7 @@ mod tests {
         let channel = Channel::new().unwrap();
         // No pending queries, should return immediately.
         // Returns ENOTIMP if c-ares was not built with threading support.
-        let result = channel.queue_wait_empty(0);
+        let result = channel.queue_wait_empty(Some(Duration::ZERO));
         assert!(result.is_ok() || result == Err(Error::ENOTIMP));
     }
 }

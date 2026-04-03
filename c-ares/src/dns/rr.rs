@@ -212,8 +212,8 @@ impl DnsRr {
     /// Set IPv4 address data type for the given key.
     ///
     /// Can only be used on keys with datatype `INADDR`.
-    pub fn set_addr(&mut self, key: DnsRrKey, addr: &Ipv4Addr) -> Result<&mut Self> {
-        let in_addr = ipv4_as_in_addr(*addr);
+    pub fn set_addr(&mut self, key: DnsRrKey, addr: Ipv4Addr) -> Result<&mut Self> {
+        let in_addr = ipv4_as_in_addr(addr);
         let status =
             unsafe { c_ares_sys::ares_dns_rr_set_addr(self.as_mut_ptr(), key.into(), &in_addr) };
         status_to_result(status)?;
@@ -223,7 +223,7 @@ impl DnsRr {
     /// Set IPv6 address data type for the given key.
     ///
     /// Can only be used on keys with datatype `INADDR6`.
-    pub fn set_addr6(&mut self, key: DnsRrKey, addr: &Ipv6Addr) -> Result<&mut Self> {
+    pub fn set_addr6(&mut self, key: DnsRrKey, addr: Ipv6Addr) -> Result<&mut Self> {
         let in6 = c_ares_sys::ares_in6_addr {
             _S6_un: c_ares_sys::ares_in6_addr__bindgen_ty_1 {
                 _S6_u8: addr.octets(),
@@ -384,7 +384,7 @@ mod tests {
                 300,
             )
             .expect("rr_add");
-        rr.set_addr(DnsRrKey::A_ADDR, &Ipv4Addr::new(10, 0, 0, 1))
+        rr.set_addr(DnsRrKey::A_ADDR, Ipv4Addr::new(10, 0, 0, 1))
             .expect("set_addr");
         // Read back via &self methods
         assert_eq!(rr.rr_type(), DnsRecordType::A);
@@ -418,7 +418,7 @@ mod tests {
             )
             .expect("rr_add");
         let addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1);
-        rr.set_addr6(DnsRrKey::AAAA_ADDR, &addr).expect("set_addr6");
+        rr.set_addr6(DnsRrKey::AAAA_ADDR, addr).expect("set_addr6");
         assert_eq!(rr.get_addr6(DnsRrKey::AAAA_ADDR), Some(addr));
 
         // Re-read from the record
@@ -798,7 +798,7 @@ mod tests {
                 300,
             )
             .expect("rr_add");
-        rr.set_addr(DnsRrKey::A_ADDR, &Ipv4Addr::new(1, 1, 1, 1))
+        rr.set_addr(DnsRrKey::A_ADDR, Ipv4Addr::new(1, 1, 1, 1))
             .expect("set_addr");
 
         // Read via &self

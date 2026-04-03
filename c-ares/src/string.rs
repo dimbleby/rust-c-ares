@@ -39,6 +39,18 @@ impl fmt::Debug for AresString {
     }
 }
 
+impl fmt::Display for AresString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&**self, f)
+    }
+}
+
+impl AsRef<str> for AresString {
+    fn as_ref(&self) -> &str {
+        self
+    }
+}
+
 /// A smart pointer wrapping a byte buffer as allocated by c-ares.
 pub struct AresBuf {
     buf: *mut u8,
@@ -71,6 +83,12 @@ unsafe impl Sync for AresBuf {}
 impl fmt::Debug for AresBuf {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&**self, f)
+    }
+}
+
+impl AsRef<[u8]> for AresBuf {
+    fn as_ref(&self) -> &[u8] {
+        self
     }
 }
 
@@ -112,5 +130,31 @@ mod tests {
     fn ares_buf_debug() {
         fn assert_debug<T: fmt::Debug>() {}
         assert_debug::<AresBuf>();
+    }
+
+    #[test]
+    fn ares_string_display() {
+        let name = crate::expand_name(b"\x07example\x03com\x00", 0)
+            .expect("expand_name")
+            .0;
+        assert_eq!(format!("{name}"), "example.com");
+    }
+
+    #[test]
+    fn ares_string_as_ref_str() {
+        let name = crate::expand_name(b"\x07example\x03com\x00", 0)
+            .expect("expand_name")
+            .0;
+        let s: &str = name.as_ref();
+        assert_eq!(s, "example.com");
+    }
+
+    #[test]
+    fn ares_buf_as_ref_slice() {
+        let data = crate::expand_string(b"\x05hello", 0)
+            .expect("expand_string")
+            .0;
+        let bytes: &[u8] = data.as_ref();
+        assert_eq!(bytes, b"hello");
     }
 }

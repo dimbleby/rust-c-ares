@@ -7,6 +7,8 @@
 - `Channel::queue_wait_empty()` now takes `Option<Duration>`
 - `Options::set_udp_max_queries()` now takes `Option<u32>`
 - `Ipv4Addr` and `Ipv6Addr` parameters are now passed by value consistently
+- `AresString` now implements `Display` and `AsRef<str>`
+- `AresBuf` now implements `AsRef<[u8]>`
 - Derive Debug where it was previously missing
 - Return errors instead of panicking when string arguments contain null bytes.
   The following methods now return `Result`s:

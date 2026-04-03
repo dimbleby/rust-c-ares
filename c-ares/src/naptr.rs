@@ -106,7 +106,7 @@ impl<'a> NAPTRResult<'a> {
     }
 
     /// Returns the regular expression in this `NAPTRResult`.
-    pub fn reg_exp(self) -> &'a str {
+    pub fn regexp(self) -> &'a str {
         unsafe { dns_string_as_str(self.naptr_reply.regexp.cast()) }
     }
 
@@ -130,7 +130,7 @@ impl fmt::Display for NAPTRResult<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "Flags: {}, ", self.flags())?;
         write!(fmt, "Service name: {}, ", self.service_name())?;
-        write!(fmt, "Regular expression: {}, ", self.reg_exp())?;
+        write!(fmt, "Regular expression: {}, ", self.regexp())?;
         write!(fmt, "Replacement pattern: {}, ", self.replacement_pattern())?;
         write!(fmt, "Order: {}, ", self.order())?;
         write!(fmt, "Preference: {}", self.preference())

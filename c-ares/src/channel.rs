@@ -531,8 +531,8 @@ impl Channel {
     }
 
     /// Set the local IPv6 address from which to make queries.
-    pub fn set_local_ipv6(&mut self, ipv6: &Ipv6Addr) -> &mut Self {
-        let in6_addr = ipv6_as_in6_addr(ipv6);
+    pub fn set_local_ipv6(&mut self, ipv6: Ipv6Addr) -> &mut Self {
+        let in6_addr = ipv6_as_in6_addr(&ipv6);
         unsafe {
             c_ares_sys::ares_set_local_ip6(self.ares_channel, ptr::from_ref(&in6_addr).cast())
         }
@@ -1676,7 +1676,7 @@ mod tests {
     #[test]
     fn channel_set_local_ipv6() {
         let mut channel = Channel::new().unwrap();
-        channel.set_local_ipv6(&Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0));
+        channel.set_local_ipv6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0));
     }
 
     #[test]

@@ -124,7 +124,7 @@ impl FutureResolver {
     }
 
     /// Set the local IPv6 address from which to make queries.
-    pub fn set_local_ipv6(&self, ipv6: &Ipv6Addr) -> &Self {
+    pub fn set_local_ipv6(&self, ipv6: Ipv6Addr) -> &Self {
         self.inner.set_local_ipv6(ipv6);
         self
     }
@@ -480,7 +480,7 @@ mod tests {
     fn future_resolver_set_local_ipv6() {
         let resolver = FutureResolver::new().unwrap();
         let ipv6 = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1);
-        let result = resolver.set_local_ipv6(&ipv6);
+        let result = resolver.set_local_ipv6(ipv6);
         assert!(std::ptr::eq(result, &resolver));
     }
 

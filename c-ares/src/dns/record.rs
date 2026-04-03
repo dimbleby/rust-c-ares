@@ -490,7 +490,7 @@ mod tests {
                     300,
                 )
                 .expect("rr_add");
-            rr.set_addr(DnsRrKey::A_ADDR, &Ipv4Addr::new(10, 0, 0, i))
+            rr.set_addr(DnsRrKey::A_ADDR, Ipv4Addr::new(10, 0, 0, i))
                 .expect("set_addr");
         }
 
@@ -501,7 +501,7 @@ mod tests {
             let octets = addr.octets();
             rr.set_addr(
                 DnsRrKey::A_ADDR,
-                &Ipv4Addr::new(octets[0], octets[1], octets[2], octets[3] + 100),
+                Ipv4Addr::new(octets[0], octets[1], octets[2], octets[3] + 100),
             )
             .expect("set_addr");
         }
@@ -627,7 +627,7 @@ mod tests {
                     300,
                 )
                 .expect("rr_add");
-            rr.set_addr(DnsRrKey::A_ADDR, &Ipv4Addr::new(10, 0, 0, i))
+            rr.set_addr(DnsRrKey::A_ADDR, Ipv4Addr::new(10, 0, 0, i))
                 .expect("set_addr");
         }
         assert_eq!(rec.rr_count(DnsSection::Answer), 5);
@@ -671,7 +671,7 @@ mod tests {
                 3600,
             )
             .expect("rr_add additional");
-        rr.set_addr(DnsRrKey::A_ADDR, &Ipv4Addr::new(192, 0, 2, 1))
+        rr.set_addr(DnsRrKey::A_ADDR, Ipv4Addr::new(192, 0, 2, 1))
             .expect("set_addr");
 
         assert_eq!(rec.rr_count(DnsSection::Answer), 0);
@@ -711,7 +711,7 @@ mod tests {
                 300,
             )
             .expect("rr_add");
-        rr.set_addr(DnsRrKey::A_ADDR, &Ipv4Addr::new(93, 184, 216, 34))
+        rr.set_addr(DnsRrKey::A_ADDR, Ipv4Addr::new(93, 184, 216, 34))
             .expect("set_addr");
 
         let wire = rec.write().expect("write");

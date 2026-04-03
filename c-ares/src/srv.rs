@@ -80,6 +80,8 @@ impl<'a> IntoIterator for &'a SRVResults {
     }
 }
 
+impl std::iter::FusedIterator for SRVResultsIter<'_> {}
+
 impl Drop for SRVResults {
     fn drop(&mut self) {
         unsafe { c_ares_sys::ares_free_data(self.srv_reply.cast()) }

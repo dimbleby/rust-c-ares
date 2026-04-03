@@ -74,7 +74,14 @@ impl<'a> Iterator for AResultsIter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         self.addrttls.next().map(|addrttl| AResult { addrttl })
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.addrttls.size_hint()
+    }
 }
+
+impl ExactSizeIterator for AResultsIter<'_> {}
+impl std::iter::FusedIterator for AResultsIter<'_> {}
 
 impl<'a> IntoIterator for &'a AResults {
     type Item = AResult<'a>;
@@ -142,5 +149,31 @@ mod tests {
         assert_sync::<AResult>();
         assert_sync::<AResults>();
         assert_sync::<AResultsIter>();
+    }
+
+    // DNS A response with 2 records: 93.184.216.34 (TTL 300), 93.184.216.35 (TTL 600)
+    const TWO_A_RECORDS: &[u8] = &[
+        0x00, 0x00, 0x81, 0x80, 0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x07, 0x65, 0x78,
+        0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01, 0x00, 0x01, 0xc0,
+        0x0c, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x01, 0x2c, 0x00, 0x04, 0x5d, 0xb8, 0xd8, 0x22,
+        0xc0, 0x0c, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x58, 0x00, 0x04, 0x5d, 0xb8, 0xd8,
+        0x23,
+    ];
+
+    #[test]
+    fn exact_size_iterator() {
+        let results = AResults::parse_from(TWO_A_RECORDS).unwrap();
+        let iter = results.iter();
+        assert_eq!(iter.len(), 2);
+    }
+
+    #[test]
+    fn fused_iterator() {
+        let results = AResults::parse_from(TWO_A_RECORDS).unwrap();
+        let mut iter = results.iter();
+        assert!(iter.next().is_some());
+        assert!(iter.next().is_some());
+        assert!(iter.next().is_none());
+        assert!(iter.next().is_none());
     }
 }

@@ -9,6 +9,8 @@
 - `Ipv4Addr` and `Ipv6Addr` parameters are now passed by value consistently
 - `AresString` now implements `Display` and `AsRef<str>`
 - `AresBuf` now implements `AsRef<[u8]>`
+- Result iterators now implement `FusedIterator`; `AResultsIter` and
+  `AAAAResultsIter` also implement `ExactSizeIterator`
 - Derive Debug where it was previously missing
 - Return errors instead of panicking when string arguments contain null bytes.
   The following methods now return `Result`s:

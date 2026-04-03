@@ -80,6 +80,8 @@ impl<'a> IntoIterator for &'a URIResults {
     }
 }
 
+impl std::iter::FusedIterator for URIResultsIter<'_> {}
+
 impl Drop for URIResults {
     fn drop(&mut self) {
         unsafe { c_ares_sys::ares_free_data(self.uri_reply.cast()) }

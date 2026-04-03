@@ -75,7 +75,14 @@ impl<'a> Iterator for AAAAResultsIter<'a> {
             .next()
             .map(|addr6ttl| AAAAResult { addr6ttl })
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.addr6ttls.size_hint()
+    }
 }
+
+impl ExactSizeIterator for AAAAResultsIter<'_> {}
+impl std::iter::FusedIterator for AAAAResultsIter<'_> {}
 
 impl<'a> IntoIterator for &'a AAAAResults {
     type Item = AAAAResult<'a>;
@@ -144,5 +151,29 @@ mod tests {
         assert_sync::<AAAAResult>();
         assert_sync::<AAAAResults>();
         assert_sync::<AAAAResultsIter>();
+    }
+
+    // DNS AAAA response with 1 record: 2001:db8::1 (TTL 300)
+    const ONE_AAAA_RECORD: &[u8] = &[
+        0x00, 0x00, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x07, 0x65, 0x78,
+        0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x1c, 0x00, 0x01, 0xc0,
+        0x0c, 0x00, 0x1c, 0x00, 0x01, 0x00, 0x00, 0x01, 0x2c, 0x00, 0x10, 0x20, 0x01, 0x0d, 0xb8,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+    ];
+
+    #[test]
+    fn exact_size_iterator() {
+        let results = AAAAResults::parse_from(ONE_AAAA_RECORD).unwrap();
+        let iter = results.iter();
+        assert_eq!(iter.len(), 1);
+    }
+
+    #[test]
+    fn fused_iterator() {
+        let results = AAAAResults::parse_from(ONE_AAAA_RECORD).unwrap();
+        let mut iter = results.iter();
+        assert!(iter.next().is_some());
+        assert!(iter.next().is_none());
+        assert!(iter.next().is_none());
     }
 }

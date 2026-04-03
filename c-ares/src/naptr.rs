@@ -79,6 +79,8 @@ impl<'a> IntoIterator for &'a NAPTRResults {
     }
 }
 
+impl std::iter::FusedIterator for NAPTRResultsIter<'_> {}
+
 impl Drop for NAPTRResults {
     fn drop(&mut self) {
         unsafe { c_ares_sys::ares_free_data(self.naptr_reply.cast()) }

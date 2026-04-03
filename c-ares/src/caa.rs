@@ -78,6 +78,8 @@ impl<'a> IntoIterator for &'a CAAResults {
     }
 }
 
+impl std::iter::FusedIterator for CAAResultsIter<'_> {}
+
 impl Drop for CAAResults {
     fn drop(&mut self) {
         unsafe { c_ares_sys::ares_free_data(self.caa_reply.cast()) }

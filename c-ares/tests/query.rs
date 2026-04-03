@@ -205,7 +205,7 @@ fn query_naptr_record() {
         for naptr_result in &results {
             assert!(!naptr_result.flags().is_empty());
             assert!(!naptr_result.service_name().is_empty());
-            assert!(naptr_result.reg_exp().is_empty());
+            assert!(naptr_result.regexp().is_empty());
             assert!(!naptr_result.replacement_pattern().is_empty());
             let _order = naptr_result.order();
             let _preference = naptr_result.preference();

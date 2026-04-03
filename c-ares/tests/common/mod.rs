@@ -53,15 +53,15 @@ pub fn process_channel(channel: &mut Channel, timeout: Duration) {
                     let readable = read_fds.contains(borrowed_fd);
                     let writable = write_fds.contains(borrowed_fd);
                     if readable || writable {
-                        let rfd = if readable { *fd } else { SOCKET_BAD };
-                        let wfd = if writable { *fd } else { SOCKET_BAD };
+                        let rfd = readable.then_some(*fd);
+                        let wfd = writable.then_some(*fd);
                         channel.process_fd(rfd, wfd);
                         called = true;
                     }
                 }
                 // Always call process_fd at least once to handle c-ares timeouts
                 if !called {
-                    channel.process_fd(SOCKET_BAD, SOCKET_BAD);
+                    channel.process_fd(None, None);
                 }
             }
             Err(_) => break,

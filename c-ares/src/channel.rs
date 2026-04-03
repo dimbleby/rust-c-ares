@@ -442,9 +442,11 @@ impl Channel {
     ///
     /// Providing a value for `read_fd` indicates that the identified socket is readable; likewise
     /// providing a value for `write_fd` indicates that the identified socket is writable.  Use
-    /// `SOCKET_BAD` for "no action".
-    pub fn process_fd(&mut self, read_fd: Socket, write_fd: Socket) {
-        unsafe { c_ares_sys::ares_process_fd(self.ares_channel, read_fd, write_fd) }
+    /// `None` for "no action".
+    pub fn process_fd(&mut self, read_fd: Option<Socket>, write_fd: Option<Socket>) {
+        let rfd = read_fd.unwrap_or(c_ares_sys::ARES_SOCKET_BAD);
+        let wfd = write_fd.unwrap_or(c_ares_sys::ARES_SOCKET_BAD);
+        unsafe { c_ares_sys::ares_process_fd(self.ares_channel, rfd, wfd) }
         panic::propagate();
     }
 
@@ -1415,7 +1417,6 @@ impl<'a> IntoIterator for &'a GetSock {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::SOCKET_BAD;
     use std::net::{Ipv4Addr, Ipv6Addr};
 
     #[test]
@@ -1646,9 +1647,9 @@ mod tests {
     }
 
     #[test]
-    fn channel_process_fd_bad_socket() {
+    fn channel_process_fd_none() {
         let mut channel = Channel::new().unwrap();
-        channel.process_fd(SOCKET_BAD, SOCKET_BAD);
+        channel.process_fd(None, None);
     }
 
     #[test]

@@ -220,17 +220,8 @@ impl EventLoop {
         for event in events.iter() {
             let socket = c_ares::Socket::try_from(event.key).unwrap();
 
-            let rfd = if event.readable {
-                socket
-            } else {
-                c_ares::SOCKET_BAD
-            };
-
-            let wfd = if event.writable {
-                socket
-            } else {
-                c_ares::SOCKET_BAD
-            };
+            let rfd = event.readable.then_some(socket);
+            let wfd = event.writable.then_some(socket);
 
             self.ares_channel.lock().unwrap().process_fd(rfd, wfd);
             acted = true;
@@ -238,10 +229,7 @@ impl EventLoop {
 
         if !acted {
             // No events.  Have c-ares process any timeouts.
-            self.ares_channel
-                .lock()
-                .unwrap()
-                .process_fd(c_ares::SOCKET_BAD, c_ares::SOCKET_BAD);
+            self.ares_channel.lock().unwrap().process_fd(None, None);
         }
     }
 }

@@ -164,21 +164,19 @@ mod example {
 
             match results {
                 0 => {
-                    ares_channel.process_fd(c_ares::SOCKET_BAD, c_ares::SOCKET_BAD);
+                    ares_channel.process_fd(None, None);
                 }
                 n => {
                     for event in &events[0..n] {
                         let active_fd = event.data() as c_ares::Socket;
-                        let rfd = if (event.events() & EpollFlags::EPOLLIN).is_empty() {
-                            c_ares::SOCKET_BAD
-                        } else {
-                            active_fd
-                        };
-                        let wfd = if (event.events() & EpollFlags::EPOLLOUT).is_empty() {
-                            c_ares::SOCKET_BAD
-                        } else {
-                            active_fd
-                        };
+                        let rfd = event
+                            .events()
+                            .contains(EpollFlags::EPOLLIN)
+                            .then_some(active_fd);
+                        let wfd = event
+                            .events()
+                            .contains(EpollFlags::EPOLLOUT)
+                            .then_some(active_fd);
                         ares_channel.process_fd(rfd, wfd);
                     }
                 }

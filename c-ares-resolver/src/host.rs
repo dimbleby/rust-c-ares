@@ -4,14 +4,26 @@ use std::net::IpAddr;
 /// An owned version of `c_ares::HostResults`.
 #[derive(Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub struct HostResults {
-    /// The hostname returned by the lookup.
-    pub hostname: String,
+    hostname: String,
+    addresses: Vec<IpAddr>,
+    aliases: Vec<String>,
+}
 
-    /// The IP addresses returned by the lookup.
-    pub addresses: Vec<IpAddr>,
+impl HostResults {
+    /// Returns the hostname from this `HostResults`.
+    pub fn hostname(&self) -> &str {
+        &self.hostname
+    }
 
-    /// The aliases returned by the lookup.
-    pub aliases: Vec<String>,
+    /// Returns the IP addresses from this `HostResults`.
+    pub fn addresses(&self) -> &[IpAddr] {
+        &self.addresses
+    }
+
+    /// Returns the aliases from this `HostResults`.
+    pub fn aliases(&self) -> &[String] {
+        &self.aliases
+    }
 }
 
 impl From<c_ares::HostResults<'_>> for HostResults {
@@ -29,11 +41,11 @@ impl From<c_ares::HostResults<'_>> for HostResults {
 
 impl fmt::Display for HostResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "Hostname: {}, ", self.hostname)?;
-        for address in &self.addresses {
+        write!(fmt, "Hostname: {}, ", self.hostname())?;
+        for address in self.addresses() {
             write!(fmt, "Address: {address}, ")?;
         }
-        for alias in &self.aliases {
+        for alias in self.aliases() {
             write!(fmt, "Alias: {alias}, ")?;
         }
         Ok(())
@@ -151,8 +163,8 @@ mod tests {
             addresses: vec!["127.0.0.1".parse().unwrap(), "::1".parse().unwrap()],
             aliases: vec!["www.example.com".to_string()],
         };
-        assert_eq!(results.addresses.len(), 2);
-        assert_eq!(results.aliases.len(), 1);
+        assert_eq!(results.addresses().len(), 2);
+        assert_eq!(results.aliases().len(), 1);
     }
 
     #[test]

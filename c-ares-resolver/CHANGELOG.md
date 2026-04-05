@@ -8,6 +8,8 @@
 - Rename `get_servers()` to `servers()` and return `Vec<String>` instead of
   `AresString`
 - `HostResults` and `NameInfoResult` now implement `Display`
+- `HostResults` and `NameInfoResult` fields are now private; use accessor methods
+  (`hostname()`, `addresses()`, `aliases()`, `node()`, `service()`) instead
 - Return errors instead of panicking when string arguments contain null bytes.
   The following methods now return `Result`s:
   - `Options::set_domains`

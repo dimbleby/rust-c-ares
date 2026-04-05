@@ -13,7 +13,7 @@ fn get_host_by_address() {
     let addr: IpAddr = "8.8.8.8".parse().unwrap();
     let result = resolver.get_host_by_address(&addr);
     assert!(result.is_ok(), "Failed to get host by address");
-    assert!(!result.unwrap().hostname.is_empty());
+    assert!(!result.unwrap().hostname().is_empty());
 }
 
 #[test]
@@ -23,7 +23,7 @@ fn get_host_by_name() {
     let result = resolver.get_host_by_name("google.com", c_ares::AddressFamily::INET);
     assert!(result.is_ok(), "Failed to get host by name");
     let host = result.unwrap();
-    assert!(!host.hostname.is_empty());
+    assert!(!host.hostname().is_empty());
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn get_name_info() {
     let result = resolver.get_name_info(&addr, c_ares::NIFlags::empty());
     assert!(result.is_ok(), "Failed to get name info");
     let info = result.unwrap();
-    assert!(info.node.is_some() || info.service.is_some());
+    assert!(info.node().is_some() || info.service().is_some());
 }
 
 #[test]

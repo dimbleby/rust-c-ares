@@ -51,11 +51,6 @@ mod example {
                                 println!("       Address: {}", addr);
                             }
                         }
-                        c_ares::DnsRecordType::AAAA => {
-                            if let Some(addr) = rr.get_addr6(c_ares::DnsRrKey::AAAA_ADDR) {
-                                println!("       Address: {}", addr);
-                            }
-                        }
                         c_ares::DnsRecordType::MX => {
                             let pref = rr.get_u16(c_ares::DnsRrKey::MX_PREFERENCE);
                             let exchange = rr.get_str(c_ares::DnsRrKey::MX_EXCHANGE);
@@ -64,12 +59,6 @@ mod example {
                                 pref,
                                 exchange.unwrap_or("<none>")
                             );
-                        }
-                        c_ares::DnsRecordType::TXT => {
-                            for (j, data) in rr.abins(c_ares::DnsRrKey::TXT_DATA).enumerate() {
-                                let text = std::str::from_utf8(data).unwrap_or("<not utf-8>");
-                                println!("       TXT[{}]: {}", j, text);
-                            }
                         }
                         _ => {}
                     }

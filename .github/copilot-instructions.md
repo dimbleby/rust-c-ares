@@ -4,34 +4,33 @@
 
 The workspace uses **Rust edition 2024**. Be aware of its implications: `gen` is a reserved keyword, `unsafe` blocks are required inside `unsafe fn` bodies, and lifetime capture rules in `impl Trait` return types have changed.
 
-```sh
-# Build the full workspace
-cargo build --workspace
-
-# Run all tests (network-dependent tests are #[ignore] by default)
-cargo test --workspace
-
-# Run a single test by name
-cargo test -p c-ares -- test_name
-cargo test -p c-ares-resolver -- test_name
-
-# Run ignored network tests (requires network access)
-cargo test --workspace -- --ignored
-
-# Lint
-cargo clippy --workspace --tests --examples -- -D warnings
-
-# Format check
-cargo fmt --all -- --check
-```
-
-Prefer `--features vendored` when running tests, examples, and clippy to ensure you build against the latest vendored c-ares and get full coverage of version-gated APIs:
+Common tasks are available via `make` targets (all default to `--features vendored`):
 
 ```sh
-cargo test --workspace --features vendored
-cargo clippy --workspace --tests --examples --features vendored -- -D warnings
-cargo run -p c-ares-resolver --features vendored --example futures
+make build          # Build the full workspace
+make test           # Run all tests including network-dependent ones
+make test-offline   # Run only offline (non-ignored) tests
+make lint           # Format check + clippy
+make coverage       # Generate coverage report (requires cargo-llvm-cov)
+make examples       # Run all examples
+make clean          # Remove build artifacts
+make help           # Show all targets
 ```
+
+To build against the system `libcares` instead of vendored, override `FEATURES`:
+
+```sh
+make test FEATURES=
+```
+
+To run a single test by name:
+
+```sh
+cargo test -p c-ares --features vendored -- test_name
+cargo test -p c-ares-resolver --features vendored -- test_name
+```
+
+Prefer `--features vendored` when running commands directly to ensure you build against the latest vendored c-ares and get full coverage of version-gated APIs.
 
 Checkout must include submodules (`git clone --recurse-submodules` or `git submodule update --init`) for vendored builds.
 

@@ -6,7 +6,7 @@ use c_types::in_addr;
 use c_types::iovec;
 use c_types::sockaddr;
 use c_types::socklen_t;
-use libc::timeval;
+pub use libc::timeval;
 
 #[cfg(target_os = "android")]
 use jni_sys;

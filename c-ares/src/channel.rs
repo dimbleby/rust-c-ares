@@ -344,7 +344,7 @@ impl Options {
     ) -> &mut Self {
         self.ares_options.server_failover_opts.retry_chance = server_failover_options.retry_chance;
         self.ares_options.server_failover_opts.retry_delay =
-            server_failover_options.retry_delay.as_millis() as usize;
+            server_failover_options.retry_delay.as_millis() as _;
         self.optmask |= c_ares_sys::ARES_OPT_SERVER_FAILOVER;
         self
     }
@@ -413,7 +413,7 @@ impl Channel {
         // We deferred setting up domains in the options - do it now.
         let domains: Vec<_> = options.domains.iter().map(|s| s.as_ptr()).collect();
         options.ares_options.domains = domains.as_ptr().cast_mut().cast();
-        options.ares_options.ndomains = domains.len() as c_int;
+        options.ares_options.ndomains = domains.len() as _;
 
         // Likewise for lookups.
         if let Some(c_lookup) = &options.lookups {
@@ -554,10 +554,10 @@ impl Channel {
             c_ares_sys::ares_getsock(
                 self.ares_channel,
                 socks.as_mut_ptr(),
-                c_ares_sys::ARES_GETSOCK_MAXNUM as c_int,
+                c_ares_sys::ARES_GETSOCK_MAXNUM as _,
             )
         };
-        Sockets::new(socks, bitmask as u32)
+        Sockets::new(socks, bitmask as _)
     }
 
     /// Retrieve the set of socket descriptors which the calling application should wait on for
@@ -1137,8 +1137,8 @@ impl Channel {
             c_ares_sys::ares_gethostbyaddr(
                 self.ares_channel,
                 c_addr,
-                length as c_int,
-                family as c_int,
+                length as _,
+                family as _,
                 Some(get_host_callback::<F>),
                 c_arg.cast(),
             )
@@ -1162,7 +1162,7 @@ impl Channel {
             c_ares_sys::ares_gethostbyname(
                 self.ares_channel,
                 c_name.as_ptr(),
-                family as c_int,
+                family as _,
                 Some(get_host_callback::<F>),
                 c_arg.cast(),
             )
@@ -1411,6 +1411,32 @@ impl Channel {
     pub fn process_pending_write(&mut self) {
         unsafe { c_ares_sys::ares_process_pending_write(self.ares_channel) }
         panic::propagate();
+    }
+
+    /// Return the maximum time to wait before processing timeouts.
+    ///
+    /// If there are pending queries, returns the time until the next timeout
+    /// fires, optionally capped at `max_timeout`. If there are no pending
+    /// queries, returns `max_timeout` (which may be `None`).
+    pub fn timeout(&self, max_timeout: Option<Duration>) -> Option<Duration> {
+        let mut maxtv;
+        let maxtv_ptr = match max_timeout {
+            Some(d) => {
+                maxtv = c_ares_sys::timeval {
+                    tv_sec: d.as_secs() as _,
+                    tv_usec: d.subsec_micros() as _,
+                };
+                &mut maxtv as *mut _
+            }
+            None => ptr::null_mut(),
+        };
+        let mut tv = c_ares_sys::timeval {
+            tv_sec: 0,
+            tv_usec: 0,
+        };
+        let result = unsafe { c_ares_sys::ares_timeout(self.ares_channel, maxtv_ptr, &mut tv) };
+        unsafe { result.as_ref() }
+            .map(|tv| Duration::new(tv.tv_sec as u64, (tv.tv_usec as u32) * 1000))
     }
 
     /// Block until notified that there are no longer any queries in queue, or
@@ -2130,5 +2156,22 @@ mod tests {
         let opts = ServerFailoverOptions::new();
         let debug = format!("{:?}", opts);
         assert!(debug.contains("ServerFailoverOptions"));
+    }
+
+    #[test]
+    fn timeout_no_queries_with_max() {
+        let channel = Channel::new().unwrap();
+        // No pending queries: returns the max_timeout we provide.
+        let max = Duration::from_secs(5);
+        let result = channel.timeout(Some(max));
+        assert_eq!(result, Some(max));
+    }
+
+    #[test]
+    fn timeout_no_queries_without_max() {
+        let channel = Channel::new().unwrap();
+        // No pending queries and no max: returns None.
+        let result = channel.timeout(None);
+        assert_eq!(result, None);
     }
 }

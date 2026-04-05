@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Re-export `libc::timeval`
 - Derive Debug where it was previously missing
 
 ## 11.0.0 (14 December 2025)

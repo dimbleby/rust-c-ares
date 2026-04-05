@@ -49,7 +49,6 @@ mod error;
 mod events;
 mod flags;
 mod host;
-mod hostent;
 mod mx;
 mod nameinfo;
 mod naptr;
@@ -84,8 +83,7 @@ pub use crate::error::{Error, Result};
 #[cfg(cares1_34)]
 pub use crate::events::{FdEventFlags, FdEvents, ProcessFlags};
 pub use crate::flags::Flags;
-pub use crate::host::HostResults;
-pub use crate::hostent::{HostAddressResultsIter, HostAliasResultsIter};
+pub use crate::host::{HostAddressResultsIter, HostAliasResultsIter, HostResults};
 pub use crate::mx::{MXResult, MXResults, MXResultsIter};
 pub use crate::nameinfo::NameInfoResult;
 pub use crate::naptr::{NAPTRResult, NAPTRResults, NAPTRResultsIter};

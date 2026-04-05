@@ -3,14 +3,16 @@ use std::fmt;
 use std::ptr;
 use std::slice;
 
+use itertools::Itertools;
+
 use crate::error::{Error, Result};
-use crate::hostent::{HasHostent, HostAliasResultsIter, HostentOwned};
+use crate::host::{HostAliasResultsIter, HostResults};
 use crate::panic;
 
 /// The result of a successful CNAME lookup.
 #[derive(Debug)]
 pub struct CNameResults {
-    hostent: HostentOwned,
+    hostent: HostResults,
 }
 
 impl CNameResults {
@@ -36,7 +38,7 @@ impl CNameResults {
 
     fn new(hostent: *mut c_types::hostent) -> Self {
         CNameResults {
-            hostent: HostentOwned::new(hostent),
+            hostent: HostResults::new(hostent),
         }
     }
 
@@ -53,7 +55,9 @@ impl CNameResults {
 
 impl fmt::Display for CNameResults {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        self.hostent.fmt(fmt)
+        write!(fmt, "Hostname: {}, ", self.hostname())?;
+        let aliases = self.aliases().format(", ");
+        write!(fmt, "Aliases: [{aliases}]")
     }
 }
 

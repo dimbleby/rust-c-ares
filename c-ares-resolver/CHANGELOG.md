@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `Resolver` host callbacks (`get_host_by_address`, `get_host_by_name`) now pass
+  `Result<&c_ares::HostResults>` instead of `Result<c_ares::HostResults>`
 - `Options::set_timeout()` and `Options::set_max_timeout()` now take `Duration`
   instead of integer milliseconds
 - `queue_wait_empty()` now takes `Option<Duration>`

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Host callbacks (`get_host_by_address`, `get_host_by_name`) now pass
+  `Result<&HostResults>` instead of `Result<HostResults>`
+- `HostResults` is no longer `Clone` or `Copy`
+- Fix `CNameResults` `Display` to not include addresses
 - `Options::set_timeout()` and `Options::set_max_timeout()` now take `Duration`
   instead of integer milliseconds
 - `ServerFailoverOptions::set_retry_delay()` now takes `Duration`

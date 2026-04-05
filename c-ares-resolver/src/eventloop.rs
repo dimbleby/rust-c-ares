@@ -198,10 +198,10 @@ impl EventLoop {
             let socket = c_ares::Socket::try_from(event.key).unwrap();
             let mut event_flags = FdEventFlags::empty();
             if event.readable {
-                event_flags.insert(FdEventFlags::Read)
+                event_flags.insert(FdEventFlags::READ)
             }
             if event.writable {
-                event_flags.insert(FdEventFlags::Write)
+                event_flags.insert(FdEventFlags::WRITE)
             }
             FdEvents::new(socket, event_flags)
         });

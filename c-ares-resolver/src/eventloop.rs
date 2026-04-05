@@ -7,7 +7,6 @@ use std::os::windows::io::BorrowedSocket;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
 
 #[cfg(cares1_34)]
 use c_ares::{FdEventFlags, FdEvents, ProcessFlags};
@@ -141,11 +140,15 @@ impl EventLoop {
     // Event loop thread - waits for events, and handles them.
     fn event_loop_thread(mut self) {
         let mut events = polling::Events::new();
-        let timeout = Duration::from_millis(500);
         loop {
+            // Ask c-ares how long until the next timeout fires.
+            // When idle, this returns None and we block until woken by a
+            // socket event or poller.notify() (used for shutdown).
+            let timeout = self.ares_channel.lock().unwrap().timeout(None);
+
             // Wait for something to happen.
             events.clear();
-            let results = self.poller.wait(&mut events, Some(timeout));
+            let results = self.poller.wait(&mut events, timeout);
 
             // If we're asked to quit, then quit.
             if self.quit.load(Ordering::Acquire) {

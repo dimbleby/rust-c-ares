@@ -8,6 +8,7 @@
 - `Options` setters that accept `u32` now saturate to `c_int::MAX` instead of
   silently truncating on overflow
 - Add `Channel::as_raw()` to expose the underlying `ares_channel` pointer
+- Add `Channel::timeout()` to query the next timeout deadline via `ares_timeout()`
 - `Channel::process_fd()` now takes `Option<Socket>` instead of using `SOCKET_BAD`
   as a sentinel
 - `Channel::queue_wait_empty()` now takes `Option<Duration>`

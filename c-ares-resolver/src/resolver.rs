@@ -677,7 +677,20 @@ impl Resolver {
     /// Pass `None` to wait indefinitely.
     #[cfg(cares1_27)]
     pub fn queue_wait_empty(&self, timeout: Option<std::time::Duration>) -> c_ares::Result<()> {
-        self.ares_channel.lock().unwrap().queue_wait_empty(timeout)
+        // Call ares_queue_wait_empty without holding the channel Mutex.
+        //
+        // This function blocks until all queries complete. If we held the
+        // Mutex, the event loop thread would be unable to call process_fd,
+        // causing a deadlock. This is safe because ares_queue_wait_empty is
+        // only functional when c-ares has thread safety (otherwise it returns
+        // ENOTIMP), and thread-safe c-ares has internal locking.
+        let raw = self.ares_channel.lock().unwrap().as_raw();
+        let timeout_ms: core::ffi::c_int = match timeout {
+            None => -1,
+            Some(d) => d.as_millis().try_into().unwrap_or(core::ffi::c_int::MAX),
+        };
+        let rc = unsafe { c_ares_sys::ares_queue_wait_empty(raw, timeout_ms) };
+        c_ares::Error::try_from(rc).map_or(Ok(()), Err)
     }
 
     /// Retrieve the total number of active queries pending answers from servers.
@@ -986,6 +999,44 @@ mod tests {
         let resolver = Resolver::new().unwrap();
         let result = resolver.queue_wait_empty(Some(std::time::Duration::ZERO));
         assert!(result.is_ok() || result == Err(c_ares::Error::ENOTIMP));
+    }
+
+    #[test]
+    #[cfg(cares1_27)]
+    fn resolver_queue_wait_empty_none_timeout() {
+        let resolver = Resolver::new().unwrap();
+        // None means "wait indefinitely", but with no pending queries it returns immediately.
+        let result = resolver.queue_wait_empty(None);
+        assert!(result.is_ok() || result == Err(c_ares::Error::ENOTIMP));
+    }
+
+    // Regression test: queue_wait_empty must not hold the channel Mutex while
+    // blocking, otherwise the event loop thread cannot call process_fd and
+    // queries can never complete.
+    //
+    // The query has a 1s timeout against a non-routable address. If the event
+    // loop can make progress, the query times out at ~1s and queue_wait_empty
+    // returns promptly. If deadlocked, the query timeout never fires.
+    #[test]
+    #[cfg(cares1_27)]
+    fn resolver_queue_wait_empty_with_pending_query() {
+        let mut options = Options::new();
+        options.set_timeout(1_000).set_tries(1);
+        let resolver = std::sync::Arc::new(Resolver::with_options(options).unwrap());
+
+        // Point at a non-routable address so the query stays pending until it times out.
+        resolver.set_servers(&["192.0.2.1"]).unwrap();
+        resolver.query_a("example.com", |_| {});
+
+        let start = std::time::Instant::now();
+        let _ = resolver.queue_wait_empty(Some(std::time::Duration::from_secs(5)));
+        let elapsed = start.elapsed();
+
+        // Should complete at ~1s when the query times out, not at 5s.
+        assert!(
+            elapsed < std::time::Duration::from_secs(3),
+            "queue_wait_empty took {elapsed:.2?}, expected ~1s: event loop likely deadlocked"
+        );
     }
 
     #[test]

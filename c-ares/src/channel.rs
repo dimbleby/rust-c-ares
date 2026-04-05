@@ -365,6 +365,17 @@ pub struct Channel {
 }
 
 impl Channel {
+    /// Returns the raw `ares_channel` pointer.
+    ///
+    /// # Safety
+    ///
+    /// The returned pointer is only valid for the lifetime of this `Channel`.
+    /// Callers must ensure that any use of the pointer is compatible with
+    /// concurrent access (e.g. only call thread-safe c-ares functions).
+    pub fn as_raw(&self) -> c_ares_sys::ares_channel {
+        self.ares_channel
+    }
+
     /// Create a new channel for name service lookups, with default `Options`.
     ///
     /// # Examples

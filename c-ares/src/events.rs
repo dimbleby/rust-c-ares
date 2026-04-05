@@ -7,9 +7,9 @@ bitflags!(
     #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
     pub struct FdEventFlags: u32 {
         /// Read event (including disconnect/error).
-        const Read = c_ares_sys::ares_fd_eventflag_t::ARES_FD_EVENT_READ as u32;
+        const READ = c_ares_sys::ares_fd_eventflag_t::ARES_FD_EVENT_READ as u32;
         /// Write event.
-        const Write = c_ares_sys::ares_fd_eventflag_t::ARES_FD_EVENT_WRITE as u32;
+        const WRITE = c_ares_sys::ares_fd_eventflag_t::ARES_FD_EVENT_WRITE as u32;
     }
 );
 
@@ -18,7 +18,7 @@ bitflags!(
     #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
     pub struct ProcessFlags: u32 {
         /// Skip any processing unrelated to the file descriptor events passed in.
-        const SkipNonFd = c_ares_sys::ares_process_flag_t::ARES_PROCESS_FLAG_SKIP_NON_FD as u32;
+        const SKIP_NON_FD = c_ares_sys::ares_process_flag_t::ARES_PROCESS_FLAG_SKIP_NON_FD as u32;
     }
 );
 
@@ -58,23 +58,23 @@ mod tests {
 
     #[test]
     fn fd_event_flags_read() {
-        let flags = FdEventFlags::Read;
-        assert!(flags.contains(FdEventFlags::Read));
-        assert!(!flags.contains(FdEventFlags::Write));
+        let flags = FdEventFlags::READ;
+        assert!(flags.contains(FdEventFlags::READ));
+        assert!(!flags.contains(FdEventFlags::WRITE));
     }
 
     #[test]
     fn fd_event_flags_write() {
-        let flags = FdEventFlags::Write;
-        assert!(flags.contains(FdEventFlags::Write));
-        assert!(!flags.contains(FdEventFlags::Read));
+        let flags = FdEventFlags::WRITE;
+        assert!(flags.contains(FdEventFlags::WRITE));
+        assert!(!flags.contains(FdEventFlags::READ));
     }
 
     #[test]
     fn fd_event_flags_combined() {
-        let flags = FdEventFlags::Read | FdEventFlags::Write;
-        assert!(flags.contains(FdEventFlags::Read));
-        assert!(flags.contains(FdEventFlags::Write));
+        let flags = FdEventFlags::READ | FdEventFlags::WRITE;
+        assert!(flags.contains(FdEventFlags::READ));
+        assert!(flags.contains(FdEventFlags::WRITE));
     }
 
     #[test]
@@ -85,24 +85,24 @@ mod tests {
 
     #[test]
     fn process_flags_skip_non_fd() {
-        let flags = ProcessFlags::SkipNonFd;
-        assert!(flags.contains(ProcessFlags::SkipNonFd));
+        let flags = ProcessFlags::SKIP_NON_FD;
+        assert!(flags.contains(ProcessFlags::SKIP_NON_FD));
     }
 
     #[test]
     fn fd_events_new() {
-        let events = FdEvents::new(42, FdEventFlags::Read);
+        let events = FdEvents::new(42, FdEventFlags::READ);
         assert_eq!(events.0.fd, 42);
-        assert_eq!(events.0.events, FdEventFlags::Read.bits());
+        assert_eq!(events.0.events, FdEventFlags::READ.bits());
     }
 
     #[test]
     fn debug_fd_events() {
-        let events = FdEvents::new(42, FdEventFlags::Read | FdEventFlags::Write);
+        let events = FdEvents::new(42, FdEventFlags::READ | FdEventFlags::WRITE);
         let debug = format!("{:?}", events);
         assert!(debug.contains("FdEvents"));
         assert!(debug.contains("42"));
-        assert!(debug.contains("Read"));
-        assert!(debug.contains("Write"));
+        assert!(debug.contains("READ"));
+        assert!(debug.contains("WRITE"));
     }
 }

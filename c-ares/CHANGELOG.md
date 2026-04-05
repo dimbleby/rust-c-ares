@@ -17,6 +17,8 @@
 - Rename `get_sock()` to `sockets()`, `GetSock` to `Sockets`, `GetSockIter`
   to `SocketsIter`
 - Derive Debug where it was previously missing
+- Rename `FdEventFlags::Read`/`Write` to `READ`/`WRITE` and
+  `ProcessFlags::SkipNonFd` to `SKIP_NON_FD`
 - Return errors instead of panicking when string arguments contain null bytes.
   The following methods now return `Result`s:
   - `Options::set_domains`

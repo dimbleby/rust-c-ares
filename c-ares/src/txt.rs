@@ -56,7 +56,7 @@ impl fmt::Display for TXTResults {
 }
 
 /// Iterator of `TXTResult`s.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct TXTResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_txt_ext>,
 }
@@ -93,6 +93,15 @@ unsafe impl Send for TXTResults {}
 unsafe impl Sync for TXTResults {}
 unsafe impl Send for TXTResultsIter<'_> {}
 unsafe impl Sync for TXTResultsIter<'_> {}
+
+impl fmt::Debug for TXTResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TXTResult")
+            .field("record_start", &self.record_start())
+            .field("text", &self.text())
+            .finish()
+    }
+}
 
 impl<'a> TXTResult<'a> {
     /// Is this the start of a text record, or the continuation of a previous record?
@@ -151,5 +160,31 @@ mod tests {
         assert_sync::<TXTResult>();
         assert_sync::<TXTResults>();
         assert_sync::<TXTResultsIter>();
+    }
+
+    // DNS TXT response: example.com -> "hello world", TTL 300
+    const ONE_TXT_RECORD: &[u8] = &[
+        0x00, 0x00, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x07, 0x65, 0x78,
+        0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x10, 0x00, 0x01, 0xc0,
+        0x0c, 0x00, 0x10, 0x00, 0x01, 0x00, 0x00, 0x01, 0x2c, 0x00, 0x0c, 0x0b, 0x68, 0x65, 0x6c,
+        0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64,
+    ];
+
+    #[test]
+    fn debug_txt_result() {
+        let results = TXTResults::parse_from(ONE_TXT_RECORD).unwrap();
+        let result = results.iter().next().unwrap();
+        let debug = format!("{:?}", result);
+        assert!(debug.contains("TXTResult"));
+        assert!(debug.contains("record_start"));
+        assert!(debug.contains("text"));
+    }
+
+    #[test]
+    fn debug_txt_results_iter() {
+        let results = TXTResults::parse_from(ONE_TXT_RECORD).unwrap();
+        let iter = results.iter();
+        let debug = format!("{:?}", iter);
+        assert!(debug.contains("TXTResultsIter"));
     }
 }

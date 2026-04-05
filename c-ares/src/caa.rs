@@ -55,7 +55,7 @@ impl fmt::Display for CAAResults {
 }
 
 /// Iterator of `CAAResult`s.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct CAAResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_caa_reply>,
 }
@@ -92,6 +92,16 @@ unsafe impl Send for CAAResult<'_> {}
 unsafe impl Sync for CAAResult<'_> {}
 unsafe impl Send for CAAResultsIter<'_> {}
 unsafe impl Sync for CAAResultsIter<'_> {}
+
+impl fmt::Debug for CAAResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CAAResult")
+            .field("critical", &self.critical())
+            .field("property", &self.property())
+            .field("value", &self.value())
+            .finish()
+    }
+}
 
 impl<'a> CAAResult<'a> {
     /// Is the 'critical' flag set in this `CAAResult`?
@@ -155,5 +165,32 @@ mod tests {
         assert_sync::<CAAResult>();
         assert_sync::<CAAResults>();
         assert_sync::<CAAResultsIter>();
+    }
+
+    // DNS CAA response: example.com -> 0 issue "letsencrypt.org", TTL 300
+    const ONE_CAA_RECORD: &[u8] = &[
+        0x00, 0x00, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x07, 0x65, 0x78,
+        0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x01, 0x01, 0x00, 0x01, 0xc0,
+        0x0c, 0x01, 0x01, 0x00, 0x01, 0x00, 0x00, 0x01, 0x2c, 0x00, 0x16, 0x00, 0x05, 0x69, 0x73,
+        0x73, 0x75, 0x65, 0x6c, 0x65, 0x74, 0x73, 0x65, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x2e,
+        0x6f, 0x72, 0x67,
+    ];
+
+    #[test]
+    fn debug_caa_result() {
+        let results = CAAResults::parse_from(ONE_CAA_RECORD).unwrap();
+        let result = results.iter().next().unwrap();
+        let debug = format!("{:?}", result);
+        assert!(debug.contains("CAAResult"));
+        assert!(debug.contains("issue"));
+        assert!(debug.contains("critical"));
+    }
+
+    #[test]
+    fn debug_caa_results_iter() {
+        let results = CAAResults::parse_from(ONE_CAA_RECORD).unwrap();
+        let iter = results.iter();
+        let debug = format!("{:?}", iter);
+        assert!(debug.contains("CAAResultsIter"));
     }
 }

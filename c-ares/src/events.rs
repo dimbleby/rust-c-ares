@@ -1,5 +1,6 @@
 use crate::types::Socket;
 use bitflags::bitflags;
+use std::fmt;
 
 bitflags!(
     /// Events used by FdEvents.
@@ -33,6 +34,15 @@ impl FdEvents {
             events: events.bits(),
         };
         FdEvents(events)
+    }
+}
+
+impl fmt::Debug for FdEvents {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FdEvents")
+            .field("fd", &self.0.fd)
+            .field("events", &FdEventFlags::from_bits_truncate(self.0.events))
+            .finish()
     }
 }
 
@@ -84,5 +94,15 @@ mod tests {
         let events = FdEvents::new(42, FdEventFlags::Read);
         assert_eq!(events.0.fd, 42);
         assert_eq!(events.0.events, FdEventFlags::Read.bits());
+    }
+
+    #[test]
+    fn debug_fd_events() {
+        let events = FdEvents::new(42, FdEventFlags::Read | FdEventFlags::Write);
+        let debug = format!("{:?}", events);
+        assert!(debug.contains("FdEvents"));
+        assert!(debug.contains("42"));
+        assert!(debug.contains("Read"));
+        assert!(debug.contains("Write"));
     }
 }

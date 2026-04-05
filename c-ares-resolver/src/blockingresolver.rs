@@ -1,3 +1,4 @@
+use std::fmt;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 
 use crate::error::Error;
@@ -20,6 +21,12 @@ use std::sync::mpsc;
 /// `Resolver`.
 pub struct BlockingResolver {
     inner: Resolver,
+}
+
+impl fmt::Debug for BlockingResolver {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("BlockingResolver").finish_non_exhaustive()
+    }
 }
 
 // Most query implementations follow the same pattern: call through to the `Resolver`, arranging
@@ -470,5 +477,12 @@ mod tests {
         let resolver = BlockingResolver::new().unwrap();
         let result = resolver.set_server_state_callback(|_server, _success, _flags| {});
         assert!(std::ptr::eq(result, &resolver));
+    }
+
+    #[test]
+    fn debug_blocking_resolver() {
+        let resolver = BlockingResolver::new().unwrap();
+        let debug = format!("{:?}", resolver);
+        assert!(debug.contains("BlockingResolver"));
     }
 }

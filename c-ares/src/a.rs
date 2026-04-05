@@ -64,7 +64,7 @@ impl fmt::Display for AResults {
 }
 
 /// Iterator of `AResult`s.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AResultsIter<'a> {
     addrttls: slice::Iter<'a, c_ares_sys::ares_addrttl>,
 }
@@ -89,6 +89,15 @@ impl<'a> IntoIterator for &'a AResults {
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
+    }
+}
+
+impl fmt::Debug for AResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AResult")
+            .field("ipv4", &self.ipv4())
+            .field("ttl", &self.ttl())
+            .finish()
     }
 }
 
@@ -175,5 +184,23 @@ mod tests {
         assert!(iter.next().is_some());
         assert!(iter.next().is_none());
         assert!(iter.next().is_none());
+    }
+
+    #[test]
+    fn debug_a_result() {
+        let results = AResults::parse_from(TWO_A_RECORDS).unwrap();
+        let result = results.iter().next().unwrap();
+        let debug = format!("{:?}", result);
+        assert!(debug.contains("AResult"));
+        assert!(debug.contains("93.184.216.34"));
+        assert!(debug.contains("300"));
+    }
+
+    #[test]
+    fn debug_a_results_iter() {
+        let results = AResults::parse_from(TWO_A_RECORDS).unwrap();
+        let iter = results.iter();
+        let debug = format!("{:?}", iter);
+        assert!(debug.contains("AResultsIter"));
     }
 }

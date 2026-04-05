@@ -1,3 +1,4 @@
+use std::fmt;
 use std::future::Future;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::pin::Pin;
@@ -17,6 +18,12 @@ use c_ares::ServerStateFlags;
 pub struct CAresFuture<T> {
     inner: futures_channel::oneshot::Receiver<c_ares::Result<T>>,
     _resolver: Arc<Resolver>,
+}
+
+impl<T> fmt::Debug for CAresFuture<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CAresFuture").finish_non_exhaustive()
+    }
 }
 
 impl<T> CAresFuture<T> {
@@ -60,6 +67,12 @@ impl<T> Future for CAresFuture<T> {
 /// `Resolver`.
 pub struct FutureResolver {
     inner: Arc<Resolver>,
+}
+
+impl fmt::Debug for FutureResolver {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FutureResolver").finish_non_exhaustive()
+    }
 }
 
 // Most query implementations follow the same pattern: call through to the `Resolver`, arranging
@@ -580,5 +593,20 @@ mod tests {
         let resolver = FutureResolver::new().unwrap();
         let result = resolver.set_server_state_callback(|_server, _success, _flags| {});
         assert!(std::ptr::eq(result, &resolver));
+    }
+
+    #[test]
+    fn debug_future_resolver() {
+        let resolver = FutureResolver::new().unwrap();
+        let debug = format!("{:?}", resolver);
+        assert!(debug.contains("FutureResolver"));
+    }
+
+    #[test]
+    fn debug_cares_future() {
+        let resolver = FutureResolver::new().unwrap();
+        let future = resolver.query_a("example.com");
+        let debug = format!("{:?}", future);
+        assert!(debug.contains("CAresFuture"));
     }
 }

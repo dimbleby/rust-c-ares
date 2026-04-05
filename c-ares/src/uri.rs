@@ -57,7 +57,7 @@ impl fmt::Display for URIResults {
 }
 
 /// Iterator of `URIResult`s.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct URIResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_uri_reply>,
 }
@@ -94,6 +94,17 @@ unsafe impl Send for URIResult<'_> {}
 unsafe impl Sync for URIResult<'_> {}
 unsafe impl Send for URIResultsIter<'_> {}
 unsafe impl Sync for URIResultsIter<'_> {}
+
+impl fmt::Debug for URIResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("URIResult")
+            .field("uri", &self.uri())
+            .field("priority", &self.priority())
+            .field("weight", &self.weight())
+            .field("ttl", &self.ttl())
+            .finish()
+    }
+}
 
 impl<'a> URIResult<'a> {
     /// Returns the weight in this `URIResult`.
@@ -156,5 +167,32 @@ mod tests {
         assert_send::<URIResult>();
         assert_send::<URIResults>();
         assert_send::<URIResultsIter>();
+    }
+
+    // DNS URI response: example.com -> "https://example.com", priority 10, weight 1, TTL 300
+    const ONE_URI_RECORD: &[u8] = &[
+        0x00, 0x00, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x07, 0x65, 0x78,
+        0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x01, 0x00, 0x00, 0x01, 0xc0,
+        0x0c, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x01, 0x2c, 0x00, 0x17, 0x00, 0x0a, 0x00, 0x01,
+        0x68, 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65,
+        0x2e, 0x63, 0x6f, 0x6d,
+    ];
+
+    #[test]
+    fn debug_uri_result() {
+        let results = URIResults::parse_from(ONE_URI_RECORD).unwrap();
+        let result = results.iter().next().unwrap();
+        let debug = format!("{:?}", result);
+        assert!(debug.contains("URIResult"));
+        assert!(debug.contains("https://example.com"));
+        assert!(debug.contains("10"));
+    }
+
+    #[test]
+    fn debug_uri_results_iter() {
+        let results = URIResults::parse_from(ONE_URI_RECORD).unwrap();
+        let iter = results.iter();
+        let debug = format!("{:?}", iter);
+        assert!(debug.contains("URIResultsIter"));
     }
 }

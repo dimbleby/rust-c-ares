@@ -130,6 +130,22 @@ impl EventLoop {
                 .set_pending_write_callback(pending_write_callback);
         }
 
+        // When a new query is enqueued, wake the event loop so it can
+        // recompute the timeout.
+        #[cfg(cares1_35)]
+        {
+            let poller = Arc::clone(&self.poller);
+            let query_enqueue_callback = move || {
+                poller
+                    .notify()
+                    .expect("Failed to notify poller of query enqueue");
+            };
+            ares_channel
+                .lock()
+                .unwrap()
+                .set_query_enqueue_callback(query_enqueue_callback);
+        }
+
         // Create a stopper.
         let stopper = EventLoopStopper::new(Arc::clone(&self.poller), Arc::clone(&self.quit));
 
@@ -144,12 +160,19 @@ impl EventLoop {
     // lifetime.
     #[allow(clippy::needless_pass_by_value)]
     fn event_loop_thread(self, ares_channel: Arc<Mutex<c_ares::Channel>>) {
-        const MAX_POLL: Duration = Duration::from_millis(500);
         let mut events = polling::Events::new();
+
+        // Without the query enqueue callback we have no way to be woken when
+        // a new query arrives on an existing connection, so we cap the poll
+        // interval.  With the callback we can block until needed.
+        #[cfg(not(cares1_35))]
+        const MAX_POLL: Option<Duration> = Some(Duration::from_millis(500));
+        #[cfg(cares1_35)]
+        const MAX_POLL: Option<Duration> = None;
 
         loop {
             // Ask c-ares how long until the next timeout fires.
-            let timeout = ares_channel.lock().unwrap().timeout(Some(MAX_POLL));
+            let timeout = ares_channel.lock().unwrap().timeout(MAX_POLL);
 
             // Wait for something to happen.
             events.clear();

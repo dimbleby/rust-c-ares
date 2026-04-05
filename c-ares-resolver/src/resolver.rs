@@ -555,7 +555,7 @@ impl Resolver {
     /// On completion, `handler` is called with the result.
     pub fn get_host_by_address<F>(&self, address: &IpAddr, handler: F)
     where
-        F: FnOnce(c_ares::Result<c_ares::HostResults>) + Send + 'static,
+        F: FnOnce(c_ares::Result<&c_ares::HostResults>) + Send + 'static,
     {
         self.ares_channel
             .lock()
@@ -568,7 +568,7 @@ impl Resolver {
     /// On completion, `handler` is called with the result.
     pub fn get_host_by_name<F>(&self, name: &str, family: c_ares::AddressFamily, handler: F)
     where
-        F: FnOnce(c_ares::Result<c_ares::HostResults>) + Send + 'static,
+        F: FnOnce(c_ares::Result<&c_ares::HostResults>) + Send + 'static,
     {
         self.ares_channel
             .lock()

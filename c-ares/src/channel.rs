@@ -22,7 +22,8 @@ use crate::dns::{DnsCls, DnsRecord, DnsRecordType};
 use crate::error::{Error, Result};
 #[cfg(cares1_34)]
 use crate::events::{FdEvents, ProcessFlags};
-use crate::host::{HostResults, get_host_callback};
+use crate::host::HostResults;
+use crate::host::get_host_callback;
 use crate::mx::{MXResults, query_mx_callback};
 use crate::nameinfo::{NameInfoResult, get_name_info_callback};
 use crate::naptr::{NAPTRResults, query_naptr_callback};
@@ -1114,7 +1115,7 @@ impl Channel {
     /// On completion, `handler` is called with the result.
     pub fn get_host_by_address<F>(&mut self, address: &IpAddr, handler: F)
     where
-        F: FnOnce(Result<HostResults>) + Send + 'static,
+        F: FnOnce(Result<&HostResults>) + Send + 'static,
     {
         let in_addr: c_types::in_addr;
         let in6_addr: c_types::in6_addr;
@@ -1151,7 +1152,7 @@ impl Channel {
     /// On completion, `handler` is called with the result.
     pub fn get_host_by_name<F>(&mut self, name: &str, family: AddressFamily, handler: F)
     where
-        F: FnOnce(Result<HostResults>) + Send + 'static,
+        F: FnOnce(Result<&HostResults>) + Send + 'static,
     {
         let Ok(c_name) = CString::new(name) else {
             handler(Err(Error::EBADNAME));

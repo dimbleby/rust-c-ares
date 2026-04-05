@@ -6,13 +6,13 @@ use std::slice;
 use itertools::Itertools;
 
 use crate::error::{Error, Result};
-use crate::hostent::{HasHostent, HostAliasResultsIter, HostentOwned};
+use crate::host::{HostAliasResultsIter, HostResults};
 use crate::panic;
 
 /// The result of a successful PTR lookup.
 #[derive(Debug)]
 pub struct PTRResults {
-    hostent: HostentOwned,
+    hostent: HostResults,
 }
 
 impl PTRResults {
@@ -41,7 +41,7 @@ impl PTRResults {
 
     fn new(hostent: *mut c_types::hostent) -> Self {
         PTRResults {
-            hostent: HostentOwned::new(hostent),
+            hostent: HostResults::new(hostent),
         }
     }
 

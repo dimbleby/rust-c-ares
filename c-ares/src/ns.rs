@@ -6,13 +6,13 @@ use std::slice;
 use itertools::Itertools;
 
 use crate::error::{Error, Result};
-use crate::hostent::{HasHostent, HostAliasResultsIter, HostentOwned};
+use crate::host::{HostAliasResultsIter, HostResults};
 use crate::panic;
 
 /// The result of a successful NS lookup.
 #[derive(Debug)]
 pub struct NSResults {
-    hostent: HostentOwned,
+    hostent: HostResults,
 }
 
 impl NSResults {
@@ -32,7 +32,7 @@ impl NSResults {
 
     fn new(hostent: *mut c_types::hostent) -> Self {
         NSResults {
-            hostent: HostentOwned::new(hostent),
+            hostent: HostResults::new(hostent),
         }
     }
 

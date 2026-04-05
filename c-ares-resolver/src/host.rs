@@ -26,8 +26,8 @@ impl HostResults {
     }
 }
 
-impl From<c_ares::HostResults<'_>> for HostResults {
-    fn from(results: c_ares::HostResults) -> Self {
+impl From<&c_ares::HostResults> for HostResults {
+    fn from(results: &c_ares::HostResults) -> Self {
         Self {
             hostname: results.hostname().to_owned(),
             addresses: results.addresses().collect(),

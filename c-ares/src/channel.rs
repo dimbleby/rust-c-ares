@@ -136,6 +136,17 @@ impl Default for Options {
 
 impl Options {
     /// Returns a fresh `Options`, on which no values are set.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use c_ares::{Options, Flags};
+    ///
+    /// let mut options = Options::new();
+    /// options.set_flags(Flags::STAYOPEN | Flags::EDNS)
+    ///        .set_timeout(5000)
+    ///        .set_tries(3);
+    /// ```
     pub fn new() -> Self {
         Self::default()
     }
@@ -355,12 +366,27 @@ pub struct Channel {
 
 impl Channel {
     /// Create a new channel for name service lookups, with default `Options`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let channel = c_ares::Channel::new().unwrap();
+    /// ```
     pub fn new() -> Result<Self> {
         let options = Options::default();
         Self::with_options(options)
     }
 
     /// Create a new channel for name service lookups, with the given `Options`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut options = c_ares::Options::new();
+    /// options.set_flags(c_ares::Flags::STAYOPEN)
+    ///        .set_tries(2);
+    /// let channel = c_ares::Channel::with_options(options).unwrap();
+    /// ```
     pub fn with_options(mut options: Options) -> Result<Channel> {
         // Initialize the library.
         let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
@@ -489,6 +515,15 @@ impl Channel {
 
     /// Retrieve the set of socket descriptors which the calling application should wait on for
     /// reading and / or writing.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let channel = c_ares::Channel::new().unwrap();
+    /// for (socket, readable, writable) in &channel.sockets() {
+    ///     println!("socket {socket}: read={readable}, write={writable}");
+    /// }
+    /// ```
     pub fn sockets(&self) -> Sockets {
         let mut socks = [0; c_ares_sys::ARES_GETSOCK_MAXNUM];
         let bitmask = unsafe {
@@ -512,6 +547,13 @@ impl Channel {
     ///
     /// String format is `host[:port]`.  IPv6 addresses with ports require square brackets eg
     /// `[2001:4860:4860::8888]:53`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut channel = c_ares::Channel::new().unwrap();
+    /// channel.set_servers(&["8.8.8.8", "8.8.4.4:53"]).unwrap();
+    /// ```
     pub fn set_servers(&mut self, servers: &[&str]) -> Result<&mut Self> {
         let servers_csv = servers.join(",");
         let c_servers = CString::new(servers_csv).map_err(|_| Error::EBADSTR)?;
@@ -1193,6 +1235,25 @@ impl Channel {
     /// the parsed response.
     ///
     /// Returns the query ID on success.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use c_ares::*;
+    ///
+    /// let mut channel = Channel::new().unwrap();
+    /// let mut query = DnsRecord::new(0, DnsFlags::RD, DnsOpcode::Query, DnsRcode::NoError).unwrap();
+    /// query.query_add("example.com", DnsRecordType::A, DnsCls::IN).unwrap();
+    /// channel.send_dnsrec(&query, move |result| {
+    ///     let record = result.unwrap();
+    ///     for rr in record.rrs(DnsSection::Answer) {
+    ///         if let Some(addr) = rr.get_addr(DnsRrKey::A_ADDR) {
+    ///             println!("address: {addr}");
+    ///         }
+    ///     }
+    /// }).unwrap();
+    /// // ... drive the event loop ...
+    /// ```
     #[cfg(cares1_28)]
     pub fn send_dnsrec<F>(&mut self, dnsrec: &DnsRecord, handler: F) -> Result<u16>
     where
@@ -1219,6 +1280,28 @@ impl Channel {
     /// a parsed [`DnsRecord`] in the callback.
     ///
     /// Returns the query ID on success.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use c_ares::{Channel, DnsCls, DnsRecordType, DnsRrKey, DnsSection};
+    ///
+    /// let mut channel = Channel::new().unwrap();
+    /// channel.query_dnsrec(
+    ///     "example.com",
+    ///     DnsCls::IN,
+    ///     DnsRecordType::A,
+    ///     move |result| {
+    ///         let record = result.unwrap();
+    ///         for rr in record.rrs(DnsSection::Answer) {
+    ///             if let Some(addr) = rr.get_addr(DnsRrKey::A_ADDR) {
+    ///                 println!("address: {addr}");
+    ///             }
+    ///         }
+    ///     },
+    /// ).unwrap();
+    /// // ... drive the event loop with channel.sockets() / channel.process_fd() ...
+    /// ```
     #[cfg(cares1_28)]
     pub fn query_dnsrec<F>(
         &mut self,
@@ -1252,6 +1335,25 @@ impl Channel {
 
     /// Initiate a series of DNS queries using a pre-built [`DnsRecord`],
     /// receiving a parsed [`DnsRecord`] in the callback.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use c_ares::*;
+    ///
+    /// let mut channel = Channel::new().unwrap();
+    /// let mut query = DnsRecord::new(0, DnsFlags::RD, DnsOpcode::Query, DnsRcode::NoError).unwrap();
+    /// query.query_add("example.com", DnsRecordType::A, DnsCls::IN).unwrap();
+    /// channel.search_dnsrec(&query, move |result| {
+    ///     let record = result.unwrap();
+    ///     for rr in record.rrs(DnsSection::Answer) {
+    ///         if let Some(addr) = rr.get_addr(DnsRrKey::A_ADDR) {
+    ///             println!("address: {addr}");
+    ///         }
+    ///     }
+    /// }).unwrap();
+    /// // ... drive the event loop ...
+    /// ```
     #[cfg(cares1_28)]
     pub fn search_dnsrec<F>(&mut self, dnsrec: &DnsRecord, handler: F) -> Result<()>
     where

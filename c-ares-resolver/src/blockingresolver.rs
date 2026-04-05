@@ -43,6 +43,20 @@ macro_rules! blockify {
 
 impl BlockingResolver {
     /// Create a new `BlockingResolver`, using default `Options`.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let resolver = c_ares_resolver::BlockingResolver::new().unwrap();
+    /// match resolver.query_a("example.com") {
+    ///     Ok(results) => {
+    ///         for result in &results {
+    ///             println!("{}: TTL {}", result.ipv4(), result.ttl());
+    ///         }
+    ///     }
+    ///     Err(e) => eprintln!("Query failed: {e}"),
+    /// }
+    /// ```
     pub fn new() -> Result<Self, Error> {
         let options = Options::default();
         Self::with_options(options)
@@ -312,6 +326,22 @@ impl BlockingResolver {
     }
 
     /// Send a DNS query using a pre-built [`c_ares::DnsRecord`].
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use c_ares::*;
+    ///
+    /// let resolver = c_ares_resolver::BlockingResolver::new().unwrap();
+    /// let mut query = DnsRecord::new(0, DnsFlags::RD, DnsOpcode::Query, DnsRcode::NoError).unwrap();
+    /// query.query_add("example.com", DnsRecordType::A, DnsCls::IN).unwrap();
+    /// let response = resolver.send_dnsrec(&query).unwrap();
+    /// for rr in response.rrs(DnsSection::Answer) {
+    ///     if let Some(addr) = rr.get_addr(DnsRrKey::A_ADDR) {
+    ///         println!("address: {addr}");
+    ///     }
+    /// }
+    /// ```
     #[cfg(cares1_28)]
     pub fn send_dnsrec(&self, dnsrec: &c_ares::DnsRecord) -> c_ares::Result<c_ares::DnsRecord> {
         let (tx, rx) = mpsc::sync_channel(1);
@@ -323,6 +353,22 @@ impl BlockingResolver {
 
     /// Initiate a DNS query for `name` with the given class and type, receiving a parsed
     /// [`c_ares::DnsRecord`].
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use c_ares::{DnsCls, DnsRecordType, DnsRrKey, DnsSection};
+    ///
+    /// let resolver = c_ares_resolver::BlockingResolver::new().unwrap();
+    /// let record = resolver
+    ///     .query_dnsrec("example.com", DnsCls::IN, DnsRecordType::A)
+    ///     .unwrap();
+    /// for rr in record.rrs(DnsSection::Answer) {
+    ///     if let Some(addr) = rr.get_addr(DnsRrKey::A_ADDR) {
+    ///         println!("address: {addr}");
+    ///     }
+    /// }
+    /// ```
     #[cfg(cares1_28)]
     pub fn query_dnsrec(
         &self,
@@ -340,6 +386,22 @@ impl BlockingResolver {
 
     /// Initiate a series of DNS queries using a pre-built [`c_ares::DnsRecord`], receiving a
     /// parsed [`c_ares::DnsRecord`].
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use c_ares::*;
+    ///
+    /// let resolver = c_ares_resolver::BlockingResolver::new().unwrap();
+    /// let mut query = DnsRecord::new(0, DnsFlags::RD, DnsOpcode::Query, DnsRcode::NoError).unwrap();
+    /// query.query_add("example.com", DnsRecordType::A, DnsCls::IN).unwrap();
+    /// let response = resolver.search_dnsrec(&query).unwrap();
+    /// for rr in response.rrs(DnsSection::Answer) {
+    ///     if let Some(addr) = rr.get_addr(DnsRrKey::A_ADDR) {
+    ///         println!("address: {addr}");
+    ///     }
+    /// }
+    /// ```
     #[cfg(cares1_28)]
     pub fn search_dnsrec(&self, dnsrec: &c_ares::DnsRecord) -> c_ares::Result<c_ares::DnsRecord> {
         let (tx, rx) = mpsc::sync_channel(1);

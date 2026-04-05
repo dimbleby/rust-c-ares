@@ -128,6 +128,20 @@ impl DnsRecord {
     /// When building a query to send via
     /// [`Channel::send_dnsrec()`](crate::Channel::send_dnsrec), set `id`
     /// to `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use c_ares::{DnsRecord, DnsFlags, DnsOpcode, DnsRcode, DnsRecordType, DnsCls};
+    ///
+    /// let mut record = DnsRecord::new(
+    ///     0,
+    ///     DnsFlags::RD,
+    ///     DnsOpcode::Query,
+    ///     DnsRcode::NoError,
+    /// ).unwrap();
+    /// record.query_add("example.com", DnsRecordType::A, DnsCls::IN).unwrap();
+    /// ```
     pub fn new(id: u16, flags: DnsFlags, opcode: DnsOpcode, rcode: DnsRcode) -> Result<DnsRecord> {
         let mut dnsrec: *mut c_ares_sys::ares_dns_record_t = ptr::null_mut();
         let status = unsafe {

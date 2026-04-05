@@ -57,7 +57,7 @@ impl fmt::Display for SRVResults {
 }
 
 /// Iterator of `SRVResult`s.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct SRVResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_srv_reply>,
 }
@@ -94,6 +94,17 @@ unsafe impl Send for SRVResult<'_> {}
 unsafe impl Sync for SRVResult<'_> {}
 unsafe impl Send for SRVResultsIter<'_> {}
 unsafe impl Sync for SRVResultsIter<'_> {}
+
+impl fmt::Debug for SRVResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SRVResult")
+            .field("host", &self.host())
+            .field("port", &self.port())
+            .field("priority", &self.priority())
+            .field("weight", &self.weight())
+            .finish()
+    }
+}
 
 impl<'a> SRVResult<'a> {
     /// Returns the hostname in this `SRVResult`.
@@ -162,5 +173,33 @@ mod tests {
         assert_sync::<SRVResult>();
         assert_sync::<SRVResults>();
         assert_sync::<SRVResultsIter>();
+    }
+
+    // DNS SRV response: _sip._tcp.example.com -> sip.example.com, priority 10, weight 60, port 5060
+    const ONE_SRV_RECORD: &[u8] = &[
+        0x00, 0x00, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x04, 0x5f, 0x73,
+        0x69, 0x70, 0x04, 0x5f, 0x74, 0x63, 0x70, 0x07, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65,
+        0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x21, 0x00, 0x01, 0xc0, 0x0c, 0x00, 0x21, 0x00, 0x01,
+        0x00, 0x00, 0x01, 0x2c, 0x00, 0x17, 0x00, 0x0a, 0x00, 0x3c, 0x13, 0xc4, 0x03, 0x73, 0x69,
+        0x70, 0x07, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00,
+    ];
+
+    #[test]
+    fn debug_srv_result() {
+        let results = SRVResults::parse_from(ONE_SRV_RECORD).unwrap();
+        let result = results.iter().next().unwrap();
+        let debug = format!("{:?}", result);
+        assert!(debug.contains("SRVResult"));
+        assert!(debug.contains("sip.example.com"));
+        assert!(debug.contains("5060"));
+        assert!(debug.contains("60"));
+    }
+
+    #[test]
+    fn debug_srv_results_iter() {
+        let results = SRVResults::parse_from(ONE_SRV_RECORD).unwrap();
+        let iter = results.iter();
+        let debug = format!("{:?}", iter);
+        assert!(debug.contains("SRVResultsIter"));
     }
 }

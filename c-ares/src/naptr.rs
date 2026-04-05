@@ -56,7 +56,7 @@ impl fmt::Display for NAPTRResults {
 }
 
 /// Iterator of `NAPTRResult`s.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct NAPTRResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_naptr_reply>,
 }
@@ -93,6 +93,19 @@ unsafe impl Send for NAPTRResult<'_> {}
 unsafe impl Sync for NAPTRResult<'_> {}
 unsafe impl Send for NAPTRResultsIter<'_> {}
 unsafe impl Sync for NAPTRResultsIter<'_> {}
+
+impl fmt::Debug for NAPTRResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("NAPTRResult")
+            .field("flags", &self.flags())
+            .field("service_name", &self.service_name())
+            .field("regexp", &self.regexp())
+            .field("replacement_pattern", &self.replacement_pattern())
+            .field("order", &self.order())
+            .field("preference", &self.preference())
+            .finish()
+    }
+}
 
 impl<'a> NAPTRResult<'a> {
     /// Returns the flags in this `NAPTRResult`.
@@ -179,5 +192,33 @@ mod tests {
         assert_sync::<NAPTRResult>();
         assert_sync::<NAPTRResults>();
         assert_sync::<NAPTRResultsIter>();
+    }
+
+    // DNS NAPTR response: example.com -> flags="s", service="SIP+D2T", order=100, preference=10
+    const ONE_NAPTR_RECORD: &[u8] = &[
+        0x00, 0x00, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x07, 0x65, 0x78,
+        0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x23, 0x00, 0x01, 0xc0,
+        0x0c, 0x00, 0x23, 0x00, 0x01, 0x00, 0x00, 0x01, 0x2c, 0x00, 0x26, 0x00, 0x64, 0x00, 0x0a,
+        0x01, 0x73, 0x07, 0x53, 0x49, 0x50, 0x2b, 0x44, 0x32, 0x54, 0x00, 0x04, 0x5f, 0x73, 0x69,
+        0x70, 0x04, 0x5f, 0x74, 0x63, 0x70, 0x07, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03,
+        0x63, 0x6f, 0x6d, 0x00,
+    ];
+
+    #[test]
+    fn debug_naptr_result() {
+        let results = NAPTRResults::parse_from(ONE_NAPTR_RECORD).unwrap();
+        let result = results.iter().next().unwrap();
+        let debug = format!("{:?}", result);
+        assert!(debug.contains("NAPTRResult"));
+        assert!(debug.contains("SIP+D2T"));
+        assert!(debug.contains("100"));
+    }
+
+    #[test]
+    fn debug_naptr_results_iter() {
+        let results = NAPTRResults::parse_from(ONE_NAPTR_RECORD).unwrap();
+        let iter = results.iter();
+        let debug = format!("{:?}", iter);
+        assert!(debug.contains("NAPTRResultsIter"));
     }
 }

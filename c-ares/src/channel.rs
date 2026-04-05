@@ -1,6 +1,7 @@
 #[allow(unused_imports)]
 use core::ffi::{c_char, c_int, c_void};
 use std::ffi::CString;
+use std::fmt;
 use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::ptr;
@@ -62,6 +63,7 @@ type PendingWriteCallback = dyn Fn() + Send + 'static;
 /// However, in order to detect when such a server has recovered, c-ares will occasionally retry
 /// failed servers.  `ServerFailoverOptions` contains options to control this behaviour.
 #[cfg(cares1_29)]
+#[derive(Debug)]
 pub struct ServerFailoverOptions {
     retry_chance: u16,
     retry_delay: usize,
@@ -109,6 +111,12 @@ pub struct Options {
     #[cfg(cares1_19)]
     hosts_path: Option<CString>,
     socket_state_callback: Option<Arc<SocketStateCallback>>,
+}
+
+impl fmt::Debug for Options {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Options").finish_non_exhaustive()
+    }
 }
 
 impl Default for Options {
@@ -1322,6 +1330,12 @@ unsafe impl Sync for Channel {}
 unsafe impl Send for Options {}
 unsafe impl Sync for Options {}
 
+impl fmt::Debug for Channel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Channel").finish_non_exhaustive()
+    }
+}
+
 unsafe extern "C" fn socket_state_callback<F>(
     data: *mut c_void,
     socket_fd: c_ares_sys::ares_socket_t,
@@ -1965,5 +1979,26 @@ mod tests {
         // None means "wait indefinitely", but with no pending queries it returns immediately.
         let result = channel.queue_wait_empty(None);
         assert!(result.is_ok() || result == Err(Error::ENOTIMP));
+    }
+
+    #[test]
+    fn debug_options() {
+        let options = Options::new();
+        let debug = format!("{:?}", options);
+        assert!(debug.contains("Options"));
+    }
+
+    #[test]
+    fn debug_channel() {
+        let channel = Channel::new().unwrap();
+        let debug = format!("{:?}", channel);
+        assert!(debug.contains("Channel"));
+    }
+
+    #[test]
+    fn debug_server_failover_options() {
+        let opts = ServerFailoverOptions::new();
+        let debug = format!("{:?}", opts);
+        assert!(debug.contains("ServerFailoverOptions"));
     }
 }

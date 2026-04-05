@@ -63,7 +63,7 @@ impl fmt::Display for AAAAResults {
 }
 
 /// Iterator of `AAAAResult`s.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AAAAResultsIter<'a> {
     addr6ttls: slice::Iter<'a, c_ares_sys::ares_addr6ttl>,
 }
@@ -90,6 +90,15 @@ impl<'a> IntoIterator for &'a AAAAResults {
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
+    }
+}
+
+impl fmt::Debug for AAAAResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AAAAResult")
+            .field("ipv6", &self.ipv6())
+            .field("ttl", &self.ttl())
+            .finish()
     }
 }
 
@@ -175,5 +184,23 @@ mod tests {
         assert!(iter.next().is_some());
         assert!(iter.next().is_none());
         assert!(iter.next().is_none());
+    }
+
+    #[test]
+    fn debug_aaaa_result() {
+        let results = AAAAResults::parse_from(ONE_AAAA_RECORD).unwrap();
+        let result = results.iter().next().unwrap();
+        let debug = format!("{:?}", result);
+        assert!(debug.contains("AAAAResult"));
+        assert!(debug.contains("2001:db8::1"));
+        assert!(debug.contains("300"));
+    }
+
+    #[test]
+    fn debug_aaaa_results_iter() {
+        let results = AAAAResults::parse_from(ONE_AAAA_RECORD).unwrap();
+        let iter = results.iter();
+        let debug = format!("{:?}", iter);
+        assert!(debug.contains("AAAAResultsIter"));
     }
 }

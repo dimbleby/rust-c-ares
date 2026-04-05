@@ -56,7 +56,7 @@ impl fmt::Display for MXResults {
 }
 
 /// Iterator of `MXResult`s.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct MXResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_mx_reply>,
 }
@@ -93,6 +93,15 @@ unsafe impl Send for MXResult<'_> {}
 unsafe impl Sync for MXResult<'_> {}
 unsafe impl Send for MXResultsIter<'_> {}
 unsafe impl Sync for MXResultsIter<'_> {}
+
+impl fmt::Debug for MXResult<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("MXResult")
+            .field("host", &self.host())
+            .field("priority", &self.priority())
+            .finish()
+    }
+}
 
 impl<'a> MXResult<'a> {
     /// Returns the hostname in this `MXResult`.
@@ -149,5 +158,32 @@ mod tests {
         assert_sync::<MXResult>();
         assert_sync::<MXResults>();
         assert_sync::<MXResultsIter>();
+    }
+
+    // DNS MX response: example.com -> mail.example.com, priority 10, TTL 300
+    const ONE_MX_RECORD: &[u8] = &[
+        0x00, 0x00, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x07, 0x65, 0x78,
+        0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x0f, 0x00, 0x01, 0xc0,
+        0x0c, 0x00, 0x0f, 0x00, 0x01, 0x00, 0x00, 0x01, 0x2c, 0x00, 0x14, 0x00, 0x0a, 0x04, 0x6d,
+        0x61, 0x69, 0x6c, 0x07, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d,
+        0x00,
+    ];
+
+    #[test]
+    fn debug_mx_result() {
+        let results = MXResults::parse_from(ONE_MX_RECORD).unwrap();
+        let result = results.iter().next().unwrap();
+        let debug = format!("{:?}", result);
+        assert!(debug.contains("MXResult"));
+        assert!(debug.contains("mail.example.com"));
+        assert!(debug.contains("10"));
+    }
+
+    #[test]
+    fn debug_mx_results_iter() {
+        let results = MXResults::parse_from(ONE_MX_RECORD).unwrap();
+        let iter = results.iter();
+        let debug = format!("{:?}", iter);
+        assert!(debug.contains("MXResultsIter"));
     }
 }

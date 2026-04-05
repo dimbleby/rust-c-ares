@@ -1,3 +1,4 @@
+use std::fmt;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::sync::{Arc, Mutex};
 
@@ -11,6 +12,12 @@ use c_ares::{ServerFailoverOptions, ServerStateFlags};
 #[derive(Default)]
 pub struct Options {
     inner: c_ares::Options,
+}
+
+impl fmt::Debug for Options {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Options").finish_non_exhaustive()
+    }
 }
 
 impl Options {
@@ -182,6 +189,12 @@ impl Options {
 pub struct Resolver {
     ares_channel: Arc<Mutex<c_ares::Channel>>,
     _event_loop_stopper: EventLoopStopper,
+}
+
+impl fmt::Debug for Resolver {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Resolver").finish_non_exhaustive()
+    }
 }
 
 impl Resolver {
@@ -962,5 +975,19 @@ mod tests {
         let resolver = Resolver::new().unwrap();
         let result = resolver.queue_wait_empty(Some(std::time::Duration::ZERO));
         assert!(result.is_ok() || result == Err(c_ares::Error::ENOTIMP));
+    }
+
+    #[test]
+    fn debug_resolver_options() {
+        let options = Options::new();
+        let debug = format!("{:?}", options);
+        assert!(debug.contains("Options"));
+    }
+
+    #[test]
+    fn debug_resolver() {
+        let resolver = Resolver::new().unwrap();
+        let debug = format!("{:?}", resolver);
+        assert!(debug.contains("Resolver"));
     }
 }

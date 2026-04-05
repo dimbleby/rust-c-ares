@@ -16,7 +16,9 @@ fn get_host_by_address_ipv4() {
     use std::net::IpAddr;
 
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -43,7 +45,9 @@ fn get_host_by_address_ipv6() {
     use std::net::IpAddr;
 
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -68,7 +72,9 @@ fn get_host_by_address_ipv6() {
 #[ignore = "requires network"]
 fn get_host_by_name_ipv4() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -99,7 +105,9 @@ fn get_host_by_name_ipv4() {
 #[ignore = "requires network"]
 fn get_host_by_name_ipv6() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -129,7 +137,9 @@ fn get_name_info_ipv4() {
     use std::net::SocketAddr;
 
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -164,7 +174,9 @@ fn get_name_info_ipv6() {
     use std::net::SocketAddr;
 
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])

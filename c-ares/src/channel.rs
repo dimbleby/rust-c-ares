@@ -66,7 +66,7 @@ type PendingWriteCallback = dyn Fn() + Send + 'static;
 #[derive(Debug)]
 pub struct ServerFailoverOptions {
     retry_chance: u16,
-    retry_delay: usize,
+    retry_delay: Duration,
 }
 
 #[cfg(cares1_29)]
@@ -74,7 +74,7 @@ impl Default for ServerFailoverOptions {
     fn default() -> Self {
         Self {
             retry_chance: 10,
-            retry_delay: 5000,
+            retry_delay: Duration::from_secs(5),
         }
     }
 }
@@ -93,9 +93,9 @@ impl ServerFailoverOptions {
         self
     }
 
-    /// The `retry_delay` sets the minimum delay in milliseconds that c-ares will wait before
+    /// The `retry_delay` sets the minimum delay that c-ares will wait before
     /// retrying a specific failed server.
-    pub fn set_retry_delay(&mut self, retry_delay: usize) -> &mut Self {
+    pub fn set_retry_delay(&mut self, retry_delay: Duration) -> &mut Self {
         self.retry_delay = retry_delay;
         self
     }
@@ -140,11 +140,12 @@ impl Options {
     /// # Examples
     ///
     /// ```
+    /// use std::time::Duration;
     /// use c_ares::{Options, Flags};
     ///
     /// let mut options = Options::new();
     /// options.set_flags(Flags::STAYOPEN | Flags::EDNS)
-    ///        .set_timeout(5000)
+    ///        .set_timeout(Duration::from_secs(5))
     ///        .set_tries(3);
     /// ```
     pub fn new() -> Self {
@@ -162,8 +163,8 @@ impl Options {
     /// Set the number of milliseconds each name server is given to respond to a query on the first
     /// try.  (After the first try, the timeout algorithm becomes more complicated, but scales
     /// linearly with the value of timeout).  The default is 2000ms.
-    pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
-        self.ares_options.timeout = ms as c_int;
+    pub fn set_timeout(&mut self, timeout: Duration) -> &mut Self {
+        self.ares_options.timeout = c_int::try_from(timeout.as_millis()).unwrap_or(c_int::MAX);
         self.optmask |= c_ares_sys::ARES_OPT_TIMEOUTMS;
         self
     }
@@ -171,7 +172,7 @@ impl Options {
     /// Set the number of tries the resolver will try contacting each name server before giving up.
     /// The default is three tries.
     pub fn set_tries(&mut self, tries: u32) -> &mut Self {
-        self.ares_options.tries = tries as c_int;
+        self.ares_options.tries = c_int::try_from(tries).unwrap_or(c_int::MAX);
         self.optmask |= c_ares_sys::ARES_OPT_TRIES;
         self
     }
@@ -180,7 +181,7 @@ impl Options {
     /// is" prior to querying for it with the default domain extensions appended.  The default
     /// value is 1 unless set otherwise by resolv.conf or the RES_OPTIONS environment variable.
     pub fn set_ndots(&mut self, ndots: u32) -> &mut Self {
-        self.ares_options.ndots = ndots as c_int;
+        self.ares_options.ndots = c_int::try_from(ndots).unwrap_or(c_int::MAX);
         self.optmask |= c_ares_sys::ARES_OPT_NDOTS;
         self
     }
@@ -242,14 +243,14 @@ impl Options {
 
     /// Set the socket send buffer size.
     pub fn set_sock_send_buffer_size(&mut self, size: u32) -> &mut Self {
-        self.ares_options.socket_send_buffer_size = size as c_int;
+        self.ares_options.socket_send_buffer_size = c_int::try_from(size).unwrap_or(c_int::MAX);
         self.optmask |= c_ares_sys::ARES_OPT_SOCK_SNDBUF;
         self
     }
 
     /// Set the socket receive buffer size.
     pub fn set_sock_receive_buffer_size(&mut self, size: u32) -> &mut Self {
-        self.ares_options.socket_receive_buffer_size = size as c_int;
+        self.ares_options.socket_receive_buffer_size = c_int::try_from(size).unwrap_or(c_int::MAX);
         self.optmask |= c_ares_sys::ARES_OPT_SOCK_RCVBUF;
         self
     }
@@ -270,7 +271,7 @@ impl Options {
 
     /// Set the EDNS packet size.
     pub fn set_ednspsz(&mut self, size: u32) -> &mut Self {
-        self.ares_options.ednspsz = size as c_int;
+        self.ares_options.ednspsz = c_int::try_from(size).unwrap_or(c_int::MAX);
         self.optmask |= c_ares_sys::ARES_OPT_EDNSPSZ;
         self
     }
@@ -303,18 +304,18 @@ impl Options {
     pub fn set_udp_max_queries(&mut self, udp_max_queries: Option<u32>) -> &mut Self {
         self.ares_options.udp_max_queries = match udp_max_queries {
             None => 0,
-            Some(n) => n as i32,
+            Some(n) => c_int::try_from(n).unwrap_or(c_int::MAX),
         };
         self.optmask |= c_ares_sys::ARES_OPT_UDP_MAX_QUERIES;
         self
     }
 
-    /// Set the upper bound for timeout between sequential retry attempts, in milliseconds.  When
-    /// retrying queries, the timeout is increased from the requested timeout parameter, this caps
-    /// the value.
+    /// Set the upper bound for timeout between sequential retry attempts.  When retrying queries,
+    /// the timeout is increased from the requested timeout parameter, this caps the value.
     #[cfg(cares1_22)]
-    pub fn set_max_timeout(&mut self, max_timeout: i32) -> &mut Self {
-        self.ares_options.maxtimeout = max_timeout;
+    pub fn set_max_timeout(&mut self, max_timeout: Duration) -> &mut Self {
+        self.ares_options.maxtimeout =
+            c_int::try_from(max_timeout.as_millis()).unwrap_or(c_int::MAX);
         self.optmask |= c_ares_sys::ARES_OPT_MAXTIMEOUTMS;
         self
     }
@@ -342,7 +343,8 @@ impl Options {
         server_failover_options: &ServerFailoverOptions,
     ) -> &mut Self {
         self.ares_options.server_failover_opts.retry_chance = server_failover_options.retry_chance;
-        self.ares_options.server_failover_opts.retry_delay = server_failover_options.retry_delay;
+        self.ares_options.server_failover_opts.retry_delay =
+            server_failover_options.retry_delay.as_millis() as usize;
         self.optmask |= c_ares_sys::ARES_OPT_SERVER_FAILOVER;
         self
     }
@@ -1592,7 +1594,7 @@ mod tests {
     #[test]
     fn options_set_timeout() {
         let mut options = Options::new();
-        options.set_timeout(5000);
+        options.set_timeout(Duration::from_secs(5));
     }
 
     #[test]
@@ -1688,7 +1690,7 @@ mod tests {
     #[test]
     fn options_set_max_timeout() {
         let mut options = Options::new();
-        options.set_max_timeout(30000);
+        options.set_max_timeout(Duration::from_secs(30));
     }
 
     #[cfg(cares1_23)]
@@ -1703,7 +1705,9 @@ mod tests {
     fn options_set_server_failover_options() {
         let mut options = Options::new();
         let mut failover_opts = ServerFailoverOptions::new();
-        failover_opts.set_retry_chance(5).set_retry_delay(10000);
+        failover_opts
+            .set_retry_chance(5)
+            .set_retry_delay(Duration::from_secs(10));
         options.set_server_failover_options(&failover_opts);
     }
 
@@ -1712,7 +1716,7 @@ mod tests {
         let mut options = Options::new();
         options
             .set_flags(Flags::USEVC)
-            .set_timeout(3000)
+            .set_timeout(Duration::from_secs(3))
             .set_tries(2)
             .set_ndots(1)
             .set_udp_port(53)
@@ -1726,7 +1730,7 @@ mod tests {
         let mut options = Options::new();
         options
             .set_flags(Flags::USEVC | Flags::STAYOPEN)
-            .set_timeout(2000)
+            .set_timeout(Duration::from_secs(2))
             .set_tries(3)
             .set_ndots(2)
             .set_udp_port(53)

@@ -26,10 +26,11 @@ impl Options {
     /// # Examples
     ///
     /// ```
+    /// use std::time::Duration;
     /// use c_ares_resolver::Options;
     ///
     /// let mut options = Options::new();
-    /// options.set_timeout(5000)
+    /// options.set_timeout(Duration::from_secs(5))
     ///        .set_tries(3);
     /// let resolver = c_ares_resolver::FutureResolver::with_options(options).unwrap();
     /// ```
@@ -46,8 +47,8 @@ impl Options {
     /// Set the number of milliseconds each name server is given to respond to a query on the first
     /// try.  (After the first try, the timeout algorithm becomes more complicated, but scales
     /// linearly with the value of timeout).  The default is 5000ms.
-    pub fn set_timeout(&mut self, ms: u32) -> &mut Self {
-        self.inner.set_timeout(ms);
+    pub fn set_timeout(&mut self, timeout: std::time::Duration) -> &mut Self {
+        self.inner.set_timeout(timeout);
         self
     }
 
@@ -151,11 +152,10 @@ impl Options {
         self
     }
 
-    /// Set the upper bound for timeout between sequential retry attempts, in milliseconds.  When
-    /// retrying queries, the timeout is increased from the requested timeout parameter, this caps
-    /// the value.
+    /// Set the upper bound for timeout between sequential retry attempts.  When retrying queries,
+    /// the timeout is increased from the requested timeout parameter, this caps the value.
     #[cfg(cares1_22)]
-    pub fn set_max_timeout(&mut self, max_timeout: i32) -> &mut Self {
+    pub fn set_max_timeout(&mut self, max_timeout: std::time::Duration) -> &mut Self {
         self.inner.set_max_timeout(max_timeout);
         self
     }
@@ -755,7 +755,7 @@ mod tests {
     #[test]
     fn options_set_timeout() {
         let mut options = Options::new();
-        let result = options.set_timeout(1000);
+        let result = options.set_timeout(std::time::Duration::from_secs(1));
         assert!(std::ptr::eq(result, &options));
     }
 
@@ -863,7 +863,7 @@ mod tests {
     #[cfg(cares1_22)]
     fn options_set_max_timeout() {
         let mut options = Options::new();
-        let result = options.set_max_timeout(30000);
+        let result = options.set_max_timeout(std::time::Duration::from_secs(30));
         assert!(std::ptr::eq(result, &options));
     }
 
@@ -891,7 +891,9 @@ mod tests {
     #[test]
     fn resolver_with_custom_options() {
         let mut options = Options::new();
-        options.set_timeout(2000).set_tries(2);
+        options
+            .set_timeout(std::time::Duration::from_secs(2))
+            .set_tries(2);
         let resolver = Resolver::with_options(options);
         assert!(resolver.is_ok());
     }
@@ -1021,7 +1023,9 @@ mod tests {
     #[cfg(cares1_27)]
     fn resolver_queue_wait_empty_with_pending_query() {
         let mut options = Options::new();
-        options.set_timeout(1_000).set_tries(1);
+        options
+            .set_timeout(std::time::Duration::from_secs(1))
+            .set_tries(1);
         let resolver = std::sync::Arc::new(Resolver::with_options(options).unwrap());
 
         // Point at a non-routable address so the query stays pending until it times out.

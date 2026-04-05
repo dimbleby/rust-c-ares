@@ -10,6 +10,7 @@ mod example {
     use std::mem;
     use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};
     use std::ptr;
+    use std::time::Duration;
     use windows_sys::Win32::Networking::WinSock::{
         FD_SET, FD_SETSIZE, SOCKET_ERROR, TIMEVAL, WSACleanup, WSADATA, WSAStartup, select,
     };
@@ -61,7 +62,7 @@ mod example {
             .set_domains(&["example.com"])
             .unwrap()
             .set_flags(c_ares::Flags::STAYOPEN)
-            .set_timeout(500)
+            .set_timeout(Duration::from_millis(500))
             .set_tries(3);
         let mut ares_channel =
             c_ares::Channel::with_options(options).expect("Failed to create channel");

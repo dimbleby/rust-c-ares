@@ -2110,6 +2110,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(cares1_29)]
     fn debug_server_failover_options() {
         let opts = ServerFailoverOptions::new();
         let debug = format!("{:?}", opts);

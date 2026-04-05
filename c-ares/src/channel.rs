@@ -1538,6 +1538,13 @@ mod tests {
         options.set_udp_max_queries(Some(100));
     }
 
+    #[cfg(cares1_20)]
+    #[test]
+    fn options_set_udp_max_queries_none() {
+        let mut options = Options::new();
+        options.set_udp_max_queries(None);
+    }
+
     #[cfg(cares1_22)]
     #[test]
     fn options_set_max_timeout() {
@@ -1719,6 +1726,15 @@ mod tests {
         channel.set_servers(&["8.8.8.8"]).unwrap();
         let servers = channel.servers();
         assert!(!servers.is_empty());
+    }
+
+    #[cfg(cares1_24)]
+    #[test]
+    fn channel_servers_empty() {
+        let mut channel = Channel::new().unwrap();
+        channel.set_servers(&[]).unwrap();
+        let servers = channel.servers();
+        assert!(servers.is_empty());
     }
 
     #[cfg(cares1_34)]
@@ -1939,6 +1955,15 @@ mod tests {
         // No pending queries, should return immediately.
         // Returns ENOTIMP if c-ares was not built with threading support.
         let result = channel.queue_wait_empty(Some(Duration::ZERO));
+        assert!(result.is_ok() || result == Err(Error::ENOTIMP));
+    }
+
+    #[cfg(cares1_27)]
+    #[test]
+    fn channel_queue_wait_empty_none_timeout() {
+        let channel = Channel::new().unwrap();
+        // None means "wait indefinitely", but with no pending queries it returns immediately.
+        let result = channel.queue_wait_empty(None);
         assert!(result.is_ok() || result == Err(Error::ENOTIMP));
     }
 }

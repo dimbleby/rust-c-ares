@@ -341,3 +341,25 @@ mod resolver_configuration {
         resolver.set_local_ipv6("::".parse().unwrap());
     }
 }
+
+#[test]
+#[ignore = "requires network"]
+fn concurrent_queries() {
+    let resolver = BlockingResolver::with_options(test_options()).unwrap();
+    resolver
+        .set_servers(&["8.8.8.8"])
+        .expect("Failed to set servers");
+
+    // Multiple concurrent queries exercise the eventloop socket
+    // modify and re-assert interest paths.
+    std::thread::scope(|s| {
+        let r = &resolver;
+        let h1 = s.spawn(move || r.query_a("google.com"));
+        let h2 = s.spawn(move || r.query_aaaa("google.com"));
+        let h3 = s.spawn(move || r.query_mx("google.com"));
+
+        assert!(h1.join().unwrap().is_ok(), "A query failed");
+        assert!(h2.join().unwrap().is_ok(), "AAAA query failed");
+        assert!(h3.join().unwrap().is_ok(), "MX query failed");
+    });
+}

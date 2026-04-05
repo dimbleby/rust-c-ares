@@ -139,9 +139,27 @@ mod tests {
     }
 
     #[test]
+    fn ares_string_debug_output() {
+        let name = crate::expand_name(b"\x07example\x03com\x00", 0)
+            .expect("expand_name")
+            .0;
+        let debug = format!("{name:?}");
+        assert!(debug.contains("example.com"));
+    }
+
+    #[test]
     fn ares_buf_debug() {
         fn assert_debug<T: fmt::Debug>() {}
         assert_debug::<AresBuf>();
+    }
+
+    #[test]
+    fn ares_buf_debug_output() {
+        let data = crate::expand_string(b"\x05hello", 0)
+            .expect("expand_string")
+            .0;
+        let debug = format!("{data:?}");
+        assert!(!debug.is_empty());
     }
 
     #[test]

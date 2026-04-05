@@ -389,9 +389,10 @@ impl Channel {
     /// ```
     pub fn with_options(mut options: Options) -> Result<Channel> {
         // Initialize the library.
-        let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
-        let lib_rc = unsafe { c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL) };
-        std::mem::drop(ares_library_lock);
+        let lib_rc = {
+            let _lock = ARES_LIBRARY_LOCK.lock().unwrap();
+            unsafe { c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL) }
+        };
         if lib_rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             return Err(Error::from(lib_rc));
         }
@@ -423,9 +424,8 @@ impl Channel {
             c_ares_sys::ares_init_options(&mut ares_channel, &options.ares_options, options.optmask)
         };
         if channel_rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
-            let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
+            let _lock = ARES_LIBRARY_LOCK.lock().unwrap();
             unsafe { c_ares_sys::ares_library_cleanup() }
-            std::mem::drop(ares_library_lock);
             return Err(Error::from(channel_rc));
         }
 
@@ -451,9 +451,20 @@ impl Channel {
 
     /// Duplicate a channel.
     pub fn try_clone(&self) -> Result<Channel> {
+        // Balance the ares_library_cleanup() that will run when the clone is dropped.
+        let lib_rc = {
+            let _lock = ARES_LIBRARY_LOCK.lock().unwrap();
+            unsafe { c_ares_sys::ares_library_init(c_ares_sys::ARES_LIB_INIT_ALL) }
+        };
+        if lib_rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
+            return Err(Error::from(lib_rc));
+        }
+
         let mut ares_channel = ptr::null_mut();
         let rc = unsafe { c_ares_sys::ares_dup(&mut ares_channel, self.ares_channel) };
         if rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
+            let _lock = ARES_LIBRARY_LOCK.lock().unwrap();
+            unsafe { c_ares_sys::ares_library_cleanup() }
             return Err(Error::from(rc));
         }
 
@@ -1418,9 +1429,10 @@ impl Channel {
 impl Drop for Channel {
     fn drop(&mut self) {
         unsafe { c_ares_sys::ares_destroy(self.ares_channel) }
-        let ares_library_lock = ARES_LIBRARY_LOCK.lock().unwrap();
-        unsafe { c_ares_sys::ares_library_cleanup() }
-        std::mem::drop(ares_library_lock);
+        {
+            let _lock = ARES_LIBRARY_LOCK.lock().unwrap();
+            unsafe { c_ares_sys::ares_library_cleanup() }
+        }
         if !std::thread::panicking() {
             panic::propagate();
         }

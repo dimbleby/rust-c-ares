@@ -3,11 +3,20 @@ use std::fmt;
 /// An owned version of `c_ares::NameInfoResult`.
 #[derive(Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub struct NameInfoResult {
-    /// The node returned by the lookup.
-    pub node: Option<String>,
+    node: Option<String>,
+    service: Option<String>,
+}
 
-    /// The service returned by the lookup.
-    pub service: Option<String>,
+impl NameInfoResult {
+    /// Returns the node from this `NameInfoResult`.
+    pub fn node(&self) -> Option<&str> {
+        self.node.as_deref()
+    }
+
+    /// Returns the service from this `NameInfoResult`.
+    pub fn service(&self) -> Option<&str> {
+        self.service.as_deref()
+    }
 }
 
 impl From<c_ares::NameInfoResult<'_>> for NameInfoResult {
@@ -21,9 +30,9 @@ impl From<c_ares::NameInfoResult<'_>> for NameInfoResult {
 
 impl fmt::Display for NameInfoResult {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let node = self.node.as_deref().unwrap_or("<None>");
+        let node = self.node().unwrap_or("<None>");
         write!(fmt, "Node: {node}, ")?;
-        let service = self.service.as_deref().unwrap_or("<None>");
+        let service = self.service().unwrap_or("<None>");
         write!(fmt, "Service: {service}")
     }
 }
@@ -130,8 +139,8 @@ mod tests {
             node: None,
             service: None,
         };
-        assert!(result.node.is_none());
-        assert!(result.service.is_none());
+        assert!(result.node().is_none());
+        assert!(result.service().is_none());
     }
 
     #[test]

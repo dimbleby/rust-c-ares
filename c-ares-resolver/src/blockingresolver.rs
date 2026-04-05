@@ -463,4 +463,12 @@ mod tests {
         let result = resolver.queue_wait_empty(Some(std::time::Duration::ZERO));
         assert!(result.is_ok() || result == Err(c_ares::Error::ENOTIMP));
     }
+
+    #[test]
+    #[cfg(cares1_29)]
+    fn blocking_resolver_set_server_state_callback() {
+        let resolver = BlockingResolver::new().unwrap();
+        let result = resolver.set_server_state_callback(|_server, _success, _flags| {});
+        assert!(std::ptr::eq(result, &resolver));
+    }
 }

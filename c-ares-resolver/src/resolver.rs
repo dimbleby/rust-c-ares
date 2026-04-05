@@ -22,6 +22,17 @@ impl fmt::Debug for Options {
 
 impl Options {
     /// Returns a fresh `Options`, on which no values are set.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use c_ares_resolver::Options;
+    ///
+    /// let mut options = Options::new();
+    /// options.set_timeout(5000)
+    ///        .set_tries(3);
+    /// let resolver = c_ares_resolver::FutureResolver::with_options(options).unwrap();
+    /// ```
     pub fn new() -> Self {
         Self::default()
     }

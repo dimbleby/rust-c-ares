@@ -195,6 +195,14 @@ pub fn status_to_result(status: c_ares_sys::ares_status_t) -> Result<()> {
 /// The version is returned as both a string and an integer.  The integer is built up as 24bit
 /// number, with 8 separate bits used for major number, minor number and patch number.  For
 /// example, the version string "1.2.3" is returned as hexadecimal number 0x010203 (decimal 66051).
+///
+/// # Examples
+///
+/// ```
+/// let (version_str, version_int) = c_ares::version();
+/// assert!(!version_str.is_empty());
+/// assert!(version_int >= 0x011000); // at least 1.16.0
+/// ```
 pub fn version() -> (&'static str, u32) {
     let mut int_version: c_int = 0;
     let str_version = unsafe {

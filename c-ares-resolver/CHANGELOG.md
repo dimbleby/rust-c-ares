@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `Options::set_timeout()` and `Options::set_max_timeout()` now take `Duration`
+  instead of integer milliseconds
 - `queue_wait_empty()` now takes `Option<Duration>`
 - `Options::set_udp_max_queries()` now takes `Option<u32>`
 - `set_local_ipv6()` now takes `Ipv6Addr` by value

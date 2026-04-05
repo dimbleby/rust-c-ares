@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `Options::set_timeout()` and `Options::set_max_timeout()` now take `Duration`
+  instead of integer milliseconds
+- `ServerFailoverOptions::set_retry_delay()` now takes `Duration`
+- `Options` setters that accept `u32` now saturate to `c_int::MAX` instead of
+  silently truncating on overflow
+- Add `Channel::as_raw()` to expose the underlying `ares_channel` pointer
 - `Channel::process_fd()` now takes `Option<Socket>` instead of using `SOCKET_BAD`
   as a sentinel
 - `Channel::queue_wait_empty()` now takes `Option<Duration>`

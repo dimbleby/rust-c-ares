@@ -15,7 +15,7 @@ use std::time::Duration;
 fn raw_search() {
     let mut options = Options::new();
     options
-        .set_timeout(2000)
+        .set_timeout(Duration::from_millis(2000))
         .set_tries(2)
         .set_domains(&["com"])
         .unwrap();
@@ -44,7 +44,7 @@ fn raw_search() {
 fn search_a_record() {
     let mut options = Options::new();
     options
-        .set_timeout(2000)
+        .set_timeout(Duration::from_millis(2000))
         .set_tries(2)
         .set_domains(&["com"])
         .unwrap();
@@ -71,7 +71,9 @@ fn search_a_record() {
 #[ignore = "requires network"]
 fn search_aaaa_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -94,7 +96,9 @@ fn search_aaaa_record() {
 #[ignore = "requires network"]
 fn search_caa_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -117,7 +121,9 @@ fn search_caa_record() {
 #[ignore = "requires network"]
 fn search_cname_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -140,7 +146,9 @@ fn search_cname_record() {
 #[ignore = "requires network"]
 fn search_mx_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -163,7 +171,9 @@ fn search_mx_record() {
 #[ignore = "requires network"]
 fn search_naptr_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -186,7 +196,9 @@ fn search_naptr_record() {
 #[ignore = "requires network"]
 fn search_ns_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -209,7 +221,9 @@ fn search_ns_record() {
 #[ignore = "requires network"]
 fn search_ptr_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -232,7 +246,9 @@ fn search_ptr_record() {
 #[ignore = "requires network"]
 fn search_soa_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -255,7 +271,9 @@ fn search_soa_record() {
 #[ignore = "requires network"]
 fn search_srv_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -278,7 +296,9 @@ fn search_srv_record() {
 #[ignore = "requires network"]
 fn search_txt_record() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])

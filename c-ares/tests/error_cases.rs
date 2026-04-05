@@ -16,7 +16,9 @@ fn get_host_by_address_nonexistent() {
     use std::net::IpAddr;
 
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -42,7 +44,9 @@ fn get_host_by_address_nonexistent() {
 #[ignore = "requires network"]
 fn get_host_by_name_nonexistent() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -71,7 +75,9 @@ fn get_name_info_nonexistent() {
     use std::net::SocketAddr;
 
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -101,7 +107,9 @@ fn get_name_info_nonexistent() {
 #[ignore = "requires network"]
 fn query_caa_nonexistent() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -124,7 +132,9 @@ fn query_caa_nonexistent() {
 #[ignore = "requires network"]
 fn query_cancel() {
     let mut options = Options::new();
-    options.set_timeout(5000).set_tries(3);
+    options
+        .set_timeout(Duration::from_millis(5000))
+        .set_tries(3);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -155,7 +165,9 @@ fn query_cancel() {
 #[ignore = "requires network"]
 fn query_cname_nonexistent() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -178,7 +190,9 @@ fn query_cname_nonexistent() {
 #[ignore = "requires network"]
 fn query_mx_nonexistent() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -201,7 +215,9 @@ fn query_mx_nonexistent() {
 #[ignore = "requires network"]
 fn query_nonexistent_domain() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -224,7 +240,9 @@ fn query_nonexistent_domain() {
 #[ignore = "requires network"]
 fn query_ns_nonexistent() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -247,7 +265,9 @@ fn query_ns_nonexistent() {
 #[ignore = "requires network"]
 fn query_soa_nonexistent() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -270,7 +290,9 @@ fn query_soa_nonexistent() {
 #[ignore = "requires network"]
 fn query_srv_nonexistent() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -326,7 +348,9 @@ fn query_a_null_byte() {
 #[ignore = "requires network"]
 fn query_txt_nonexistent() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])

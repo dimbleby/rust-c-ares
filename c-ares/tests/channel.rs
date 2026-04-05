@@ -14,7 +14,9 @@ use std::time::Duration;
 #[ignore = "requires network"]
 fn multiple_concurrent_queries() {
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -62,7 +64,9 @@ fn pending_write_callback_setup() {
     use std::sync::atomic::AtomicUsize;
 
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])
@@ -98,7 +102,9 @@ fn server_state_callback_invoked() {
     use std::sync::atomic::AtomicUsize;
 
     let mut options = Options::new();
-    options.set_timeout(2000).set_tries(2);
+    options
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(&["8.8.8.8"])

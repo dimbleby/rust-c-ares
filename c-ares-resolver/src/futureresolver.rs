@@ -497,6 +497,7 @@ impl FutureResolver {
 mod tests {
     use super::*;
     use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
+    use std::time::Duration;
 
     fn assert_send<T: Send>() {}
     fn assert_sync<T: Sync>() {}
@@ -537,7 +538,9 @@ mod tests {
     #[test]
     fn future_resolver_with_custom_options() {
         let mut options = Options::new();
-        options.set_timeout(2000).set_tries(2);
+        options
+            .set_timeout(Duration::from_millis(2000))
+            .set_tries(2);
         let resolver = FutureResolver::with_options(options);
         assert!(resolver.is_ok());
     }

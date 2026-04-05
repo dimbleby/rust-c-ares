@@ -10,6 +10,7 @@ mod example {
     use nix::sys::epoll::{Epoll, EpollCreateFlags, EpollEvent, EpollFlags};
     use std::collections::HashSet;
     use std::os::fd::BorrowedFd;
+    use std::time::Duration;
 
     fn print_a_results(result: &c_ares::Result<c_ares::AResults>) {
         match *result {
@@ -80,7 +81,7 @@ mod example {
         let mut options = c_ares::Options::new();
         options
             .set_flags(c_ares::Flags::STAYOPEN)
-            .set_timeout(500)
+            .set_timeout(Duration::from_millis(500))
             .set_tries(3);
         let mut ares_channel =
             c_ares::Channel::with_options(options).expect("Failed to create channel");

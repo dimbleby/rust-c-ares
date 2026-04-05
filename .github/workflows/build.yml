@@ -95,3 +95,22 @@ jobs:
           cargo run -p c-ares-resolver --example futures
           cargo run -p c-ares-resolver --example send_dnsrec
         name: Run c-ares-resolver examples
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install Rust
+        run: rustup update stable --no-self-update && rustup default stable
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@735e5933943122c5ac182670a935f54a949265c1 # v2.52.4
+        with:
+          tool: cargo-llvm-cov
+      - name: Generate coverage report
+        run: cargo llvm-cov --workspace --features vendored --target x86_64-unknown-linux-gnu -- --include-ignored
+        env:
+          LLVM_COV_FLAGS: "--show-branch-summary=false"

@@ -31,7 +31,7 @@ impl DnsRr {
     ///
     /// The pointer must be non-null and valid for lifetime `'a`.
     pub(super) unsafe fn from_const_ptr<'a>(rr: *const c_ares_sys::ares_dns_rr_t) -> &'a DnsRr {
-        unsafe { &*(rr as *const DnsRr) }
+        unsafe { &*rr.cast() }
     }
 
     /// Cast a raw mut pointer to `&mut DnsRr`.
@@ -40,7 +40,7 @@ impl DnsRr {
     ///
     /// The pointer must be non-null and valid for lifetime `'a`.
     pub(super) unsafe fn from_mut_ptr<'a>(rr: *mut c_ares_sys::ares_dns_rr_t) -> &'a mut DnsRr {
-        unsafe { &mut *(rr as *mut DnsRr) }
+        unsafe { &mut *rr.cast() }
     }
 
     /// Returns a const pointer to the inner C type.

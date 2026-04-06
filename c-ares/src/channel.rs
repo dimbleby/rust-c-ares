@@ -57,6 +57,43 @@ type ServerStateCallback = dyn Fn(&str, bool, ServerStateFlags) + Send + 'static
 #[cfg(cares1_34)]
 type PendingWriteCallback = dyn Fn() + Send + 'static;
 
+/// Event system to use for the c-ares built-in event thread.
+///
+/// Passed to [`Options::set_event_thread()`] to select which I/O backend the internal event loop
+/// should use.  In most cases [`Default`](EventSys::Default) is the right choice.
+///
+/// Available since c-ares 1.26.0.
+#[cfg(cares1_26)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum EventSys {
+    /// Let c-ares pick the best available backend.
+    Default,
+    /// Win32 IOCP / AFD_POLL.
+    Win32,
+    /// Linux `epoll`.
+    Epoll,
+    /// BSD / macOS `kqueue`.
+    Kqueue,
+    /// POSIX `poll()`.
+    Poll,
+    /// POSIX `select()` — last-resort fallback.
+    Select,
+}
+
+#[cfg(cares1_26)]
+impl EventSys {
+    fn as_raw(self) -> c_ares_sys::ares_evsys_t {
+        match self {
+            Self::Default => c_ares_sys::ares_evsys_t::ARES_EVSYS_DEFAULT,
+            Self::Win32 => c_ares_sys::ares_evsys_t::ARES_EVSYS_WIN32,
+            Self::Epoll => c_ares_sys::ares_evsys_t::ARES_EVSYS_EPOLL,
+            Self::Kqueue => c_ares_sys::ares_evsys_t::ARES_EVSYS_KQUEUE,
+            Self::Poll => c_ares_sys::ares_evsys_t::ARES_EVSYS_POLL,
+            Self::Select => c_ares_sys::ares_evsys_t::ARES_EVSYS_SELECT,
+        }
+    }
+}
+
 /// Server failover options.
 ///
 /// When a DNS server fails to respond to a query, c-ares will deprioritize the server.  On
@@ -347,6 +384,21 @@ impl Options {
         self.ares_options.server_failover_opts.retry_delay =
             server_failover_options.retry_delay.as_millis() as usize;
         self.optmask |= c_ares_sys::ARES_OPT_SERVER_FAILOVER;
+        self
+    }
+
+    /// Enable the c-ares built-in event thread.
+    ///
+    /// When enabled, c-ares manages its own event loop internally.  The caller does not need to
+    /// monitor sockets or call `process_fd()`.  Requires that c-ares was built with thread safety
+    /// (`ares_threadsafety()` returns true); otherwise channel initialisation will fail.
+    ///
+    /// `evsys` selects the I/O backend; use [`EventSys::Default`] to let c-ares choose the best
+    /// option for the platform.
+    #[cfg(cares1_26)]
+    pub fn set_event_thread(&mut self, evsys: EventSys) -> &mut Self {
+        self.ares_options.evsys = evsys.as_raw();
+        self.optmask |= c_ares_sys::ARES_OPT_EVENT_THREAD;
         self
     }
 }
@@ -2157,6 +2209,43 @@ mod tests {
         let opts = ServerFailoverOptions::new();
         let debug = format!("{:?}", opts);
         assert!(debug.contains("ServerFailoverOptions"));
+    }
+
+    #[cfg(cares1_26)]
+    #[test]
+    fn options_set_event_thread() {
+        let mut options = Options::new();
+        options.set_event_thread(EventSys::Default);
+    }
+
+    #[cfg(cares1_26)]
+    #[test]
+    fn options_set_event_thread_creates_channel() {
+        // Only works if c-ares was built with thread safety.
+        if !crate::thread_safety() {
+            return;
+        }
+        let mut options = Options::new();
+        options.set_event_thread(EventSys::Default);
+        let channel = Channel::with_options(options);
+        assert!(channel.is_ok());
+    }
+
+    #[cfg(cares1_26)]
+    #[test]
+    fn event_sys_variants() {
+        // Exercise all variants through as_raw().
+        let variants = [
+            EventSys::Default,
+            EventSys::Win32,
+            EventSys::Epoll,
+            EventSys::Kqueue,
+            EventSys::Poll,
+            EventSys::Select,
+        ];
+        for variant in variants {
+            let _ = variant.as_raw();
+        }
     }
 
     #[test]

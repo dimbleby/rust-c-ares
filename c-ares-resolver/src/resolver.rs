@@ -199,7 +199,10 @@ impl Options {
 /// `c_ares::Error::EDESTRUCTION`.
 pub struct Resolver {
     ares_channel: Arc<Mutex<c_ares::Channel>>,
-    _event_loop_stopper: EventLoopStopper,
+
+    // Present when we run our own event loop; `None` when c-ares manages its built-in event
+    // thread (the thread stops automatically when the Channel is destroyed).
+    _event_loop_stopper: Option<EventLoopStopper>,
 }
 
 impl fmt::Debug for Resolver {
@@ -217,17 +220,29 @@ impl Resolver {
 
     /// Create a new `Resolver`, with the given `Options`.
     pub fn with_options(options: Options) -> Result<Self, Error> {
-        // Create and run the event loop.
-        let event_loop = EventLoop::new(options.inner)?;
-        let channel = Arc::clone(&event_loop.ares_channel);
-        let stopper = event_loop.run();
+        let mut inner = options.inner;
 
-        // Return the Resolver.
-        let resolver = Self {
-            ares_channel: channel,
-            _event_loop_stopper: stopper,
+        // Use the c-ares built-in event thread if available, else our custom event loop.
+        #[cfg(cares1_26)]
+        let event_loop = if c_ares::thread_safety() {
+            inner.set_event_thread(c_ares::EventSys::Default);
+            None
+        } else {
+            Some(EventLoop::new(&mut inner)?)
         };
-        Ok(resolver)
+        #[cfg(not(cares1_26))]
+        let event_loop = Some(EventLoop::new(&mut inner)?);
+
+        // Create the channel.
+        let ares_channel = Arc::new(Mutex::new(c_ares::Channel::with_options(inner)?));
+
+        // Start the custom event loop if we're using one.
+        let stopper = event_loop.map(|el| el.run(Arc::clone(&ares_channel)));
+
+        Ok(Self {
+            ares_channel,
+            _event_loop_stopper: stopper,
+        })
     }
 
     /// Reinitialize a channel from system configuration.

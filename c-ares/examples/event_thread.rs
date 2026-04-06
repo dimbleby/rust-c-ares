@@ -41,9 +41,13 @@ mod inner {
         // Send the query.  The callback receives the parsed DnsRecord response.
         channel.send_dnsrec(&query, move |result| match result {
             Ok(record) => {
-                for rr in record.rrs(c_ares::DnsSection::Answer) {
-                    if let Some(addr) = rr.get_addr(c_ares::DnsRrKey::A_ADDR) {
-                        println!("{domain} has address {addr}");
+                if record.rr_count(c_ares::DnsSection::Answer) == 0 {
+                    eprintln!("No answers for {domain} ({})", record.rcode());
+                } else {
+                    for rr in record.rrs(c_ares::DnsSection::Answer) {
+                        if let Some(addr) = rr.get_addr(c_ares::DnsRrKey::A_ADDR) {
+                            println!("{domain} has address {addr}");
+                        }
                     }
                 }
             }

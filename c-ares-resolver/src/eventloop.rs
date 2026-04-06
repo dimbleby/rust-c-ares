@@ -25,7 +25,7 @@ pub struct EventLoopStopper {
 }
 
 impl EventLoopStopper {
-    pub fn new(poller: Arc<polling::Poller>, quit: Arc<AtomicBool>) -> Self {
+    fn new(poller: Arc<polling::Poller>, quit: Arc<AtomicBool>) -> Self {
         Self { poller, quit }
     }
 }
@@ -37,12 +37,14 @@ impl Drop for EventLoopStopper {
     }
 }
 
-// The EventLoop sets up a polling::Poller and use it to wait for events on sockets as directed by
+// The EventLoop sets up a polling::Poller and uses it to wait for events on sockets as directed by
 // the c-ares library.
+//
+// Construction is two-phase: `new()` prepares options (sets the socket state callback), then
+// `run()` accepts the already-created channel and starts the background thread.
 pub struct EventLoop {
     poller: Arc<polling::Poller>,
     interests: Arc<Mutex<HashMap<c_ares::Socket, Interest>>>,
-    pub ares_channel: Arc<Mutex<c_ares::Channel>>,
     quit: Arc<AtomicBool>,
 
     #[allow(dead_code)]
@@ -50,8 +52,11 @@ pub struct EventLoop {
 }
 
 impl EventLoop {
-    // Create a new event loop.
-    pub fn new(mut options: c_ares::Options) -> Result<Self, Error> {
+    // Create a new event loop, setting up the socket state callback on `options`.
+    //
+    // The caller should create the `c_ares::Channel` with these options, then pass the resulting
+    // channel to `run()`.
+    pub fn new(options: &mut c_ares::Options) -> Result<Self, Error> {
         // Create a polling::Poller on which to wait for events, and a hashmap to record which
         // sockets we are interested in.
         let poller = Arc::new(polling::Poller::new()?);
@@ -96,56 +101,49 @@ impl EventLoop {
             options.set_socket_state_callback(sock_callback);
         }
 
-        // Create the c-ares channel.
-        #[allow(unused_mut)]
-        let mut ares_channel = c_ares::Channel::with_options(options)?;
+        let event_loop = Self {
+            poller,
+            interests,
+            quit: Arc::new(AtomicBool::new(false)),
+            pending_write: Arc::new(AtomicBool::new(false)),
+        };
+        Ok(event_loop)
+    }
 
-        // Implement the pending-write optimization.
-        let pending_write = Arc::new(AtomicBool::new(false));
+    // Run the event loop with the given channel.
+    pub fn run(self, ares_channel: Arc<Mutex<c_ares::Channel>>) -> EventLoopStopper {
+        // Set up the pending-write optimization.
         #[cfg(cares1_34)]
         {
-            let pending_write = Arc::clone(&pending_write);
-            let poller = Arc::clone(&poller);
+            let pending_write = Arc::clone(&self.pending_write);
+            let poller = Arc::clone(&self.poller);
             let pending_write_callback = move || {
                 pending_write.store(true, Ordering::Release);
                 poller
                     .notify()
                     .expect("Failed to notify poller of pending write");
             };
-            ares_channel.set_pending_write_callback(pending_write_callback);
+            ares_channel
+                .lock()
+                .unwrap()
+                .set_pending_write_callback(pending_write_callback);
         }
 
-        // Create and return the event loop.
-        let locked_channel = Arc::new(Mutex::new(ares_channel));
-        let event_loop = Self {
-            poller,
-            interests,
-            ares_channel: locked_channel,
-            quit: Arc::new(AtomicBool::new(false)),
-            pending_write,
-        };
-        Ok(event_loop)
-    }
-
-    // Run the event loop.
-    pub fn run(self) -> EventLoopStopper {
         // Create a stopper.
-        let poller = Arc::clone(&self.poller);
-        let quit = Arc::clone(&self.quit);
-        let stopper = EventLoopStopper::new(poller, quit);
+        let stopper = EventLoopStopper::new(Arc::clone(&self.poller), Arc::clone(&self.quit));
 
-        thread::spawn(|| self.event_loop_thread());
+        thread::spawn(|| self.event_loop_thread(ares_channel));
         stopper
     }
 
     // Event loop thread - waits for events, and handles them.
-    fn event_loop_thread(mut self) {
+    fn event_loop_thread(self, ares_channel: Arc<Mutex<c_ares::Channel>>) {
         const MAX_POLL: Duration = Duration::from_millis(500);
         let mut events = polling::Events::new();
 
         loop {
             // Ask c-ares how long until the next timeout fires.
-            let timeout = self.ares_channel.lock().unwrap().timeout(Some(MAX_POLL));
+            let timeout = ares_channel.lock().unwrap().timeout(Some(MAX_POLL));
 
             // Wait for something to happen.
             events.clear();
@@ -167,11 +165,11 @@ impl EventLoop {
             // Process any pending write.
             #[cfg(cares1_34)]
             if self.pending_write.swap(false, Ordering::AcqRel) {
-                self.ares_channel.lock().unwrap().process_pending_write();
+                ares_channel.lock().unwrap().process_pending_write();
             }
 
             // Process any events.
-            self.handle_events(&events);
+            handle_events(&ares_channel, &events);
 
             // `polling` always operates in oneshot mode, but c-ares expects us to maintain an
             // interest in sockets until told otherwise.
@@ -194,47 +192,46 @@ impl EventLoop {
             }
         }
     }
+}
 
-    #[cfg(cares1_34)]
-    fn handle_events(&mut self, events: &polling::Events) {
-        let mut fd_events: Vec<FdEvents> = Vec::with_capacity(events.capacity().into());
-        let fd_events_iter = events.iter().map(|event| {
-            let socket = c_ares::Socket::try_from(event.key).unwrap();
-            let mut event_flags = FdEventFlags::empty();
-            if event.readable {
-                event_flags.insert(FdEventFlags::READ)
-            }
-            if event.writable {
-                event_flags.insert(FdEventFlags::WRITE)
-            }
-            FdEvents::new(socket, event_flags)
-        });
-        fd_events.extend(fd_events_iter);
+#[cfg(cares1_34)]
+fn handle_events(ares_channel: &Mutex<c_ares::Channel>, events: &polling::Events) {
+    let mut fd_events: Vec<FdEvents> = Vec::with_capacity(events.capacity().into());
+    let fd_events_iter = events.iter().map(|event| {
+        let socket = c_ares::Socket::try_from(event.key).unwrap();
+        let mut event_flags = FdEventFlags::empty();
+        if event.readable {
+            event_flags.insert(FdEventFlags::READ)
+        }
+        if event.writable {
+            event_flags.insert(FdEventFlags::WRITE)
+        }
+        FdEvents::new(socket, event_flags)
+    });
+    fd_events.extend(fd_events_iter);
 
-        let _ = self
-            .ares_channel
-            .lock()
-            .unwrap()
-            .process_fds(&fd_events, ProcessFlags::empty());
+    let _ = ares_channel
+        .lock()
+        .unwrap()
+        .process_fds(&fd_events, ProcessFlags::empty());
+}
+
+#[cfg(not(cares1_34))]
+fn handle_events(ares_channel: &Mutex<c_ares::Channel>, events: &polling::Events) {
+    let mut acted = false;
+    for event in events.iter() {
+        let socket = c_ares::Socket::try_from(event.key).unwrap();
+
+        let rfd = event.readable.then_some(socket);
+        let wfd = event.writable.then_some(socket);
+
+        ares_channel.lock().unwrap().process_fd(rfd, wfd);
+        acted = true;
     }
 
-    #[cfg(not(cares1_34))]
-    fn handle_events(&mut self, events: &polling::Events) {
-        let mut acted = false;
-        for event in events.iter() {
-            let socket = c_ares::Socket::try_from(event.key).unwrap();
-
-            let rfd = event.readable.then_some(socket);
-            let wfd = event.writable.then_some(socket);
-
-            self.ares_channel.lock().unwrap().process_fd(rfd, wfd);
-            acted = true;
-        }
-
-        if !acted {
-            // No events.  Have c-ares process any timeouts.
-            self.ares_channel.lock().unwrap().process_fd(None, None);
-        }
+    if !acted {
+        // No events.  Have c-ares process any timeouts.
+        ares_channel.lock().unwrap().process_fd(None, None);
     }
 }
 

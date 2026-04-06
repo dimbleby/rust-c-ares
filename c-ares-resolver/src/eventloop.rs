@@ -47,7 +47,7 @@ pub struct EventLoop {
     interests: Arc<Mutex<HashMap<c_ares::Socket, Interest>>>,
     quit: Arc<AtomicBool>,
 
-    #[allow(dead_code)]
+    #[cfg(cares1_34)]
     pending_write: Arc<AtomicBool>,
 }
 
@@ -105,6 +105,7 @@ impl EventLoop {
             poller,
             interests,
             quit: Arc::new(AtomicBool::new(false)),
+            #[cfg(cares1_34)]
             pending_write: Arc::new(AtomicBool::new(false)),
         };
         Ok(event_loop)

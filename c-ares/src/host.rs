@@ -123,7 +123,7 @@ impl Iterator for HostAddressResultsIter<'_> {
             None
         } else {
             unsafe {
-                self.next = &*ptr::from_ref(self.next).offset(1);
+                self.next = &*ptr::from_ref(self.next).add(1);
                 self.family
                     .and_then(|family| ip_address_from_bytes(family, h_addr.cast()))
             }
@@ -147,7 +147,7 @@ impl<'a> Iterator for HostAliasResultsIter<'a> {
         if h_alias.is_null() {
             None
         } else {
-            self.next = unsafe { &*ptr::from_ref(self.next).offset(1) };
+            self.next = unsafe { &*ptr::from_ref(self.next).add(1) };
             let string = unsafe { hostname_as_str(h_alias) };
             Some(string)
         }

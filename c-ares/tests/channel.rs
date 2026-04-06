@@ -1,11 +1,11 @@
 //! Channel feature integration tests (concurrent queries, callbacks).
 
-#![cfg(all(unix, any(target_os = "linux", target_os = "android")))]
+#![cfg(cares1_28)]
 
 mod common;
 
 use c_ares::*;
-use common::process_channel;
+use common::event_thread_channel;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
@@ -13,14 +13,7 @@ use std::time::Duration;
 #[test]
 #[ignore = "requires network"]
 fn multiple_concurrent_queries() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = event_thread_channel();
 
     let a_completed = Arc::new(AtomicBool::new(false));
     let a_completed_clone = a_completed.clone();
@@ -41,7 +34,9 @@ fn multiple_concurrent_queries() {
         mx_completed_clone.store(true, Ordering::SeqCst);
     });
 
-    process_channel(&mut channel, Duration::from_secs(15));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(15)))
+        .expect("queue_wait_empty");
 
     assert!(
         a_completed.load(Ordering::SeqCst),
@@ -63,14 +58,7 @@ fn multiple_concurrent_queries() {
 fn pending_write_callback_setup() {
     use std::sync::atomic::AtomicUsize;
 
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = event_thread_channel();
 
     let callback_count = Arc::new(AtomicUsize::new(0));
     let callback_count_clone = callback_count.clone();
@@ -89,7 +77,9 @@ fn pending_write_callback_setup() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
     // Note: The callback may or may not be invoked - we just test that setting it works
@@ -101,14 +91,7 @@ fn pending_write_callback_setup() {
 fn server_state_callback_invoked() {
     use std::sync::atomic::AtomicUsize;
 
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = event_thread_channel();
 
     let callback_count = Arc::new(AtomicUsize::new(0));
     let callback_count_clone = callback_count.clone();
@@ -137,7 +120,9 @@ fn server_state_callback_invoked() {
         let _ = result;
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
     assert!(

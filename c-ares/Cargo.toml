@@ -28,12 +28,6 @@ c-ares-sys = { version = "11.0.0", path = "../c-ares-sys", default-features = fa
 c-types.workspace = true
 itertools.workspace = true
 
-[target.'cfg(unix)'.dev-dependencies]
-nix = { version = "0.31", default-features = false, features = ["event"] }
-
-[target.'cfg(windows)'.dev-dependencies]
-windows-sys = { version = "0.61", features = ["Win32_Networking_WinSock"] }
-
 [features]
 default = ["maybe-vendored"]
 maybe-vendored = ["c-ares-sys/maybe-vendored"]

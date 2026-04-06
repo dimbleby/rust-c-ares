@@ -31,9 +31,6 @@
 //! - If you have queries pending and don't see events happening, you still need to call either
 //!   `process_fd()` or `process()` at some point anyway - to give `c-ares` an opportunity to
 //!   process any requests that have timed out.
-//!
-//! Complete examples can be found
-//! [here](https://github.com/dimbleby/rust-c-ares/tree/main/examples).
 #![deny(missing_docs)]
 
 #[macro_use]

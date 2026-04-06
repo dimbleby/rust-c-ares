@@ -20,7 +20,7 @@ pub(crate) unsafe extern "C" fn dnsrec_callback<F>(
         Err(()) => {
             // We wrap in ManuallyDrop so we don't call ares_dns_record_destroy
             // — c-ares owns this record and will free it after we return.
-            let rec = unsafe { DnsRecord::from_raw(dnsrec as *mut _) };
+            let rec = unsafe { DnsRecord::from_raw(dnsrec.cast_mut()) };
             let rec = ManuallyDrop::new(rec);
             handler(Ok(&rec))
         }

@@ -345,7 +345,7 @@ impl Options {
     ) -> &mut Self {
         self.ares_options.server_failover_opts.retry_chance = server_failover_options.retry_chance;
         self.ares_options.server_failover_opts.retry_delay =
-            server_failover_options.retry_delay.as_millis() as _;
+            server_failover_options.retry_delay.as_millis() as usize;
         self.optmask |= c_ares_sys::ARES_OPT_SERVER_FAILOVER;
         self
     }
@@ -414,7 +414,7 @@ impl Channel {
         // We deferred setting up domains in the options - do it now.
         let domains: Vec<_> = options.domains.iter().map(|s| s.as_ptr()).collect();
         options.ares_options.domains = domains.as_ptr().cast_mut().cast();
-        options.ares_options.ndomains = domains.len() as _;
+        options.ares_options.ndomains = domains.len() as i32;
 
         // Likewise for lookups.
         if let Some(c_lookup) = &options.lookups {
@@ -555,10 +555,10 @@ impl Channel {
             c_ares_sys::ares_getsock(
                 self.ares_channel,
                 socks.as_mut_ptr(),
-                c_ares_sys::ARES_GETSOCK_MAXNUM as _,
+                c_ares_sys::ARES_GETSOCK_MAXNUM as i32,
             )
         };
-        Sockets::new(socks, bitmask as _)
+        Sockets::new(socks, bitmask as u32)
     }
 
     /// Retrieve the set of socket descriptors which the calling application should wait on for
@@ -1138,8 +1138,8 @@ impl Channel {
             c_ares_sys::ares_gethostbyaddr(
                 self.ares_channel,
                 c_addr,
-                length as _,
-                family as _,
+                length as i32,
+                family as i32,
                 Some(get_host_callback::<F>),
                 c_arg.cast(),
             )
@@ -1163,7 +1163,7 @@ impl Channel {
             c_ares_sys::ares_gethostbyname(
                 self.ares_channel,
                 c_name.as_ptr(),
-                family as _,
+                family as i32,
                 Some(get_host_callback::<F>),
                 c_arg.cast(),
             )
@@ -1427,7 +1427,7 @@ impl Channel {
                     tv_sec: d.as_secs() as _,
                     tv_usec: d.subsec_micros() as _,
                 };
-                &mut maxtv as *mut _
+                &mut maxtv
             }
             None => ptr::null_mut(),
         };

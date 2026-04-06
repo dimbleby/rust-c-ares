@@ -79,7 +79,7 @@ pub use crate::cname::CNameResults;
 #[cfg(cares1_28)]
 pub use crate::dns::{
     DnsCls, DnsDataType, DnsFlags, DnsOpcode, DnsOptDataType, DnsParseFlags, DnsRcode, DnsRecord,
-    DnsRecordType, DnsRr, DnsRrKey, DnsSection,
+    DnsRecordType, DnsRr, DnsRrKey, DnsSection, OptParseError, OptValue, parse_opt_value,
 };
 pub use crate::error::{Error, Result};
 #[cfg(cares1_34)]

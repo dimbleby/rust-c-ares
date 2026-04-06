@@ -43,8 +43,6 @@
 #![deny(missing_docs)]
 
 mod blockingresolver;
-#[cfg(cares1_28)]
-mod dns_opt;
 mod error;
 mod eventloop;
 mod futureresolver;
@@ -53,8 +51,6 @@ mod nameinfo;
 mod resolver;
 
 pub use crate::blockingresolver::BlockingResolver;
-#[cfg(cares1_28)]
-pub use crate::dns_opt::{OptParseError, OptValue, parse_opt_value};
 pub use crate::error::Error;
 pub use crate::futureresolver::{CAresFuture, FutureResolver};
 pub use crate::host::HostResults;

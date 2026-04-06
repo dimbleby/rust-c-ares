@@ -1,70 +1,26 @@
 use c_ares::*;
-use nix::sys::select::{FdSet, select};
-use nix::sys::time::TimeVal;
-use std::os::fd::BorrowedFd;
 use std::time::Duration;
 
-/// Helper function to process DNS queries using select.
-pub fn process_channel(channel: &mut Channel, timeout: Duration) {
-    use std::time::Instant;
+/// Create a `Channel` with the c-ares built-in event thread enabled.
+///
+/// Panics if c-ares was not built with thread safety support.
+#[cfg(cares1_28)]
+pub fn event_thread_channel() -> Channel {
+    assert!(
+        c_ares::thread_safety(),
+        "c-ares was not built with thread safety; cannot use event thread"
+    );
 
-    let start = Instant::now();
-    loop {
-        if start.elapsed() > timeout {
-            break;
-        }
+    let mut options = Options::new();
+    options
+        .set_flags(Flags::STAYOPEN)
+        .set_timeout(Duration::from_millis(2000))
+        .set_tries(2)
+        .set_event_thread(EventSys::Default);
 
-        let sockets = channel.sockets();
-        let socks: Vec<_> = sockets.iter().collect();
-
-        if socks.is_empty() {
-            break;
-        }
-
-        let mut read_fds = FdSet::new();
-        let mut write_fds = FdSet::new();
-
-        for (fd, readable, writable) in &socks {
-            let borrowed_fd = unsafe { BorrowedFd::borrow_raw(*fd) };
-            if *readable {
-                read_fds.insert(borrowed_fd);
-            }
-            if *writable {
-                write_fds.insert(borrowed_fd);
-            }
-        }
-
-        let mut tv = TimeVal::new(0, 100_000); // 100ms
-
-        let result = select(
-            None,
-            Some(&mut read_fds),
-            Some(&mut write_fds),
-            None,
-            Some(&mut tv),
-        );
-
-        match result {
-            Ok(_) => {
-                // Process active file descriptors
-                let mut called = false;
-                for (fd, _, _) in &socks {
-                    let borrowed_fd = unsafe { BorrowedFd::borrow_raw(*fd) };
-                    let readable = read_fds.contains(borrowed_fd);
-                    let writable = write_fds.contains(borrowed_fd);
-                    if readable || writable {
-                        let rfd = readable.then_some(*fd);
-                        let wfd = writable.then_some(*fd);
-                        channel.process_fd(rfd, wfd);
-                        called = true;
-                    }
-                }
-                // Always call process_fd at least once to handle c-ares timeouts
-                if !called {
-                    channel.process_fd(None, None);
-                }
-            }
-            Err(_) => break,
-        }
-    }
+    let mut channel = Channel::with_options(options).expect("Failed to create channel");
+    channel
+        .set_servers(&["8.8.8.8"])
+        .expect("Failed to set servers");
+    channel
 }

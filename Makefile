@@ -30,9 +30,7 @@ coverage: ## Generate coverage report (requires cargo-llvm-cov)
 	cargo llvm-cov --workspace $(FEATURES_FLAG) -- --include-ignored
 
 examples: ## Run all examples
-	cargo run -p c-ares $(FEATURES_FLAG) --example epoll
 	cargo run -p c-ares $(FEATURES_FLAG) --example event_thread
-	cargo run -p c-ares $(FEATURES_FLAG) --example select
 	cargo run -p c-ares $(FEATURES_FLAG) --example version
 	cargo run -p c-ares-resolver $(FEATURES_FLAG) --example blocking
 	cargo run -p c-ares-resolver $(FEATURES_FLAG) --example callback

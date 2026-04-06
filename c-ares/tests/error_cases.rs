@@ -1,28 +1,19 @@
 //! Error path and nonexistent domain integration tests.
 
-#![cfg(all(unix, any(target_os = "linux", target_os = "android")))]
-
 mod common;
 
 use c_ares::*;
-use common::process_channel;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn get_host_by_address_nonexistent() {
     use std::net::IpAddr;
 
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -35,22 +26,18 @@ fn get_host_by_address_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn get_host_by_name_nonexistent() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -64,24 +51,20 @@ fn get_host_by_name_nonexistent() {
         },
     );
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn get_name_info_nonexistent() {
     use std::net::SocketAddr;
 
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -98,22 +81,18 @@ fn get_name_info_nonexistent() {
         },
     );
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_caa_nonexistent() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -123,22 +102,18 @@ fn query_caa_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_cancel() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(5000))
-        .set_tries(3);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let cancelled = Arc::new(AtomicBool::new(false));
     let cancelled_clone = cancelled.clone();
@@ -153,7 +128,9 @@ fn query_cancel() {
     channel.cancel();
 
     // Process should complete quickly since query was cancelled
-    process_channel(&mut channel, Duration::from_secs(1));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(1)))
+        .expect("queue_wait_empty");
 
     assert!(
         cancelled.load(Ordering::SeqCst),
@@ -161,17 +138,11 @@ fn query_cancel() {
     );
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_cname_nonexistent() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -181,22 +152,18 @@ fn query_cname_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_mx_nonexistent() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -206,22 +173,18 @@ fn query_mx_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_nonexistent_domain() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -231,22 +194,18 @@ fn query_nonexistent_domain() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_ns_nonexistent() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -256,22 +215,18 @@ fn query_ns_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_soa_nonexistent() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -281,22 +236,18 @@ fn query_soa_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_srv_nonexistent() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -309,7 +260,9 @@ fn query_srv_nonexistent() {
         },
     );
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -344,17 +297,11 @@ fn query_a_null_byte() {
     assert!(completed.load(Ordering::SeqCst), "Handler was not called");
 }
 
+#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_txt_nonexistent() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = common::event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -364,7 +311,9 @@ fn query_txt_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }

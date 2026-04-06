@@ -1,11 +1,11 @@
 //! Host lookup and name info integration tests.
 
-#![cfg(all(unix, any(target_os = "linux", target_os = "android")))]
+#![cfg(cares1_28)]
 
 mod common;
 
 use c_ares::*;
-use common::process_channel;
+use common::event_thread_channel;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
@@ -15,14 +15,7 @@ use std::time::Duration;
 fn get_host_by_address_ipv4() {
     use std::net::IpAddr;
 
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -34,7 +27,9 @@ fn get_host_by_address_ipv4() {
         assert!(!host_results.hostname().is_empty(), "No hostname returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -44,14 +39,7 @@ fn get_host_by_address_ipv4() {
 fn get_host_by_address_ipv6() {
     use std::net::IpAddr;
 
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -63,7 +51,9 @@ fn get_host_by_address_ipv6() {
         assert!(!host_results.hostname().is_empty(), "No hostname returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -71,14 +61,7 @@ fn get_host_by_address_ipv6() {
 #[test]
 #[ignore = "requires network"]
 fn get_host_by_name_ipv4() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -96,7 +79,9 @@ fn get_host_by_name_ipv4() {
         assert!(!format!("{}", host_results).is_empty());
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -104,14 +89,7 @@ fn get_host_by_name_ipv4() {
 #[test]
 #[ignore = "requires network"]
 fn get_host_by_name_ipv6() {
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -126,7 +104,9 @@ fn get_host_by_name_ipv6() {
         );
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -136,14 +116,7 @@ fn get_host_by_name_ipv6() {
 fn get_name_info_ipv4() {
     use std::net::SocketAddr;
 
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -163,7 +136,9 @@ fn get_name_info_ipv4() {
         },
     );
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -173,14 +148,7 @@ fn get_name_info_ipv4() {
 fn get_name_info_ipv6() {
     use std::net::SocketAddr;
 
-    let mut options = Options::new();
-    options
-        .set_timeout(Duration::from_millis(2000))
-        .set_tries(2);
-    let mut channel = Channel::with_options(options).expect("Failed to create channel");
-    channel
-        .set_servers(&["8.8.8.8"])
-        .expect("Failed to set servers");
+    let mut channel = event_thread_channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -193,7 +161,9 @@ fn get_name_info_ipv6() {
         assert!(name_info.service().is_none(), "Name info service returned");
     });
 
-    process_channel(&mut channel, Duration::from_secs(3));
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }

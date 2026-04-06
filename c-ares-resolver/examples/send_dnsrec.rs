@@ -6,8 +6,8 @@
 
 #[cfg(cares1_28)]
 mod inner {
-    use c_ares::{DnsCls, DnsRecordType, DnsRr, DnsRrKey, DnsSection};
-    use c_ares_resolver::{Resolver, parse_opt_value};
+    use c_ares::{DnsCls, DnsRecordType, DnsRr, DnsRrKey, DnsSection, parse_opt_value};
+    use c_ares_resolver::Resolver;
     use std::sync::mpsc;
 
     fn format_opt_value(key: DnsRrKey, opt: u16, data: &[u8]) -> String {

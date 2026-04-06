@@ -35,7 +35,7 @@ examples: ## Run all examples
 	cargo run -p c-ares-resolver $(FEATURES_FLAG) --example blocking
 	cargo run -p c-ares-resolver $(FEATURES_FLAG) --example callback
 	cargo run -p c-ares-resolver $(FEATURES_FLAG) --example futures
-	cargo run -p c-ares-resolver $(FEATURES_FLAG) --example send_dnsrec
+	cargo run -p c-ares-resolver $(FEATURES_FLAG) --example dnsrec
 
 clean: ## Remove build artifacts
 	cargo clean

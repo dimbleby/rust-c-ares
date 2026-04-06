@@ -91,7 +91,7 @@ jobs:
           cargo run -p c-ares-resolver --example blocking
           cargo run -p c-ares-resolver --example callback
           cargo run -p c-ares-resolver --example futures
-          cargo run -p c-ares-resolver --example send_dnsrec
+          cargo run -p c-ares-resolver --example dnsrec
         name: Run c-ares-resolver examples
 
   coverage:

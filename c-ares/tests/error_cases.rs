@@ -5,6 +5,7 @@ mod common;
 use c_ares::*;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+#[cfg(cares1_28)]
 use std::time::Duration;
 
 #[cfg(cares1_28)]

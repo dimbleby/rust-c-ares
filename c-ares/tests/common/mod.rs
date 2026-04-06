@@ -1,4 +1,6 @@
+#[cfg(cares1_28)]
 use c_ares::*;
+#[cfg(cares1_28)]
 use std::time::Duration;
 
 /// Create a `Channel` with the c-ares built-in event thread enabled.

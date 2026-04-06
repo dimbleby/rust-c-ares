@@ -1,15 +1,16 @@
 //! A safe wrapper for the [`c-ares`](https://c-ares.org) library.
 //!
-//! This crate is a fairly faithful wrapper of `c-ares`; which is to say that it preserves some of
-//! the complexity of using the underlying library.  If you just want to make a DNS query, you
-//! should probably prefer the [`c-ares-resolver`](https://crates.io/crates/c-ares-resolver) crate,
-//! which does the hard work for you.
+//! If your `c-ares` is sufficiently recent (version 1.26+) and built with thread safety, it should
+//! be quite ergonomic to use this crate directly. See the
+//! [`event_thread`](https://github.com/dimbleby/rust-c-ares/tree/main/c-ares/examples/event_thread.rs)
+//! example.
 //!
-//! Direct usage of this crate requires you to pay attention to `c-ares` as it tells you which
-//! file descriptors it cares about, and to poll for activity on those file descriptors.
-//! This likely requires you to have an event loop or similar with which to integrate.
+//! Otherwise, you will need to manage your own event loop. You may prefer the
+//! [`c-ares-resolver`](https://crates.io/crates/c-ares-resolver) crate, which does that for you.
+//! That crate also offers a variety of resolvers: using callbacks, using futures, or blocking.
 //!
-//! Still here?  Usage of this crate is as follows:
+//! Direct usage without the event thread requires you to pay attention to `c-ares` as it tells you
+//! which file descriptors it cares about, and to poll for activity on those file descriptors:
 //!
 //! - Create a `Channel`.
 //!
@@ -31,7 +32,7 @@
 //!   `process_fd()` or `process()` at some point anyway - to give `c-ares` an opportunity to
 //!   process any requests that have timed out.
 //!
-//! Complete examples showing how to use the library can be found
+//! Complete examples can be found
 //! [here](https://github.com/dimbleby/rust-c-ares/tree/main/examples).
 #![deny(missing_docs)]
 

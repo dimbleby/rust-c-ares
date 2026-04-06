@@ -37,6 +37,8 @@ use crate::srv::{SRVResults, query_srv_callback};
 #[cfg(cares1_24)]
 use crate::string::AresString;
 use crate::txt::{TXTResults, query_txt_callback};
+#[cfg(cares1_26)]
+use crate::types::EventSys;
 use crate::types::{AddressFamily, DnsClass, QueryType, Socket};
 use crate::uri::{URIResults, query_uri_callback};
 #[allow(unused_imports)]
@@ -56,43 +58,6 @@ type ServerStateCallback = dyn Fn(&str, bool, ServerStateFlags) + Send + 'static
 
 #[cfg(cares1_34)]
 type PendingWriteCallback = dyn Fn() + Send + 'static;
-
-/// Event system to use for the c-ares built-in event thread.
-///
-/// Passed to [`Options::set_event_thread()`] to select which I/O backend the internal event loop
-/// should use.  In most cases [`Default`](EventSys::Default) is the right choice.
-///
-/// Available since c-ares 1.26.0.
-#[cfg(cares1_26)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum EventSys {
-    /// Let c-ares pick the best available backend.
-    Default,
-    /// Win32 IOCP / AFD_POLL.
-    Win32,
-    /// Linux `epoll`.
-    Epoll,
-    /// BSD / macOS `kqueue`.
-    Kqueue,
-    /// POSIX `poll()`.
-    Poll,
-    /// POSIX `select()` — last-resort fallback.
-    Select,
-}
-
-#[cfg(cares1_26)]
-impl EventSys {
-    fn as_raw(self) -> c_ares_sys::ares_evsys_t {
-        match self {
-            Self::Default => c_ares_sys::ares_evsys_t::ARES_EVSYS_DEFAULT,
-            Self::Win32 => c_ares_sys::ares_evsys_t::ARES_EVSYS_WIN32,
-            Self::Epoll => c_ares_sys::ares_evsys_t::ARES_EVSYS_EPOLL,
-            Self::Kqueue => c_ares_sys::ares_evsys_t::ARES_EVSYS_KQUEUE,
-            Self::Poll => c_ares_sys::ares_evsys_t::ARES_EVSYS_POLL,
-            Self::Select => c_ares_sys::ares_evsys_t::ARES_EVSYS_SELECT,
-        }
-    }
-}
 
 /// Server failover options.
 ///
@@ -397,7 +362,7 @@ impl Options {
     /// option for the platform.
     #[cfg(cares1_26)]
     pub fn set_event_thread(&mut self, evsys: EventSys) -> &mut Self {
-        self.ares_options.evsys = evsys.as_raw();
+        self.ares_options.evsys = evsys.into();
         self.optmask |= c_ares_sys::ARES_OPT_EVENT_THREAD;
         self
     }
@@ -2229,23 +2194,6 @@ mod tests {
         options.set_event_thread(EventSys::Default);
         let channel = Channel::with_options(options);
         assert!(channel.is_ok());
-    }
-
-    #[cfg(cares1_26)]
-    #[test]
-    fn event_sys_variants() {
-        // Exercise all variants through as_raw().
-        let variants = [
-            EventSys::Default,
-            EventSys::Win32,
-            EventSys::Epoll,
-            EventSys::Kqueue,
-            EventSys::Poll,
-            EventSys::Select,
-        ];
-        for variant in variants {
-            let _ = variant.as_raw();
-        }
     }
 
     #[test]

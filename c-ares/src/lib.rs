@@ -68,8 +68,6 @@ mod utils;
 pub use crate::a::{AResult, AResults, AResultsIter};
 pub use crate::aaaa::{AAAAResult, AAAAResults, AAAAResultsIter};
 pub use crate::caa::{CAAResult, CAAResults, CAAResultsIter};
-#[cfg(cares1_26)]
-pub use crate::channel::EventSys;
 #[cfg(cares1_29)]
 pub use crate::channel::ServerFailoverOptions;
 pub use crate::channel::{Channel, Options, Sockets, SocketsIter};
@@ -96,6 +94,8 @@ pub use crate::soa::SOAResult;
 pub use crate::srv::{SRVResult, SRVResults, SRVResultsIter};
 pub use crate::string::{AresBuf, AresString};
 pub use crate::txt::{TXTResult, TXTResults, TXTResultsIter};
+#[cfg(cares1_26)]
+pub use crate::types::EventSys;
 pub use crate::types::{AddressFamily, SOCKET_BAD, Socket};
 pub use crate::uri::{URIResult, URIResults, URIResultsIter};
 #[cfg(cares1_23)]

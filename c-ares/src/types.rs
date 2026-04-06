@@ -43,6 +43,44 @@ pub enum DnsClass {
     IN = 1,
 }
 
+/// Event system to use for the c-ares built-in event thread.
+///
+/// Passed to [`Options::set_event_thread()`](crate::Options::set_event_thread) to select which I/O
+/// backend the internal event loop should use.  In most cases [`Default`](EventSys::Default) is the
+/// right choice.
+///
+/// Available since c-ares 1.26.0.
+#[cfg(cares1_26)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum EventSys {
+    /// Let c-ares pick the best available backend.
+    Default,
+    /// Win32 IOCP / AFD_POLL.
+    Win32,
+    /// Linux `epoll`.
+    Epoll,
+    /// BSD / macOS `kqueue`.
+    Kqueue,
+    /// POSIX `poll()`.
+    Poll,
+    /// POSIX `select()` — last-resort fallback.
+    Select,
+}
+
+#[cfg(cares1_26)]
+impl From<EventSys> for c_ares_sys::ares_evsys_t {
+    fn from(val: EventSys) -> Self {
+        match val {
+            EventSys::Default => c_ares_sys::ares_evsys_t::ARES_EVSYS_DEFAULT,
+            EventSys::Win32 => c_ares_sys::ares_evsys_t::ARES_EVSYS_WIN32,
+            EventSys::Epoll => c_ares_sys::ares_evsys_t::ARES_EVSYS_EPOLL,
+            EventSys::Kqueue => c_ares_sys::ares_evsys_t::ARES_EVSYS_KQUEUE,
+            EventSys::Poll => c_ares_sys::ares_evsys_t::ARES_EVSYS_POLL,
+            EventSys::Select => c_ares_sys::ares_evsys_t::ARES_EVSYS_SELECT,
+        }
+    }
+}
+
 pub const MAX_ADDRTTLS: usize = 32;
 
 #[cfg(test)]
@@ -102,5 +140,22 @@ mod tests {
         let mut sorted = families.clone();
         sorted.sort();
         assert_eq!(sorted.len(), 3);
+    }
+
+    #[cfg(cares1_26)]
+    #[test]
+    fn event_sys_variants() {
+        // Exercise all variants through the From conversion.
+        let variants = [
+            EventSys::Default,
+            EventSys::Win32,
+            EventSys::Epoll,
+            EventSys::Kqueue,
+            EventSys::Poll,
+            EventSys::Select,
+        ];
+        for variant in variants {
+            let _: c_ares_sys::ares_evsys_t = variant.into();
+        }
     }
 }

@@ -779,3 +779,60 @@ fn send_dnsrec() {
         "Callback was not called"
     );
 }
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo() {
+    let resolver = Resolver::with_options(test_options()).unwrap();
+    let pair = Arc::new((Mutex::new(false), Condvar::new()));
+    let pair_clone = Arc::clone(&pair);
+
+    let hints = c_ares::AddrInfoHints {
+        family: Some(c_ares::AddressFamily::INET),
+        ..c_ares::AddrInfoHints::default()
+    };
+    resolver.get_addrinfo("google.com", None, &hints, move |result| {
+        assert!(result.is_ok());
+        let addrinfo = result.unwrap();
+        assert!(addrinfo.nodes().count() > 0);
+        let (lock, cvar) = pair_clone.as_ref();
+        *lock.lock().unwrap() = true;
+        cvar.notify_one();
+    });
+
+    assert!(
+        wait_for_completion(&pair, Duration::from_secs(3)),
+        "Callback was not called"
+    );
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_with_service() {
+    let resolver = Resolver::with_options(test_options()).unwrap();
+    let pair = Arc::new((Mutex::new(false), Condvar::new()));
+    let pair_clone = Arc::clone(&pair);
+
+    let hints = c_ares::AddrInfoHints {
+        family: Some(c_ares::AddressFamily::INET),
+        ..c_ares::AddrInfoHints::default()
+    };
+    resolver.get_addrinfo("google.com", Some("http"), &hints, move |result| {
+        assert!(result.is_ok());
+        let addrinfo = result.unwrap();
+        assert!(addrinfo.nodes().count() > 0);
+        for node in addrinfo.nodes() {
+            if let Some(sa) = node.socket_addr() {
+                assert_eq!(sa.port(), 80);
+            }
+        }
+        let (lock, cvar) = pair_clone.as_ref();
+        *lock.lock().unwrap() = true;
+        cvar.notify_one();
+    });
+
+    assert!(
+        wait_for_completion(&pair, Duration::from_secs(3)),
+        "Callback was not called"
+    );
+}

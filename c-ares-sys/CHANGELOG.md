@@ -4,6 +4,7 @@
 
 - Re-export `libc::timeval`
 - Derive Debug where it was previously missing
+- Export `ARES_AI_*` address info hint flag constants
 
 ## 11.0.0 (14 December 2025)
 

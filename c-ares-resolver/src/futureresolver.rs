@@ -78,9 +78,9 @@ impl fmt::Debug for FutureResolver {
 // Most query implementations follow the same pattern: call through to the `Resolver`, arranging
 // that the callback completes a future.
 macro_rules! futurize {
-    ($resolver:expr, $query:ident, $question:expr) => {{
+    ($resolver:expr, $query:ident, $($arg:expr),+ $(,)?) => {{
         let (sender, receiver) = futures_channel::oneshot::channel();
-        $resolver.$query($question, |result| {
+        $resolver.$query($($arg,)+ |result| {
             let _ = sender.send(result);
         });
         let resolver = Arc::clone(&$resolver);
@@ -339,6 +339,16 @@ impl FutureResolver {
         });
         let resolver = Arc::clone(&self.inner);
         CAresFuture::new(receiver, resolver)
+    }
+
+    /// Initiate a host query by name and service.
+    pub fn get_addrinfo(
+        &self,
+        name: &str,
+        service: Option<&str>,
+        hints: &c_ares::AddrInfoHints,
+    ) -> CAresFuture<c_ares::AddrInfoResults> {
+        futurize!(self.inner, get_addrinfo, name, service, hints)
     }
 
     /// Initiate a single-question DNS query for `name`.  The class and type of the query are per

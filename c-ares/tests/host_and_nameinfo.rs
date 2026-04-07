@@ -167,3 +167,279 @@ fn get_name_info_ipv6() {
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_ipv4() {
+    let mut channel = event_thread_channel();
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    let hints = AddrInfoHints {
+        family: Some(AddressFamily::INET),
+        ..AddrInfoHints::default()
+    };
+    channel.get_addrinfo("google.com", None, &hints, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        let addrinfo = result.expect("Query failed");
+        assert!(addrinfo.nodes().count() > 0, "No address nodes returned");
+        for node in addrinfo.nodes() {
+            assert_eq!(node.family(), AddressFamily::INET);
+            assert!(node.ip_addr().is_some());
+        }
+    });
+
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
+
+    assert!(completed.load(Ordering::SeqCst), "Query did not complete");
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_ipv6() {
+    let mut channel = event_thread_channel();
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    let hints = AddrInfoHints {
+        family: Some(AddressFamily::INET6),
+        ..AddrInfoHints::default()
+    };
+    channel.get_addrinfo("google.com", None, &hints, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        let addrinfo = result.expect("Query failed");
+        assert!(addrinfo.nodes().count() > 0, "No address nodes returned");
+        for node in addrinfo.nodes() {
+            assert_eq!(node.family(), AddressFamily::INET6);
+            assert!(node.ip_addr().is_some());
+        }
+    });
+
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
+
+    assert!(completed.load(Ordering::SeqCst), "Query did not complete");
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_unspec() {
+    let mut channel = event_thread_channel();
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    let hints = AddrInfoHints::default();
+    channel.get_addrinfo("google.com", None, &hints, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        let addrinfo = result.expect("Query failed");
+        assert!(addrinfo.nodes().count() > 0, "No address nodes returned");
+    });
+
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
+
+    assert!(completed.load(Ordering::SeqCst), "Query did not complete");
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_with_service() {
+    let mut channel = event_thread_channel();
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    let hints = AddrInfoHints {
+        family: Some(AddressFamily::INET),
+        ..AddrInfoHints::default()
+    };
+    channel.get_addrinfo("google.com", Some("http"), &hints, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        let addrinfo = result.expect("Query failed");
+        assert!(addrinfo.nodes().count() > 0, "No address nodes returned");
+        // When a service is given, the port should be set (80 for http)
+        for node in addrinfo.nodes() {
+            if let Some(sa) = node.socket_addr() {
+                assert_eq!(sa.port(), 80);
+            }
+        }
+    });
+
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
+
+    assert!(
+        completed.load(Ordering::SeqCst),
+        "Query did not complete (get_addrinfo_with_service)"
+    );
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_cnames() {
+    let mut channel = event_thread_channel();
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    let hints = AddrInfoHints {
+        flags: AddrInfoFlags::CANONNAME,
+        family: Some(AddressFamily::INET),
+        ..AddrInfoHints::default()
+    };
+    // www.github.com has a well-known CNAME chain.
+    channel.get_addrinfo("www.github.com", None, &hints, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        let addrinfo = result.expect("Query failed");
+        assert!(addrinfo.nodes().count() > 0, "No address nodes returned");
+
+        let cnames: Vec<_> = addrinfo.cnames().collect();
+        assert!(!cnames.is_empty(), "Expected at least one CNAME record");
+        for cname in &cnames {
+            assert!(!cname.name().is_empty());
+            assert!(!cname.alias().is_empty());
+            assert!(!format!("{cname}").is_empty());
+            assert!(!format!("{cname:?}").is_empty());
+        }
+    });
+
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
+
+    assert!(completed.load(Ordering::SeqCst), "Query did not complete");
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_debug_display() {
+    let mut channel = event_thread_channel();
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    let hints = AddrInfoHints {
+        family: Some(AddressFamily::INET),
+        ..AddrInfoHints::default()
+    };
+    channel.get_addrinfo("google.com", None, &hints, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        let addrinfo = result.expect("Query failed");
+
+        // Exercise Display and Debug on all types.
+        let display = format!("{addrinfo}");
+        let debug = format!("{addrinfo:?}");
+        assert!(display.contains("Nodes:"));
+        assert!(debug.contains("AddrInfoResults"));
+
+        for node in addrinfo.nodes() {
+            let node_display = format!("{node}");
+            let node_debug = format!("{node:?}");
+            assert!(!node_display.is_empty());
+            assert!(node_debug.contains("AddrInfoNode"));
+            assert!(node.ttl() >= 0);
+            assert!(node.socktype() >= 0);
+            assert!(node.protocol() >= 0);
+        }
+
+        // Exercise iterator Debug.
+        let iter_debug = format!("{:?}", addrinfo.nodes());
+        assert!(iter_debug.contains("AddrInfoNodeIter"));
+    });
+
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
+
+    assert!(completed.load(Ordering::SeqCst), "Query did not complete");
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_display_with_cnames() {
+    let mut channel = event_thread_channel();
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    let hints = AddrInfoHints {
+        flags: AddrInfoFlags::CANONNAME,
+        family: Some(AddressFamily::INET),
+        ..AddrInfoHints::default()
+    };
+    // www.github.com has a well-known CNAME chain, and CANONNAME gives us a name.
+    channel.get_addrinfo("www.github.com", None, &hints, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        let addrinfo = result.expect("Query failed");
+
+        // Exercise Display — this hits the name and CNames branches.
+        let display = format!("{addrinfo}");
+        assert!(
+            display.contains("Name:"),
+            "expected Name in display: {display}"
+        );
+        assert!(
+            display.contains("CNames:"),
+            "expected CNames in display: {display}"
+        );
+    });
+
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(3)))
+        .expect("queue_wait_empty");
+
+    assert!(completed.load(Ordering::SeqCst), "Query did not complete");
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_nonexistent() {
+    let mut channel = event_thread_channel();
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    let hints = AddrInfoHints::default();
+    // Query a name that will fail at the DNS level, exercising the error path
+    // in `get_addrinfo_callback`.
+    channel.get_addrinfo("nonexistent.example.invalid", None, &hints, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        assert!(result.is_err(), "Expected an error for nonexistent domain");
+    });
+
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(5)))
+        .expect("queue_wait_empty");
+
+    assert!(completed.load(Ordering::SeqCst), "Query did not complete");
+}
+
+#[test]
+fn get_addrinfo_null_name() {
+    let mut channel = event_thread_channel();
+
+    let completed = Arc::new(AtomicBool::new(false));
+    let completed_clone = completed.clone();
+
+    let hints = AddrInfoHints::default();
+    channel.get_addrinfo("invalid\0name", None, &hints, move |result| {
+        completed_clone.store(true, Ordering::SeqCst);
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), Error::EBADNAME);
+    });
+
+    // The callback is invoked synchronously for bad names, but wait just in case.
+    channel
+        .queue_wait_empty(Some(Duration::from_secs(1)))
+        .expect("queue_wait_empty");
+
+    assert!(completed.load(Ordering::SeqCst), "Callback was not called");
+}

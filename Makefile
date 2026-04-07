@@ -31,6 +31,7 @@ coverage: ## Generate coverage report (requires cargo-llvm-cov)
 
 examples: ## Run all examples
 	cargo run -p c-ares $(FEATURES_FLAG) --example event_thread
+	cargo run -p c-ares $(FEATURES_FLAG) --example getaddrinfo
 	cargo run -p c-ares $(FEATURES_FLAG) --example version
 	cargo run -p c-ares-resolver $(FEATURES_FLAG) --example blocking
 	cargo run -p c-ares-resolver $(FEATURES_FLAG) --example callback

@@ -63,6 +63,21 @@ pub const ARES_NI_IDN: c_int = 1 << 10;
 pub const ARES_NI_IDN_ALLOW_UNASSIGNED: c_int = 1 << 11;
 pub const ARES_NI_IDN_USE_STD3_ASCII_RULES: c_int = 1 << 12;
 
+// Flags for addrinfo hints
+pub const ARES_AI_CANONNAME: c_int = 1;
+pub const ARES_AI_NUMERICHOST: c_int = 1 << 1;
+pub const ARES_AI_PASSIVE: c_int = 1 << 2;
+pub const ARES_AI_NUMERICSERV: c_int = 1 << 3;
+pub const ARES_AI_V4MAPPED: c_int = 1 << 4;
+pub const ARES_AI_ALL: c_int = 1 << 5;
+pub const ARES_AI_ADDRCONFIG: c_int = 1 << 6;
+pub const ARES_AI_NOSORT: c_int = 1 << 7;
+pub const ARES_AI_ENVHOSTS: c_int = 1 << 8;
+pub const ARES_AI_IDN: c_int = 1 << 10;
+pub const ARES_AI_IDN_ALLOW_UNASSIGNED: c_int = 1 << 11;
+pub const ARES_AI_IDN_USE_STD3_ASCII_RULES: c_int = 1 << 12;
+pub const ARES_AI_CANONIDN: c_int = 1 << 13;
+
 // Server state callback flag values
 pub const ARES_SERV_STATE_UDP: c_int = 1;
 pub const ARES_SERV_STATE_TCP: c_int = 1 << 1;

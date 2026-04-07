@@ -13,6 +13,9 @@ sub print_values {
             $value =~ s/^\(//;
             $value =~ s/\)$//;
 
+            # Skip multi-line defines (line continuations).
+            next if $value =~ /\\$/;
+
             if ($flag =~ /\p{Lowercase}/) {
                 print "#[allow(non_upper_case_globals)]\n"
             }
@@ -57,6 +60,10 @@ print_values("ARES_OPT_", @lines);
 print "\n";
 print "// Flags for nameinfo queries\n";
 print_values("ARES_NI_", @lines);
+
+print "\n";
+print "// Flags for addrinfo hints\n";
+print_values("ARES_AI_", @lines);
 
 print "\n";
 print "// Server state callback flag values\n";

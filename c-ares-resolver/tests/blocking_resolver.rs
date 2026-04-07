@@ -363,3 +363,36 @@ fn concurrent_queries() {
         assert!(h3.join().unwrap().is_ok(), "MX query failed");
     });
 }
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo() {
+    let resolver = BlockingResolver::with_options(test_options()).unwrap();
+    let hints = c_ares::AddrInfoHints {
+        family: Some(c_ares::AddressFamily::INET),
+        ..c_ares::AddrInfoHints::default()
+    };
+    let result = resolver.get_addrinfo("google.com", None, &hints);
+    assert!(result.is_ok(), "Failed to get addr info");
+    let addrinfo = result.unwrap();
+    assert!(addrinfo.nodes().count() > 0);
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_with_service() {
+    let resolver = BlockingResolver::with_options(test_options()).unwrap();
+    let hints = c_ares::AddrInfoHints {
+        family: Some(c_ares::AddressFamily::INET),
+        ..c_ares::AddrInfoHints::default()
+    };
+    let result = resolver.get_addrinfo("google.com", Some("http"), &hints);
+    assert!(result.is_ok(), "Failed to get addr info with service");
+    let addrinfo = result.unwrap();
+    assert!(addrinfo.nodes().count() > 0);
+    for node in addrinfo.nodes() {
+        if let Some(sa) = node.socket_addr() {
+            assert_eq!(sa.port(), 80);
+        }
+    }
+}

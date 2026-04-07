@@ -11,7 +11,9 @@ use std::time::Duration;
 mod options;
 mod sockets;
 
-pub use options::{Options, ServerFailoverOptions};
+pub use options::Options;
+#[cfg(cares1_29)]
+pub use options::ServerFailoverOptions;
 pub use sockets::{Sockets, SocketsIter};
 
 use options::SocketStateCallback;
@@ -20,6 +22,7 @@ use options::SocketStateCallback;
 use crate::ServerStateFlags;
 use crate::a::{AResults, query_a_callback};
 use crate::aaaa::{AAAAResults, query_aaaa_callback};
+use crate::addrinfo::{AddrInfoHints, AddrInfoResults, get_addrinfo_callback};
 use crate::caa::{CAAResults, query_caa_callback};
 use crate::cname::{CNameResults, query_cname_callback};
 #[cfg(cares1_28)]
@@ -921,6 +924,44 @@ impl Channel {
         panic::propagate();
     }
 
+    /// Initiate a host query by name and service.
+    ///
+    /// The `hints` parameter controls the desired address family, socket type, protocol, and
+    /// behaviour flags.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn get_addrinfo<F>(
+        &mut self,
+        name: &str,
+        service: Option<&str>,
+        hints: &AddrInfoHints,
+        handler: F,
+    ) where
+        F: FnOnce(Result<AddrInfoResults>) + Send + 'static,
+    {
+        let Ok(c_name) = CString::new(name) else {
+            handler(Err(Error::EBADNAME));
+            return;
+        };
+        let Ok(c_service) = service.map(CString::new).transpose() else {
+            handler(Err(Error::EBADNAME));
+            return;
+        };
+        let c_hints: c_ares_sys::ares_addrinfo_hints = hints.into();
+        let c_arg = Box::into_raw(Box::new(handler));
+        unsafe {
+            c_ares_sys::ares_getaddrinfo(
+                self.ares_channel,
+                c_name.as_ptr(),
+                c_service.as_ref().map_or(ptr::null(), |s| s.as_ptr()),
+                &c_hints,
+                Some(get_addrinfo_callback::<F>),
+                c_arg.cast(),
+            );
+        }
+        panic::propagate();
+    }
+
     /// Initiate a single-question DNS query for `name`.  The class and type of the query are per
     /// the provided parameters, taking values as defined in `arpa/nameser.h`.
     ///
@@ -1169,7 +1210,7 @@ impl Channel {
     /// Retrieve the total number of active queries pending answers from servers.
     ///
     /// Some c-ares requests may spawn multiple queries, such as
-    /// `get_addr_info()` when using `AddressFamily::UNSPEC`, which will be
+    /// `get_addrinfo()` when using `AddressFamily::UNSPEC`, which will be
     /// reflected in this number.
     #[cfg(cares1_27)]
     pub fn queue_active_queries(&self) -> usize {

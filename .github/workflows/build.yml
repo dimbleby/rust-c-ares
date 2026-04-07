@@ -85,6 +85,7 @@ jobs:
         name: Check minimal versions
       - run: |
           cargo run -p c-ares --example event_thread
+          cargo run -p c-ares --example getaddrinfo
           cargo run -p c-ares --example version
         name: Run c-ares examples
       - run: |

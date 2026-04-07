@@ -12,21 +12,27 @@
 - `Options` setters that accept `u32` now saturate to `c_int::MAX` instead of
   silently truncating on overflow
 - Add `Channel::as_raw()` to expose the underlying `ares_channel` pointer
-- Add `Channel::timeout()` to query the next timeout deadline via `ares_timeout()`
-- `Channel::process_fd()` now takes `Option<Socket>` instead of using `SOCKET_BAD`
-  as a sentinel
+- Add `Channel::timeout()` to query the next timeout deadline via
+  `ares_timeout()`
+- `Channel::process_fd()` now takes `Option<Socket>` instead of using
+  `SOCKET_BAD` as a sentinel
 - `Channel::queue_wait_empty()` now takes `Option<Duration>`
 - `Options::set_udp_max_queries()` now takes `Option<u32>`
 - `Ipv4Addr` and `Ipv6Addr` parameters are now passed by value consistently
-- `AresString` now implements `Display`, `AsRef<str>`, and `From<AresString> for String`
+- Add `get_addrinfo()` for host queries by name and service via
+  `ares_getaddrinfo()`
+- Add `AddrInfoFlags`, `AddrInfoHints`, `AddrInfoResults`, `AddrInfoNode`,
+  `AddrInfoCName` types and iterators
+- `AresString` now implements `Display`, `AsRef<str>`, and `From<AresString> for
+String`
 - `AresBuf` now implements `AsRef<[u8]>` and `From<AresBuf> for Vec<u8>`
 - Result iterators now implement `FusedIterator`; `AResultsIter` and
   `AAAAResultsIter` also implement `ExactSizeIterator`
 - Rename `NAPTRResult::reg_exp()` to `regexp()`
 - Rename `get_servers()` to `servers()` and return `Vec<String>` instead of
   `AresString`
-- Rename `get_sock()` to `sockets()`, `GetSock` to `Sockets`, `GetSockIter`
-  to `SocketsIter`
+- Rename `get_sock()` to `sockets()`, `GetSock` to `Sockets`, `GetSockIter` to
+  `SocketsIter`
 - Derive Debug where it was previously missing
 - Rename `FdEventFlags::Read`/`Write` to `READ`/`WRITE` and
   `ProcessFlags::SkipNonFd` to `SKIP_NON_FD`

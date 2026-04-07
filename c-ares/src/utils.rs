@@ -65,6 +65,17 @@ pub fn ipv6_as_in6_addr(ipv6: &Ipv6Addr) -> c_types::in6_addr {
     in6_addr
 }
 
+// Get an Ipv6Addr from an in6_addr.
+#[cfg(unix)]
+pub fn ipv6_from_in6_addr(in6_addr: c_types::in6_addr) -> Ipv6Addr {
+    Ipv6Addr::from(in6_addr.s6_addr)
+}
+
+#[cfg(windows)]
+pub fn ipv6_from_in6_addr(in6_addr: c_types::in6_addr) -> Ipv6Addr {
+    Ipv6Addr::from(unsafe { in6_addr.u.Byte })
+}
+
 // Get a sockaddr_in from a SocketAddrV4.
 #[cfg(any(
     target_os = "macos",
@@ -155,6 +166,17 @@ pub fn socket_addrv6_as_sockaddr_in6(sock_v6: &SocketAddrV6) -> c_types::sockadd
     sockaddr_in6.sin6_flowinfo = sock_v6.flowinfo();
     sockaddr_in6.Anonymous.sin6_scope_id = sock_v6.scope_id();
     sockaddr_in6
+}
+
+// Get scope_id from a sockaddr_in6.
+#[cfg(unix)]
+pub fn sockaddr_in6_scope_id(sa: &c_types::sockaddr_in6) -> u32 {
+    sa.sin6_scope_id
+}
+
+#[cfg(windows)]
+pub fn sockaddr_in6_scope_id(sa: &c_types::sockaddr_in6) -> u32 {
+    unsafe { sa.Anonymous.sin6_scope_id }
 }
 
 pub unsafe fn c_string_as_str_unchecked<'a>(c_str: *const c_char) -> &'a str {

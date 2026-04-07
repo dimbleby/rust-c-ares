@@ -604,6 +604,24 @@ impl Resolver {
             .get_name_info(address, flags, handler)
     }
 
+    /// Initiate a host query by name and service.
+    ///
+    /// On completion, `handler` is called with the result.
+    pub fn get_addrinfo<F>(
+        &self,
+        name: &str,
+        service: Option<&str>,
+        hints: &c_ares::AddrInfoHints,
+        handler: F,
+    ) where
+        F: FnOnce(c_ares::Result<c_ares::AddrInfoResults>) + Send + 'static,
+    {
+        self.ares_channel
+            .lock()
+            .unwrap()
+            .get_addrinfo(name, service, hints, handler)
+    }
+
     /// Initiate a single-question DNS query for `name`.  The class and type of the query are per
     /// the provided parameters, taking values as defined in `arpa/nameser.h`.
     ///

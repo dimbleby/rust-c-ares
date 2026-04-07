@@ -356,3 +356,38 @@ fn send_dnsrec() {
     assert_eq!(record.rcode(), DnsRcode::NoError);
     assert!(record.rr_count(DnsSection::Answer) > 0);
 }
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo() {
+    let resolver = FutureResolver::with_options(test_options()).unwrap();
+    let hints = c_ares::AddrInfoHints {
+        family: Some(c_ares::AddressFamily::INET),
+        ..c_ares::AddrInfoHints::default()
+    };
+    let future = resolver.get_addrinfo("google.com", None, &hints);
+    let result = block_on(future);
+    assert!(result.is_ok(), "Failed to get addr info");
+    let addrinfo = result.unwrap();
+    assert!(addrinfo.nodes().count() > 0);
+}
+
+#[test]
+#[ignore = "requires network"]
+fn get_addrinfo_with_service() {
+    let resolver = FutureResolver::with_options(test_options()).unwrap();
+    let hints = c_ares::AddrInfoHints {
+        family: Some(c_ares::AddressFamily::INET),
+        ..c_ares::AddrInfoHints::default()
+    };
+    let future = resolver.get_addrinfo("google.com", Some("http"), &hints);
+    let result = block_on(future);
+    assert!(result.is_ok(), "Failed to get addr info with service");
+    let addrinfo = result.unwrap();
+    assert!(addrinfo.nodes().count() > 0);
+    for node in addrinfo.nodes() {
+        if let Some(sa) = node.socket_addr() {
+            assert_eq!(sa.port(), 80);
+        }
+    }
+}

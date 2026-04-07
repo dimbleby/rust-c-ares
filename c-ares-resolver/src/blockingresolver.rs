@@ -32,9 +32,9 @@ impl fmt::Debug for BlockingResolver {
 // Most query implementations follow the same pattern: call through to the `Resolver`, arranging
 // that the callback sends the result down a channel.
 macro_rules! blockify {
-    ($resolver:expr, $query:ident, $question:expr) => {{
+    ($resolver:expr, $query:ident, $($arg:expr),+ $(,)?) => {{
         let (tx, rx) = mpsc::sync_channel(1);
-        $resolver.$query($question, move |result| {
+        $resolver.$query($($arg,)+ move |result| {
             let _ = tx.send(result);
         });
         rx.recv().unwrap()
@@ -293,6 +293,16 @@ impl BlockingResolver {
             let _ = tx.send(result.map(Into::into));
         });
         rx.recv().unwrap()
+    }
+
+    /// Initiate a host query by name and service.
+    pub fn get_addrinfo(
+        &self,
+        name: &str,
+        service: Option<&str>,
+        hints: &c_ares::AddrInfoHints,
+    ) -> c_ares::Result<c_ares::AddrInfoResults> {
+        blockify!(self.inner, get_addrinfo, name, service, hints)
     }
 
     /// Initiate a single-question DNS query for `name`.  The class and type of the query are per

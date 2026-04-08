@@ -128,7 +128,7 @@ impl DnsRr {
 
     /// Retrieve binary data for the given key.
     ///
-    /// Can be used on keys with datatype `BIN`, `BINP`, or `ABINP`.
+    /// Can only be used on keys with datatype `BIN`, `BINP`.
     pub fn get_bin(&self, key: DnsRrKey) -> Option<&[u8]> {
         let mut len: usize = 0;
         let ptr = unsafe { c_ares_sys::ares_dns_rr_get_bin(self.as_ptr(), key.into(), &mut len) };

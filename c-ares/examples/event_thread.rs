@@ -45,8 +45,8 @@ mod inner {
                     eprintln!("No answers for {domain} ({})", record.rcode());
                 }
                 for rr in record.rrs(c_ares::DnsSection::Answer) {
-                    if let Some(addr) = rr.get_addr(c_ares::DnsRrKey::A_ADDR) {
-                        println!("{domain} has address {addr}");
+                    if let Some(a) = rr.as_a() {
+                        println!("{domain} has address {}", a.addr());
                     }
                 }
             }

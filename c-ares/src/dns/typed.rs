@@ -28,10 +28,7 @@
 //!
 //! # Field optionality
 //!
-//! Typed accessors return bare values, never `Option`. The DNS wire
-//! format does not distinguish "field absent" from "field present with
-//! default/empty value" (`RDLENGTH = 0` and "no RDATA" are the same
-//! encoding), so neither does this API.
+//! Typed accessors return bare values, never `Option`.
 //!
 //! - **Numeric scalars** (`u8`, `u16`, `u32`) return zero when unset.
 //! - **`Ipv4Addr` / `Ipv6Addr`** return `0.0.0.0` / `::` when unset.
@@ -39,8 +36,6 @@
 //! - **Array-shaped fields** (TXT entries, OPT/SVCB/HTTPS parameters)
 //!   are exposed as iterators with companion `*_count` methods; an empty
 //!   array is its own valid representation.
-//!
-//! Accessors never panic.
 //!
 //! # Discrimination
 //!
@@ -53,6 +48,7 @@
 use std::fmt;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
+use super::dns_opt::{OptParseError, OptValue, parse_opt_value};
 use super::enums::{DnsCls, DnsRecordType, DnsRrKey};
 use super::rr::DnsRr;
 
@@ -652,9 +648,24 @@ impl<'a> OptRecord<'a> {
         self.0.get_opt_count(DnsRrKey::OPT_OPTIONS)
     }
 
-    /// Returns an iterator over `(option_code, value_bytes)` pairs
-    /// ([`OPT_OPTIONS`](DnsRrKey::OPT_OPTIONS)).
-    pub fn options(self) -> impl Iterator<Item = (u16, &'a [u8])> {
+    /// Returns an iterator over EDNS options
+    /// ([`OPT_OPTIONS`](DnsRrKey::OPT_OPTIONS)) yielding
+    /// `(option_code, decoded_value)` pairs.
+    ///
+    /// The value is decoded according to its registered datatype (see
+    /// [`OptValue`]). For options the linked c-ares does not recognise,
+    /// decoding may fail; use [`raw_options`](Self::raw_options) to
+    /// access the underlying byte slice instead.
+    pub fn options(self) -> impl Iterator<Item = (u16, Result<OptValue, OptParseError>)> + 'a {
+        self.0
+            .opts(DnsRrKey::OPT_OPTIONS)
+            .map(|(k, v)| (k, parse_opt_value(DnsRrKey::OPT_OPTIONS, k, v)))
+    }
+
+    /// Returns an iterator over EDNS options
+    /// ([`OPT_OPTIONS`](DnsRrKey::OPT_OPTIONS)) yielding
+    /// `(option_code, value_bytes)` pairs without decoding.
+    pub fn raw_options(self) -> impl Iterator<Item = (u16, &'a [u8])> {
         self.0.opts(DnsRrKey::OPT_OPTIONS)
     }
 }
@@ -693,9 +704,24 @@ impl<'a> SvcbRecord<'a> {
         self.0.get_opt_count(DnsRrKey::SVCB_PARAMS)
     }
 
-    /// Returns an iterator over `(param_key, value_bytes)` pairs
-    /// ([`SVCB_PARAMS`](DnsRrKey::SVCB_PARAMS)).
-    pub fn params(self) -> impl Iterator<Item = (u16, &'a [u8])> {
+    /// Returns an iterator over SvcParams
+    /// ([`SVCB_PARAMS`](DnsRrKey::SVCB_PARAMS)) yielding
+    /// `(param_key, decoded_value)` pairs.
+    ///
+    /// The value is decoded according to its registered datatype (see
+    /// [`OptValue`]). For parameters the linked c-ares does not
+    /// recognise, decoding may fail; use [`raw_params`](Self::raw_params)
+    /// to access the underlying byte slice instead.
+    pub fn params(self) -> impl Iterator<Item = (u16, Result<OptValue, OptParseError>)> + 'a {
+        self.0
+            .opts(DnsRrKey::SVCB_PARAMS)
+            .map(|(k, v)| (k, parse_opt_value(DnsRrKey::SVCB_PARAMS, k, v)))
+    }
+
+    /// Returns an iterator over SvcParams
+    /// ([`SVCB_PARAMS`](DnsRrKey::SVCB_PARAMS)) yielding
+    /// `(param_key, value_bytes)` pairs without decoding.
+    pub fn raw_params(self) -> impl Iterator<Item = (u16, &'a [u8])> {
         self.0.opts(DnsRrKey::SVCB_PARAMS)
     }
 }
@@ -735,9 +761,24 @@ impl<'a> HttpsRecord<'a> {
         self.0.get_opt_count(DnsRrKey::HTTPS_PARAMS)
     }
 
-    /// Returns an iterator over `(param_key, value_bytes)` pairs
-    /// ([`HTTPS_PARAMS`](DnsRrKey::HTTPS_PARAMS)).
-    pub fn params(self) -> impl Iterator<Item = (u16, &'a [u8])> {
+    /// Returns an iterator over SvcParams
+    /// ([`HTTPS_PARAMS`](DnsRrKey::HTTPS_PARAMS)) yielding
+    /// `(param_key, decoded_value)` pairs.
+    ///
+    /// The value is decoded according to its registered datatype (see
+    /// [`OptValue`]). For parameters the linked c-ares does not
+    /// recognise, decoding may fail; use [`raw_params`](Self::raw_params)
+    /// to access the underlying byte slice instead.
+    pub fn params(self) -> impl Iterator<Item = (u16, Result<OptValue, OptParseError>)> + 'a {
+        self.0
+            .opts(DnsRrKey::HTTPS_PARAMS)
+            .map(|(k, v)| (k, parse_opt_value(DnsRrKey::HTTPS_PARAMS, k, v)))
+    }
+
+    /// Returns an iterator over SvcParams
+    /// ([`HTTPS_PARAMS`](DnsRrKey::HTTPS_PARAMS)) yielding
+    /// `(param_key, value_bytes)` pairs without decoding.
+    pub fn raw_params(self) -> impl Iterator<Item = (u16, &'a [u8])> {
         self.0.opts(DnsRrKey::HTTPS_PARAMS)
     }
 }
@@ -1369,6 +1410,7 @@ mod tests {
         assert_eq!(s.expire(), 4);
         assert_eq!(s.minimum(), 5);
         assert!(format!("{s:?}").contains("SoaRecord"));
+        assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Soa(_)));
     }
 
     #[test]
@@ -1484,9 +1526,15 @@ mod tests {
         assert_eq!(s.priority(), 1);
         assert_eq!(s.target(), "svc.example.com");
         assert_eq!(s.param_count(), 1);
-        let params: Vec<(u16, &[u8])> = s.params().collect();
-        assert_eq!(params.len(), 1);
-        assert_eq!(params[0].0, 1);
+        // raw_params() yields raw bytes
+        let raw: Vec<(u16, &[u8])> = s.raw_params().collect();
+        assert_eq!(raw, vec![(1u16, &b"\x00\x02h2"[..])]);
+        // params() decodes — ALPN (key 1) is a StrList
+        let parsed: Vec<(u16, OptValue)> =
+            s.params().map(|(k, v)| (k, v.expect("decode"))).collect();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].0, 1);
+        assert!(matches!(parsed[0].1, OptValue::StrList(_)));
         assert!(format!("{s:?}").contains("SvcbRecord"));
         assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Svcb(_)));
     }
@@ -1504,6 +1552,7 @@ mod tests {
         assert_eq!(h.priority(), 1);
         assert_eq!(h.target(), "svc.example.com");
         assert_eq!(h.param_count(), 1);
+        assert_eq!(h.raw_params().count(), 1);
         assert_eq!(h.params().count(), 1);
         assert!(format!("{h:?}").contains("HttpsRecord"));
         assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Https(_)));
@@ -1544,6 +1593,7 @@ mod tests {
         let _ = opt_rr.flags();
         let _ = opt_rr.option_count();
         let _ = opt_rr.options().count();
+        let _ = opt_rr.raw_options().count();
         let _ = format!("{opt_rr:?}");
         assert!(matches!(
             rec.rr(DnsSection::Additional, 0).unwrap().as_typed(),

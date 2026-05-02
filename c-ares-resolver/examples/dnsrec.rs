@@ -7,7 +7,7 @@
 
 #[cfg(cares1_28)]
 mod inner {
-    use c_ares::{DnsCls, DnsRecord, DnsRecordType, DnsRr, DnsSection, TypedRr, parse_opt_value};
+    use c_ares::{DnsCls, DnsRecord, DnsRecordType, DnsRr, DnsSection, TypedRr};
     use c_ares_resolver::Resolver;
     use std::sync::mpsc;
 
@@ -128,7 +128,7 @@ mod inner {
                     s.param_count(),
                 );
                 for (key, value) in s.params() {
-                    let parsed = parse_opt_value(c_ares::DnsRrKey::SVCB_PARAMS, key, value)
+                    let parsed = value
                         .map(|v| v.to_string())
                         .unwrap_or_else(|e| format!("<error: {e}>"));
                     println!("        param {key}: {parsed}");
@@ -142,7 +142,7 @@ mod inner {
                     h.param_count(),
                 );
                 for (key, value) in h.params() {
-                    let parsed = parse_opt_value(c_ares::DnsRrKey::HTTPS_PARAMS, key, value)
+                    let parsed = value
                         .map(|v| v.to_string())
                         .unwrap_or_else(|e| format!("<error: {e}>"));
                     println!("        param {key}: {parsed}");

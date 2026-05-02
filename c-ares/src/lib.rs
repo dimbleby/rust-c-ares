@@ -79,8 +79,11 @@ pub use crate::channel::{Channel, Options, Sockets, SocketsIter};
 pub use crate::cname::CNameResults;
 #[cfg(cares1_28)]
 pub use crate::dns::{
-    DnsCls, DnsDataType, DnsFlags, DnsOpcode, DnsOptDataType, DnsParseFlags, DnsRcode, DnsRecord,
-    DnsRecordType, DnsRr, DnsRrKey, DnsSection, OptParseError, OptValue, parse_opt_value,
+    ARecord, AaaaRecord, CaaRecord, CnameRecord, DnsCls, DnsDataType, DnsFlags, DnsOpcode,
+    DnsOptDataType, DnsParseFlags, DnsRcode, DnsRecord, DnsRecordType, DnsRr, DnsRrKey, DnsSection,
+    HinfoRecord, HttpsRecord, MxRecord, NaptrRecord, NsRecord, OptParseError, OptRecord, OptValue,
+    PtrRecord, RawRrRecord, SigRecord, SoaRecord, SrvRecord, SvcbRecord, TlsaRecord, TxtRecord,
+    TypedRr, UriRecord, parse_opt_value,
 };
 pub use crate::error::{Error, Result};
 #[cfg(cares1_34)]

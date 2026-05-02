@@ -734,7 +734,7 @@ impl From<c_ares_sys::ares_dns_datatype_t> for DnsDataType {
 /// Data type for option records for keys like `OPT_OPTIONS` and
 /// `HTTPS_PARAMS`.
 ///
-/// Returned by [`DnsRrKey::opt_datatype()`] to indicate the best match for
+/// Returned by [`DnsRr::opt_datatype()`](super::DnsRr::opt_datatype) to indicate the best match for
 /// interpreting an option record value.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
 pub enum DnsOptDataType {

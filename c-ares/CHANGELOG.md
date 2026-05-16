@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Fix `AResults::parse_from` / `AAAAResults::parse_from` to use a `c_int` for
+  the result count, matching the c-ares signature.  Without this, no results
+  were returned on big-endian 64-bit targets
+- `Options::set_socket_state_callback`, `Channel::set_server_state_callback`
+  and `Channel::set_pending_write_callback` now require the closure to be
+  `Sync`
+- `Channel::set_servers`, `Channel::set_sortlist` and `Options::set_domains`
+  now accept any `IntoIterator<Item = impl AsRef<str>>`
+- `Channel::query_dnsrec` now returns `Error::EBADNAME` (was `EBADSTR`) when
+  the supplied name contains a NUL byte
 - Host callbacks (`get_host_by_address`, `get_host_by_name`) now pass
   `Result<&HostResults>` instead of `Result<HostResults>`
 - `HostResults` is no longer `Clone` or `Copy`

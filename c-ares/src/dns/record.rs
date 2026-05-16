@@ -115,7 +115,7 @@ impl DnsRecord {
     pub fn rr(&self, section: DnsSection, idx: usize) -> Option<&DnsRr> {
         let rr =
             unsafe { c_ares_sys::ares_dns_record_rr_get_const(self.dnsrec, section.into(), idx) };
-        (!rr.is_null()).then(|| unsafe { DnsRr::from_const_ptr(rr) })
+        (!rr.is_null()).then(|| unsafe { &*rr.cast::<DnsRr>() })
     }
 
     /// Returns an iterator over the resource records in the given section.
@@ -235,7 +235,7 @@ impl DnsRecord {
             )
         };
         status_to_result(status)?;
-        Ok(unsafe { DnsRr::from_mut_ptr(rr_out) })
+        Ok(unsafe { &mut *rr_out.cast::<DnsRr>() })
     }
 
     /// Fetch a writable resource record by section and index.
@@ -243,7 +243,7 @@ impl DnsRecord {
     /// Returns `None` if the index is out of range.
     pub fn rr_mut(&mut self, section: DnsSection, idx: usize) -> Option<&mut DnsRr> {
         let rr = unsafe { c_ares_sys::ares_dns_record_rr_get(self.dnsrec, section.into(), idx) };
-        (!rr.is_null()).then(|| unsafe { DnsRr::from_mut_ptr(rr) })
+        (!rr.is_null()).then(|| unsafe { &mut *rr.cast::<DnsRr>() })
     }
 
     /// Returns an iterator over mutable resource records in the given section.
@@ -252,7 +252,7 @@ impl DnsRecord {
         let dnsrec = self.dnsrec;
         (0..count).map_while(move |i| {
             let rr = unsafe { c_ares_sys::ares_dns_record_rr_get(dnsrec, section.into(), i) };
-            (!rr.is_null()).then(|| unsafe { DnsRr::from_mut_ptr(rr) })
+            (!rr.is_null()).then(|| unsafe { &mut *rr.cast::<DnsRr>() })
         })
     }
 

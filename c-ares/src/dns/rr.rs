@@ -25,24 +25,6 @@ use super::enums::{DnsCls, DnsOptDataType, DnsRecordType, DnsRrKey};
 pub struct DnsRr(c_ares_sys::ares_dns_rr_t);
 
 impl DnsRr {
-    /// Cast a raw const pointer to `&DnsRr`.
-    ///
-    /// # Safety
-    ///
-    /// The pointer must be non-null and valid for lifetime `'a`.
-    pub(super) unsafe fn from_const_ptr<'a>(rr: *const c_ares_sys::ares_dns_rr_t) -> &'a DnsRr {
-        unsafe { &*rr.cast() }
-    }
-
-    /// Cast a raw mut pointer to `&mut DnsRr`.
-    ///
-    /// # Safety
-    ///
-    /// The pointer must be non-null and valid for lifetime `'a`.
-    pub(super) unsafe fn from_mut_ptr<'a>(rr: *mut c_ares_sys::ares_dns_rr_t) -> &'a mut DnsRr {
-        unsafe { &mut *rr.cast() }
-    }
-
     /// Returns a const pointer to the inner C type.
     fn as_ptr(&self) -> *const c_ares_sys::ares_dns_rr_t {
         ptr::from_ref(&self.0)

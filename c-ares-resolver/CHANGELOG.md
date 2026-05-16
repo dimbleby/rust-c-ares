@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `Resolver::set_servers` / `set_sortlist`, `BlockingResolver::set_servers` /
+  `set_sortlist`, `FutureResolver::set_servers` / `set_sortlist`, and
+  `Options::set_domains` now accept any `IntoIterator<Item = impl AsRef<str>>`
 - `Resolver` host callbacks (`get_host_by_address`, `get_host_by_name`) now pass
   `Result<&c_ares::HostResults>` instead of `Result<c_ares::HostResults>`
 - `Options::set_timeout()` and `Options::set_max_timeout()` now take `Duration`

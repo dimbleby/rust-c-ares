@@ -1,4 +1,4 @@
-use core::ffi::{c_int, c_uchar, c_void};
+use core::ffi::c_int;
 use std::fmt;
 use std::mem;
 use std::net::Ipv4Addr;
@@ -8,8 +8,8 @@ use std::slice;
 use itertools::Itertools;
 
 use crate::error::{Error, Result};
-use crate::panic;
-use crate::types::MAX_ADDRTTLS;
+use crate::record::QueryRecord;
+use crate::types::{MAX_ADDRTTLS, QueryType};
 use crate::utils::ipv4_from_in_addr;
 
 /// The result of a successful A lookup.
@@ -124,16 +124,11 @@ impl fmt::Display for AResult<'_> {
     }
 }
 
-pub(crate) unsafe extern "C" fn query_a_callback<F>(
-    arg: *mut c_void,
-    status: c_int,
-    _timeouts: c_int,
-    abuf: *mut c_uchar,
-    alen: c_int,
-) where
-    F: FnOnce(Result<AResults>) + Send + 'static,
-{
-    ares_callback!(arg.cast::<F>(), status, abuf, alen, AResults::parse_from);
+impl QueryRecord for AResults {
+    const QUERY_TYPE: QueryType = QueryType::A;
+    fn parse(data: &[u8]) -> Result<Self> {
+        Self::parse_from(data)
+    }
 }
 
 #[cfg(test)]

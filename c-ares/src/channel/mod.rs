@@ -20,11 +20,11 @@ use options::SocketStateCallback;
 
 #[cfg(cares1_29)]
 use crate::ServerStateFlags;
-use crate::a::{AResults, query_a_callback};
-use crate::aaaa::{AAAAResults, query_aaaa_callback};
+use crate::a::AResults;
+use crate::aaaa::AAAAResults;
 use crate::addrinfo::{AddrInfoHints, AddrInfoResults, get_addrinfo_callback};
-use crate::caa::{CAAResults, query_caa_callback};
-use crate::cname::{CNameResults, query_cname_callback};
+use crate::caa::CAAResults;
+use crate::cname::CNameResults;
 #[cfg(cares1_28)]
 use crate::dns::callback::dnsrec_callback;
 #[cfg(cares1_28)]
@@ -34,21 +34,22 @@ use crate::error::{Error, Result};
 use crate::events::{FdEvents, ProcessFlags};
 use crate::host::HostResults;
 use crate::host::get_host_callback;
-use crate::mx::{MXResults, query_mx_callback};
+use crate::mx::MXResults;
 use crate::nameinfo::{NameInfoResult, get_name_info_callback};
-use crate::naptr::{NAPTRResults, query_naptr_callback};
+use crate::naptr::NAPTRResults;
 use crate::ni_flags::NIFlags;
-use crate::ns::{NSResults, query_ns_callback};
+use crate::ns::NSResults;
 use crate::panic;
-use crate::ptr::{PTRResults, query_ptr_callback};
-use crate::query::query_callback;
-use crate::soa::{SOAResult, query_soa_callback};
-use crate::srv::{SRVResults, query_srv_callback};
+use crate::ptr::PTRResults;
+use crate::query::{query_callback, raw_query_callback};
+use crate::record::QueryRecord;
+use crate::soa::SOAResult;
+use crate::srv::SRVResults;
 #[cfg(cares1_24)]
 use crate::string::AresString;
-use crate::txt::{TXTResults, query_txt_callback};
-use crate::types::{AddressFamily, DnsClass, QueryType, Socket};
-use crate::uri::{URIResults, query_uri_callback};
+use crate::txt::TXTResults;
+use crate::types::{AddressFamily, DnsClass, Socket};
+use crate::uri::URIResults;
 #[allow(unused_imports)]
 use crate::utils::{
     c_string_as_str_unchecked, ipv4_as_in_addr, ipv6_as_in6_addr, socket_addrv4_as_sockaddr_in,
@@ -414,14 +415,7 @@ impl Channel {
     where
         F: FnOnce(Result<AResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::A,
-            query_a_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the A records associated with `name`.
@@ -431,14 +425,7 @@ impl Channel {
     where
         F: FnOnce(Result<AResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::A,
-            query_a_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the AAAA records associated with `name`.
@@ -448,14 +435,7 @@ impl Channel {
     where
         F: FnOnce(Result<AAAAResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::AAAA,
-            query_aaaa_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the AAAA records associated with
@@ -466,14 +446,7 @@ impl Channel {
     where
         F: FnOnce(Result<AAAAResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::AAAA,
-            query_aaaa_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the CAA records associated with `name`.
@@ -483,14 +456,7 @@ impl Channel {
     where
         F: FnOnce(Result<CAAResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::CAA,
-            query_caa_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the CAA records associated with
@@ -501,14 +467,7 @@ impl Channel {
     where
         F: FnOnce(Result<CAAResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::CAA,
-            query_caa_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the CNAME records associated with `name`.
@@ -518,14 +477,7 @@ impl Channel {
     where
         F: FnOnce(Result<CNameResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::CNAME,
-            query_cname_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the CNAME records associated with
@@ -536,14 +488,7 @@ impl Channel {
     where
         F: FnOnce(Result<CNameResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::CNAME,
-            query_cname_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the MX records associated with `name`.
@@ -553,14 +498,7 @@ impl Channel {
     where
         F: FnOnce(Result<MXResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::MX,
-            query_mx_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the MX records associated with `name`.
@@ -570,14 +508,7 @@ impl Channel {
     where
         F: FnOnce(Result<MXResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::MX,
-            query_mx_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the NAPTR records associated with `name`.
@@ -587,14 +518,7 @@ impl Channel {
     where
         F: FnOnce(Result<NAPTRResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::NAPTR,
-            query_naptr_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the NAPTR records associated with
@@ -605,14 +529,7 @@ impl Channel {
     where
         F: FnOnce(Result<NAPTRResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::NAPTR,
-            query_naptr_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the NS records associated with `name`.
@@ -622,14 +539,7 @@ impl Channel {
     where
         F: FnOnce(Result<NSResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::NS,
-            query_ns_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the NS records associated with `name`.
@@ -639,14 +549,7 @@ impl Channel {
     where
         F: FnOnce(Result<NSResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::NS,
-            query_ns_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the PTR records associated with `name`.
@@ -656,14 +559,7 @@ impl Channel {
     where
         F: FnOnce(Result<PTRResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::PTR,
-            query_ptr_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the PTR records associated with
@@ -674,14 +570,7 @@ impl Channel {
     where
         F: FnOnce(Result<PTRResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::PTR,
-            query_ptr_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the SOA records associated with `name`.
@@ -691,14 +580,7 @@ impl Channel {
     where
         F: FnOnce(Result<SOAResult>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::SOA,
-            query_soa_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the SOA records associated with
@@ -709,14 +591,7 @@ impl Channel {
     where
         F: FnOnce(Result<SOAResult>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::SOA,
-            query_soa_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the SRV records associated with `name`.
@@ -726,14 +601,7 @@ impl Channel {
     where
         F: FnOnce(Result<SRVResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::SRV,
-            query_srv_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the SRV records associated with
@@ -744,14 +612,7 @@ impl Channel {
     where
         F: FnOnce(Result<SRVResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::SRV,
-            query_srv_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the TXT records associated with `name`.
@@ -761,14 +622,7 @@ impl Channel {
     where
         F: FnOnce(Result<TXTResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::TXT,
-            query_txt_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the TXT records associated with
@@ -779,14 +633,7 @@ impl Channel {
     where
         F: FnOnce(Result<TXTResults>) + Send + 'static,
     {
-        ares_search!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::TXT,
-            query_txt_callback::<F>,
-            handler
-        );
+        self.do_search(name, handler);
     }
 
     /// Initiate a single-question DNS query for the URI records associated with `name`.
@@ -796,14 +643,7 @@ impl Channel {
     where
         F: FnOnce(Result<URIResults>) + Send + 'static,
     {
-        ares_query!(
-            self.ares_channel,
-            name,
-            DnsClass::IN,
-            QueryType::URI,
-            query_uri_callback::<F>,
-            handler
-        );
+        self.do_query(name, handler);
     }
 
     /// Initiate a series of single-question DNS queries for the URI records associated with
@@ -814,12 +654,35 @@ impl Channel {
     where
         F: FnOnce(Result<URIResults>) + Send + 'static,
     {
+        self.do_search(name, handler);
+    }
+
+    fn do_query<R, F>(&mut self, name: &str, handler: F)
+    where
+        R: QueryRecord,
+        F: FnOnce(Result<R>) + Send + 'static,
+    {
+        ares_query!(
+            self.ares_channel,
+            name,
+            DnsClass::IN,
+            R::QUERY_TYPE,
+            query_callback::<R, F>,
+            handler
+        );
+    }
+
+    fn do_search<R, F>(&mut self, name: &str, handler: F)
+    where
+        R: QueryRecord,
+        F: FnOnce(Result<R>) + Send + 'static,
+    {
         ares_search!(
             self.ares_channel,
             name,
             DnsClass::IN,
-            QueryType::URI,
-            query_uri_callback::<F>,
+            R::QUERY_TYPE,
+            query_callback::<R, F>,
             handler
         );
     }
@@ -979,7 +842,7 @@ impl Channel {
             name,
             c_int::from(dns_class),
             c_int::from(query_type),
-            query_callback::<F>,
+            raw_query_callback::<F>,
             handler
         );
     }
@@ -1001,7 +864,7 @@ impl Channel {
             name,
             c_int::from(dns_class),
             c_int::from(query_type),
-            query_callback::<F>,
+            raw_query_callback::<F>,
             handler
         );
     }

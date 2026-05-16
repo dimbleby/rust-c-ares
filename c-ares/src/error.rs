@@ -5,89 +5,96 @@ use std::result;
 
 use crate::utils::c_string_as_str_unchecked;
 
-/// Error codes that the library might return.
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
-pub enum Error {
+macro_rules! ares_errors {
+    ($($(#[$attr:meta])* $variant:ident => $ares:ident,)*) => {
+        /// Error codes that the library might return.
+        #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, PartialOrd, Ord)]
+        pub enum Error {
+            $(
+                $(#[$attr])*
+                $variant = c_ares_sys::ares_status_t::$ares as isize,
+            )*
+            /// Unknown error.
+            UNKNOWN,
+        }
+
+        impl From<i32> for Error {
+            fn from(code: i32) -> Self {
+                match code {
+                    $(x if x == Error::$variant as i32 => Error::$variant,)*
+                    _ => Error::UNKNOWN,
+                }
+            }
+        }
+
+        impl TryFrom<c_ares_sys::ares_status_t> for Error {
+            type Error = ();
+
+            fn try_from(
+                status: c_ares_sys::ares_status_t,
+            ) -> std::result::Result<Self, ()> {
+                match status {
+                    c_ares_sys::ares_status_t::ARES_SUCCESS => Err(()),
+                    $(c_ares_sys::ares_status_t::$ares => Ok(Error::$variant),)*
+                }
+            }
+        }
+    };
+}
+
+ares_errors! {
     /// DNS server returned answer with no data.
-    ENODATA = c_ares_sys::ares_status_t::ARES_ENODATA as isize,
-
+    ENODATA => ARES_ENODATA,
     /// DNS server claims query was misformatted.
-    EFORMERR = c_ares_sys::ares_status_t::ARES_EFORMERR as isize,
-
+    EFORMERR => ARES_EFORMERR,
     /// DNS server returned general failure.
-    ESERVFAIL = c_ares_sys::ares_status_t::ARES_ESERVFAIL as isize,
-
+    ESERVFAIL => ARES_ESERVFAIL,
     /// Domain name not found.
-    ENOTFOUND = c_ares_sys::ares_status_t::ARES_ENOTFOUND as isize,
-
+    ENOTFOUND => ARES_ENOTFOUND,
     /// DNS server does not implement requested operation.
-    ENOTIMP = c_ares_sys::ares_status_t::ARES_ENOTIMP as isize,
-
+    ENOTIMP => ARES_ENOTIMP,
     /// DNS server refused query.
-    EREFUSED = c_ares_sys::ares_status_t::ARES_EREFUSED as isize,
-
+    EREFUSED => ARES_EREFUSED,
     /// Misformatted DNS query.
-    EBADQUERY = c_ares_sys::ares_status_t::ARES_EBADQUERY as isize,
-
+    EBADQUERY => ARES_EBADQUERY,
     /// Misformatted domain name.
-    EBADNAME = c_ares_sys::ares_status_t::ARES_EBADNAME as isize,
-
+    EBADNAME => ARES_EBADNAME,
     /// Unsupported address family.
-    EBADFAMILY = c_ares_sys::ares_status_t::ARES_EBADFAMILY as isize,
-
+    EBADFAMILY => ARES_EBADFAMILY,
     /// Misformatted DNS reply.
-    EBADRESP = c_ares_sys::ares_status_t::ARES_EBADRESP as isize,
-
+    EBADRESP => ARES_EBADRESP,
     /// Could not contact DNS servers.
-    ECONNREFUSED = c_ares_sys::ares_status_t::ARES_ECONNREFUSED as isize,
-
+    ECONNREFUSED => ARES_ECONNREFUSED,
     /// Timeout while contacting DNS servers.
-    ETIMEOUT = c_ares_sys::ares_status_t::ARES_ETIMEOUT as isize,
-
+    ETIMEOUT => ARES_ETIMEOUT,
     /// End of file.
-    EOF = c_ares_sys::ares_status_t::ARES_EOF as isize,
-
+    EOF => ARES_EOF,
     /// Error reading file.
-    EFILE = c_ares_sys::ares_status_t::ARES_EFILE as isize,
-
+    EFILE => ARES_EFILE,
     /// Out of memory.
-    ENOMEM = c_ares_sys::ares_status_t::ARES_ENOMEM as isize,
-
+    ENOMEM => ARES_ENOMEM,
     /// Channel is being destroyed.
-    EDESTRUCTION = c_ares_sys::ares_status_t::ARES_EDESTRUCTION as isize,
-
+    EDESTRUCTION => ARES_EDESTRUCTION,
     /// Misformatted string.
-    EBADSTR = c_ares_sys::ares_status_t::ARES_EBADSTR as isize,
-
+    EBADSTR => ARES_EBADSTR,
     /// Illegal flags specified.
-    EBADFLAGS = c_ares_sys::ares_status_t::ARES_EBADFLAGS as isize,
-
+    EBADFLAGS => ARES_EBADFLAGS,
     /// Given hostname is not numeric.
-    ENONAME = c_ares_sys::ares_status_t::ARES_ENONAME as isize,
-
+    ENONAME => ARES_ENONAME,
     /// Illegal hints flags specified.
-    EBADHINTS = c_ares_sys::ares_status_t::ARES_EBADHINTS as isize,
-
+    EBADHINTS => ARES_EBADHINTS,
     /// c-ares library initialization not yet performed.
-    ENOTINITIALIZED = c_ares_sys::ares_status_t::ARES_ENOTINITIALIZED as isize,
-
+    ENOTINITIALIZED => ARES_ENOTINITIALIZED,
     /// Error loading iphlpapi.dll.
-    ELOADIPHLPAPI = c_ares_sys::ares_status_t::ARES_ELOADIPHLPAPI as isize,
-
+    ELOADIPHLPAPI => ARES_ELOADIPHLPAPI,
     /// Could not find GetNetworkParams function.
-    EADDRGETNETWORKPARAMS = c_ares_sys::ares_status_t::ARES_EADDRGETNETWORKPARAMS as isize,
-
+    EADDRGETNETWORKPARAMS => ARES_EADDRGETNETWORKPARAMS,
     /// DNS query cancelled.
-    ECANCELLED = c_ares_sys::ares_status_t::ARES_ECANCELLED as isize,
-
+    ECANCELLED => ARES_ECANCELLED,
     /// The textual service name provided could not be dereferenced into a port.
-    ESERVICE = c_ares_sys::ares_status_t::ARES_ESERVICE as isize,
-
+    ESERVICE => ARES_ESERVICE,
     /// No DNS servers were configured.
-    ENOSERVER = c_ares_sys::ares_status_t::ARES_ENOSERVER as isize,
-
-    /// Unknown error.
-    UNKNOWN,
+    ENOSERVER => ARES_ENOSERVER,
 }
 
 impl error::Error for Error {}
@@ -99,79 +106,6 @@ impl fmt::Display for Error {
             c_string_as_str_unchecked(ptr)
         };
         fmt.write_str(text)
-    }
-}
-
-impl From<i32> for Error {
-    fn from(code: i32) -> Self {
-        match code {
-            x if x == Error::ENODATA as i32 => Error::ENODATA,
-            x if x == Error::EFORMERR as i32 => Error::EFORMERR,
-            x if x == Error::ESERVFAIL as i32 => Error::ESERVFAIL,
-            x if x == Error::ENOTFOUND as i32 => Error::ENOTFOUND,
-            x if x == Error::ENOTIMP as i32 => Error::ENOTIMP,
-            x if x == Error::EREFUSED as i32 => Error::EREFUSED,
-            x if x == Error::EBADQUERY as i32 => Error::EBADQUERY,
-            x if x == Error::EBADNAME as i32 => Error::EBADNAME,
-            x if x == Error::EBADFAMILY as i32 => Error::EBADFAMILY,
-            x if x == Error::EBADRESP as i32 => Error::EBADRESP,
-            x if x == Error::ECONNREFUSED as i32 => Error::ECONNREFUSED,
-            x if x == Error::ETIMEOUT as i32 => Error::ETIMEOUT,
-            x if x == Error::EOF as i32 => Error::EOF,
-            x if x == Error::EFILE as i32 => Error::EFILE,
-            x if x == Error::ENOMEM as i32 => Error::ENOMEM,
-            x if x == Error::EDESTRUCTION as i32 => Error::EDESTRUCTION,
-            x if x == Error::EBADSTR as i32 => Error::EBADSTR,
-            x if x == Error::EBADFLAGS as i32 => Error::EBADFLAGS,
-            x if x == Error::ENONAME as i32 => Error::ENONAME,
-            x if x == Error::EBADHINTS as i32 => Error::EBADHINTS,
-            x if x == Error::ENOTINITIALIZED as i32 => Error::ENOTINITIALIZED,
-            x if x == Error::ELOADIPHLPAPI as i32 => Error::ELOADIPHLPAPI,
-            x if x == Error::EADDRGETNETWORKPARAMS as i32 => Error::EADDRGETNETWORKPARAMS,
-            x if x == Error::ECANCELLED as i32 => Error::ECANCELLED,
-            x if x == Error::ESERVICE as i32 => Error::ESERVICE,
-            x if x == Error::ENOSERVER as i32 => Error::ENOSERVER,
-            _ => Error::UNKNOWN,
-        }
-    }
-}
-
-impl TryFrom<c_ares_sys::ares_status_t> for Error {
-    type Error = ();
-
-    fn try_from(
-        status: c_ares_sys::ares_status_t,
-    ) -> std::result::Result<Self, <Self as TryFrom<c_ares_sys::ares_status_t>>::Error> {
-        let error = match status {
-            c_ares_sys::ares_status_t::ARES_SUCCESS => return Err(()),
-            c_ares_sys::ares_status_t::ARES_ENODATA => Error::ENODATA,
-            c_ares_sys::ares_status_t::ARES_EFORMERR => Error::EFORMERR,
-            c_ares_sys::ares_status_t::ARES_ESERVFAIL => Error::ESERVFAIL,
-            c_ares_sys::ares_status_t::ARES_ENOTFOUND => Error::ENOTFOUND,
-            c_ares_sys::ares_status_t::ARES_ENOTIMP => Error::ENOTIMP,
-            c_ares_sys::ares_status_t::ARES_EREFUSED => Error::EREFUSED,
-            c_ares_sys::ares_status_t::ARES_EBADQUERY => Error::EBADQUERY,
-            c_ares_sys::ares_status_t::ARES_EBADNAME => Error::EBADNAME,
-            c_ares_sys::ares_status_t::ARES_EBADFAMILY => Error::EBADFAMILY,
-            c_ares_sys::ares_status_t::ARES_EBADRESP => Error::EBADRESP,
-            c_ares_sys::ares_status_t::ARES_ECONNREFUSED => Error::ECONNREFUSED,
-            c_ares_sys::ares_status_t::ARES_ETIMEOUT => Error::ETIMEOUT,
-            c_ares_sys::ares_status_t::ARES_EOF => Error::EOF,
-            c_ares_sys::ares_status_t::ARES_EFILE => Error::EFILE,
-            c_ares_sys::ares_status_t::ARES_ENOMEM => Error::ENOMEM,
-            c_ares_sys::ares_status_t::ARES_EDESTRUCTION => Error::EDESTRUCTION,
-            c_ares_sys::ares_status_t::ARES_EBADSTR => Error::EBADSTR,
-            c_ares_sys::ares_status_t::ARES_EBADFLAGS => Error::EBADFLAGS,
-            c_ares_sys::ares_status_t::ARES_ENONAME => Error::ENONAME,
-            c_ares_sys::ares_status_t::ARES_EBADHINTS => Error::EBADHINTS,
-            c_ares_sys::ares_status_t::ARES_ENOTINITIALIZED => Error::ENOTINITIALIZED,
-            c_ares_sys::ares_status_t::ARES_ELOADIPHLPAPI => Error::ELOADIPHLPAPI,
-            c_ares_sys::ares_status_t::ARES_EADDRGETNETWORKPARAMS => Error::EADDRGETNETWORKPARAMS,
-            c_ares_sys::ares_status_t::ARES_ECANCELLED => Error::ECANCELLED,
-            c_ares_sys::ares_status_t::ARES_ESERVICE => Error::ESERVICE,
-            c_ares_sys::ares_status_t::ARES_ENOSERVER => Error::ENOSERVER,
-        };
-        Ok(error)
     }
 }
 

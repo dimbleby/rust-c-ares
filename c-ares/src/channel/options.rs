@@ -11,7 +11,7 @@ use crate::error::{Error, Result};
 use crate::types::EventSys;
 use crate::types::Socket;
 
-pub(crate) type SocketStateCallback = dyn Fn(Socket, bool, bool) + Send + 'static;
+pub(crate) type SocketStateCallback = dyn Fn(Socket, bool, bool) + Send + Sync + 'static;
 
 /// Server failover options.
 ///
@@ -188,7 +188,7 @@ impl Options {
     /// - `write` is set to true if the socket should listen for write events.
     pub fn set_socket_state_callback<F>(&mut self, callback: F) -> &mut Self
     where
-        F: Fn(Socket, bool, bool) + Send + 'static,
+        F: Fn(Socket, bool, bool) + Send + Sync + 'static,
     {
         let boxed_callback = Arc::new(callback);
         self.ares_options.sock_state_cb = Some(super::socket_state_callback::<F>);

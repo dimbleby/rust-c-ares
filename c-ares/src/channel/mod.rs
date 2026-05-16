@@ -60,10 +60,10 @@ use std::sync::Mutex;
 static ARES_LIBRARY_LOCK: Mutex<()> = Mutex::new(());
 
 #[cfg(cares1_29)]
-type ServerStateCallback = dyn Fn(&str, bool, ServerStateFlags) + Send + 'static;
+type ServerStateCallback = dyn Fn(&str, bool, ServerStateFlags) + Send + Sync + 'static;
 
 #[cfg(cares1_34)]
-type PendingWriteCallback = dyn Fn() + Send + 'static;
+type PendingWriteCallback = dyn Fn() + Send + Sync + 'static;
 
 /// A channel for name service lookups.
 pub struct Channel {
@@ -372,7 +372,7 @@ impl Channel {
     #[cfg(cares1_29)]
     pub fn set_server_state_callback<F>(&mut self, callback: F) -> &mut Self
     where
-        F: Fn(&str, bool, ServerStateFlags) + Send + 'static,
+        F: Fn(&str, bool, ServerStateFlags) + Send + Sync + 'static,
     {
         let boxed_callback = Arc::new(callback);
         let data = Arc::as_ptr(&boxed_callback).cast_mut().cast();
@@ -392,7 +392,7 @@ impl Channel {
     #[cfg(cares1_34)]
     pub fn set_pending_write_callback<F>(&mut self, callback: F) -> &mut Self
     where
-        F: Fn() + Send + 'static,
+        F: Fn() + Send + Sync + 'static,
     {
         let boxed_callback = Arc::new(callback);
         let data = Arc::as_ptr(&boxed_callback).cast_mut().cast();
@@ -1246,7 +1246,7 @@ unsafe extern "C" fn socket_state_callback<F>(
     readable: c_int,
     writable: c_int,
 ) where
-    F: Fn(Socket, bool, bool) + Send + 'static,
+    F: Fn(Socket, bool, bool) + Send + Sync + 'static,
 {
     let handler = data.cast::<F>();
     let handler = unsafe { &*handler };
@@ -1260,7 +1260,7 @@ unsafe extern "C" fn server_state_callback<F>(
     flags: c_int,
     data: *mut c_void,
 ) where
-    F: Fn(&str, bool, ServerStateFlags) + Send + 'static,
+    F: Fn(&str, bool, ServerStateFlags) + Send + Sync + 'static,
 {
     let handler = data.cast::<F>();
     let handler = unsafe { &*handler };
@@ -1277,7 +1277,7 @@ unsafe extern "C" fn server_state_callback<F>(
 #[cfg(cares1_34)]
 unsafe extern "C" fn pending_write_callback<F>(data: *mut c_void)
 where
-    F: Fn() + Send + 'static,
+    F: Fn() + Send + Sync + 'static,
 {
     let handler = data.cast::<F>();
     let handler = unsafe { &*handler };

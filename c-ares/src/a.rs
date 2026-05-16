@@ -28,21 +28,23 @@ pub struct AResult<'a> {
 impl AResults {
     /// Obtain an `AResults` from the response to an A lookup.
     pub fn parse_from(data: &[u8]) -> Result<AResults> {
-        let mut results: AResults = AResults {
-            naddrttls: MAX_ADDRTTLS,
-            addrttls: unsafe { mem::MaybeUninit::zeroed().assume_init() },
-        };
+        let mut addrttls: [c_ares_sys::ares_addrttl; MAX_ADDRTTLS] =
+            unsafe { mem::MaybeUninit::zeroed().assume_init() };
+        let mut naddrttls: c_int = MAX_ADDRTTLS as c_int;
         let parse_status = unsafe {
             c_ares_sys::ares_parse_a_reply(
                 data.as_ptr(),
                 data.len() as c_int,
                 ptr::null_mut(),
-                results.addrttls.as_mut_ptr(),
-                ptr::from_mut(&mut results.naddrttls).cast(),
+                addrttls.as_mut_ptr(),
+                &mut naddrttls,
             )
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
-            Ok(results)
+            Ok(AResults {
+                naddrttls: naddrttls as usize,
+                addrttls,
+            })
         } else {
             Err(Error::from(parse_status))
         }

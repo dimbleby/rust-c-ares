@@ -1,10 +1,10 @@
-use core::ffi::{c_int, c_uchar, c_void};
+use core::ffi::c_int;
 use std::fmt;
 use std::ptr;
-use std::slice;
 
 use crate::error::{Error, Result};
-use crate::panic;
+use crate::record::QueryRecord;
+use crate::types::QueryType;
 use crate::utils::hostname_as_str;
 
 /// The result of a successful SOA lookup.
@@ -89,16 +89,11 @@ impl Drop for SOAResult {
 unsafe impl Send for SOAResult {}
 unsafe impl Sync for SOAResult {}
 
-pub(crate) unsafe extern "C" fn query_soa_callback<F>(
-    arg: *mut c_void,
-    status: c_int,
-    _timeouts: c_int,
-    abuf: *mut c_uchar,
-    alen: c_int,
-) where
-    F: FnOnce(Result<SOAResult>) + Send + 'static,
-{
-    ares_callback!(arg.cast::<F>(), status, abuf, alen, SOAResult::parse_from);
+impl QueryRecord for SOAResult {
+    const QUERY_TYPE: QueryType = QueryType::SOA;
+    fn parse(data: &[u8]) -> Result<Self> {
+        Self::parse_from(data)
+    }
 }
 
 #[cfg(test)]

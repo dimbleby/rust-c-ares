@@ -1,12 +1,12 @@
-use core::ffi::{c_int, c_uchar, c_void};
+use core::ffi::c_int;
 use std::fmt;
 use std::ptr;
-use std::slice;
 
 use itertools::Itertools;
 
 use crate::error::{Error, Result};
-use crate::panic;
+use crate::record::QueryRecord;
+use crate::types::QueryType;
 use crate::utils::{dns_string_as_str, hostname_as_str};
 
 /// The result of a successful NAPTR lookup.
@@ -150,22 +150,11 @@ impl fmt::Display for NAPTRResult<'_> {
     }
 }
 
-pub(crate) unsafe extern "C" fn query_naptr_callback<F>(
-    arg: *mut c_void,
-    status: c_int,
-    _timeouts: c_int,
-    abuf: *mut c_uchar,
-    alen: c_int,
-) where
-    F: FnOnce(Result<NAPTRResults>) + Send + 'static,
-{
-    ares_callback!(
-        arg.cast::<F>(),
-        status,
-        abuf,
-        alen,
-        NAPTRResults::parse_from
-    );
+impl QueryRecord for NAPTRResults {
+    const QUERY_TYPE: QueryType = QueryType::NAPTR;
+    fn parse(data: &[u8]) -> Result<Self> {
+        Self::parse_from(data)
+    }
 }
 
 #[cfg(test)]

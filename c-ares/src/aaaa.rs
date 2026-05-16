@@ -1,4 +1,4 @@
-use core::ffi::{c_int, c_uchar, c_void};
+use core::ffi::c_int;
 use std::fmt;
 use std::mem;
 use std::net::Ipv6Addr;
@@ -8,8 +8,9 @@ use std::slice;
 use itertools::Itertools;
 
 use crate::error::{Error, Result};
-use crate::panic;
+use crate::record::QueryRecord;
 use crate::types::MAX_ADDRTTLS;
+use crate::types::QueryType;
 
 /// The result of a successful AAAA lookup.
 #[derive(Clone, Copy, Debug)]
@@ -126,16 +127,11 @@ impl fmt::Display for AAAAResult<'_> {
     }
 }
 
-pub(crate) unsafe extern "C" fn query_aaaa_callback<F>(
-    arg: *mut c_void,
-    status: c_int,
-    _timeouts: c_int,
-    abuf: *mut c_uchar,
-    alen: c_int,
-) where
-    F: FnOnce(Result<AAAAResults>) + Send + 'static,
-{
-    ares_callback!(arg.cast::<F>(), status, abuf, alen, AAAAResults::parse_from);
+impl QueryRecord for AAAAResults {
+    const QUERY_TYPE: QueryType = QueryType::AAAA;
+    fn parse(data: &[u8]) -> Result<Self> {
+        Self::parse_from(data)
+    }
 }
 
 #[cfg(test)]

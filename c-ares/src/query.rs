@@ -3,8 +3,9 @@ use std::slice;
 
 use crate::error::{Error, Result};
 use crate::panic;
+use crate::record::QueryRecord;
 
-pub(crate) unsafe extern "C" fn query_callback<F>(
+pub(crate) unsafe extern "C" fn raw_query_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,
@@ -21,4 +22,17 @@ pub(crate) unsafe extern "C" fn query_callback<F>(
     };
     let handler = unsafe { Box::from_raw(arg.cast::<F>()) };
     panic::catch(|| handler(result));
+}
+
+pub(crate) unsafe extern "C" fn query_callback<R, F>(
+    arg: *mut c_void,
+    status: c_int,
+    _timeouts: c_int,
+    abuf: *mut c_uchar,
+    alen: c_int,
+) where
+    R: QueryRecord,
+    F: FnOnce(Result<R>) + Send + 'static,
+{
+    ares_callback!(arg.cast::<F>(), status, abuf, alen, R::parse);
 }

@@ -56,6 +56,7 @@ mod ns;
 mod panic;
 mod ptr;
 mod query;
+mod record;
 mod server_state_flags;
 mod soa;
 mod srv;

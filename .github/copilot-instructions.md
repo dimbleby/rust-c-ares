@@ -61,6 +61,7 @@ When navigating the codebase, these are the most important files to know about:
 | `c-ares/src/types.rs` | `QueryType`, `DnsClass`, `AddressFamily`, `Socket` enums |
 | `c-ares/src/error.rs` | `Error` enum (maps `ares_status_t`), `Result<T>` type alias |
 | `c-ares/src/channel.rs` | `Channel` — all query/search methods live here |
+| `c-ares/src/record.rs` | `QueryRecord` trait wiring a result type to a `QueryType` + parser; the single generic trampoline lives in `query.rs` |
 | `c-ares/src/dns/` | Structured DNS record API (generic message parsing/writing, gated behind `cares1_28`) |
 | `c-ares/build.rs` | Version detection — emits `cfg(cares1_XX)` flags |
 | `c-ares-resolver/src/error.rs` | `Error` enum wrapping both `io::Error` and `c_ares::Error` |
@@ -113,7 +114,7 @@ Each DNS record type (`a.rs`, `aaaa.rs`, `mx.rs`, etc. in `c-ares/src/`) follows
 - `XResult<'a>` — borrowed view into a single record, lifetime-bound to the owning `XResults`. Provides accessor methods returning borrowed data. Implements `Display`, `Send`, `Sync`.
 - `XResultsIter<'a>` — iterator that walks the C linked list, yielding `XResult<'a>` items. Implements `Send`, `Sync`.
 
-Each record module also exports a `pub(crate) unsafe extern "C" fn query_x_callback<F>` that bridges the C callback into the typed Rust closure using the `ares_callback!` macro.
+Each record module also has an `impl QueryRecord for XResults` block (`pub(crate) trait` defined in `c-ares/src/record.rs`) that supplies its `QueryType` and a `parse` function delegating to `XResults::parse_from`. A single generic trampoline (`query::query_callback<R, F>`) bridges the C callback into the typed Rust closure for all record types; there is no per-record callback function.
 
 ### Callback lifecycle and macros
 
@@ -130,7 +131,7 @@ The full lifecycle is:
 4. `panic::catch` wraps the handler call; if it panics, the panic is stored in a thread-local.
 5. Back in the caller, `panic::propagate()` resumes any stored panic on the Rust side.
 
-When adding a new query method, use `ares_query!`/`ares_search!` on the caller side and `ares_callback!` in the callback — do not hand-write the boxing/unboxing.
+When adding a new typed query method, implement `QueryRecord` for the result type and add thin `Channel::query_xxx` / `search_xxx` wrappers that delegate to the private `do_query` / `do_search` helpers — do not hand-write the boxing/unboxing or a new trampoline. The `ares_query!`/`ares_search!`/`ares_callback!` macros remain the right tools for non-standard pathways (raw bytes, `DnsRecord`, etc.).
 
 ### Resolver patterns
 

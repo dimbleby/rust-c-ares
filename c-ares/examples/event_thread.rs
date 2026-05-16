@@ -27,7 +27,7 @@ mod inner {
             .set_event_thread(c_ares::EventSys::Default);
 
         let mut channel = c_ares::Channel::with_options(options)?;
-        channel.set_servers(&["8.8.8.8"])?;
+        channel.set_servers(["8.8.8.8"])?;
 
         // Build a DNS query.
         let mut query = c_ares::DnsRecord::new(

@@ -316,21 +316,21 @@ mod resolver_configuration {
     #[test]
     fn set_custom_servers() {
         let resolver = BlockingResolver::new().unwrap();
-        let result = resolver.set_servers(&["8.8.8.8", "8.8.4.4"]);
+        let result = resolver.set_servers(["8.8.8.8", "8.8.4.4"]);
         assert!(result.is_ok());
     }
 
     #[test]
     fn set_invalid_server() {
         let resolver = BlockingResolver::new().unwrap();
-        let result = resolver.set_servers(&["not-a-valid-address"]);
+        let result = resolver.set_servers(["not-a-valid-address"]);
         assert!(result.is_err());
     }
 
     #[test]
     fn set_ipv6_servers() {
         let resolver = BlockingResolver::new().unwrap();
-        let result = resolver.set_servers(&["[2001:4860:4860::8888]:53"]);
+        let result = resolver.set_servers(["[2001:4860:4860::8888]:53"]);
         assert!(result.is_ok());
     }
 
@@ -347,7 +347,7 @@ mod resolver_configuration {
 fn concurrent_queries() {
     let resolver = BlockingResolver::with_options(test_options()).unwrap();
     resolver
-        .set_servers(&["8.8.8.8"])
+        .set_servers(["8.8.8.8"])
         .expect("Failed to set servers");
 
     // Multiple concurrent queries exercise the eventloop socket

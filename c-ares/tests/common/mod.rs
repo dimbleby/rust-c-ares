@@ -22,7 +22,7 @@ pub fn event_thread_channel() -> Channel {
 
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
-        .set_servers(&["8.8.8.8"])
+        .set_servers(["8.8.8.8"])
         .expect("Failed to set servers");
     channel
 }

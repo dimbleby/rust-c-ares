@@ -124,7 +124,11 @@ impl FutureResolver {
     ///
     /// String format is `host[:port]`.  IPv6 addresses with ports require square brackets eg
     /// `[2001:4860:4860::8888]:53`.
-    pub fn set_servers(&self, servers: &[&str]) -> c_ares::Result<&Self> {
+    pub fn set_servers<I, S>(&self, servers: I) -> c_ares::Result<&Self>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
         self.inner.set_servers(servers)?;
         Ok(self)
     }
@@ -162,7 +166,11 @@ impl FutureResolver {
     /// Each element of the sortlist holds an IP-address/netmask pair. The netmask is optional but
     /// follows the address after a slash if present. For example: "130.155.160.0/255.255.240.0",
     /// or "130.155.0.0".
-    pub fn set_sortlist(&self, sortlist: &[&str]) -> c_ares::Result<&Self> {
+    pub fn set_sortlist<I, S>(&self, sortlist: I) -> c_ares::Result<&Self>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
         self.inner.set_sortlist(sortlist)?;
         Ok(self)
     }
@@ -580,14 +588,14 @@ mod tests {
     #[test]
     fn future_resolver_set_servers_valid() {
         let resolver = FutureResolver::new().unwrap();
-        let result = resolver.set_servers(&["8.8.8.8", "8.8.4.4"]);
+        let result = resolver.set_servers(["8.8.8.8", "8.8.4.4"]);
         assert!(result.is_ok());
     }
 
     #[test]
     fn future_resolver_set_sortlist_valid() {
         let resolver = FutureResolver::new().unwrap();
-        let result = resolver.set_sortlist(&["130.155.160.0/255.255.240.0"]);
+        let result = resolver.set_sortlist(["130.155.160.0/255.255.240.0"]);
         assert!(result.is_ok());
     }
 
@@ -609,7 +617,7 @@ mod tests {
     #[cfg(cares1_24)]
     fn future_resolver_servers() {
         let resolver = FutureResolver::new().unwrap();
-        let _ = resolver.set_servers(&["8.8.8.8"]);
+        let _ = resolver.set_servers(["8.8.8.8"]);
         let servers = resolver.servers();
         assert!(!servers.is_empty());
     }

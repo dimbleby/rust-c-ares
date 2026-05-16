@@ -83,7 +83,11 @@ impl Options {
 
     /// Set the domains to search, instead of the domains specified in resolv.conf or the domain
     /// derived from the kernel hostname variable.
-    pub fn set_domains(&mut self, domains: &[&str]) -> c_ares::Result<&mut Self> {
+    pub fn set_domains<I, S>(&mut self, domains: I) -> c_ares::Result<&mut Self>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
         self.inner.set_domains(domains)?;
         Ok(self)
     }
@@ -257,7 +261,11 @@ impl Resolver {
     ///
     /// String format is `host[:port]`.  IPv6 addresses with ports require square brackets eg
     /// `[2001:4860:4860::8888]:53`.
-    pub fn set_servers(&self, servers: &[&str]) -> c_ares::Result<&Self> {
+    pub fn set_servers<I, S>(&self, servers: I) -> c_ares::Result<&Self>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
         self.ares_channel.lock().unwrap().set_servers(servers)?;
         Ok(self)
     }
@@ -295,7 +303,11 @@ impl Resolver {
     /// Each element of the sortlist holds an IP-address/netmask pair. The netmask is optional but
     /// follows the address after a slash if present. For example: "130.155.160.0/255.255.240.0",
     /// or "130.155.0.0".
-    pub fn set_sortlist(&self, sortlist: &[&str]) -> c_ares::Result<&Self> {
+    pub fn set_sortlist<I, S>(&self, sortlist: I) -> c_ares::Result<&Self>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
         self.ares_channel.lock().unwrap().set_sortlist(sortlist)?;
         Ok(self)
     }
@@ -823,7 +835,7 @@ mod tests {
     #[test]
     fn options_set_domains() {
         let mut options = Options::new();
-        let result = options.set_domains(&["example.com", "test.com"]).unwrap();
+        let result = options.set_domains(["example.com", "test.com"]).unwrap();
         assert!(std::ptr::eq(result, &options));
     }
 
@@ -956,28 +968,28 @@ mod tests {
     #[test]
     fn resolver_set_servers_valid() {
         let resolver = Resolver::new().unwrap();
-        let result = resolver.set_servers(&["8.8.8.8", "8.8.4.4"]);
+        let result = resolver.set_servers(["8.8.8.8", "8.8.4.4"]);
         assert!(result.is_ok());
     }
 
     #[test]
     fn resolver_set_servers_with_port() {
         let resolver = Resolver::new().unwrap();
-        let result = resolver.set_servers(&["8.8.8.8:53"]);
+        let result = resolver.set_servers(["8.8.8.8:53"]);
         assert!(result.is_ok());
     }
 
     #[test]
     fn resolver_set_servers_ipv6() {
         let resolver = Resolver::new().unwrap();
-        let result = resolver.set_servers(&["[2001:4860:4860::8888]:53"]);
+        let result = resolver.set_servers(["[2001:4860:4860::8888]:53"]);
         assert!(result.is_ok());
     }
 
     #[test]
     fn resolver_set_sortlist_valid() {
         let resolver = Resolver::new().unwrap();
-        let result = resolver.set_sortlist(&["130.155.160.0/255.255.240.0"]);
+        let result = resolver.set_sortlist(["130.155.160.0/255.255.240.0"]);
         assert!(result.is_ok());
     }
 
@@ -999,7 +1011,7 @@ mod tests {
     #[cfg(cares1_24)]
     fn resolver_servers() {
         let resolver = Resolver::new().unwrap();
-        let _ = resolver.set_servers(&["8.8.8.8"]);
+        let _ = resolver.set_servers(["8.8.8.8"]);
         let servers = resolver.servers();
         assert!(!servers.is_empty());
     }
@@ -1062,7 +1074,7 @@ mod tests {
         let resolver = std::sync::Arc::new(Resolver::with_options(options).unwrap());
 
         // Point at a non-routable address so the query stays pending until it times out.
-        resolver.set_servers(&["192.0.2.1"]).unwrap();
+        resolver.set_servers(["192.0.2.1"]).unwrap();
         resolver.query_a("example.com", |_| {});
 
         let start = std::time::Instant::now();

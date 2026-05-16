@@ -294,8 +294,18 @@ impl Channel {
     /// let mut channel = c_ares::Channel::new().unwrap();
     /// channel.set_servers(&["8.8.8.8", "8.8.4.4:53"]).unwrap();
     /// ```
-    pub fn set_servers(&mut self, servers: &[&str]) -> Result<&mut Self> {
-        let servers_csv = servers.join(",");
+    pub fn set_servers<I, S>(&mut self, servers: I) -> Result<&mut Self>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let mut servers_csv = String::new();
+        for (i, s) in servers.into_iter().enumerate() {
+            if i > 0 {
+                servers_csv.push(',');
+            }
+            servers_csv.push_str(s.as_ref());
+        }
         let c_servers = CString::new(servers_csv).map_err(|_| Error::EBADSTR)?;
         let ares_rc = unsafe {
             c_ares_sys::ares_set_servers_ports_csv(self.ares_channel, c_servers.as_ptr())
@@ -351,8 +361,18 @@ impl Channel {
     /// Each element of the sortlist holds an IP-address/netmask pair. The netmask is optional but
     /// follows the address after a slash if present. For example: "130.155.160.0/255.255.240.0",
     /// or "130.155.0.0".
-    pub fn set_sortlist(&mut self, sortlist: &[&str]) -> Result<&mut Self> {
-        let sortlist_str = sortlist.join(" ");
+    pub fn set_sortlist<I, S>(&mut self, sortlist: I) -> Result<&mut Self>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let mut sortlist_str = String::new();
+        for (i, s) in sortlist.into_iter().enumerate() {
+            if i > 0 {
+                sortlist_str.push(' ');
+            }
+            sortlist_str.push_str(s.as_ref());
+        }
         let c_sortlist = CString::new(sortlist_str).map_err(|_| Error::EBADSTR)?;
         let ares_rc =
             unsafe { c_ares_sys::ares_set_sortlist(self.ares_channel, c_sortlist.as_ptr()) };
@@ -1169,28 +1189,28 @@ mod tests {
     #[test]
     fn channel_set_servers_empty() {
         let mut channel = Channel::new().unwrap();
-        let result = channel.set_servers(&[]);
+        let result = channel.set_servers(Vec::<&str>::new());
         assert!(result.is_ok());
     }
 
     #[test]
     fn channel_set_servers_ipv4() {
         let mut channel = Channel::new().unwrap();
-        let result = channel.set_servers(&["8.8.8.8", "8.8.4.4"]);
+        let result = channel.set_servers(["8.8.8.8", "8.8.4.4"]);
         assert!(result.is_ok());
     }
 
     #[test]
     fn channel_set_servers_ipv6() {
         let mut channel = Channel::new().unwrap();
-        let result = channel.set_servers(&["[2001:4860:4860::8888]"]);
+        let result = channel.set_servers(["[2001:4860:4860::8888]"]);
         assert!(result.is_ok());
     }
 
     #[test]
     fn channel_set_servers_with_port() {
         let mut channel = Channel::new().unwrap();
-        let result = channel.set_servers(&["8.8.8.8:53", "[2001:4860:4860::8888]:53"]);
+        let result = channel.set_servers(["8.8.8.8:53", "[2001:4860:4860::8888]:53"]);
         assert!(result.is_ok());
     }
 
@@ -1241,8 +1261,22 @@ mod tests {
     #[test]
     fn channel_set_sortlist() {
         let mut channel = Channel::new().unwrap();
-        let result = channel.set_sortlist(&["130.155.160.0/255.255.240.0", "130.155.0.0"]);
+        let result = channel.set_sortlist(["130.155.160.0/255.255.240.0", "130.155.0.0"]);
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn channel_set_servers_owned_strings() {
+        let mut channel = Channel::new().unwrap();
+        let servers: Vec<String> = vec!["8.8.8.8".into(), "8.8.4.4".into()];
+        channel.set_servers(servers).unwrap();
+    }
+
+    #[test]
+    fn channel_set_sortlist_owned_strings() {
+        let mut channel = Channel::new().unwrap();
+        let sortlist: Vec<String> = vec!["130.155.0.0".into()];
+        channel.set_sortlist(sortlist).unwrap();
     }
 
     #[cfg(cares1_22)]
@@ -1257,7 +1291,7 @@ mod tests {
     #[test]
     fn channel_servers() {
         let mut channel = Channel::new().unwrap();
-        channel.set_servers(&["8.8.8.8"]).unwrap();
+        channel.set_servers(["8.8.8.8"]).unwrap();
         let servers = channel.servers();
         assert!(!servers.is_empty());
     }
@@ -1266,7 +1300,7 @@ mod tests {
     #[test]
     fn channel_servers_empty() {
         let mut channel = Channel::new().unwrap();
-        channel.set_servers(&[]).unwrap();
+        channel.set_servers(Vec::<&str>::new()).unwrap();
         let servers = channel.servers();
         assert!(servers.is_empty());
     }
@@ -1324,7 +1358,7 @@ mod tests {
     fn set_servers_invalid() {
         let mut channel = Channel::new().unwrap();
         // Invalid server format
-        let result = channel.set_servers(&["not-a-valid-ip"]);
+        let result = channel.set_servers(["not-a-valid-ip"]);
         assert!(result.is_err());
     }
 
@@ -1332,7 +1366,7 @@ mod tests {
     fn set_sortlist_invalid() {
         let mut channel = Channel::new().unwrap();
         // Invalid sortlist format
-        let result = channel.set_sortlist(&["not-a-valid-address"]);
+        let result = channel.set_sortlist(["not-a-valid-address"]);
         // Should fail
         assert!(result.is_err());
     }

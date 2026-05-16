@@ -161,10 +161,14 @@ impl Options {
 
     /// Set the domains to search, instead of the domains specified in resolv.conf or the domain
     /// derived from the kernel hostname variable.
-    pub fn set_domains(&mut self, domains: &[&str]) -> Result<&mut Self> {
+    pub fn set_domains<I, S>(&mut self, domains: I) -> Result<&mut Self>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
         self.domains = domains
-            .iter()
-            .map(|&s| CString::new(s).map_err(|_| Error::EBADSTR))
+            .into_iter()
+            .map(|s| CString::new(s.as_ref()).map_err(|_| Error::EBADSTR))
             .collect::<Result<Vec<_>>>()?;
         self.optmask |= c_ares_sys::ARES_OPT_DOMAINS;
         Ok(self)
@@ -369,7 +373,14 @@ mod tests {
     #[test]
     fn options_set_domains() {
         let mut options = Options::new();
-        options.set_domains(&["example.com", "test.local"]).unwrap();
+        options.set_domains(["example.com", "test.local"]).unwrap();
+    }
+
+    #[test]
+    fn options_set_domains_owned_strings() {
+        let mut options = Options::new();
+        let domains: Vec<String> = vec!["example.com".into(), "test.local".into()];
+        options.set_domains(domains).unwrap();
     }
 
     #[test]
@@ -485,7 +496,7 @@ mod tests {
             .set_ndots(2)
             .set_udp_port(53)
             .set_tcp_port(53)
-            .set_domains(&["example.com"])
+            .set_domains(["example.com"])
             .unwrap()
             .set_lookups("b")
             .unwrap()

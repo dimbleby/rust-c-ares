@@ -22,12 +22,12 @@ fn raw_search() {
         .set_flags(Flags::STAYOPEN)
         .set_timeout(Duration::from_millis(2000))
         .set_tries(2)
-        .set_domains(&["com"])
+        .set_domains(["com"])
         .unwrap()
         .set_event_thread(EventSys::Default);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
-        .set_servers(&["8.8.8.8"])
+        .set_servers(["8.8.8.8"])
         .expect("Failed to set servers");
 
     let completed = Arc::new(AtomicBool::new(false));
@@ -60,12 +60,12 @@ fn search_a_record() {
         .set_flags(Flags::STAYOPEN)
         .set_timeout(Duration::from_millis(2000))
         .set_tries(2)
-        .set_domains(&["com"])
+        .set_domains(["com"])
         .unwrap()
         .set_event_thread(EventSys::Default);
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
-        .set_servers(&["8.8.8.8"])
+        .set_servers(["8.8.8.8"])
         .expect("Failed to set servers");
 
     let completed = Arc::new(AtomicBool::new(false));

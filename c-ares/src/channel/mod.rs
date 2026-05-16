@@ -953,7 +953,7 @@ impl Channel {
     where
         F: FnOnce(Result<&DnsRecord>) + Send + 'static,
     {
-        let c_name = CString::new(name).map_err(|_| Error::EBADSTR)?;
+        let c_name = CString::new(name).map_err(|_| Error::EBADNAME)?;
         let mut qid: u16 = 0;
         let c_arg = Box::into_raw(Box::new(handler));
         let status = unsafe {
@@ -1285,6 +1285,14 @@ mod tests {
     fn channel_process_pending_write() {
         let mut channel = Channel::new().unwrap();
         channel.process_pending_write();
+    }
+
+    #[cfg(cares1_28)]
+    #[test]
+    fn query_dnsrec_rejects_nul_in_name_with_ebadname() {
+        let mut channel = Channel::new().unwrap();
+        let result = channel.query_dnsrec("ex\0ample.com", DnsCls::IN, DnsRecordType::A, |_| {});
+        assert_eq!(result, Err(Error::EBADNAME));
     }
 
     #[test]

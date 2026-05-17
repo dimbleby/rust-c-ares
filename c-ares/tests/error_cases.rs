@@ -5,16 +5,14 @@ mod common;
 use c_ares::*;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-#[cfg(cares1_28)]
 use std::time::Duration;
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn get_host_by_address_nonexistent() {
     use std::net::IpAddr;
 
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -27,18 +25,15 @@ fn get_host_by_address_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn get_host_by_name_nonexistent() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -52,20 +47,17 @@ fn get_host_by_name_nonexistent() {
         },
     );
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn get_name_info_nonexistent() {
     use std::net::SocketAddr;
 
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -82,18 +74,15 @@ fn get_name_info_nonexistent() {
         },
     );
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_caa_nonexistent() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -103,18 +92,15 @@ fn query_caa_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_cancel() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let cancelled = Arc::new(AtomicBool::new(false));
     let cancelled_clone = cancelled.clone();
@@ -129,9 +115,7 @@ fn query_cancel() {
     channel.cancel();
 
     // Process should complete quickly since query was cancelled
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(1)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(1));
 
     assert!(
         cancelled.load(Ordering::SeqCst),
@@ -139,11 +123,10 @@ fn query_cancel() {
     );
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_cname_nonexistent() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -153,18 +136,15 @@ fn query_cname_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_mx_nonexistent() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -174,18 +154,15 @@ fn query_mx_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_nonexistent_domain() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -195,18 +172,15 @@ fn query_nonexistent_domain() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_ns_nonexistent() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -216,18 +190,15 @@ fn query_ns_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_soa_nonexistent() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -237,18 +208,15 @@ fn query_soa_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_srv_nonexistent() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -261,9 +229,7 @@ fn query_srv_nonexistent() {
         },
     );
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -298,11 +264,10 @@ fn query_a_null_byte() {
     assert!(completed.load(Ordering::SeqCst), "Handler was not called");
 }
 
-#[cfg(cares1_28)]
 #[test]
 #[ignore = "requires network"]
 fn query_txt_nonexistent() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -312,9 +277,7 @@ fn query_txt_nonexistent() {
         assert_eq!(result.unwrap_err(), Error::ENOTFOUND);
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }

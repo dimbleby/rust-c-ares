@@ -1,11 +1,9 @@
 //! DNS query integration tests for specific record types, including result accessor methods and
 //! Display traits.
 
-#![cfg(cares1_28)]
-
 mod common;
 
-use common::event_thread_channel;
+use common::{channel, process_channel};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
@@ -13,7 +11,7 @@ use std::time::Duration;
 #[test]
 #[ignore = "requires network"]
 fn query_a_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -39,9 +37,7 @@ fn query_a_record() {
         assert!(ttl_valid, "No valid TTL");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -49,7 +45,7 @@ fn query_a_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_aaaa_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -71,9 +67,7 @@ fn query_aaaa_record() {
         assert!(ipv6_valid, "No valid IPv6 address");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -81,7 +75,7 @@ fn query_aaaa_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_caa_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -104,9 +98,7 @@ fn query_caa_record() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -114,7 +106,7 @@ fn query_caa_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_cname_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -127,9 +119,7 @@ fn query_cname_record() {
         assert!(!format!("{}", results).is_empty());
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -137,7 +127,7 @@ fn query_cname_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_mx_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -159,9 +149,7 @@ fn query_mx_record() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -169,7 +157,7 @@ fn query_mx_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_naptr_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -192,9 +180,7 @@ fn query_naptr_record() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -202,7 +188,7 @@ fn query_naptr_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_ns_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -215,9 +201,7 @@ fn query_ns_record() {
         assert!(!format!("{}", results).is_empty());
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -225,7 +209,7 @@ fn query_ns_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_ptr_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -238,9 +222,7 @@ fn query_ptr_record() {
         assert!(!format!("{}", results).is_empty());
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -248,7 +230,7 @@ fn query_ptr_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_soa_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -266,9 +248,7 @@ fn query_soa_record() {
         assert!(!format!("{}", soa).is_empty());
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -276,7 +256,7 @@ fn query_soa_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_srv_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -302,9 +282,7 @@ fn query_srv_record() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -312,7 +290,7 @@ fn query_srv_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_txt_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -334,9 +312,7 @@ fn query_txt_record() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -344,7 +320,7 @@ fn query_txt_record() {
 #[test]
 #[ignore = "requires network"]
 fn query_uri_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -364,9 +340,7 @@ fn query_uri_record() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -374,7 +348,7 @@ fn query_uri_record() {
 #[test]
 #[ignore = "requires network"]
 fn raw_query() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -386,9 +360,7 @@ fn raw_query() {
         assert!(!data.is_empty(), "No data returned");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }

@@ -760,6 +760,8 @@ pub enum DnsOptDataType {
     Bin,
     /// DNS domain name format.
     Name,
+    /// UTF-8 encoded string.
+    Utf8Str,
 }
 
 impl From<c_ares_sys::ares_dns_opt_datatype_t> for DnsOptDataType {
@@ -788,6 +790,9 @@ impl From<c_ares_sys::ares_dns_opt_datatype_t> for DnsOptDataType {
             }
             c_ares_sys::ares_dns_opt_datatype_t::ARES_OPT_DATATYPE_BIN => DnsOptDataType::Bin,
             c_ares_sys::ares_dns_opt_datatype_t::ARES_OPT_DATATYPE_NAME => DnsOptDataType::Name,
+            c_ares_sys::ares_dns_opt_datatype_t::ARES_OPT_DATATYPE_UTF8_STR => {
+                DnsOptDataType::Utf8Str
+            }
         }
     }
 }

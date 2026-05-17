@@ -167,6 +167,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)] // exhaustive table-driven test
     fn try_from_status() {
         assert!(Error::try_from(c_ares_sys::ares_status_t::ARES_SUCCESS).is_err());
         assert_eq!(
@@ -313,15 +314,15 @@ mod tests {
             Error::UNKNOWN,
         ];
         for error in &errors {
-            let display = format!("{}", error);
-            assert!(!display.is_empty(), "Error {:?} has empty display", error);
+            let display = format!("{error}");
+            assert!(!display.is_empty(), "Error {error:?} has empty display");
         }
     }
 
     #[test]
     fn debug_format() {
         let error = Error::ETIMEOUT;
-        let debug = format!("{:?}", error);
+        let debug = format!("{error:?}");
         assert!(debug.contains("ETIMEOUT"));
     }
 

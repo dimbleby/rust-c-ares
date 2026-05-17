@@ -70,7 +70,7 @@ fn get_host_by_name_ipv4() {
             "No addresses returned"
         );
         assert_eq!(host_results.aliases().count(), 0);
-        assert!(!format!("{}", host_results).is_empty());
+        assert!(!format!("{host_results}").is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -122,7 +122,7 @@ fn get_name_info_ipv4() {
                 name_info.node().is_some() || name_info.service().is_some(),
                 "No name info returned"
             );
-            assert!(!format!("{}", name_info).is_empty());
+            assert!(!format!("{name_info}").is_empty());
         },
     );
 

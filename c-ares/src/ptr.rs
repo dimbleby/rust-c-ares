@@ -28,7 +28,7 @@ impl PTRResults {
                 dummy_ip.as_ptr().cast(),
                 dummy_ip.len() as c_int,
                 c_types::AF_INET.into(),
-                &mut hostent,
+                &raw mut hostent,
             )
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {

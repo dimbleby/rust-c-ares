@@ -38,7 +38,7 @@ mod tests {
     #[test]
     fn debug() {
         let flags = ServerStateFlags::TCP;
-        let debug = format!("{:?}", flags);
+        let debug = format!("{flags:?}");
         assert!(!debug.is_empty());
     }
 }

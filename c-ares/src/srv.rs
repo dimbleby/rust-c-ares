@@ -27,7 +27,7 @@ impl SRVResults {
     pub fn parse_from(data: &[u8]) -> Result<SRVResults> {
         let mut srv_reply: *mut c_ares_sys::ares_srv_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_srv_reply(data.as_ptr(), data.len() as c_int, &mut srv_reply)
+            c_ares_sys::ares_parse_srv_reply(data.as_ptr(), data.len() as c_int, &raw mut srv_reply)
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let srv_result = SRVResults::new(srv_reply);
@@ -57,7 +57,7 @@ impl fmt::Display for SRVResults {
 }
 
 /// Iterator of `SRVResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct SRVResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_srv_reply>,
 }
@@ -183,7 +183,7 @@ mod tests {
     fn debug_srv_result() {
         let results = SRVResults::parse_from(ONE_SRV_RECORD).unwrap();
         let result = results.iter().next().unwrap();
-        let debug = format!("{:?}", result);
+        let debug = format!("{result:?}");
         assert!(debug.contains("SRVResult"));
         assert!(debug.contains("sip.example.com"));
         assert!(debug.contains("5060"));
@@ -194,7 +194,7 @@ mod tests {
     fn debug_srv_results_iter() {
         let results = SRVResults::parse_from(ONE_SRV_RECORD).unwrap();
         let iter = results.iter();
-        let debug = format!("{:?}", iter);
+        let debug = format!("{iter:?}");
         assert!(debug.contains("SRVResultsIter"));
     }
 }

@@ -13,7 +13,7 @@ fn raw_search() {
     let mut options = Options::new();
     options
         .set_flags(Flags::STAYOPEN)
-        .set_timeout(Duration::from_millis(2000))
+        .set_timeout(Duration::from_secs(2))
         .set_tries(2)
         .set_domains(["com"])
         .unwrap();
@@ -43,7 +43,7 @@ fn search_a_record() {
     let mut options = Options::new();
     options
         .set_flags(Flags::STAYOPEN)
-        .set_timeout(Duration::from_millis(2000))
+        .set_timeout(Duration::from_secs(2))
         .set_tries(2)
         .set_domains(["com"])
         .unwrap();

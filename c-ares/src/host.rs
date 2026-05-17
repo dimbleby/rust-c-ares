@@ -81,11 +81,11 @@ pub(crate) unsafe extern "C" fn get_host_callback<F>(
             // hostent and will free it after we return.
             let host_results = HostResults::new(hostent);
             let host_results = ManuallyDrop::new(host_results);
-            handler(Ok(&host_results))
+            handler(Ok(&host_results));
         } else {
             let error = Error::from(status);
-            handler(Err(error))
-        };
+            handler(Err(error));
+        }
     });
 }
 
@@ -104,12 +104,12 @@ unsafe fn ip_address_from_bytes(family: AddressFamily, h_addr: *const u8) -> Opt
             let ipv6 = Ipv6Addr::from(bytes);
             Some(IpAddr::V6(ipv6))
         }
-        _ => None,
+        AddressFamily::UNSPEC => None,
     }
 }
 
 /// Iterator of `IpAddr`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct HostAddressResultsIter<'a> {
     family: Option<AddressFamily>,
     next: &'a *const c_char,
@@ -135,7 +135,7 @@ unsafe impl Send for HostAddressResultsIter<'_> {}
 unsafe impl Sync for HostAddressResultsIter<'_> {}
 
 /// Iterator of `&'a str`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct HostAliasResultsIter<'a> {
     next: &'a *const c_char,
 }

@@ -37,7 +37,7 @@ impl AResults {
                 data.len() as c_int,
                 ptr::null_mut(),
                 addrttls.as_mut_ptr(),
-                &mut naddrttls,
+                &raw mut naddrttls,
             )
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
@@ -187,7 +187,7 @@ mod tests {
     fn debug_a_result() {
         let results = AResults::parse_from(TWO_A_RECORDS).unwrap();
         let result = results.iter().next().unwrap();
-        let debug = format!("{:?}", result);
+        let debug = format!("{result:?}");
         assert!(debug.contains("AResult"));
         assert!(debug.contains("93.184.216.34"));
         assert!(debug.contains("300"));
@@ -197,7 +197,7 @@ mod tests {
     fn debug_a_results_iter() {
         let results = AResults::parse_from(TWO_A_RECORDS).unwrap();
         let iter = results.iter();
-        let debug = format!("{:?}", iter);
+        let debug = format!("{iter:?}");
         assert!(debug.contains("AResultsIter"));
     }
 }

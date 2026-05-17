@@ -118,7 +118,7 @@ mod tests {
     #[test]
     fn debug() {
         let flags = Flags::USEVC | Flags::PRIMARY;
-        let debug = format!("{:?}", flags);
+        let debug = format!("{flags:?}");
         assert!(debug.contains("USEVC"));
         assert!(debug.contains("PRIMARY"));
     }

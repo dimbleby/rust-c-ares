@@ -309,7 +309,7 @@ mod tests {
         let data = [127, 0, 0, 1, 10, 0, 0, 1];
         assert_eq!(
             parse_inaddr4_list(&data).unwrap(),
-            vec![Ipv4Addr::new(127, 0, 0, 1), Ipv4Addr::new(10, 0, 0, 1),]
+            vec![Ipv4Addr::LOCALHOST, Ipv4Addr::new(10, 0, 0, 1),]
         );
     }
 
@@ -530,10 +530,7 @@ mod tests {
     fn parse_opt_value_inaddr4_list() {
         // HTTPS param 4 = ipv4hint (InAddr4List)
         let result = parse_opt_value(DnsRrKey::HTTPS_PARAMS, 4, &[127, 0, 0, 1]).unwrap();
-        assert_eq!(
-            result,
-            OptValue::InAddr4List(vec![Ipv4Addr::new(127, 0, 0, 1)])
-        );
+        assert_eq!(result, OptValue::InAddr4List(vec![Ipv4Addr::LOCALHOST]));
     }
 
     #[test]

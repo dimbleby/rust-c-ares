@@ -119,7 +119,7 @@ mod tests {
             addresses: vec![],
             aliases: vec![],
         };
-        let debug = format!("{:?}", results);
+        let debug = format!("{results:?}");
         assert!(debug.contains("example.com"));
     }
 

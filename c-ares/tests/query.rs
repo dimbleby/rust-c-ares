@@ -20,7 +20,7 @@ fn query_a_record() {
         completed_clone.store(true, Ordering::SeqCst);
         let results = result.expect("Query failed");
         assert!(results.iter().count() > 0, "No A records returned");
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
 
         let mut ipv4_valid = false;
         let mut ttl_valid = false;
@@ -31,7 +31,7 @@ fn query_a_record() {
             if a_result.ttl() >= 0 {
                 ttl_valid = true;
             }
-            assert!(!format!("{}", a_result).is_empty());
+            assert!(!format!("{a_result}").is_empty());
         }
         assert!(ipv4_valid, "No valid IPv4 address");
         assert!(ttl_valid, "No valid TTL");
@@ -54,7 +54,7 @@ fn query_aaaa_record() {
         completed_clone.store(true, Ordering::SeqCst);
         let results = result.expect("Query failed");
         assert!(results.iter().count() > 0, "No AAAA records returned");
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
 
         let mut ipv6_valid = false;
         for aaaa_result in &results {
@@ -62,7 +62,7 @@ fn query_aaaa_record() {
                 ipv6_valid = true;
             }
             assert!(aaaa_result.ttl() >= 0);
-            assert!(!format!("{}", aaaa_result).is_empty());
+            assert!(!format!("{aaaa_result}").is_empty());
         }
         assert!(ipv6_valid, "No valid IPv6 address");
     });
@@ -88,13 +88,13 @@ fn query_caa_record() {
             "No CAA records with property returned"
         );
 
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
 
         for caa_result in &results {
             assert!(!caa_result.critical());
             assert!(!caa_result.property().is_empty());
             assert!(!caa_result.value().is_empty());
-            assert!(!format!("{}", caa_result).is_empty());
+            assert!(!format!("{caa_result}").is_empty());
         }
     });
 
@@ -116,7 +116,7 @@ fn query_cname_record() {
         let results = result.expect("Query failed");
         assert!(!results.hostname().is_empty(), "No CNAME hostname returned");
         assert!(results.aliases().count() > 0, "No aliases returned");
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -140,12 +140,12 @@ fn query_mx_record() {
             "No MX records with host returned"
         );
 
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
 
         for mx_result in &results {
             assert!(!mx_result.host().is_empty());
             assert!(mx_result.priority() > 0);
-            assert!(!format!("{}", mx_result).is_empty());
+            assert!(!format!("{mx_result}").is_empty());
         }
     });
 
@@ -167,7 +167,7 @@ fn query_naptr_record() {
         let results = result.expect("Query failed");
         assert!(results.iter().count() > 0, "No NAPTR records returned");
 
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
 
         for naptr_result in &results {
             assert!(!naptr_result.flags().is_empty());
@@ -176,7 +176,7 @@ fn query_naptr_record() {
             assert!(!naptr_result.replacement_pattern().is_empty());
             let _order = naptr_result.order();
             let _preference = naptr_result.preference();
-            assert!(!format!("{}", naptr_result).is_empty());
+            assert!(!format!("{naptr_result}").is_empty());
         }
     });
 
@@ -198,7 +198,7 @@ fn query_ns_record() {
         let results = result.expect("Query failed");
         assert!(!results.hostname().is_empty(), "No NS hostname returned");
         assert!(results.aliases().count() > 0, "No NS aliases returned");
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -219,7 +219,7 @@ fn query_ptr_record() {
         let results = result.expect("Query failed");
         assert!(!results.hostname().is_empty(), "No PTR hostname returned");
         assert!(results.aliases().count() > 0, "No PTR aliases returned");
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -245,7 +245,7 @@ fn query_soa_record() {
         assert!(soa.retry() > 0);
         assert!(soa.expire() > 0);
         assert!(soa.min_ttl() > 0);
-        assert!(!format!("{}", soa).is_empty());
+        assert!(!format!("{soa}").is_empty());
     });
 
     process_channel(&mut channel, Duration::from_secs(3));
@@ -271,14 +271,14 @@ fn query_srv_record() {
             "No SRV records with host and port returned"
         );
 
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
 
         for srv_result in &results {
             assert!(!srv_result.host().is_empty());
             assert!(srv_result.port() > 0);
             let _priority = srv_result.priority();
             let _weight = srv_result.weight();
-            assert!(!format!("{}", srv_result).is_empty());
+            assert!(!format!("{srv_result}").is_empty());
         }
     });
 
@@ -303,12 +303,12 @@ fn query_txt_record() {
             "No TXT records with text returned"
         );
 
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
 
         for txt_result in &results {
             assert!(!txt_result.text().is_empty());
             let _record_start = txt_result.record_start();
-            assert!(!format!("{}", txt_result).is_empty());
+            assert!(!format!("{txt_result}").is_empty());
         }
     });
 
@@ -329,14 +329,14 @@ fn query_uri_record() {
         completed_clone.store(true, Ordering::SeqCst);
         let results = result.expect("Query failed");
         assert!(results.iter().count() > 0, "No URI records returned");
-        assert!(!format!("{}", results).is_empty());
+        assert!(!format!("{results}").is_empty());
 
         for uri_result in &results {
             assert!(!uri_result.uri().is_empty());
             let _priority = uri_result.priority();
             let _weight = uri_result.weight();
             assert!(uri_result.ttl() >= 0);
-            assert!(!format!("{}", uri_result).is_empty());
+            assert!(!format!("{uri_result}").is_empty());
         }
     });
 

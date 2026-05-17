@@ -60,6 +60,9 @@ impl ServerFailoverOptions {
 
 /// Used to configure the behaviour of the name resolver.
 pub struct Options {
+    // The `ares_` prefix mirrors the FFI type name; the apparent name overlap
+    // with the struct is deliberate.
+    #[allow(clippy::struct_field_names)]
     pub(super) ares_options: c_ares_sys::ares_options,
     pub(super) optmask: c_int,
     pub(super) domains: Vec<CString>,
@@ -544,7 +547,7 @@ mod tests {
     #[test]
     fn debug_options() {
         let options = Options::new();
-        let debug = format!("{:?}", options);
+        let debug = format!("{options:?}");
         assert!(debug.contains("Options"));
     }
 
@@ -552,7 +555,7 @@ mod tests {
     #[cfg(cares1_29)]
     fn debug_server_failover_options() {
         let opts = ServerFailoverOptions::new();
-        let debug = format!("{:?}", opts);
+        let debug = format!("{opts:?}");
         assert!(debug.contains("ServerFailoverOptions"));
     }
 

@@ -98,7 +98,7 @@ mod tests {
             node: Some("example.com".to_string()),
             service: Some("https".to_string()),
         };
-        let debug = format!("{:?}", result);
+        let debug = format!("{result:?}");
         assert!(debug.contains("example.com"));
         assert!(debug.contains("https"));
     }

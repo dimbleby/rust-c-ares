@@ -64,7 +64,7 @@ mod tests {
     fn display_io_error() {
         let io_err = io::Error::new(io::ErrorKind::NotFound, "file not found");
         let err = Error::Io(io_err);
-        let display = format!("{}", err);
+        let display = format!("{err}");
         assert!(display.contains("file not found"));
     }
 
@@ -72,7 +72,7 @@ mod tests {
     fn display_ares_error() {
         let ares_err = c_ares::Error::ENODATA;
         let err = Error::Ares(ares_err);
-        let display = format!("{}", err);
+        let display = format!("{err}");
         assert!(!display.is_empty());
     }
 
@@ -108,7 +108,7 @@ mod tests {
     fn debug_format() {
         let io_err = io::Error::other("test");
         let err = Error::Io(io_err);
-        let debug = format!("{:?}", err);
+        let debug = format!("{err:?}");
         assert!(debug.contains("Io"));
     }
 }

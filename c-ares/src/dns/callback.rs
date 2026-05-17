@@ -15,14 +15,15 @@ pub(crate) unsafe extern "C" fn dnsrec_callback<F>(
 {
     let handler = unsafe { Box::from_raw(arg.cast::<F>()) };
 
-    panic::catch(|| match Error::try_from(status) {
-        Ok(err) => handler(Err(err)),
-        Err(()) => {
+    panic::catch(|| {
+        if let Ok(err) = Error::try_from(status) {
+            handler(Err(err));
+        } else {
             // We wrap in ManuallyDrop so we don't call ares_dns_record_destroy
             // — c-ares owns this record and will free it after we return.
             let rec = unsafe { DnsRecord::from_raw(dnsrec.cast_mut()) };
             let rec = ManuallyDrop::new(rec);
-            handler(Ok(&rec))
+            handler(Ok(&rec));
         }
     });
 }

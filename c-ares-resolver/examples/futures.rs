@@ -25,6 +25,6 @@ fn main() {
                 println!("host {}, priority {}", result.host(), result.priority());
             }
         }
-        Err(e) => println!("MX lookup failed with error '{}'", e),
+        Err(e) => println!("MX lookup failed with error '{e}'"),
     }
 }

@@ -27,7 +27,11 @@ impl TXTResults {
     pub fn parse_from(data: &[u8]) -> Result<TXTResults> {
         let mut txt_reply: *mut c_ares_sys::ares_txt_ext = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_txt_reply_ext(data.as_ptr(), data.len() as c_int, &mut txt_reply)
+            c_ares_sys::ares_parse_txt_reply_ext(
+                data.as_ptr(),
+                data.len() as c_int,
+                &raw mut txt_reply,
+            )
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let result = TXTResults::new(txt_reply);
@@ -57,7 +61,7 @@ impl fmt::Display for TXTResults {
 }
 
 /// Iterator of `TXTResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct TXTResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_txt_ext>,
 }
@@ -170,7 +174,7 @@ mod tests {
     fn debug_txt_result() {
         let results = TXTResults::parse_from(ONE_TXT_RECORD).unwrap();
         let result = results.iter().next().unwrap();
-        let debug = format!("{:?}", result);
+        let debug = format!("{result:?}");
         assert!(debug.contains("TXTResult"));
         assert!(debug.contains("record_start"));
         assert!(debug.contains("text"));
@@ -180,7 +184,7 @@ mod tests {
     fn debug_txt_results_iter() {
         let results = TXTResults::parse_from(ONE_TXT_RECORD).unwrap();
         let iter = results.iter();
-        let debug = format!("{:?}", iter);
+        let debug = format!("{iter:?}");
         assert!(debug.contains("TXTResultsIter"));
     }
 }

@@ -26,7 +26,7 @@ impl CAAResults {
     pub fn parse_from(data: &[u8]) -> Result<CAAResults> {
         let mut caa_reply: *mut c_ares_sys::ares_caa_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_caa_reply(data.as_ptr(), data.len() as c_int, &mut caa_reply)
+            c_ares_sys::ares_parse_caa_reply(data.as_ptr(), data.len() as c_int, &raw mut caa_reply)
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let caa_result = CAAResults::new(caa_reply);
@@ -56,7 +56,7 @@ impl fmt::Display for CAAResults {
 }
 
 /// Iterator of `CAAResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct CAAResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_caa_reply>,
 }
@@ -176,7 +176,7 @@ mod tests {
     fn debug_caa_result() {
         let results = CAAResults::parse_from(ONE_CAA_RECORD).unwrap();
         let result = results.iter().next().unwrap();
-        let debug = format!("{:?}", result);
+        let debug = format!("{result:?}");
         assert!(debug.contains("CAAResult"));
         assert!(debug.contains("issue"));
         assert!(debug.contains("critical"));
@@ -186,7 +186,7 @@ mod tests {
     fn debug_caa_results_iter() {
         let results = CAAResults::parse_from(ONE_CAA_RECORD).unwrap();
         let iter = results.iter();
-        let debug = format!("{:?}", iter);
+        let debug = format!("{iter:?}");
         assert!(debug.contains("CAAResultsIter"));
     }
 }

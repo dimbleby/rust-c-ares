@@ -15,7 +15,7 @@ pub fn channel() -> Channel {
     let mut options = Options::new();
     options
         .set_flags(Flags::STAYOPEN)
-        .set_timeout(Duration::from_millis(2000))
+        .set_timeout(Duration::from_secs(2))
         .set_tries(2);
 
     let mut channel = Channel::with_options(options).expect("Failed to create channel");

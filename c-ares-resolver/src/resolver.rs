@@ -61,7 +61,7 @@ impl Options {
 
     /// Set the number of dots which must be present in a domain name for it to be queried for "as
     /// is" prior to querying for it with the default domain extensions appended.  The default
-    /// value is 1 unless set otherwise by resolv.conf or the RES_OPTIONS environment variable.
+    /// value is 1 unless set otherwise by resolv.conf or the `RES_OPTIONS` environment variable.
     pub fn set_ndots(&mut self, ndots: u32) -> &mut Self {
         self.inner.set_ndots(ndots);
         self
@@ -338,7 +338,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::AResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_a(name, handler)
+        self.ares_channel.lock().unwrap().query_a(name, handler);
     }
 
     /// Search for the A records associated with `name`.
@@ -348,7 +348,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::AResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_a(name, handler)
+        self.ares_channel.lock().unwrap().search_a(name, handler);
     }
 
     /// Look up the AAAA records associated with `name`.
@@ -358,7 +358,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::AAAAResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_aaaa(name, handler)
+        self.ares_channel.lock().unwrap().query_aaaa(name, handler);
     }
 
     /// Search for the AAAA records associated with `name`.
@@ -368,7 +368,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::AAAAResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_aaaa(name, handler)
+        self.ares_channel.lock().unwrap().search_aaaa(name, handler);
     }
 
     /// Look up the CAA records associated with `name`.
@@ -378,7 +378,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::CAAResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_caa(name, handler)
+        self.ares_channel.lock().unwrap().query_caa(name, handler);
     }
 
     /// Search for the CAA records associated with `name`.
@@ -388,7 +388,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::CAAResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_caa(name, handler)
+        self.ares_channel.lock().unwrap().search_caa(name, handler);
     }
 
     /// Look up the CNAME records associated with `name`.
@@ -398,7 +398,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::CNameResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_cname(name, handler)
+        self.ares_channel.lock().unwrap().query_cname(name, handler);
     }
 
     /// Search for the CNAME records associated with `name`.
@@ -411,7 +411,7 @@ impl Resolver {
         self.ares_channel
             .lock()
             .unwrap()
-            .search_cname(name, handler)
+            .search_cname(name, handler);
     }
 
     /// Look up the MX records associated with `name`.
@@ -421,7 +421,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::MXResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_mx(name, handler)
+        self.ares_channel.lock().unwrap().query_mx(name, handler);
     }
 
     /// Search for the MX records associated with `name`.
@@ -431,7 +431,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::MXResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_mx(name, handler)
+        self.ares_channel.lock().unwrap().search_mx(name, handler);
     }
 
     /// Look up the NAPTR records associated with `name`.
@@ -441,7 +441,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::NAPTRResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_naptr(name, handler)
+        self.ares_channel.lock().unwrap().query_naptr(name, handler);
     }
 
     /// Search for the NAPTR records associated with `name`.
@@ -454,7 +454,7 @@ impl Resolver {
         self.ares_channel
             .lock()
             .unwrap()
-            .search_naptr(name, handler)
+            .search_naptr(name, handler);
     }
 
     /// Look up the NS records associated with `name`.
@@ -464,7 +464,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::NSResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_ns(name, handler)
+        self.ares_channel.lock().unwrap().query_ns(name, handler);
     }
 
     /// Search for the NS records associated with `name`.
@@ -474,7 +474,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::NSResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_ns(name, handler)
+        self.ares_channel.lock().unwrap().search_ns(name, handler);
     }
 
     /// Look up the PTR records associated with `name`.
@@ -484,7 +484,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::PTRResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_ptr(name, handler)
+        self.ares_channel.lock().unwrap().query_ptr(name, handler);
     }
 
     /// Search for the PTR records associated with `name`.
@@ -494,7 +494,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::PTRResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_ptr(name, handler)
+        self.ares_channel.lock().unwrap().search_ptr(name, handler);
     }
 
     /// Look up the SOA record associated with `name`.
@@ -504,7 +504,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::SOAResult>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_soa(name, handler)
+        self.ares_channel.lock().unwrap().query_soa(name, handler);
     }
 
     /// Search for the SOA record associated with `name`.
@@ -514,7 +514,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::SOAResult>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_soa(name, handler)
+        self.ares_channel.lock().unwrap().search_soa(name, handler);
     }
 
     /// Look up the SRV records associated with `name`.
@@ -524,7 +524,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::SRVResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_srv(name, handler)
+        self.ares_channel.lock().unwrap().query_srv(name, handler);
     }
 
     /// Search for the SRV records associated with `name`.
@@ -534,7 +534,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::SRVResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_srv(name, handler)
+        self.ares_channel.lock().unwrap().search_srv(name, handler);
     }
 
     /// Look up the TXT records associated with `name`.
@@ -544,7 +544,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::TXTResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_txt(name, handler)
+        self.ares_channel.lock().unwrap().query_txt(name, handler);
     }
 
     /// Search for the TXT records associated with `name`.
@@ -554,7 +554,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::TXTResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_txt(name, handler)
+        self.ares_channel.lock().unwrap().search_txt(name, handler);
     }
 
     /// Look up the URI records associated with `name`.
@@ -564,7 +564,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::URIResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().query_uri(name, handler)
+        self.ares_channel.lock().unwrap().query_uri(name, handler);
     }
 
     /// Search for the URI records associated with `name`.
@@ -574,7 +574,7 @@ impl Resolver {
     where
         F: FnOnce(c_ares::Result<c_ares::URIResults>) + Send + 'static,
     {
-        self.ares_channel.lock().unwrap().search_uri(name, handler)
+        self.ares_channel.lock().unwrap().search_uri(name, handler);
     }
 
     /// Perform a host query by address.
@@ -587,7 +587,7 @@ impl Resolver {
         self.ares_channel
             .lock()
             .unwrap()
-            .get_host_by_address(address, handler)
+            .get_host_by_address(address, handler);
     }
 
     /// Perform a host query by name.
@@ -613,7 +613,7 @@ impl Resolver {
         self.ares_channel
             .lock()
             .unwrap()
-            .get_name_info(address, flags, handler)
+            .get_name_info(address, flags, handler);
     }
 
     /// Initiate a host query by name and service.
@@ -631,7 +631,7 @@ impl Resolver {
         self.ares_channel
             .lock()
             .unwrap()
-            .get_addrinfo(name, service, hints, handler)
+            .get_addrinfo(name, service, hints, handler);
     }
 
     /// Initiate a single-question DNS query for `name`.  The class and type of the query are per
@@ -801,91 +801,91 @@ mod tests {
     fn options_set_timeout() {
         let mut options = Options::new();
         let result = options.set_timeout(std::time::Duration::from_secs(1));
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_tries() {
         let mut options = Options::new();
         let result = options.set_tries(3);
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_ndots() {
         let mut options = Options::new();
         let result = options.set_ndots(2);
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_udp_port() {
         let mut options = Options::new();
         let result = options.set_udp_port(5353);
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_tcp_port() {
         let mut options = Options::new();
         let result = options.set_tcp_port(5353);
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_domains() {
         let mut options = Options::new();
         let result = options.set_domains(["example.com", "test.com"]).unwrap();
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_lookups() {
         let mut options = Options::new();
         let result = options.set_lookups("bf").unwrap();
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_sock_send_buffer_size() {
         let mut options = Options::new();
         let result = options.set_sock_send_buffer_size(65536);
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_sock_receive_buffer_size() {
         let mut options = Options::new();
         let result = options.set_sock_receive_buffer_size(65536);
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_rotate() {
         let mut options = Options::new();
         let result = options.set_rotate();
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_no_rotate() {
         let mut options = Options::new();
         let result = options.set_no_rotate();
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_ednspsz() {
         let mut options = Options::new();
         let result = options.set_ednspsz(4096);
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
     fn options_set_resolvconf_path() {
         let mut options = Options::new();
         let result = options.set_resolvconf_path("/etc/resolv.conf").unwrap();
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
@@ -893,7 +893,7 @@ mod tests {
     fn options_set_hosts_path() {
         let mut options = Options::new();
         let result = options.set_hosts_path("/etc/hosts").unwrap();
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
@@ -901,7 +901,7 @@ mod tests {
     fn options_set_udp_max_queries() {
         let mut options = Options::new();
         let result = options.set_udp_max_queries(Some(100));
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
@@ -909,7 +909,7 @@ mod tests {
     fn options_set_max_timeout() {
         let mut options = Options::new();
         let result = options.set_max_timeout(std::time::Duration::from_secs(30));
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
@@ -917,7 +917,7 @@ mod tests {
     fn options_set_query_cache_max_ttl() {
         let mut options = Options::new();
         let result = options.set_query_cache_max_ttl(3600);
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
@@ -946,23 +946,23 @@ mod tests {
     #[test]
     fn resolver_set_local_ipv4() {
         let resolver = Resolver::new().unwrap();
-        let result = resolver.set_local_ipv4(Ipv4Addr::new(127, 0, 0, 1));
-        assert!(std::ptr::eq(result, &resolver));
+        let result = resolver.set_local_ipv4(Ipv4Addr::LOCALHOST);
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
     fn resolver_set_local_ipv6() {
         let resolver = Resolver::new().unwrap();
-        let ipv6 = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1);
+        let ipv6 = Ipv6Addr::LOCALHOST;
         let result = resolver.set_local_ipv6(ipv6);
-        assert!(std::ptr::eq(result, &resolver));
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
     fn resolver_set_local_device() {
         let resolver = Resolver::new().unwrap();
         let result = resolver.set_local_device("lo").unwrap();
-        assert!(std::ptr::eq(result, &resolver));
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
@@ -1021,7 +1021,7 @@ mod tests {
     fn resolver_set_server_state_callback() {
         let resolver = Resolver::new().unwrap();
         let result = resolver.set_server_state_callback(|_server, _success, _flags| {});
-        assert!(std::ptr::eq(result, &resolver));
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
@@ -1030,7 +1030,7 @@ mod tests {
         let mut options = Options::new();
         let failover_opts = c_ares::ServerFailoverOptions::new();
         let result = options.set_server_failover_options(&failover_opts);
-        assert!(std::ptr::eq(result, &options));
+        assert!(std::ptr::eq(result, &raw const options));
     }
 
     #[test]
@@ -1091,14 +1091,14 @@ mod tests {
     #[test]
     fn debug_resolver_options() {
         let options = Options::new();
-        let debug = format!("{:?}", options);
+        let debug = format!("{options:?}");
         assert!(debug.contains("Options"));
     }
 
     #[test]
     fn debug_resolver() {
         let resolver = Resolver::new().unwrap();
-        let debug = format!("{:?}", resolver);
+        let debug = format!("{resolver:?}");
         assert!(debug.contains("Resolver"));
     }
 }

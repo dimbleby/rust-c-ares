@@ -37,7 +37,7 @@ impl AAAAResults {
                 data.len() as c_int,
                 ptr::null_mut(),
                 addr6ttls.as_mut_ptr(),
-                &mut naddr6ttls,
+                &raw mut naddr6ttls,
             )
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
@@ -188,7 +188,7 @@ mod tests {
     fn debug_aaaa_result() {
         let results = AAAAResults::parse_from(ONE_AAAA_RECORD).unwrap();
         let result = results.iter().next().unwrap();
-        let debug = format!("{:?}", result);
+        let debug = format!("{result:?}");
         assert!(debug.contains("AAAAResult"));
         assert!(debug.contains("2001:db8::1"));
         assert!(debug.contains("300"));
@@ -198,7 +198,7 @@ mod tests {
     fn debug_aaaa_results_iter() {
         let results = AAAAResults::parse_from(ONE_AAAA_RECORD).unwrap();
         let iter = results.iter();
-        let debug = format!("{:?}", iter);
+        let debug = format!("{iter:?}");
         assert!(debug.contains("AAAAResultsIter"));
     }
 }

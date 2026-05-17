@@ -6,7 +6,7 @@ use c_ares_resolver::Resolver;
 fn print_a_results(result: &c_ares::Result<c_ares::AResults>) {
     match *result {
         Err(ref e) => {
-            println!("Query failed with error '{}'", e);
+            println!("Query failed with error '{e}'");
         }
         Ok(ref a_results) => {
             println!("Successful A lookup...");

@@ -120,7 +120,7 @@ impl FromStr for DnsRecordType {
     fn from_str(s: &str) -> Result<Self> {
         let c_str = CString::new(s).map_err(|_| Error::EBADSTR)?;
         let mut qtype = c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_A;
-        let ok = unsafe { c_ares_sys::ares_dns_rec_type_fromstr(&mut qtype, c_str.as_ptr()) };
+        let ok = unsafe { c_ares_sys::ares_dns_rec_type_fromstr(&raw mut qtype, c_str.as_ptr()) };
         if ok == c_ares_sys::ares_bool_t::ARES_TRUE {
             Ok(DnsRecordType::from(qtype))
         } else {
@@ -181,7 +181,7 @@ impl FromStr for DnsCls {
     fn from_str(s: &str) -> Result<Self> {
         let c_str = CString::new(s).map_err(|_| Error::EBADSTR)?;
         let mut qclass = c_ares_sys::ares_dns_class_t::ARES_CLASS_IN;
-        let ok = unsafe { c_ares_sys::ares_dns_class_fromstr(&mut qclass, c_str.as_ptr()) };
+        let ok = unsafe { c_ares_sys::ares_dns_class_fromstr(&raw mut qclass, c_str.as_ptr()) };
         if ok == c_ares_sys::ares_bool_t::ARES_TRUE {
             Ok(DnsCls::from(qclass))
         } else {

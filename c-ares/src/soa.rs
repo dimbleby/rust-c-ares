@@ -18,7 +18,7 @@ impl SOAResult {
     pub fn parse_from(data: &[u8]) -> Result<SOAResult> {
         let mut soa_reply: *mut c_ares_sys::ares_soa_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_soa_reply(data.as_ptr(), data.len() as c_int, &mut soa_reply)
+            c_ares_sys::ares_parse_soa_reply(data.as_ptr(), data.len() as c_int, &raw mut soa_reply)
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let result = SOAResult::new(soa_reply);

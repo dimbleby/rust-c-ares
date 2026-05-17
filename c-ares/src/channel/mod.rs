@@ -68,18 +68,21 @@ type PendingWriteCallback = dyn Fn() + Send + Sync + 'static;
 
 /// A channel for name service lookups.
 pub struct Channel {
+    // The `ares_` prefix mirrors the FFI type name; the apparent name overlap
+    // with the struct is deliberate.
+    #[allow(clippy::struct_field_names)]
     ares_channel: c_ares_sys::ares_channel,
 
     // For ownership only.
-    _socket_state_callback: Option<Arc<SocketStateCallback>>,
+    socket_state_callback: Option<Arc<SocketStateCallback>>,
 
     // For ownership only.
     #[cfg(cares1_29)]
-    _server_state_callback: Option<Arc<ServerStateCallback>>,
+    server_state_callback: Option<Arc<ServerStateCallback>>,
 
     // For ownership only.
     #[cfg(cares1_34)]
-    _pending_write_callback: Option<Arc<PendingWriteCallback>>,
+    pending_write_callback: Option<Arc<PendingWriteCallback>>,
 }
 
 impl Channel {
@@ -133,24 +136,28 @@ impl Channel {
 
         // Likewise for lookups.
         if let Some(c_lookup) = &options.lookups {
-            options.ares_options.lookups = c_lookup.as_ptr().cast_mut()
+            options.ares_options.lookups = c_lookup.as_ptr().cast_mut();
         }
 
         // And the resolvconf_path.
         if let Some(c_resolvconf_path) = &options.resolvconf_path {
-            options.ares_options.resolvconf_path = c_resolvconf_path.as_ptr().cast_mut()
+            options.ares_options.resolvconf_path = c_resolvconf_path.as_ptr().cast_mut();
         }
 
         // And the hosts_path.
         #[cfg(cares1_19)]
         if let Some(c_hosts_path) = &options.hosts_path {
-            options.ares_options.hosts_path = c_hosts_path.as_ptr().cast_mut()
+            options.ares_options.hosts_path = c_hosts_path.as_ptr().cast_mut();
         }
 
         // Initialize the channel.
         let mut ares_channel = ptr::null_mut();
         let channel_rc = unsafe {
-            c_ares_sys::ares_init_options(&mut ares_channel, &options.ares_options, options.optmask)
+            c_ares_sys::ares_init_options(
+                &raw mut ares_channel,
+                &raw const options.ares_options,
+                options.optmask,
+            )
         };
         if channel_rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let _lock = ARES_LIBRARY_LOCK.lock().unwrap();
@@ -160,11 +167,11 @@ impl Channel {
 
         let channel = Channel {
             ares_channel,
-            _socket_state_callback: options.socket_state_callback,
+            socket_state_callback: options.socket_state_callback,
             #[cfg(cares1_29)]
-            _server_state_callback: None,
+            server_state_callback: None,
             #[cfg(cares1_34)]
-            _pending_write_callback: None,
+            pending_write_callback: None,
         };
         Ok(channel)
     }
@@ -190,28 +197,28 @@ impl Channel {
         }
 
         let mut ares_channel = ptr::null_mut();
-        let rc = unsafe { c_ares_sys::ares_dup(&mut ares_channel, self.ares_channel) };
+        let rc = unsafe { c_ares_sys::ares_dup(&raw mut ares_channel, self.ares_channel) };
         if rc != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let _lock = ARES_LIBRARY_LOCK.lock().unwrap();
             unsafe { c_ares_sys::ares_library_cleanup() }
             return Err(Error::from(rc));
         }
 
-        let socket_state_callback = self._socket_state_callback.as_ref().cloned();
+        let socket_state_callback = self.socket_state_callback.clone();
 
         #[cfg(cares1_29)]
-        let server_state_callback = self._server_state_callback.as_ref().cloned();
+        let server_state_callback = self.server_state_callback.clone();
 
         #[cfg(cares1_34)]
-        let pending_write_callback = self._pending_write_callback.as_ref().cloned();
+        let pending_write_callback = self.pending_write_callback.clone();
 
         let channel = Channel {
             ares_channel,
-            _socket_state_callback: socket_state_callback,
+            socket_state_callback,
             #[cfg(cares1_29)]
-            _server_state_callback: server_state_callback,
+            server_state_callback,
             #[cfg(cares1_34)]
-            _pending_write_callback: pending_write_callback,
+            pending_write_callback,
         };
         Ok(channel)
     }
@@ -343,7 +350,7 @@ impl Channel {
     pub fn set_local_ipv6(&mut self, ipv6: Ipv6Addr) -> &mut Self {
         let in6_addr = ipv6_as_in6_addr(&ipv6);
         unsafe {
-            c_ares_sys::ares_set_local_ip6(self.ares_channel, ptr::from_ref(&in6_addr).cast())
+            c_ares_sys::ares_set_local_ip6(self.ares_channel, ptr::from_ref(&in6_addr).cast());
         }
         self
     }
@@ -402,9 +409,9 @@ impl Channel {
                 self.ares_channel,
                 Some(server_state_callback::<F>),
                 data,
-            )
+            );
         }
-        self._server_state_callback = Some(boxed_callback);
+        self.server_state_callback = Some(boxed_callback);
         self
     }
 
@@ -422,9 +429,9 @@ impl Channel {
                 self.ares_channel,
                 Some(pending_write_callback::<F>),
                 data,
-            )
+            );
         }
-        self._pending_write_callback = Some(boxed_callback);
+        self.pending_write_callback = Some(boxed_callback);
         self
     }
 
@@ -710,6 +717,9 @@ impl Channel {
     /// Perform a host query by address.
     ///
     /// On completion, `handler` is called with the result.
+    // `in_addr` and `in6_addr` mirror the C struct names; the apparent
+    // similarity is deliberate.
+    #[allow(clippy::similar_names)]
     pub fn get_host_by_address<F>(&mut self, address: &IpAddr, handler: F)
     where
         F: FnOnce(Result<&HostResults>) + Send + 'static,
@@ -739,7 +749,7 @@ impl Channel {
                 family as i32,
                 Some(get_host_callback::<F>),
                 c_arg.cast(),
-            )
+            );
         }
         panic::propagate();
     }
@@ -763,7 +773,7 @@ impl Channel {
                 family as i32,
                 Some(get_host_callback::<F>),
                 c_arg.cast(),
-            )
+            );
         }
         panic::propagate();
     }
@@ -802,7 +812,7 @@ impl Channel {
                 flags.bits(),
                 Some(get_name_info_callback::<F>),
                 c_arg.cast(),
-            )
+            );
         }
         panic::propagate();
     }
@@ -837,7 +847,7 @@ impl Channel {
                 self.ares_channel,
                 c_name.as_ptr(),
                 c_service.as_ref().map_or(ptr::null(), |s| s.as_ptr()),
-                &c_hints,
+                &raw const c_hints,
                 Some(get_addrinfo_callback::<F>),
                 c_arg.cast(),
             );
@@ -927,7 +937,7 @@ impl Channel {
                 dnsrec.as_raw(),
                 Some(dnsrec_callback::<F>),
                 c_arg.cast(),
-                &mut qid,
+                &raw mut qid,
             )
         };
         panic::propagate();
@@ -984,7 +994,7 @@ impl Channel {
                 query_type.into(),
                 Some(dnsrec_callback::<F>),
                 c_arg.cast(),
-                &mut qid,
+                &raw mut qid,
             )
         };
         panic::propagate();
@@ -1060,6 +1070,9 @@ impl Channel {
             Some(d) => {
                 maxtv = c_ares_sys::timeval {
                     tv_sec: d.as_secs() as _,
+                    // `tv_usec` is `i32` on some targets and `i64` on others;
+                    // `u32 -> i32` cannot use `From`/`Into`.
+                    #[allow(clippy::cast_lossless, clippy::cast_possible_wrap)]
                     tv_usec: d.subsec_micros() as _,
                 };
                 &mut maxtv
@@ -1070,7 +1083,7 @@ impl Channel {
             tv_sec: 0,
             tv_usec: 0,
         };
-        let result = unsafe { c_ares_sys::ares_timeout(self.ares_channel, maxtv_ptr, &mut tv) };
+        let result = unsafe { c_ares_sys::ares_timeout(self.ares_channel, maxtv_ptr, &raw mut tv) };
         unsafe { result.as_ref() }
             .map(|tv| Duration::new(tv.tv_sec as u64, (tv.tv_usec as u32) * 1000))
     }
@@ -1153,7 +1166,7 @@ unsafe extern "C" fn server_state_callback<F>(
             server,
             success != c_ares_sys::ares_bool_t::ARES_FALSE,
             ServerStateFlags::from_bits_truncate(flags),
-        )
+        );
     });
 }
 
@@ -1243,13 +1256,13 @@ mod tests {
     #[test]
     fn channel_set_local_ipv4() {
         let mut channel = Channel::new().unwrap();
-        channel.set_local_ipv4(Ipv4Addr::new(0, 0, 0, 0));
+        channel.set_local_ipv4(Ipv4Addr::UNSPECIFIED);
     }
 
     #[test]
     fn channel_set_local_ipv6() {
         let mut channel = Channel::new().unwrap();
-        channel.set_local_ipv6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0));
+        channel.set_local_ipv6(Ipv6Addr::UNSPECIFIED);
     }
 
     #[test]
@@ -1432,7 +1445,7 @@ mod tests {
     #[test]
     fn debug_channel() {
         let channel = Channel::new().unwrap();
-        let debug = format!("{:?}", channel);
+        let debug = format!("{channel:?}");
         assert!(debug.contains("Channel"));
     }
 

@@ -26,7 +26,11 @@ impl NAPTRResults {
     pub fn parse_from(data: &[u8]) -> Result<NAPTRResults> {
         let mut naptr_reply: *mut c_ares_sys::ares_naptr_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_naptr_reply(data.as_ptr(), data.len() as c_int, &mut naptr_reply)
+            c_ares_sys::ares_parse_naptr_reply(
+                data.as_ptr(),
+                data.len() as c_int,
+                &raw mut naptr_reply,
+            )
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let naptr_result = NAPTRResults::new(naptr_reply);
@@ -56,7 +60,7 @@ impl fmt::Display for NAPTRResults {
 }
 
 /// Iterator of `NAPTRResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct NAPTRResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_naptr_reply>,
 }
@@ -197,7 +201,7 @@ mod tests {
     fn debug_naptr_result() {
         let results = NAPTRResults::parse_from(ONE_NAPTR_RECORD).unwrap();
         let result = results.iter().next().unwrap();
-        let debug = format!("{:?}", result);
+        let debug = format!("{result:?}");
         assert!(debug.contains("NAPTRResult"));
         assert!(debug.contains("SIP+D2T"));
         assert!(debug.contains("100"));
@@ -207,7 +211,7 @@ mod tests {
     fn debug_naptr_results_iter() {
         let results = NAPTRResults::parse_from(ONE_NAPTR_RECORD).unwrap();
         let iter = results.iter();
-        let debug = format!("{:?}", iter);
+        let debug = format!("{iter:?}");
         assert!(debug.contains("NAPTRResultsIter"));
     }
 }

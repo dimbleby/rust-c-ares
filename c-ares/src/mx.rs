@@ -26,7 +26,7 @@ impl MXResults {
     pub fn parse_from(data: &[u8]) -> Result<MXResults> {
         let mut mx_reply: *mut c_ares_sys::ares_mx_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_mx_reply(data.as_ptr(), data.len() as c_int, &mut mx_reply)
+            c_ares_sys::ares_parse_mx_reply(data.as_ptr(), data.len() as c_int, &raw mut mx_reply)
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let result = MXResults::new(mx_reply);
@@ -56,7 +56,7 @@ impl fmt::Display for MXResults {
 }
 
 /// Iterator of `MXResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct MXResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_mx_reply>,
 }
@@ -168,7 +168,7 @@ mod tests {
     fn debug_mx_result() {
         let results = MXResults::parse_from(ONE_MX_RECORD).unwrap();
         let result = results.iter().next().unwrap();
-        let debug = format!("{:?}", result);
+        let debug = format!("{result:?}");
         assert!(debug.contains("MXResult"));
         assert!(debug.contains("mail.example.com"));
         assert!(debug.contains("10"));
@@ -178,7 +178,7 @@ mod tests {
     fn debug_mx_results_iter() {
         let results = MXResults::parse_from(ONE_MX_RECORD).unwrap();
         let iter = results.iter();
-        let debug = format!("{:?}", iter);
+        let debug = format!("{iter:?}");
         assert!(debug.contains("MXResultsIter"));
     }
 }

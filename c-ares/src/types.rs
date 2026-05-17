@@ -90,7 +90,9 @@ mod tests {
 
     #[test]
     fn socket_bad_is_defined() {
-        let _bad = SOCKET_BAD;
+        let bad = SOCKET_BAD;
+        // Confirm we can use it (avoids a no-op binding warning).
+        assert_eq!(bad, SOCKET_BAD);
     }
 
     #[test]
@@ -116,7 +118,7 @@ mod tests {
     #[test]
     fn address_family_debug() {
         let af = AddressFamily::INET6;
-        let debug = format!("{:?}", af);
+        let debug = format!("{af:?}");
         assert!(debug.contains("INET6"));
     }
 

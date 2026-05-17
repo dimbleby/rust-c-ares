@@ -364,7 +364,7 @@ impl BlockingResolver {
     pub fn send_dnsrec(&self, dnsrec: &c_ares::DnsRecord) -> c_ares::Result<c_ares::DnsRecord> {
         let (tx, rx) = mpsc::sync_channel(1);
         self.inner.send_dnsrec(dnsrec, move |result| {
-            let _ = tx.send(result.and_then(|rec| rec.try_clone()));
+            let _ = tx.send(result.and_then(c_ares::DnsRecord::try_clone));
         })?;
         rx.recv().unwrap()
     }
@@ -397,7 +397,7 @@ impl BlockingResolver {
         let (tx, rx) = mpsc::sync_channel(1);
         self.inner
             .query_dnsrec(name, dns_class, query_type, move |result| {
-                let _ = tx.send(result.and_then(|rec| rec.try_clone()));
+                let _ = tx.send(result.and_then(c_ares::DnsRecord::try_clone));
             })?;
         rx.recv().unwrap()
     }
@@ -424,7 +424,7 @@ impl BlockingResolver {
     pub fn search_dnsrec(&self, dnsrec: &c_ares::DnsRecord) -> c_ares::Result<c_ares::DnsRecord> {
         let (tx, rx) = mpsc::sync_channel(1);
         self.inner.search_dnsrec(dnsrec, move |result| {
-            let _ = tx.send(result.and_then(|rec| rec.try_clone()));
+            let _ = tx.send(result.and_then(c_ares::DnsRecord::try_clone));
         })?;
         rx.recv().unwrap()
     }
@@ -479,9 +479,7 @@ mod tests {
     #[test]
     fn blocking_resolver_with_custom_options() {
         let mut options = Options::new();
-        options
-            .set_timeout(Duration::from_millis(2000))
-            .set_tries(2);
+        options.set_timeout(Duration::from_secs(2)).set_tries(2);
         let resolver = BlockingResolver::with_options(options);
         assert!(resolver.is_ok());
     }
@@ -489,23 +487,23 @@ mod tests {
     #[test]
     fn blocking_resolver_set_local_ipv4() {
         let resolver = BlockingResolver::new().unwrap();
-        let result = resolver.set_local_ipv4(Ipv4Addr::new(127, 0, 0, 1));
-        assert!(std::ptr::eq(result, &resolver));
+        let result = resolver.set_local_ipv4(Ipv4Addr::LOCALHOST);
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
     fn blocking_resolver_set_local_ipv6() {
         let resolver = BlockingResolver::new().unwrap();
-        let ipv6 = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1);
+        let ipv6 = Ipv6Addr::LOCALHOST;
         let result = resolver.set_local_ipv6(ipv6);
-        assert!(std::ptr::eq(result, &resolver));
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
     fn blocking_resolver_set_local_device() {
         let resolver = BlockingResolver::new().unwrap();
         let result = resolver.set_local_device("lo").unwrap();
-        assert!(std::ptr::eq(result, &resolver));
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
@@ -559,13 +557,13 @@ mod tests {
     fn blocking_resolver_set_server_state_callback() {
         let resolver = BlockingResolver::new().unwrap();
         let result = resolver.set_server_state_callback(|_server, _success, _flags| {});
-        assert!(std::ptr::eq(result, &resolver));
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
     fn debug_blocking_resolver() {
         let resolver = BlockingResolver::new().unwrap();
-        let debug = format!("{:?}", resolver);
+        let debug = format!("{resolver:?}");
         assert!(debug.contains("BlockingResolver"));
     }
 }

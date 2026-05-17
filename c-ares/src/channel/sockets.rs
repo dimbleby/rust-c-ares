@@ -31,7 +31,7 @@ impl Sockets {
 /// Iterator for sockets of interest to `c-ares`.
 ///
 /// Iterator items are `(socket, readable, writable)`.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct SocketsIter<'a> {
     next: usize,
     sockets: &'a Sockets,
@@ -82,7 +82,6 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::clone_on_copy)]
     fn sockets_iter_clone() {
         let channel = Channel::new().unwrap();
         let sockets = channel.sockets();
@@ -139,7 +138,7 @@ mod tests {
     fn sockets_debug() {
         let channel = Channel::new().unwrap();
         let sockets = channel.sockets();
-        let debug_str = format!("{:?}", sockets);
+        let debug_str = format!("{sockets:?}");
         assert!(debug_str.contains("Sockets"));
     }
 
@@ -148,7 +147,7 @@ mod tests {
         let channel = Channel::new().unwrap();
         let sockets = channel.sockets();
         let iter = sockets.iter();
-        let debug_str = format!("{:?}", iter);
+        let debug_str = format!("{iter:?}");
         assert!(debug_str.contains("SocketsIter"));
     }
 

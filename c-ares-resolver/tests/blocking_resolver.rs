@@ -337,7 +337,7 @@ mod resolver_configuration {
     #[test]
     fn set_local_addresses() {
         let resolver = BlockingResolver::new().unwrap();
-        resolver.set_local_ipv4(Ipv4Addr::new(0, 0, 0, 0));
+        resolver.set_local_ipv4(Ipv4Addr::UNSPECIFIED);
         resolver.set_local_ipv6("::".parse().unwrap());
     }
 }

@@ -6,7 +6,9 @@ use crate::error::{Error, Result};
 use crate::string::AresBuf;
 use crate::utils::{dns_string_as_str, status_to_result};
 
-use super::enums::*;
+use super::enums::{
+    DnsCls, DnsFlags, DnsOpcode, DnsParseFlags, DnsRcode, DnsRecordType, DnsSection,
+};
 use super::rr::DnsRr;
 
 /// An owned DNS record (message), wrapping `ares_dns_record_t`.
@@ -44,7 +46,7 @@ impl DnsRecord {
     pub fn parse(data: &[u8], flags: DnsParseFlags) -> Result<DnsRecord> {
         let mut dnsrec: *mut c_ares_sys::ares_dns_record_t = ptr::null_mut();
         let status = unsafe {
-            c_ares_sys::ares_dns_parse(data.as_ptr(), data.len(), flags.bits(), &mut dnsrec)
+            c_ares_sys::ares_dns_parse(data.as_ptr(), data.len(), flags.bits(), &raw mut dnsrec)
         };
         status_to_result(status)?;
         Ok(DnsRecord { dnsrec })
@@ -89,9 +91,9 @@ impl DnsRecord {
             c_ares_sys::ares_dns_record_query_get(
                 self.dnsrec,
                 idx,
-                &mut name,
-                &mut qtype,
-                &mut qclass,
+                &raw mut name,
+                &raw mut qtype,
+                &raw mut qclass,
             )
         };
         status_to_result(status)?;
@@ -146,7 +148,7 @@ impl DnsRecord {
         let mut dnsrec: *mut c_ares_sys::ares_dns_record_t = ptr::null_mut();
         let status = unsafe {
             c_ares_sys::ares_dns_record_create(
-                &mut dnsrec,
+                &raw mut dnsrec,
                 id,
                 flags.bits(),
                 opcode.into(),
@@ -225,7 +227,7 @@ impl DnsRecord {
         let mut rr_out: *mut c_ares_sys::ares_dns_rr_t = ptr::null_mut();
         let status = unsafe {
             c_ares_sys::ares_dns_record_rr_add(
-                &mut rr_out,
+                &raw mut rr_out,
                 self.dnsrec,
                 section.into(),
                 c_name.as_ptr(),
@@ -268,7 +270,8 @@ impl DnsRecord {
     pub fn write(&self) -> Result<AresBuf> {
         let mut buf: *mut core::ffi::c_uchar = ptr::null_mut();
         let mut buf_len: usize = 0;
-        let status = unsafe { c_ares_sys::ares_dns_write(self.dnsrec, &mut buf, &mut buf_len) };
+        let status =
+            unsafe { c_ares_sys::ares_dns_write(self.dnsrec, &raw mut buf, &raw mut buf_len) };
         status_to_result(status)?;
         Ok(AresBuf::new(buf, buf_len))
     }
@@ -855,7 +858,7 @@ mod tests {
     fn debug_dns_record() {
         let rec =
             DnsRecord::new(42, DnsFlags::RD, DnsOpcode::Query, DnsRcode::NoError).expect("create");
-        let debug = format!("{:?}", rec);
+        let debug = format!("{rec:?}");
         assert!(debug.contains("DnsRecord"));
         assert!(debug.contains("42"));
     }

@@ -374,7 +374,7 @@ fn query_dnsrec_cname_record() {
                     Err(Error::ENODATA) => {
                         // query_dnsrec correctly translated NOERROR + 0 answers
                     }
-                    Err(e) => panic!("Unexpected error: {}", e),
+                    Err(e) => panic!("Unexpected error: {e}"),
                 }
             },
         )

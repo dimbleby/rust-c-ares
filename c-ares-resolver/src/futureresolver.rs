@@ -416,7 +416,7 @@ impl FutureResolver {
     ) -> c_ares::Result<CAresFuture<c_ares::DnsRecord>> {
         let (sender, receiver) = futures_channel::oneshot::channel();
         self.inner.send_dnsrec(dnsrec, |result| {
-            let _ = sender.send(result.and_then(|rec| rec.try_clone()));
+            let _ = sender.send(result.and_then(c_ares::DnsRecord::try_clone));
         })?;
         let resolver = Arc::clone(&self.inner);
         Ok(CAresFuture::new(receiver, resolver))
@@ -452,7 +452,7 @@ impl FutureResolver {
         let (sender, receiver) = futures_channel::oneshot::channel();
         self.inner
             .query_dnsrec(name, dns_class, query_type, |result| {
-                let _ = sender.send(result.and_then(|rec| rec.try_clone()));
+                let _ = sender.send(result.and_then(c_ares::DnsRecord::try_clone));
             })?;
         let resolver = Arc::clone(&self.inner);
         Ok(CAresFuture::new(receiver, resolver))
@@ -484,7 +484,7 @@ impl FutureResolver {
     ) -> c_ares::Result<CAresFuture<c_ares::DnsRecord>> {
         let (sender, receiver) = futures_channel::oneshot::channel();
         self.inner.search_dnsrec(dnsrec, |result| {
-            let _ = sender.send(result.and_then(|rec| rec.try_clone()));
+            let _ = sender.send(result.and_then(c_ares::DnsRecord::try_clone));
         })?;
         let resolver = Arc::clone(&self.inner);
         Ok(CAresFuture::new(receiver, resolver))
@@ -507,14 +507,13 @@ impl FutureResolver {
 
     /// Cancel all requests made on this `FutureResolver`.
     pub fn cancel(&self) {
-        self.inner.cancel()
+        self.inner.cancel();
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
     use std::time::Duration;
 
     fn assert_send<T: Send>() {}
@@ -556,9 +555,7 @@ mod tests {
     #[test]
     fn future_resolver_with_custom_options() {
         let mut options = Options::new();
-        options
-            .set_timeout(Duration::from_millis(2000))
-            .set_tries(2);
+        options.set_timeout(Duration::from_secs(2)).set_tries(2);
         let resolver = FutureResolver::with_options(options);
         assert!(resolver.is_ok());
     }
@@ -566,23 +563,23 @@ mod tests {
     #[test]
     fn future_resolver_set_local_ipv4() {
         let resolver = FutureResolver::new().unwrap();
-        let result = resolver.set_local_ipv4(Ipv4Addr::new(127, 0, 0, 1));
-        assert!(std::ptr::eq(result, &resolver));
+        let result = resolver.set_local_ipv4(Ipv4Addr::LOCALHOST);
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
     fn future_resolver_set_local_ipv6() {
         let resolver = FutureResolver::new().unwrap();
-        let ipv6 = Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1);
+        let ipv6 = Ipv6Addr::LOCALHOST;
         let result = resolver.set_local_ipv6(ipv6);
-        assert!(std::ptr::eq(result, &resolver));
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
     fn future_resolver_set_local_device() {
         let resolver = FutureResolver::new().unwrap();
         let result = resolver.set_local_device("lo").unwrap();
-        assert!(std::ptr::eq(result, &resolver));
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
@@ -622,37 +619,6 @@ mod tests {
         assert!(!servers.is_empty());
     }
 
-    // Test CAresFuture behavior
-    fn noop_raw_waker() -> RawWaker {
-        fn noop(_: *const ()) {}
-        fn clone(_: *const ()) -> RawWaker {
-            noop_raw_waker()
-        }
-        static VTABLE: RawWakerVTable = RawWakerVTable::new(clone, noop, noop, noop);
-        RawWaker::new(std::ptr::null(), &VTABLE)
-    }
-
-    fn noop_waker() -> Waker {
-        unsafe { Waker::from_raw(noop_raw_waker()) }
-    }
-
-    #[test]
-    fn c_ares_future_poll_pending() {
-        let resolver = FutureResolver::new().unwrap();
-        let mut future = resolver.query_a("example.com");
-
-        let waker = noop_waker();
-        let mut cx = Context::from_waker(&waker);
-
-        // First poll should be pending (query not complete yet)
-        let result = Pin::new(&mut future).poll(&mut cx);
-        // Result could be Pending or Ready depending on timing
-        match result {
-            Poll::Pending => {}  // Expected
-            Poll::Ready(_) => {} // Also valid if query completed quickly or failed
-        }
-    }
-
     #[test]
     #[cfg(cares1_27)]
     fn future_resolver_queue_active_queries() {
@@ -673,13 +639,13 @@ mod tests {
     fn future_resolver_set_server_state_callback() {
         let resolver = FutureResolver::new().unwrap();
         let result = resolver.set_server_state_callback(|_server, _success, _flags| {});
-        assert!(std::ptr::eq(result, &resolver));
+        assert!(std::ptr::eq(result, &raw const resolver));
     }
 
     #[test]
     fn debug_future_resolver() {
         let resolver = FutureResolver::new().unwrap();
-        let debug = format!("{:?}", resolver);
+        let debug = format!("{resolver:?}");
         assert!(debug.contains("FutureResolver"));
     }
 
@@ -687,7 +653,7 @@ mod tests {
     fn debug_cares_future() {
         let resolver = FutureResolver::new().unwrap();
         let future = resolver.query_a("example.com");
-        let debug = format!("{:?}", future);
+        let debug = format!("{future:?}");
         assert!(debug.contains("CAresFuture"));
     }
 }

@@ -27,7 +27,7 @@ impl URIResults {
     pub fn parse_from(data: &[u8]) -> Result<URIResults> {
         let mut uri_reply: *mut c_ares_sys::ares_uri_reply = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_uri_reply(data.as_ptr(), data.len() as c_int, &mut uri_reply)
+            c_ares_sys::ares_parse_uri_reply(data.as_ptr(), data.len() as c_int, &raw mut uri_reply)
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let uri_result = URIResults::new(uri_reply);
@@ -57,7 +57,7 @@ impl fmt::Display for URIResults {
 }
 
 /// Iterator of `URIResult`s.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct URIResultsIter<'a> {
     next: Option<&'a c_ares_sys::ares_uri_reply>,
 }
@@ -177,7 +177,7 @@ mod tests {
     fn debug_uri_result() {
         let results = URIResults::parse_from(ONE_URI_RECORD).unwrap();
         let result = results.iter().next().unwrap();
-        let debug = format!("{:?}", result);
+        let debug = format!("{result:?}");
         assert!(debug.contains("URIResult"));
         assert!(debug.contains("https://example.com"));
         assert!(debug.contains("10"));
@@ -187,7 +187,7 @@ mod tests {
     fn debug_uri_results_iter() {
         let results = URIResults::parse_from(ONE_URI_RECORD).unwrap();
         let iter = results.iter();
-        let debug = format!("{:?}", iter);
+        let debug = format!("{iter:?}");
         assert!(debug.contains("URIResultsIter"));
     }
 }

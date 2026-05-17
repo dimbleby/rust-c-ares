@@ -187,12 +187,18 @@ impl AddrInfoNode<'_> {
         }
         match self.node.ai_family as c_types::ADDRESS_FAMILY {
             c_types::AF_INET => {
+                // c-ares allocates the sockaddr with proper alignment for the
+                // address family indicated by `ai_family`.
+                #[allow(clippy::cast_ptr_alignment)]
                 let sa = unsafe { &*(addr.cast::<c_types::sockaddr_in>()) };
                 let ip = ipv4_from_in_addr(sa.sin_addr);
                 let port = u16::from_be(sa.sin_port);
                 Some(SocketAddr::V4(SocketAddrV4::new(ip, port)))
             }
             c_types::AF_INET6 => {
+                // c-ares allocates the sockaddr with proper alignment for the
+                // address family indicated by `ai_family`.
+                #[allow(clippy::cast_ptr_alignment)]
                 let sa = unsafe { &*(addr.cast::<c_types::sockaddr_in6>()) };
                 let ip = ipv6_from_in6_addr(sa.sin6_addr);
                 let port = u16::from_be(sa.sin6_port);
@@ -241,7 +247,7 @@ unsafe impl Send for AddrInfoNode<'_> {}
 unsafe impl Sync for AddrInfoNode<'_> {}
 
 /// Iterator over the address nodes in an `AddrInfoResults`.
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct AddrInfoNodeIter<'a> {
     next: Option<&'a c_ares_sys::ares_addrinfo_node>,
 }
@@ -306,7 +312,7 @@ unsafe impl Send for AddrInfoCName<'_> {}
 unsafe impl Sync for AddrInfoCName<'_> {}
 
 /// Iterator over the CNAME chain in an `AddrInfoResults`.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct AddrInfoCNameIter<'a> {
     next: Option<&'a c_ares_sys::ares_addrinfo_cname>,
 }
@@ -418,7 +424,7 @@ mod tests {
     #[test]
     fn flags_debug() {
         let flags = AddrInfoFlags::CANONNAME | AddrInfoFlags::NUMERICHOST;
-        let debug = format!("{:?}", flags);
+        let debug = format!("{flags:?}");
         assert!(!debug.is_empty());
     }
 }

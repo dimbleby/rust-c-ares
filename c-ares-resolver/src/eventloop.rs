@@ -138,6 +138,11 @@ impl EventLoop {
     }
 
     // Event loop thread - waits for events, and handles them.
+    //
+    // Takes `ares_channel` by value because this method is the body of a
+    // dedicated `thread::spawn` closure and runs for the thread's full
+    // lifetime.
+    #[allow(clippy::needless_pass_by_value)]
     fn event_loop_thread(self, ares_channel: Arc<Mutex<c_ares::Channel>>) {
         const MAX_POLL: Duration = Duration::from_millis(500);
         let mut events = polling::Events::new();
@@ -200,10 +205,10 @@ fn handle_events(ares_channel: &Mutex<c_ares::Channel>, events: &polling::Events
         let socket = c_ares::Socket::try_from(event.key).unwrap();
         let mut event_flags = FdEventFlags::empty();
         if event.readable {
-            event_flags.insert(FdEventFlags::READ)
+            event_flags.insert(FdEventFlags::READ);
         }
         if event.writable {
-            event_flags.insert(FdEventFlags::WRITE)
+            event_flags.insert(FdEventFlags::WRITE);
         }
         FdEvents::new(socket, event_flags)
     });

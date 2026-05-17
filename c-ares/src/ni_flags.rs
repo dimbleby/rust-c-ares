@@ -72,7 +72,7 @@ mod tests {
     #[test]
     fn debug() {
         let flags = NIFlags::TCP | NIFlags::LOOKUPHOST;
-        let debug = format!("{:?}", flags);
+        let debug = format!("{flags:?}");
         assert!(!debug.is_empty());
     }
 }

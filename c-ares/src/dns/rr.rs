@@ -113,7 +113,8 @@ impl DnsRr {
     /// Can only be used on keys with datatype `BIN`, `BINP`.
     pub fn get_bin(&self, key: DnsRrKey) -> Option<&[u8]> {
         let mut len: usize = 0;
-        let ptr = unsafe { c_ares_sys::ares_dns_rr_get_bin(self.as_ptr(), key.into(), &mut len) };
+        let ptr =
+            unsafe { c_ares_sys::ares_dns_rr_get_bin(self.as_ptr(), key.into(), &raw mut len) };
         (!ptr.is_null()).then(|| unsafe { slice::from_raw_parts(ptr, len) })
     }
 
@@ -129,8 +130,9 @@ impl DnsRr {
     /// To get all array members concatenated, use [`get_bin()`](Self::get_bin) instead.
     pub fn get_abin(&self, key: DnsRrKey, idx: usize) -> Option<&[u8]> {
         let mut len: usize = 0;
-        let ptr =
-            unsafe { c_ares_sys::ares_dns_rr_get_abin(self.as_ptr(), key.into(), idx, &mut len) };
+        let ptr = unsafe {
+            c_ares_sys::ares_dns_rr_get_abin(self.as_ptr(), key.into(), idx, &raw mut len)
+        };
         (!ptr.is_null()).then(|| unsafe { slice::from_raw_parts(ptr, len) })
     }
 
@@ -152,7 +154,13 @@ impl DnsRr {
         let mut val: *const core::ffi::c_uchar = ptr::null();
         let mut val_len: usize = 0;
         let opt_key = unsafe {
-            c_ares_sys::ares_dns_rr_get_opt(self.as_ptr(), key.into(), idx, &mut val, &mut val_len)
+            c_ares_sys::ares_dns_rr_get_opt(
+                self.as_ptr(),
+                key.into(),
+                idx,
+                &raw mut val,
+                &raw mut val_len,
+            )
         };
         if opt_key == u16::MAX {
             None
@@ -196,8 +204,9 @@ impl DnsRr {
     /// Can only be used on keys with datatype `INADDR`.
     pub fn set_addr(&mut self, key: DnsRrKey, addr: Ipv4Addr) -> Result<&mut Self> {
         let in_addr = ipv4_as_in_addr(addr);
-        let status =
-            unsafe { c_ares_sys::ares_dns_rr_set_addr(self.as_mut_ptr(), key.into(), &in_addr) };
+        let status = unsafe {
+            c_ares_sys::ares_dns_rr_set_addr(self.as_mut_ptr(), key.into(), &raw const in_addr)
+        };
         status_to_result(status)?;
         Ok(self)
     }
@@ -211,8 +220,9 @@ impl DnsRr {
                 _S6_u8: addr.octets(),
             },
         };
-        let status =
-            unsafe { c_ares_sys::ares_dns_rr_set_addr6(self.as_mut_ptr(), key.into(), &in6) };
+        let status = unsafe {
+            c_ares_sys::ares_dns_rr_set_addr6(self.as_mut_ptr(), key.into(), &raw const in6)
+        };
         status_to_result(status)?;
         Ok(self)
     }
@@ -829,7 +839,7 @@ mod tests {
                 300,
             )
             .expect("rr_add");
-        let debug = format!("{:?}", rr);
+        let debug = format!("{rr:?}");
         assert!(debug.contains("DnsRr"));
         assert!(debug.contains("example.com"));
     }

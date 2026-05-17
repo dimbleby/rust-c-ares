@@ -85,6 +85,7 @@ pub fn ipv6_from_in6_addr(in6_addr: c_types::in6_addr) -> Ipv6Addr {
     target_os = "openbsd",
     target_os = "netbsd",
 ))]
+#[allow(clippy::trivially_copy_pass_by_ref)] // mirrors the v6 helper signature
 pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr_in {
     let in_addr = ipv4_as_in_addr(*sock_v4.ip());
     c_types::sockaddr_in {
@@ -104,6 +105,7 @@ pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr
     target_os = "openbsd",
     target_os = "netbsd",
 )))]
+#[allow(clippy::trivially_copy_pass_by_ref)] // mirrors the v6 helper signature
 pub fn socket_addrv4_as_sockaddr_in(sock_v4: &SocketAddrV4) -> c_types::sockaddr_in {
     let in_addr = ipv4_as_in_addr(*sock_v4.ip());
     c_types::sockaddr_in {
@@ -228,7 +230,7 @@ pub fn status_to_result(status: c_ares_sys::ares_status_t) -> Result<()> {
 pub fn version() -> (&'static str, u32) {
     let mut int_version: c_int = 0;
     let str_version = unsafe {
-        let ptr = c_ares_sys::ares_version(&mut int_version);
+        let ptr = c_ares_sys::ares_version(&raw mut int_version);
         c_string_as_str_unchecked(ptr)
     };
     (str_version, int_version as u32)
@@ -261,8 +263,8 @@ pub fn expand_name(buf: &[u8], offset: usize) -> Result<(AresString, usize)> {
             encoded.as_ptr(),
             buf.as_ptr(),
             buf.len() as c_int,
-            &mut s,
-            &mut enclen,
+            &raw mut s,
+            &raw mut enclen,
         )
     };
     if status != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
@@ -288,8 +290,8 @@ pub fn expand_string(buf: &[u8], offset: usize) -> Result<(AresBuf, usize)> {
             encoded.as_ptr(),
             buf.as_ptr(),
             buf.len() as c_int,
-            &mut s,
-            &mut enclen,
+            &raw mut s,
+            &raw mut enclen,
         )
     };
     if status != c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
@@ -378,7 +380,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of range")]
     fn expand_name_out_of_bounds() {
         let buf: &[u8] = b"\x07example\x03com\x00";
         let _ = expand_name(buf, buf.len() + 1);
@@ -411,7 +413,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "out of range")]
     fn expand_string_out_of_bounds() {
         let buf: &[u8] = b"\x05hello";
         let _ = expand_string(buf, buf.len() + 1);

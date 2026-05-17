@@ -99,7 +99,7 @@ mod tests {
     #[test]
     fn debug_fd_events() {
         let events = FdEvents::new(42, FdEventFlags::READ | FdEventFlags::WRITE);
-        let debug = format!("{:?}", events);
+        let debug = format!("{events:?}");
         assert!(debug.contains("FdEvents"));
         assert!(debug.contains("42"));
         assert!(debug.contains("READ"));

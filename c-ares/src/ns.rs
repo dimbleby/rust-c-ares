@@ -20,7 +20,7 @@ impl NSResults {
     pub fn parse_from(data: &[u8]) -> Result<NSResults> {
         let mut hostent: *mut c_types::hostent = ptr::null_mut();
         let parse_status = unsafe {
-            c_ares_sys::ares_parse_ns_reply(data.as_ptr(), data.len() as c_int, &mut hostent)
+            c_ares_sys::ares_parse_ns_reply(data.as_ptr(), data.len() as c_int, &raw mut hostent)
         };
         if parse_status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             let result = NSResults::new(hostent);

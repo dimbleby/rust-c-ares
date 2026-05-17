@@ -176,19 +176,17 @@ impl EventLoop {
             // interest in sockets until told otherwise.
             //
             // So re-assert our interest in all reported sockets.
-            {
+            for event in events.iter() {
+                let socket = c_ares::Socket::try_from(event.key).unwrap();
                 let interests = self.interests.lock().unwrap();
-                for event in events.iter() {
-                    let socket = c_ares::Socket::try_from(event.key).unwrap();
-                    if let Some(Interest(readable, writable)) = interests.get(&socket) {
-                        // Safety: we trust that since c-ares hasn't yet told us that it is done
-                        // with this socket, it's still open.
-                        let source = unsafe { borrow_socket(socket) };
-                        let new_event = Event::new(event.key, *readable, *writable);
-                        self.poller
-                            .modify(source, new_event)
-                            .expect("failed to renew interest");
-                    }
+                if let Some(Interest(readable, writable)) = interests.get(&socket) {
+                    // Safety: we trust that since c-ares hasn't yet told us that it is done
+                    // with this socket, it's still open.
+                    let source = unsafe { borrow_socket(socket) };
+                    let new_event = Event::new(event.key, *readable, *writable);
+                    self.poller
+                        .modify(source, new_event)
+                        .expect("failed to renew interest");
                 }
             }
         }

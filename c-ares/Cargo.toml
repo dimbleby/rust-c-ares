@@ -33,3 +33,6 @@ default = ["maybe-vendored"]
 maybe-vendored = ["c-ares-sys/maybe-vendored"]
 vendored = ["c-ares-sys/vendored"]
 build-cmake = ["c-ares-sys/build-cmake"]
+
+[dev-dependencies]
+polling.workspace = true

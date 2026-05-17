@@ -6,7 +6,7 @@
 mod common;
 
 use c_ares::*;
-use common::event_thread_channel;
+use common::{channel, process_channel};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
@@ -14,7 +14,7 @@ use std::time::Duration;
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_a_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -48,16 +48,14 @@ fn query_dnsrec_a_record() {
         })
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_aaaa_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -84,16 +82,14 @@ fn query_dnsrec_aaaa_record() {
         )
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_mx_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -116,16 +112,14 @@ fn query_dnsrec_mx_record() {
         })
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_txt_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -156,16 +150,14 @@ fn query_dnsrec_txt_record() {
         )
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn send_dnsrec_a_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     // Build a query manually using DnsRecord.
     let mut query = DnsRecord::new(0, DnsFlags::RD, DnsOpcode::Query, DnsRcode::NoError)
@@ -195,16 +187,14 @@ fn send_dnsrec_a_record() {
         })
         .expect("send_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn search_dnsrec_a_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let mut query = DnsRecord::new(0, DnsFlags::RD, DnsOpcode::Query, DnsRcode::NoError)
         .expect("Failed to create DnsRecord");
@@ -229,16 +219,14 @@ fn search_dnsrec_a_record() {
         })
         .expect("search_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn write_and_reparse_roundtrip() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -266,16 +254,14 @@ fn write_and_reparse_roundtrip() {
         })
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_soa_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -320,16 +306,14 @@ fn query_dnsrec_soa_record() {
         )
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_ns_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -351,16 +335,14 @@ fn query_dnsrec_ns_record() {
         })
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_cname_record() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -398,16 +380,14 @@ fn query_dnsrec_cname_record() {
         )
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_nonexistent_domain() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -424,16 +404,14 @@ fn query_dnsrec_nonexistent_domain() {
         )
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn send_dnsrec_nonexistent_domain() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let mut query = DnsRecord::new(0, DnsFlags::RD, DnsOpcode::Query, DnsRcode::NoError)
         .expect("Failed to create DnsRecord");
@@ -461,16 +439,14 @@ fn send_dnsrec_nonexistent_domain() {
         })
         .expect("send_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_cancel() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let cancelled = Arc::new(AtomicBool::new(false));
     let cancelled_clone = cancelled.clone();
@@ -485,9 +461,7 @@ fn query_dnsrec_cancel() {
 
     channel.cancel();
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(1)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(1));
     assert!(
         cancelled.load(Ordering::SeqCst),
         "Query should have been cancelled"
@@ -497,7 +471,7 @@ fn query_dnsrec_cancel() {
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_returns_query_id() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -511,16 +485,14 @@ fn query_dnsrec_returns_query_id() {
 
     let _ = qid;
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn send_dnsrec_returns_query_id() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let mut query = DnsRecord::new(0, DnsFlags::RD, DnsOpcode::Query, DnsRcode::NoError)
         .expect("Failed to create DnsRecord");
@@ -540,16 +512,14 @@ fn send_dnsrec_returns_query_id() {
 
     let _ = qid;
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_duplicate_response() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let saved = Arc::new(std::sync::Mutex::new(None::<DnsRecord>));
     let saved_clone = saved.clone();
@@ -562,9 +532,7 @@ fn query_dnsrec_duplicate_response() {
         })
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     // Verify the duplicated record is valid and independently usable
     // after the callback and channel processing are done.
@@ -583,7 +551,7 @@ fn query_dnsrec_duplicate_response() {
 #[test]
 #[ignore = "requires network"]
 fn query_dnsrec_response_has_additional_section() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -614,8 +582,6 @@ fn query_dnsrec_response_has_additional_section() {
         })
         .expect("query_dnsrec failed");
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }

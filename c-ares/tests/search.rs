@@ -1,7 +1,5 @@
 //! DNS search integration tests.
 
-#![cfg(cares1_28)]
-
 mod common;
 
 use c_ares::*;
@@ -12,19 +10,13 @@ use std::time::Duration;
 #[test]
 #[ignore = "requires network"]
 fn raw_search() {
-    assert!(
-        c_ares::thread_safety(),
-        "c-ares was not built with thread safety"
-    );
-
     let mut options = Options::new();
     options
         .set_flags(Flags::STAYOPEN)
         .set_timeout(Duration::from_millis(2000))
         .set_tries(2)
         .set_domains(["com"])
-        .unwrap()
-        .set_event_thread(EventSys::Default);
+        .unwrap();
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(["8.8.8.8"])
@@ -40,9 +32,7 @@ fn raw_search() {
         assert!(!data.is_empty(), "No data returned");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -50,19 +40,13 @@ fn raw_search() {
 #[test]
 #[ignore = "requires network"]
 fn search_a_record() {
-    assert!(
-        c_ares::thread_safety(),
-        "c-ares was not built with thread safety"
-    );
-
     let mut options = Options::new();
     options
         .set_flags(Flags::STAYOPEN)
         .set_timeout(Duration::from_millis(2000))
         .set_tries(2)
         .set_domains(["com"])
-        .unwrap()
-        .set_event_thread(EventSys::Default);
+        .unwrap();
     let mut channel = Channel::with_options(options).expect("Failed to create channel");
     channel
         .set_servers(["8.8.8.8"])
@@ -77,9 +61,7 @@ fn search_a_record() {
         assert!(results.iter().count() > 0, "No A records returned");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -87,7 +69,7 @@ fn search_a_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_aaaa_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -97,9 +79,7 @@ fn search_aaaa_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -107,7 +87,7 @@ fn search_aaaa_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_caa_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -117,9 +97,7 @@ fn search_caa_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -127,7 +105,7 @@ fn search_caa_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_cname_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -137,9 +115,7 @@ fn search_cname_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -147,7 +123,7 @@ fn search_cname_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_mx_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -157,9 +133,7 @@ fn search_mx_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -167,7 +141,7 @@ fn search_mx_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_naptr_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -177,9 +151,7 @@ fn search_naptr_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -187,7 +159,7 @@ fn search_naptr_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_ns_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -197,9 +169,7 @@ fn search_ns_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -207,7 +177,7 @@ fn search_ns_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_ptr_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -217,9 +187,7 @@ fn search_ptr_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -227,7 +195,7 @@ fn search_ptr_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_soa_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -237,9 +205,7 @@ fn search_soa_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -247,7 +213,7 @@ fn search_soa_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_srv_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -257,9 +223,7 @@ fn search_srv_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }
@@ -267,7 +231,7 @@ fn search_srv_record() {
 #[test]
 #[ignore = "requires network"]
 fn search_txt_record() {
-    let mut channel = common::event_thread_channel();
+    let mut channel = common::channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -277,9 +241,7 @@ fn search_txt_record() {
         result.expect("Search failed");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    common::process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Search did not complete");
 }

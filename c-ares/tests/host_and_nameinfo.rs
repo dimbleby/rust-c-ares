@@ -1,11 +1,9 @@
 //! Host lookup and name info integration tests.
 
-#![cfg(cares1_28)]
-
 mod common;
 
 use c_ares::*;
-use common::event_thread_channel;
+use common::{channel, process_channel};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
@@ -15,7 +13,7 @@ use std::time::Duration;
 fn get_host_by_address_ipv4() {
     use std::net::IpAddr;
 
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -27,9 +25,7 @@ fn get_host_by_address_ipv4() {
         assert!(!host_results.hostname().is_empty(), "No hostname returned");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -39,7 +35,7 @@ fn get_host_by_address_ipv4() {
 fn get_host_by_address_ipv6() {
     use std::net::IpAddr;
 
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -51,9 +47,7 @@ fn get_host_by_address_ipv6() {
         assert!(!host_results.hostname().is_empty(), "No hostname returned");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -61,7 +55,7 @@ fn get_host_by_address_ipv6() {
 #[test]
 #[ignore = "requires network"]
 fn get_host_by_name_ipv4() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -79,9 +73,7 @@ fn get_host_by_name_ipv4() {
         assert!(!format!("{}", host_results).is_empty());
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -89,7 +81,7 @@ fn get_host_by_name_ipv4() {
 #[test]
 #[ignore = "requires network"]
 fn get_host_by_name_ipv6() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -104,9 +96,7 @@ fn get_host_by_name_ipv6() {
         );
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -116,7 +106,7 @@ fn get_host_by_name_ipv6() {
 fn get_name_info_ipv4() {
     use std::net::SocketAddr;
 
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -136,9 +126,7 @@ fn get_name_info_ipv4() {
         },
     );
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -148,7 +136,7 @@ fn get_name_info_ipv4() {
 fn get_name_info_ipv6() {
     use std::net::SocketAddr;
 
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -161,9 +149,7 @@ fn get_name_info_ipv6() {
         assert!(name_info.service().is_none(), "Name info service returned");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -171,7 +157,7 @@ fn get_name_info_ipv6() {
 #[test]
 #[ignore = "requires network"]
 fn get_addrinfo_ipv4() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -190,9 +176,7 @@ fn get_addrinfo_ipv4() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -200,7 +184,7 @@ fn get_addrinfo_ipv4() {
 #[test]
 #[ignore = "requires network"]
 fn get_addrinfo_ipv6() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -219,9 +203,7 @@ fn get_addrinfo_ipv6() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -229,7 +211,7 @@ fn get_addrinfo_ipv6() {
 #[test]
 #[ignore = "requires network"]
 fn get_addrinfo_unspec() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -241,9 +223,7 @@ fn get_addrinfo_unspec() {
         assert!(addrinfo.nodes().count() > 0, "No address nodes returned");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -251,7 +231,7 @@ fn get_addrinfo_unspec() {
 #[test]
 #[ignore = "requires network"]
 fn get_addrinfo_with_service() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -272,9 +252,7 @@ fn get_addrinfo_with_service() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(
         completed.load(Ordering::SeqCst),
@@ -285,7 +263,7 @@ fn get_addrinfo_with_service() {
 #[test]
 #[ignore = "requires network"]
 fn get_addrinfo_cnames() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -311,9 +289,7 @@ fn get_addrinfo_cnames() {
         }
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -321,7 +297,7 @@ fn get_addrinfo_cnames() {
 #[test]
 #[ignore = "requires network"]
 fn get_addrinfo_debug_display() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -355,9 +331,7 @@ fn get_addrinfo_debug_display() {
         assert!(iter_debug.contains("AddrInfoNodeIter"));
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -365,7 +339,7 @@ fn get_addrinfo_debug_display() {
 #[test]
 #[ignore = "requires network"]
 fn get_addrinfo_display_with_cnames() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -392,9 +366,7 @@ fn get_addrinfo_display_with_cnames() {
         );
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
@@ -402,7 +374,7 @@ fn get_addrinfo_display_with_cnames() {
 #[test]
 #[ignore = "requires network"]
 fn get_addrinfo_nonexistent() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -415,16 +387,14 @@ fn get_addrinfo_nonexistent() {
         assert!(result.is_err(), "Expected an error for nonexistent domain");
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(5)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(5));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
 }
 
 #[test]
 fn get_addrinfo_null_name() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let completed = Arc::new(AtomicBool::new(false));
     let completed_clone = completed.clone();
@@ -437,9 +407,7 @@ fn get_addrinfo_null_name() {
     });
 
     // The callback is invoked synchronously for bad names, but wait just in case.
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(1)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(1));
 
     assert!(completed.load(Ordering::SeqCst), "Callback was not called");
 }

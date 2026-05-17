@@ -1,11 +1,9 @@
 //! Channel feature integration tests (concurrent queries, callbacks).
 
-#![cfg(cares1_28)]
-
 mod common;
 
 use c_ares::*;
-use common::event_thread_channel;
+use common::{channel, process_channel};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
@@ -13,7 +11,7 @@ use std::time::Duration;
 #[test]
 #[ignore = "requires network"]
 fn multiple_concurrent_queries() {
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let a_completed = Arc::new(AtomicBool::new(false));
     let a_completed_clone = a_completed.clone();
@@ -34,9 +32,7 @@ fn multiple_concurrent_queries() {
         mx_completed_clone.store(true, Ordering::SeqCst);
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(15)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(15));
 
     assert!(
         a_completed.load(Ordering::SeqCst),
@@ -58,7 +54,7 @@ fn multiple_concurrent_queries() {
 fn pending_write_callback_setup() {
     use std::sync::atomic::AtomicUsize;
 
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let callback_count = Arc::new(AtomicUsize::new(0));
     let callback_count_clone = callback_count.clone();
@@ -77,9 +73,7 @@ fn pending_write_callback_setup() {
         let _ = result;
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
     // Note: The callback may or may not be invoked - we just test that setting it works
@@ -91,7 +85,7 @@ fn pending_write_callback_setup() {
 fn server_state_callback_invoked() {
     use std::sync::atomic::AtomicUsize;
 
-    let mut channel = event_thread_channel();
+    let mut channel = channel();
 
     let callback_count = Arc::new(AtomicUsize::new(0));
     let callback_count_clone = callback_count.clone();
@@ -120,9 +114,7 @@ fn server_state_callback_invoked() {
         let _ = result;
     });
 
-    channel
-        .queue_wait_empty(Some(Duration::from_secs(3)))
-        .expect("queue_wait_empty");
+    process_channel(&mut channel, Duration::from_secs(3));
 
     assert!(completed.load(Ordering::SeqCst), "Query did not complete");
     assert!(

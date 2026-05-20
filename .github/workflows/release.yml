@@ -7,15 +7,22 @@ on:
       - "c-ares-resolver-[0-9]*"
       - "c-ares-[0-9]*"
 
-permissions:
-  contents: read
-  id-token: write
+permissions: {}
+
+# Never cancel an in-flight publish: a half-completed release (tag pushed,
+# artifact missing) is worse than two overlapping runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
     environment: publish
+    permissions:
+      contents: read
+      id-token: write # OIDC token for crates.io trusted publishing
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

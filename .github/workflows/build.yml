@@ -13,6 +13,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     name: Test
@@ -62,9 +66,15 @@ jobs:
           persist-credentials: false
           submodules: true
       - name: Install Rust (rustup)
-        run: rustup update ${{ matrix.rust }} --no-self-update && rustup default ${{ matrix.rust }}
+        env:
+          RUST_TOOLCHAIN: ${{ matrix.rust }}
+        run: rustup update "$RUST_TOOLCHAIN" --no-self-update && rustup default "$RUST_TOOLCHAIN"
         shell: bash
-      - run: rustup target add ${{ matrix.target }}
+      - name: Add target
+        env:
+          RUST_TARGET: ${{ matrix.target }}
+        run: rustup target add "$RUST_TARGET"
+        shell: bash
       - run: rustup component add clippy rustfmt
       - run: brew install automake
         if: matrix.build == 'macos'

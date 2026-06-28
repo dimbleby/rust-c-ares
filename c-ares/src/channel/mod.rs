@@ -331,6 +331,17 @@ impl Channel {
     #[cfg(cares1_24)]
     pub fn servers(&self) -> Vec<String> {
         let csv = unsafe { c_ares_sys::ares_get_servers_csv(self.ares_channel) };
+        Self::parse_servers_csv(csv)
+    }
+
+    // Parse the result of `ares_get_servers_csv()` into a list of servers,
+    // taking ownership of (and freeing) the c-ares-allocated string.
+    #[cfg(cares1_24)]
+    fn parse_servers_csv(csv: *mut c_char) -> Vec<String> {
+        // `ares_get_servers_csv()` returns NULL on allocation failure.
+        if csv.is_null() {
+            return Vec::new();
+        }
         let csv = AresString::new(csv);
         let csv: &str = &csv;
         if csv.is_empty() {
@@ -1276,6 +1287,23 @@ mod tests {
         let mut channel = Channel::new().unwrap();
         let result = channel.set_sortlist(["130.155.160.0/255.255.240.0", "130.155.0.0"]);
         assert!(result.is_ok());
+    }
+
+    #[cfg(cares1_24)]
+    #[test]
+    fn parse_servers_csv_null_is_empty() {
+        // ares_get_servers_csv() returns NULL on allocation failure; this must
+        // not dereference the null pointer.
+        assert!(Channel::parse_servers_csv(std::ptr::null_mut()).is_empty());
+    }
+
+    #[cfg(cares1_24)]
+    #[test]
+    fn channel_servers_round_trip() {
+        let mut channel = Channel::new().unwrap();
+        channel.set_servers(&["8.8.8.8:53"]).unwrap();
+        let servers = channel.servers();
+        assert!(servers.iter().any(|s| s.contains("8.8.8.8")));
     }
 
     #[test]

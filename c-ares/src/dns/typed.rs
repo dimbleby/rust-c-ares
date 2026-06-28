@@ -936,6 +936,8 @@ pub enum TypedRr<'a> {
     /// Wildcard request type. Should not appear in responses; carries the
     /// underlying generic record for completeness.
     Any(&'a DnsRr),
+    /// Unknown record type. Carries the underlying generic record.
+    Unknown(&'a DnsRr),
 }
 
 // =============================================================================
@@ -1081,6 +1083,7 @@ impl DnsRr {
             DnsRecordType::CAA => TypedRr::Caa(CaaRecord::new(self)),
             DnsRecordType::RAW_RR => TypedRr::RawRr(RawRrRecord::new(self)),
             DnsRecordType::ANY => TypedRr::Any(self),
+            DnsRecordType::UNKNOWN(_) => TypedRr::Unknown(self),
         }
     }
 }

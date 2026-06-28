@@ -155,66 +155,68 @@ pub union ares_addr__bindgen_ty_1 {
     pub addr4: in_addr,
     pub addr6: ares_in6_addr,
 }
-#[repr(u32)]
+impl ares_dns_rec_type_t {
+    #[doc = "< Host address."]
+    pub const ARES_REC_TYPE_A: ares_dns_rec_type_t = ares_dns_rec_type_t(1);
+    #[doc = "< Authoritative server."]
+    pub const ARES_REC_TYPE_NS: ares_dns_rec_type_t = ares_dns_rec_type_t(2);
+    #[doc = "< Canonical name."]
+    pub const ARES_REC_TYPE_CNAME: ares_dns_rec_type_t = ares_dns_rec_type_t(5);
+    #[doc = "< Start of authority zone."]
+    pub const ARES_REC_TYPE_SOA: ares_dns_rec_type_t = ares_dns_rec_type_t(6);
+    #[doc = "< Domain name pointer."]
+    pub const ARES_REC_TYPE_PTR: ares_dns_rec_type_t = ares_dns_rec_type_t(12);
+    #[doc = "< Host information."]
+    pub const ARES_REC_TYPE_HINFO: ares_dns_rec_type_t = ares_dns_rec_type_t(13);
+    #[doc = "< Mail routing information."]
+    pub const ARES_REC_TYPE_MX: ares_dns_rec_type_t = ares_dns_rec_type_t(15);
+    #[doc = "< Text strings."]
+    pub const ARES_REC_TYPE_TXT: ares_dns_rec_type_t = ares_dns_rec_type_t(16);
+    #[doc = "< RFC 2535 / RFC 2931. SIG Record"]
+    pub const ARES_REC_TYPE_SIG: ares_dns_rec_type_t = ares_dns_rec_type_t(24);
+    #[doc = "< RFC 3596. Ip6 Address."]
+    pub const ARES_REC_TYPE_AAAA: ares_dns_rec_type_t = ares_dns_rec_type_t(28);
+    #[doc = "< RFC 2782. Server Selection."]
+    pub const ARES_REC_TYPE_SRV: ares_dns_rec_type_t = ares_dns_rec_type_t(33);
+    #[doc = "< RFC 3403. Naming Authority Pointer"]
+    pub const ARES_REC_TYPE_NAPTR: ares_dns_rec_type_t = ares_dns_rec_type_t(35);
+    #[doc = "< RFC 6891. EDNS0 option (meta-RR)"]
+    pub const ARES_REC_TYPE_OPT: ares_dns_rec_type_t = ares_dns_rec_type_t(41);
+    #[doc = "< RFC 6698. DNS-Based Authentication of Named\n   Entities (DANE) Transport Layer Security\n   (TLS) Protocol: TLSA"]
+    pub const ARES_REC_TYPE_TLSA: ares_dns_rec_type_t = ares_dns_rec_type_t(52);
+    #[doc = "< RFC 9460. General Purpose Service Binding"]
+    pub const ARES_REC_TYPE_SVCB: ares_dns_rec_type_t = ares_dns_rec_type_t(64);
+    #[doc = "< RFC 9460. Service Binding type for use with\n   HTTPS"]
+    pub const ARES_REC_TYPE_HTTPS: ares_dns_rec_type_t = ares_dns_rec_type_t(65);
+    #[doc = "< Wildcard match.  Not response RR."]
+    pub const ARES_REC_TYPE_ANY: ares_dns_rec_type_t = ares_dns_rec_type_t(255);
+    #[doc = "< RFC 7553. Uniform Resource Identifier"]
+    pub const ARES_REC_TYPE_URI: ares_dns_rec_type_t = ares_dns_rec_type_t(256);
+    #[doc = "< RFC 6844. Certification Authority\n   Authorization."]
+    pub const ARES_REC_TYPE_CAA: ares_dns_rec_type_t = ares_dns_rec_type_t(257);
+    #[doc = "< Used as an indicator that the RR record\n   is not parsed, but provided in wire\n   format"]
+    pub const ARES_REC_TYPE_RAW_RR: ares_dns_rec_type_t = ares_dns_rec_type_t(65536);
+}
+#[repr(transparent)]
 #[doc = " DNS Record types handled by c-ares.  Some record types may only be valid\n  on requests (e.g. ARES_REC_TYPE_ANY), and some may only be valid on\n  responses"]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum ares_dns_rec_type_t {
-    #[doc = "< Host address."]
-    ARES_REC_TYPE_A = 1,
-    #[doc = "< Authoritative server."]
-    ARES_REC_TYPE_NS = 2,
-    #[doc = "< Canonical name."]
-    ARES_REC_TYPE_CNAME = 5,
-    #[doc = "< Start of authority zone."]
-    ARES_REC_TYPE_SOA = 6,
-    #[doc = "< Domain name pointer."]
-    ARES_REC_TYPE_PTR = 12,
-    #[doc = "< Host information."]
-    ARES_REC_TYPE_HINFO = 13,
-    #[doc = "< Mail routing information."]
-    ARES_REC_TYPE_MX = 15,
-    #[doc = "< Text strings."]
-    ARES_REC_TYPE_TXT = 16,
-    #[doc = "< RFC 2535 / RFC 2931. SIG Record"]
-    ARES_REC_TYPE_SIG = 24,
-    #[doc = "< RFC 3596. Ip6 Address."]
-    ARES_REC_TYPE_AAAA = 28,
-    #[doc = "< RFC 2782. Server Selection."]
-    ARES_REC_TYPE_SRV = 33,
-    #[doc = "< RFC 3403. Naming Authority Pointer"]
-    ARES_REC_TYPE_NAPTR = 35,
-    #[doc = "< RFC 6891. EDNS0 option (meta-RR)"]
-    ARES_REC_TYPE_OPT = 41,
-    #[doc = "< RFC 6698. DNS-Based Authentication of Named\n   Entities (DANE) Transport Layer Security\n   (TLS) Protocol: TLSA"]
-    ARES_REC_TYPE_TLSA = 52,
-    #[doc = "< RFC 9460. General Purpose Service Binding"]
-    ARES_REC_TYPE_SVCB = 64,
-    #[doc = "< RFC 9460. Service Binding type for use with\n   HTTPS"]
-    ARES_REC_TYPE_HTTPS = 65,
-    #[doc = "< Wildcard match.  Not response RR."]
-    ARES_REC_TYPE_ANY = 255,
-    #[doc = "< RFC 7553. Uniform Resource Identifier"]
-    ARES_REC_TYPE_URI = 256,
-    #[doc = "< RFC 6844. Certification Authority\n   Authorization."]
-    ARES_REC_TYPE_CAA = 257,
-    #[doc = "< Used as an indicator that the RR record\n   is not parsed, but provided in wire\n   format"]
-    ARES_REC_TYPE_RAW_RR = 65536,
+pub struct ares_dns_rec_type_t(pub ::core::ffi::c_uint);
+impl ares_dns_class_t {
+    #[doc = "< Internet"]
+    pub const ARES_CLASS_IN: ares_dns_class_t = ares_dns_class_t(1);
+    #[doc = "< CHAOS"]
+    pub const ARES_CLASS_CHAOS: ares_dns_class_t = ares_dns_class_t(3);
+    #[doc = "< Hesoid [Dyer 87]"]
+    pub const ARES_CLASS_HESOID: ares_dns_class_t = ares_dns_class_t(4);
+    #[doc = "< RFC 2136"]
+    pub const ARES_CLASS_NONE: ares_dns_class_t = ares_dns_class_t(254);
+    #[doc = "< Any class (requests only)"]
+    pub const ARES_CLASS_ANY: ares_dns_class_t = ares_dns_class_t(255);
 }
-#[repr(u32)]
+#[repr(transparent)]
 #[doc = " DNS Classes for requests and responses."]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum ares_dns_class_t {
-    #[doc = "< Internet"]
-    ARES_CLASS_IN = 1,
-    #[doc = "< CHAOS"]
-    ARES_CLASS_CHAOS = 3,
-    #[doc = "< Hesoid [Dyer 87]"]
-    ARES_CLASS_HESOID = 4,
-    #[doc = "< RFC 2136"]
-    ARES_CLASS_NONE = 254,
-    #[doc = "< Any class (requests only)"]
-    ARES_CLASS_ANY = 255,
-}
+pub struct ares_dns_class_t(pub ::core::ffi::c_uint);
 #[repr(u32)]
 #[doc = " DNS RR Section type"]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]

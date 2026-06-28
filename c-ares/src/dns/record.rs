@@ -362,6 +362,27 @@ mod tests {
         assert!(rec.rr(DnsSection::Answer, 0).is_none());
     }
 
+    #[test]
+    fn query_get_preserves_unknown_query_type() {
+        #[rustfmt::skip]
+        let data: &[u8] = &[
+            0x00, 0x01, // ID = 1
+            0x01, 0x00, // Flags: RD=1 (standard query)
+            0x00, 0x01, // QDCOUNT = 1
+            0x00, 0x00, // ANCOUNT = 0
+            0x00, 0x00, // NSCOUNT = 0
+            0x00, 0x00, // ARCOUNT = 0
+            0x00,       // root label (.)
+            0xff, 0x00, // QTYPE = unknown value accepted by c-ares
+            0x00, 0x01, // QCLASS = IN
+        ];
+        let rec = DnsRecord::parse(data, DnsParseFlags::empty()).expect("parse should succeed");
+        assert_eq!(rec.query_count(), 1);
+        let (_, qtype, qclass) = rec.query_get(0).expect("query_get");
+        assert_eq!(qtype, DnsRecordType::UNKNOWN(0xff00));
+        assert_eq!(qclass, DnsCls::IN);
+    }
+
     // Parse a DNS response with an A record answer.
     #[test]
     fn parse_a_response() {
@@ -401,6 +422,38 @@ mod tests {
 
         let addr = rr.get_addr(DnsRrKey::A_ADDR).expect("should have addr");
         assert_eq!(addr, Ipv4Addr::new(1, 2, 3, 4));
+    }
+
+    #[test]
+    fn rr_preserves_unknown_class_on_raw_rr() {
+        #[rustfmt::skip]
+        let data: &[u8] = &[
+            0x00, 0x03,             // ID = 3
+            0x81, 0x80,             // Flags: QR=1 RD=1 RA=1 (standard response)
+            0x00, 0x01,             // QDCOUNT = 1
+            0x00, 0x01,             // ANCOUNT = 1
+            0x00, 0x00,             // NSCOUNT = 0
+            0x00, 0x00,             // ARCOUNT = 0
+            // Question: example. A IN
+            0x07, b'e', b'x', b'a', b'm', b'p', b'l', b'e',
+            0x00,                   // root
+            0x00, 0x01,             // QTYPE = A
+            0x00, 0x01,             // QCLASS = IN
+            // Answer: example. unknown type, unknown class, empty RDATA
+            0xc0, 0x0c,             // pointer to name at offset 12
+            0xff, 0x00,             // TYPE = unknown; c-ares parses as RAW_RR
+            0xff, 0x00,             // CLASS = unknown but accepted for RAW_RR
+            0x00, 0x00, 0x00, 0x00, // TTL = 0
+            0x00, 0x00,             // RDLENGTH = 0
+        ];
+        let rec = DnsRecord::parse(data, DnsParseFlags::empty()).expect("parse should succeed");
+        let rr = rec.rr(DnsSection::Answer, 0).expect("rr should exist");
+
+        // An unknown wire type is surfaced as RAW_RR, and the unknown class is
+        // preserved rather than producing an invalid enum value.
+        assert_eq!(rr.rr_type(), DnsRecordType::RAW_RR);
+        assert_eq!(rr.dns_class(), DnsCls::UNKNOWN(0xff00));
+        assert!(matches!(rr.as_typed(), TypedRr::RawRr(_)));
     }
 
     #[test]

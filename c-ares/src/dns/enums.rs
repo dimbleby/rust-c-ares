@@ -51,6 +51,8 @@ pub enum DnsRecordType {
     CAA,
     /// Raw/unparsed RR record.
     RAW_RR,
+    /// Unknown record type, carrying the raw wire value.
+    UNKNOWN(u32),
 }
 
 impl From<DnsRecordType> for c_ares_sys::ares_dns_rec_type_t {
@@ -76,6 +78,7 @@ impl From<DnsRecordType> for c_ares_sys::ares_dns_rec_type_t {
             DnsRecordType::URI => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_URI,
             DnsRecordType::CAA => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_CAA,
             DnsRecordType::RAW_RR => c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_RAW_RR,
+            DnsRecordType::UNKNOWN(raw) => c_ares_sys::ares_dns_rec_type_t(raw),
         }
     }
 }
@@ -103,12 +106,16 @@ impl From<c_ares_sys::ares_dns_rec_type_t> for DnsRecordType {
             c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_URI => DnsRecordType::URI,
             c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_CAA => DnsRecordType::CAA,
             c_ares_sys::ares_dns_rec_type_t::ARES_REC_TYPE_RAW_RR => DnsRecordType::RAW_RR,
+            other => DnsRecordType::UNKNOWN(other.0),
         }
     }
 }
 
 impl fmt::Display for DnsRecordType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let DnsRecordType::UNKNOWN(raw) = self {
+            return write!(f, "TYPE{raw}");
+        }
         let ptr = unsafe { c_ares_sys::ares_dns_rec_type_tostr((*self).into()) };
         f.write_str(unsafe { dns_string_as_str(ptr) })
     }
@@ -142,6 +149,8 @@ pub enum DnsCls {
     NONE,
     /// Any class (requests only).
     ANY,
+    /// Unknown class, carrying the raw wire value.
+    UNKNOWN(u32),
 }
 
 impl From<DnsCls> for c_ares_sys::ares_dns_class_t {
@@ -152,6 +161,7 @@ impl From<DnsCls> for c_ares_sys::ares_dns_class_t {
             DnsCls::HESIOD => c_ares_sys::ares_dns_class_t::ARES_CLASS_HESOID,
             DnsCls::NONE => c_ares_sys::ares_dns_class_t::ARES_CLASS_NONE,
             DnsCls::ANY => c_ares_sys::ares_dns_class_t::ARES_CLASS_ANY,
+            DnsCls::UNKNOWN(raw) => c_ares_sys::ares_dns_class_t(raw),
         }
     }
 }
@@ -164,12 +174,16 @@ impl From<c_ares_sys::ares_dns_class_t> for DnsCls {
             c_ares_sys::ares_dns_class_t::ARES_CLASS_HESOID => DnsCls::HESIOD,
             c_ares_sys::ares_dns_class_t::ARES_CLASS_NONE => DnsCls::NONE,
             c_ares_sys::ares_dns_class_t::ARES_CLASS_ANY => DnsCls::ANY,
+            other => DnsCls::UNKNOWN(other.0),
         }
     }
 }
 
 impl fmt::Display for DnsCls {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let DnsCls::UNKNOWN(raw) = self {
+            return write!(f, "CLASS{raw}");
+        }
         let ptr = unsafe { c_ares_sys::ares_dns_class_tostr((*self).into()) };
         f.write_str(unsafe { dns_string_as_str(ptr) })
     }

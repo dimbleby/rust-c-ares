@@ -25,6 +25,8 @@ bindgen --allowlist-function="ares.*" \
         --blocklist-type="socklen_t" \
         --blocklist-type="timeval" \
         --default-enum-style="rust" \
+        --newtype-enum="ares_dns_rec_type_t" \
+        --newtype-enum="ares_dns_class_t" \
         --no-debug="ares_addrttl" \
         --no-layout-tests \
         --output=src/ffi.rs \

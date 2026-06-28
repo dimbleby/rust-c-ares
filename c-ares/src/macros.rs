@@ -24,7 +24,6 @@ macro_rules! ares_call {
                 c_arg.cast(),
             );
         }
-        panic::propagate();
     }};
 }
 
@@ -50,6 +49,6 @@ macro_rules! ares_callback {
             Err(Error::from($status))
         };
         let handler = unsafe { Box::from_raw($arg) };
-        panic::catch(|| handler(result));
+        panic::abort_on_panic(|| handler(result));
     }};
 }

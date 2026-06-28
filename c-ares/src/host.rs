@@ -75,7 +75,7 @@ pub(crate) unsafe extern "C" fn get_host_callback<F>(
 {
     let handler = unsafe { Box::from_raw(arg.cast::<F>()) };
 
-    panic::catch(|| {
+    panic::abort_on_panic(|| {
         if status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             // We wrap in ManuallyDrop so we don't call ares_free_hostent — c-ares owns this
             // hostent and will free it after we return.

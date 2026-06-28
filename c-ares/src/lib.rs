@@ -110,5 +110,6 @@ pub use crate::uri::{URIResult, URIResults, URIResultsIter};
 #[cfg(cares1_23)]
 pub use crate::utils::expand_name;
 pub use crate::utils::expand_string;
+#[cfg(cares1_23)]
 pub use crate::utils::thread_safety;
 pub use crate::utils::version;

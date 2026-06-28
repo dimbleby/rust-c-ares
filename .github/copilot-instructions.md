@@ -56,7 +56,7 @@ When navigating the codebase, these are the most important files to know about:
 | File | Purpose |
 |---|---|
 | `c-ares/src/macros.rs` | `ares_call!`, `ares_query!`, `ares_search!`, `ares_callback!` — the macros that implement the callback boxing/FFI/reclamation lifecycle |
-| `c-ares/src/panic.rs` | `panic::catch` / `panic::propagate` — safely round-trips Rust panics across FFI boundaries |
+| `c-ares/src/panic.rs` | `panic::abort_on_panic` — runs a user callback and aborts the process if it panics (unwinding across the C FFI boundary is not permitted) |
 | `c-ares/src/utils.rs` | String/pointer conversion helpers, IP address conversions, `status_to_result`, `version()` |
 | `c-ares/src/types.rs` | `QueryType`, `DnsClass`, `AddressFamily`, `Socket` enums |
 | `c-ares/src/error.rs` | `Error` enum (maps `ares_status_t`), `Result<T>` type alias |
@@ -120,16 +120,15 @@ Each record module also has an `impl QueryRecord for XResults` block (`pub(crate
 
 The callback system is built on four macros in `c-ares/src/macros.rs`:
 
-- **`ares_call!`** — The foundation. Converts the handler name to a `CString`, boxes the closure with `Box::into_raw`, calls the specified `c_ares_sys` function, then calls `panic::propagate()` to re-raise any panic caught during a prior callback.
+- **`ares_call!`** — The foundation. Converts the handler name to a `CString` and boxes the closure with `Box::into_raw`, then calls the specified `c_ares_sys` function.
 - **`ares_query!`** / **`ares_search!`** — Shorthands for `ares_call!` with `ares_query` / `ares_search`.
-- **`ares_callback!`** — Used inside the `unsafe extern "C"` callback function. Checks the status, parses the response buffer on success, reclaims the boxed closure with `Box::from_raw`, and invokes it inside `panic::catch`.
+- **`ares_callback!`** — Used inside the `unsafe extern "C"` callback function. Checks the status, parses the response buffer on success, reclaims the boxed closure with `Box::from_raw`, and invokes it inside `panic::abort_on_panic`.
 
 The full lifecycle is:
 1. Caller boxes the closure → `Box::into_raw` → raw pointer passed to C (via `ares_call!`).
 2. C library invokes the callback with the raw pointer.
 3. Callback reclaims the box → `Box::from_raw` → calls the closure (via `ares_callback!`).
-4. `panic::catch` wraps the handler call; if it panics, the panic is stored in a thread-local.
-5. Back in the caller, `panic::propagate()` resumes any stored panic on the Rust side.
+4. `panic::abort_on_panic` wraps the handler call: a panic cannot unwind across the `extern "C"` boundary, so the default panic hook reports it and the process aborts.
 
 When adding a new typed query method, implement `QueryRecord` for the result type and add thin `Channel::query_xxx` / `search_xxx` wrappers that delegate to the private `do_query` / `do_search` helpers — do not hand-write the boxing/unboxing or a new trampoline. The `ares_query!`/`ares_search!`/`ares_callback!` macros remain the right tools for non-standard pathways (raw bytes, `DnsRecord`, etc.).
 

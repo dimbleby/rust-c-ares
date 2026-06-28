@@ -180,7 +180,6 @@ impl Channel {
     #[cfg(cares1_22)]
     pub fn reinit(&mut self) -> Result<&mut Self> {
         let rc = unsafe { c_ares_sys::ares_reinit(self.ares_channel) };
-        panic::propagate();
         status_to_result(rc)?;
         Ok(self)
     }
@@ -233,14 +232,12 @@ impl Channel {
         let rfd = read_fd.unwrap_or(c_ares_sys::ARES_SOCKET_BAD);
         let wfd = write_fd.unwrap_or(c_ares_sys::ARES_SOCKET_BAD);
         unsafe { c_ares_sys::ares_process_fd(self.ares_channel, rfd, wfd) }
-        panic::propagate();
     }
 
     /// Handle input and output events associated with the specified file descriptors (sockets).
     /// Also handles timeouts associated with the `Channel`.
     pub fn process(&mut self, read_fds: &mut c_types::fd_set, write_fds: &mut c_types::fd_set) {
         unsafe { c_ares_sys::ares_process(self.ares_channel, read_fds, write_fds) }
-        panic::propagate();
     }
 
     /// Process events on multiple file descriptors based on the event mask associated with each
@@ -256,7 +253,6 @@ impl Channel {
                 flags.bits(),
             )
         };
-        panic::propagate();
         status_to_result(rc)
     }
 
@@ -762,7 +758,6 @@ impl Channel {
                 c_arg.cast(),
             );
         }
-        panic::propagate();
     }
 
     /// Perform a host query by name.
@@ -786,7 +781,6 @@ impl Channel {
                 c_arg.cast(),
             );
         }
-        panic::propagate();
     }
 
     /// Address-to-nodename translation in protocol-independent manner.
@@ -825,7 +819,6 @@ impl Channel {
                 c_arg.cast(),
             );
         }
-        panic::propagate();
     }
 
     /// Initiate a host query by name and service.
@@ -863,7 +856,6 @@ impl Channel {
                 c_arg.cast(),
             );
         }
-        panic::propagate();
     }
 
     /// Initiate a single-question DNS query for `name`.  The class and type of the query are per
@@ -951,7 +943,6 @@ impl Channel {
                 &raw mut qid,
             )
         };
-        panic::propagate();
 
         status_to_result(status)?;
         Ok(qid)
@@ -1008,7 +999,6 @@ impl Channel {
                 &raw mut qid,
             )
         };
-        panic::propagate();
 
         status_to_result(status)?;
         Ok(qid)
@@ -1049,7 +1039,6 @@ impl Channel {
                 c_arg.cast(),
             )
         };
-        panic::propagate();
 
         status_to_result(status)
     }
@@ -1060,14 +1049,12 @@ impl Channel {
     /// `Err(Error::ECANCELLED)`.
     pub fn cancel(&mut self) {
         unsafe { c_ares_sys::ares_cancel(self.ares_channel) }
-        panic::propagate();
     }
 
     /// Kick c-ares to process a pending write.
     #[cfg(cares1_34)]
     pub fn process_pending_write(&mut self) {
         unsafe { c_ares_sys::ares_process_pending_write(self.ares_channel) }
-        panic::propagate();
     }
 
     /// Return the maximum time to wait before processing timeouts.
@@ -1110,7 +1097,6 @@ impl Channel {
             Some(d) => d.as_millis().try_into().unwrap_or(c_int::MAX),
         };
         let rc = unsafe { c_ares_sys::ares_queue_wait_empty(self.ares_channel, timeout_ms) };
-        panic::propagate();
         status_to_result(rc)
     }
 
@@ -1131,9 +1117,6 @@ impl Drop for Channel {
         {
             let _lock = ARES_LIBRARY_LOCK.lock().unwrap();
             unsafe { c_ares_sys::ares_library_cleanup() }
-        }
-        if !std::thread::panicking() {
-            panic::propagate();
         }
     }
 }
@@ -1157,7 +1140,7 @@ unsafe extern "C" fn socket_state_callback<F>(
 {
     let handler = data.cast::<F>();
     let handler = unsafe { &*handler };
-    panic::catch(|| handler(socket_fd, readable != 0, writable != 0));
+    panic::abort_on_panic(|| handler(socket_fd, readable != 0, writable != 0));
 }
 
 #[cfg(cares1_29)]
@@ -1172,7 +1155,7 @@ unsafe extern "C" fn server_state_callback<F>(
     let handler = data.cast::<F>();
     let handler = unsafe { &*handler };
     let server = unsafe { c_string_as_str_unchecked(server_string) };
-    panic::catch(|| {
+    panic::abort_on_panic(|| {
         handler(
             server,
             success != c_ares_sys::ares_bool_t::ARES_FALSE,
@@ -1188,7 +1171,7 @@ where
 {
     let handler = data.cast::<F>();
     let handler = unsafe { &*handler };
-    panic::catch(handler);
+    panic::abort_on_panic(handler);
 }
 
 #[cfg(test)]
@@ -1301,7 +1284,7 @@ mod tests {
     #[test]
     fn channel_servers_round_trip() {
         let mut channel = Channel::new().unwrap();
-        channel.set_servers(&["8.8.8.8:53"]).unwrap();
+        channel.set_servers(["8.8.8.8:53"]).unwrap();
         let servers = channel.servers();
         assert!(servers.iter().any(|s| s.contains("8.8.8.8")));
     }

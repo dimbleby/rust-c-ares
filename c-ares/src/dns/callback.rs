@@ -15,7 +15,7 @@ pub(crate) unsafe extern "C" fn dnsrec_callback<F>(
 {
     let handler = unsafe { Box::from_raw(arg.cast::<F>()) };
 
-    panic::catch(|| {
+    panic::abort_on_panic(|| {
         if let Ok(err) = Error::try_from(status) {
             handler(Err(err));
         } else {

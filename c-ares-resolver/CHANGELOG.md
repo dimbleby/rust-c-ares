@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A panic in a user-supplied callback now aborts the process (after the
+  default panic hook reports it), rather than being propagated back across the
+  c-ares FFI boundary
 - `Resolver::set_servers` / `set_sortlist`, `BlockingResolver::set_servers` /
   `set_sortlist`, `FutureResolver::set_servers` / `set_sortlist`, and
   `Options::set_domains` now accept any `IntoIterator<Item = impl AsRef<str>>`

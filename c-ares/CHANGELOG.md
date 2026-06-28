@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A panic in a user-supplied callback now aborts the process (after the
+  default panic hook reports it), rather than being propagated back across the
+  c-ares FFI boundary.  Unwinding across `extern "C"` is not permitted, so a
+  panicking callback can no longer be recovered by wrapping `process_fd` (or
+  similar) in `catch_unwind`
 - Fix `AResults::parse_from` / `AAAAResults::parse_from` to use a `c_int` for
   the result count, matching the c-ares signature.  Without this, no results
   were returned on big-endian 64-bit targets

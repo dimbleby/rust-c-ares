@@ -346,7 +346,7 @@ pub(crate) unsafe extern "C" fn get_addrinfo_callback<F>(
         Err(Error::from(status))
     };
     let handler = unsafe { Box::from_raw(arg.cast::<F>()) };
-    panic::catch(|| handler(result));
+    panic::abort_on_panic(|| handler(result));
 }
 
 #[cfg(test)]

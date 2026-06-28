@@ -121,14 +121,15 @@ fn compile() {
         .arg("--enable-cares-threads")
         .arg(format!("--prefix={}", outdir.display()));
 
-    // This code fragment copied from curl-rust... c-ares and curl come from
-    // the same developer so are usually pretty similar, and this seems to
-    // work.
-    //
     // NOTE GNU terminology
-    // BUILD = machine where we are (cross) compiling
-    // HOST = machine where the compiled binary will be used
-    // TARGET = only relevant when compiling compilers
+    // --build = machine doing the compiling (cargo's HOST)
+    // --host  = machine the output will run on (cargo's TARGET)
+    // --target only matters when building a compiler, so is unused here.
+    //
+    // configure's config.sub can't parse rust's `-windows-` triples as a
+    // `--host`, so when targeting windows we instead pass the build triple as
+    // `--host` and the rust target as `--target`, which cross-compiles
+    // correctly in practice.
     let host = env::var("HOST").unwrap();
     if target != host && (!target.contains("windows") || !host.contains("windows")) {
         if target.contains("windows") {

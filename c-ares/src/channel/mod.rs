@@ -66,6 +66,9 @@ type ServerStateCallback = dyn Fn(&str, bool, ServerStateFlags) + Send + Sync + 
 #[cfg(cares1_34)]
 type PendingWriteCallback = dyn Fn() + Send + Sync + 'static;
 
+#[cfg(cares1_35)]
+type QueryEnqueueCallback = dyn Fn() + Send + 'static;
+
 /// A channel for name service lookups.
 pub struct Channel {
     // The `ares_` prefix mirrors the FFI type name; the apparent name overlap
@@ -83,6 +86,10 @@ pub struct Channel {
     // For ownership only.
     #[cfg(cares1_34)]
     pending_write_callback: Option<Arc<PendingWriteCallback>>,
+
+    // For ownership only.
+    #[cfg(cares1_35)]
+    query_enqueue_callback: Option<Arc<QueryEnqueueCallback>>,
 }
 
 impl Channel {
@@ -172,6 +179,8 @@ impl Channel {
             server_state_callback: None,
             #[cfg(cares1_34)]
             pending_write_callback: None,
+            #[cfg(cares1_35)]
+            query_enqueue_callback: None,
         };
         Ok(channel)
     }
@@ -211,6 +220,9 @@ impl Channel {
         #[cfg(cares1_34)]
         let pending_write_callback = self.pending_write_callback.clone();
 
+        #[cfg(cares1_35)]
+        let query_enqueue_callback = self.query_enqueue_callback.as_ref().cloned();
+
         let channel = Channel {
             ares_channel,
             socket_state_callback,
@@ -218,6 +230,8 @@ impl Channel {
             server_state_callback,
             #[cfg(cares1_34)]
             pending_write_callback,
+            #[cfg(cares1_35)]
+            query_enqueue_callback,
         };
         Ok(channel)
     }
@@ -439,6 +453,28 @@ impl Channel {
             );
         }
         self.pending_write_callback = Some(boxed_callback);
+        self
+    }
+
+    /// Set a callback function to be invoked when a new query is enqueued.
+    ///
+    /// This allows an external event loop to wake up immediately when new work
+    /// is submitted, rather than waiting for the next poll timeout.
+    #[cfg(cares1_35)]
+    pub fn set_query_enqueue_callback<F>(&mut self, callback: F) -> &mut Self
+    where
+        F: Fn() + Send + 'static,
+    {
+        let boxed_callback = Arc::new(callback);
+        let data = Arc::as_ptr(&boxed_callback).cast_mut().cast();
+        unsafe {
+            c_ares_sys::ares_set_query_enqueue_cb(
+                self.ares_channel,
+                Some(query_enqueue_callback::<F>),
+                data,
+            )
+        }
+        self.query_enqueue_callback = Some(boxed_callback);
         self
     }
 
@@ -1174,6 +1210,16 @@ where
     panic::abort_on_panic(handler);
 }
 
+#[cfg(cares1_35)]
+unsafe extern "C" fn query_enqueue_callback<F>(data: *mut c_void)
+where
+    F: Fn() + Send + 'static,
+{
+    let handler = data.cast::<F>();
+    let handler = unsafe { &*handler };
+    panic::catch(handler);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1413,6 +1459,15 @@ mod tests {
         let mut channel = Channel::new().unwrap();
         channel.set_pending_write_callback(|| {
             // Callback for pending writes
+        });
+    }
+
+    #[cfg(cares1_35)]
+    #[test]
+    fn channel_set_query_enqueue_callback() {
+        let mut channel = Channel::new().unwrap();
+        channel.set_query_enqueue_callback(|| {
+            // Callback for query enqueue
         });
     }
 

@@ -151,8 +151,10 @@ fn parse_u16_list(data: &[u8]) -> Result<Vec<u16>, OptParseError> {
     }
 
     Ok(data
-        .chunks_exact(2)
-        .map(|c| c.try_into().expect("chunks_exact guarantees 2 bytes"))
+        .as_chunks::<2>()
+        .0
+        .iter()
+        .copied()
         .map(u16::from_be_bytes)
         .collect())
 }
@@ -172,8 +174,10 @@ fn parse_u32_list(data: &[u8]) -> Result<Vec<u32>, OptParseError> {
     }
 
     Ok(data
-        .chunks_exact(4)
-        .map(|c| c.try_into().expect("chunks_exact guarantees 4 bytes"))
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .copied()
         .map(u32::from_be_bytes)
         .collect())
 }
@@ -187,8 +191,10 @@ fn parse_inaddr4_list(data: &[u8]) -> Result<Vec<Ipv4Addr>, OptParseError> {
     }
 
     Ok(data
-        .chunks_exact(4)
-        .map(|c| TryInto::<[u8; 4]>::try_into(c).expect("chunks_exact guarantees 4 bytes"))
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .copied()
         .map(Ipv4Addr::from)
         .collect())
 }
@@ -202,8 +208,10 @@ fn parse_inaddr6_list(data: &[u8]) -> Result<Vec<Ipv6Addr>, OptParseError> {
     }
 
     Ok(data
-        .chunks_exact(16)
-        .map(|c| TryInto::<[u8; 16]>::try_into(c).expect("chunks_exact guarantees 16 bytes"))
+        .as_chunks::<16>()
+        .0
+        .iter()
+        .copied()
         .map(Ipv6Addr::from)
         .collect())
 }

@@ -1091,7 +1091,7 @@ impl Channel {
     ///
     /// Pass `None` to wait indefinitely.
     #[cfg(cares1_27)]
-    pub fn queue_wait_empty(&mut self, timeout: Option<Duration>) -> Result<()> {
+    pub fn queue_wait_empty(&self, timeout: Option<Duration>) -> Result<()> {
         let timeout_ms = match timeout {
             None => -1,
             Some(d) => d.as_millis().try_into().unwrap_or(c_int::MAX),
@@ -1437,7 +1437,7 @@ mod tests {
     #[cfg(cares1_27)]
     #[test]
     fn channel_queue_wait_empty() {
-        let mut channel = Channel::new().unwrap();
+        let channel = Channel::new().unwrap();
         // No pending queries, should return immediately.
         // Returns ENOTIMP if c-ares was not built with threading support.
         let result = channel.queue_wait_empty(Some(Duration::ZERO));
@@ -1447,7 +1447,7 @@ mod tests {
     #[cfg(cares1_27)]
     #[test]
     fn channel_queue_wait_empty_none_timeout() {
-        let mut channel = Channel::new().unwrap();
+        let channel = Channel::new().unwrap();
         // None means "wait indefinitely", but with no pending queries it returns immediately.
         let result = channel.queue_wait_empty(None);
         assert!(result.is_ok() || result == Err(Error::ENOTIMP));

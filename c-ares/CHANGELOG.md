@@ -2,9 +2,6 @@
 
 ## Unreleased
 
-- `Channel::queue_wait_empty()` now takes `&mut self` (was `&self`): the
-  underlying `ares_queue_wait_empty()` takes a non-`const` channel pointer, so
-  `&self` was unsound given `Channel: Sync`
 - A panic in a user-supplied callback now aborts the process (after the
   default panic hook reports it), rather than being propagated back across the
   c-ares FFI boundary.  Unwinding across `extern "C"` is not permitted, so a

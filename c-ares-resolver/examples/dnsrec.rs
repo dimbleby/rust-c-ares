@@ -9,7 +9,6 @@
 mod inner {
     use c_ares::{DnsCls, DnsRecord, DnsRecordType, DnsRr, DnsSection, TypedRr};
     use c_ares_resolver::Resolver;
-    use std::sync::mpsc;
 
     fn print_rr(rr: &DnsRr) {
         println!(
@@ -203,23 +202,19 @@ mod inner {
         )?;
         query.query_add(&domain, query_type, DnsCls::IN)?;
 
-        let (tx, rx) = mpsc::channel();
         let resolver = Resolver::new()?;
 
-        resolver.send_dnsrec(&query, move |result| {
-            match result {
-                Err(e) => println!("Query failed with error '{e}'"),
-                Ok(record) => {
-                    println!("Response for {domain} {query_type} (id={}):", record.id());
-                    print_section(record, DnsSection::Answer, "Answer");
-                    print_section(record, DnsSection::Authority, "Authority");
-                    print_section(record, DnsSection::Additional, "Additional");
-                }
+        resolver.send_dnsrec(&query, move |result| match result {
+            Err(e) => println!("Query failed with error '{e}'"),
+            Ok(record) => {
+                println!("Response for {domain} {query_type} (id={}):", record.id());
+                print_section(record, DnsSection::Answer, "Answer");
+                print_section(record, DnsSection::Authority, "Authority");
+                print_section(record, DnsSection::Additional, "Additional");
             }
-            tx.send(()).unwrap();
         })?;
 
-        rx.recv()?;
+        resolver.queue_wait_empty(None)?;
         Ok(())
     }
 }

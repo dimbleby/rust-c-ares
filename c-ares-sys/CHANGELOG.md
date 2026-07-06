@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 12.0.0 (6 July 2026)
+
 - c-ares 1.34.7
 - Re-export `libc::timeval`
 - Derive Debug where it was previously missing

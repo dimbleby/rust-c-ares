@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 13.0.0 (6 July 2026)
+
 - c-ares 1.34.7
 - A panic in a user-supplied callback now aborts the process (after the
   default panic hook reports it), rather than being propagated back across the

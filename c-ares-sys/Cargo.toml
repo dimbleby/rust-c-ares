@@ -1,6 +1,6 @@
 [package]
 name = "c-ares-sys"
-version = "11.0.0"
+version = "12.0.0"
 build = "build/main.rs"
 links = "cares"
 description = "Low-level bindings to the c-ares library"

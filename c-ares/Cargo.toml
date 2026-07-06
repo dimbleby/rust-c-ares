@@ -1,6 +1,6 @@
 [package]
 name = "c-ares"
-version = "12.0.0"
+version = "13.0.0"
 description = """
 A Rust wrapper for the c-ares library, for asynchronous DNS requests.
 """
@@ -24,7 +24,7 @@ features = ["vendored"]
 
 [dependencies]
 bitflags = "2.0"
-c-ares-sys = { version = "11.0.0", path = "../c-ares-sys", default-features = false }
+c-ares-sys = { version = "12.0.0", path = "../c-ares-sys", default-features = false }
 c-types.workspace = true
 itertools.workspace = true
 

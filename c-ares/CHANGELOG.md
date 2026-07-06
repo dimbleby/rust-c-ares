@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add `DnsRr::set_ttl`
+
 ## 13.0.0 (6 July 2026)
 
 - c-ares 1.34.7

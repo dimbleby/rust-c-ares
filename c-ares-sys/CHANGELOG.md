@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- c-ares 1.34.7
 - Re-export `libc::timeval`
 - Derive Debug where it was previously missing
 - Export `ARES_AI_*` address info hint flag constants

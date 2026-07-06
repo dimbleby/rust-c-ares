@@ -206,7 +206,9 @@ impl ares_dns_class_t {
     pub const ARES_CLASS_IN: ares_dns_class_t = ares_dns_class_t(1);
     #[doc = "< CHAOS"]
     pub const ARES_CLASS_CHAOS: ares_dns_class_t = ares_dns_class_t(3);
-    #[doc = "< Hesoid [Dyer 87]"]
+    #[doc = "< Hesiod [Dyer 87]"]
+    pub const ARES_CLASS_HESIOD: ares_dns_class_t = ares_dns_class_t(4);
+    #[doc = "< typo from older c-ares version for Hesiod"]
     pub const ARES_CLASS_HESOID: ares_dns_class_t = ares_dns_class_t(4);
     #[doc = "< RFC 2136"]
     pub const ARES_CLASS_NONE: ares_dns_class_t = ares_dns_class_t(254);
@@ -1011,7 +1013,7 @@ unsafe extern "C" {
     ) -> ares_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Write a complete DNS message\n\n  \\param[in]  dnsrec   Pointer to initialized and filled DNS record object.\n  \\param[out] buf      Pointer passed by reference to be filled in with with\n                       DNS message.  Must be ares_free()'d by caller.\n  \\param[out] buf_len  Length of returned buffer containing DNS message.\n  \\return ARES_SUCCESS on success"]
+    #[doc = " Write a complete DNS message\n\n  \\param[in]  dnsrec   Pointer to initialized and filled DNS record object.\n  \\param[out] buf      Pointer passed by reference to be filled in with with\n                       DNS message.  Must be ares_free_string()'d by caller.\n  \\param[out] buf_len  Length of returned buffer containing DNS message.\n  \\return ARES_SUCCESS on success"]
     pub fn ares_dns_write(
         dnsrec: *const ares_dns_record_t,
         buf: *mut *mut ::core::ffi::c_uchar,
@@ -1027,7 +1029,7 @@ pub type ares_callback = ::core::option::Option<
         arg: *mut ::core::ffi::c_void,
         status: ::core::ffi::c_int,
         timeouts: ::core::ffi::c_int,
-        abuf: *mut ::core::ffi::c_uchar,
+        abuf: *const ::core::ffi::c_uchar,
         alen: ::core::ffi::c_int,
     ),
 >;
@@ -1044,7 +1046,7 @@ pub type ares_host_callback = ::core::option::Option<
         arg: *mut ::core::ffi::c_void,
         status: ::core::ffi::c_int,
         timeouts: ::core::ffi::c_int,
-        hostent: *mut hostent,
+        hostent: *const hostent,
     ),
 >;
 pub type ares_nameinfo_callback = ::core::option::Option<
@@ -1052,8 +1054,8 @@ pub type ares_nameinfo_callback = ::core::option::Option<
         arg: *mut ::core::ffi::c_void,
         status: ::core::ffi::c_int,
         timeouts: ::core::ffi::c_int,
-        node: *mut ::core::ffi::c_char,
-        service: *mut ::core::ffi::c_char,
+        node: *const ::core::ffi::c_char,
+        service: *const ::core::ffi::c_char,
     ),
 >;
 pub type ares_sock_create_callback = ::core::option::Option<

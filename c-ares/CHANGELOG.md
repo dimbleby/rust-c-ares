@@ -3,6 +3,7 @@
 ## Unreleased
 
 - set_query_cache_max_ttl now accepts a `Duration`
+- Add `DnsRr::set_ttl`
 
 ## 13.1.0 (20 October 2026)
 

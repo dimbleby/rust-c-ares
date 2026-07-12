@@ -105,6 +105,27 @@ jobs:
           cargo run -p c-ares-resolver --example dnsrec
         name: Run c-ares-resolver examples
 
+  build-cmake:
+    name: Build Cmake
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install Rust (rustup)
+        run: rustup update --no-self-update
+        shell: bash
+      - name: Build
+        run: |
+          cargo build --workspace --features vendored,build-cmake
+
   coverage:
     name: Coverage
     runs-on: ubuntu-latest

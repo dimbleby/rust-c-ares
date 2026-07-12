@@ -34,6 +34,9 @@ pub(super) fn build() -> Vec<PathBuf> {
     if cfg!(target_os = "macos") {
         println!("cargo:rustc-link-lib=resolv");
     }
+    if cfg!(windows) {
+        println!("cargo:rustc-link-lib=iphlpapi");
+    }
 
     compile();
 
@@ -179,6 +182,5 @@ fn build_msvc(target: &str) {
 
     // Link to compiled library.
     println!("cargo:rustc-link-search={}/lib", build.display());
-    println!("cargo:rustc-link-lib=iphlpapi");
     println!("cargo:rustc-link-lib=static=libcares");
 }

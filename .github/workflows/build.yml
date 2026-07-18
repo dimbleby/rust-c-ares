@@ -106,7 +106,7 @@ jobs:
         name: Run c-ares-resolver examples
 
   build-cmake:
-    name: Build Cmake
+    name: Build CMake
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

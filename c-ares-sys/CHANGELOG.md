@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 12.0.1 (18 July 2026)
+
+- fix windows cmake build
+
 ## 12.0.0 (6 July 2026)
 
 - c-ares 1.34.7

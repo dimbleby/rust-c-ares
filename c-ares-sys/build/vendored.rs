@@ -34,7 +34,7 @@ pub(super) fn build() -> Vec<PathBuf> {
     if cfg!(target_os = "macos") {
         println!("cargo:rustc-link-lib=resolv");
     }
-    if cfg!(windows) {
+    if env::var("CARGO_CFG_WINDOWS").is_ok() {
         println!("cargo:rustc-link-lib=iphlpapi");
     }
 

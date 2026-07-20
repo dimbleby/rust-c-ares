@@ -199,6 +199,14 @@ impl DnsRr {
         DnsOptDataType::from(raw)
     }
 
+    /// Set the resource record TTL.
+    #[cfg(cares1_35)]
+    pub fn set_ttl(&mut self, ttl: u32) -> Result<&mut Self> {
+        let status = unsafe { c_ares_sys::ares_dns_rr_set_ttl(self.as_mut_ptr(), ttl) };
+        status_to_result(status)?;
+        Ok(self)
+    }
+
     /// Set IPv4 address data type for the given key.
     ///
     /// Can only be used on keys with datatype `INADDR`.
@@ -391,6 +399,37 @@ mod tests {
             rr.get_addr(DnsRrKey::A_ADDR),
             Some(Ipv4Addr::new(10, 0, 0, 1))
         );
+    }
+
+    // --- Coverage: set_ttl / ttl round-trip ---
+    #[cfg(cares1_35)]
+    #[test]
+    fn set_and_get_ttl() {
+        let mut rec = DnsRecord::new(
+            0,
+            DnsFlags::QR | DnsFlags::RD,
+            DnsOpcode::Query,
+            DnsRcode::NoError,
+        )
+        .expect("create");
+        rec.query_add("example.com", DnsRecordType::A, DnsCls::IN)
+            .expect("query_add");
+        let rr = rec
+            .rr_add(
+                DnsSection::Answer,
+                "example.com",
+                DnsRecordType::A,
+                DnsCls::IN,
+                300,
+            )
+            .expect("rr_add");
+        assert_eq!(rr.ttl(), 300);
+        rr.set_ttl(3600).expect("set_ttl");
+        assert_eq!(rr.ttl(), 3600);
+
+        // Also read back from the record directly
+        let rr = rec.rr(DnsSection::Answer, 0).expect("rr");
+        assert_eq!(rr.ttl(), 3600);
     }
 
     // --- Coverage: set_addr6 / get_addr6 round-trip ---

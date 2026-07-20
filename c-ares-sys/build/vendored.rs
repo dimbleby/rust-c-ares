@@ -30,11 +30,13 @@ pub(super) fn build() -> Vec<PathBuf> {
     // Export the include path for crates depending on c-ares
     println!("cargo:include={}", c_ares_dir.join("include").display());
 
+    let target_os = env::var("CARGO_CFG_TARGET_OS").expect("CARGO_CFG_TARGET_OS is set by Cargo");
+
     // Need libresolv on macos.
-    if cfg!(target_os = "macos") {
+    if target_os == "macos" {
         println!("cargo:rustc-link-lib=resolv");
     }
-    if cfg!(windows) {
+    if target_os == "windows" {
         println!("cargo:rustc-link-lib=iphlpapi");
     }
 

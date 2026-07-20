@@ -2,7 +2,8 @@
 
 mod common;
 
-use c_ares::*;
+#[cfg(cares1_29)]
+use c_ares::ServerStateFlags;
 use common::{channel, process_channel};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};

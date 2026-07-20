@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 12.0.2 (20 July 2026)
+
 - fix vendored cross-compilation for macOS and Windows
 
 ## 12.0.1 (18 July 2026)

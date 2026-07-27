@@ -69,7 +69,7 @@ pub(crate) unsafe extern "C" fn get_host_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,
-    hostent: *const c_types::hostent,
+    hostent: *mut c_types::hostent,
 ) where
     F: FnOnce(Result<&HostResults>) + Send + 'static,
 {
@@ -79,7 +79,7 @@ pub(crate) unsafe extern "C" fn get_host_callback<F>(
         if status == c_ares_sys::ares_status_t::ARES_SUCCESS as i32 {
             // We wrap in ManuallyDrop so we don't call ares_free_hostent — c-ares owns this
             // hostent and will free it after we return.
-            let host_results = HostResults::new(hostent.cast_mut());
+            let host_results = HostResults::new(hostent);
             let host_results = ManuallyDrop::new(host_results);
             handler(Ok(&host_results));
         } else {

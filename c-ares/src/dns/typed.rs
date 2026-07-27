@@ -543,6 +543,325 @@ impl fmt::Debug for TlsaRecord<'_> {
     }
 }
 
+/// Typed view of a [`DS`](DnsRecordType::DS) record.
+#[derive(Copy, Clone)]
+pub struct DsRecord<'a>(&'a DnsRr);
+
+impl<'a> DsRecord<'a> {
+    common_accessors!(DsRecord);
+
+    /// Key tag ([`DS_KEY_TAG`](DnsRrKey::DS_KEY_TAG)).
+    pub fn key_tag(self) -> u16 {
+        self.0.get_u16(DnsRrKey::DS_KEY_TAG)
+    }
+
+    /// Algorithm ([`DS_ALGORITHM`](DnsRrKey::DS_ALGORITHM)).
+    pub fn algorithm(self) -> u8 {
+        self.0.get_u8(DnsRrKey::DS_ALGORITHM)
+    }
+
+    /// Digest type ([`DS_DIGEST_TYPE`](DnsRrKey::DS_DIGEST_TYPE)).
+    pub fn digest_type(self) -> u8 {
+        self.0.get_u8(DnsRrKey::DS_DIGEST_TYPE)
+    }
+
+    /// Digest ([`DS_DIGEST`](DnsRrKey::DS_DIGEST)).
+    pub fn digest(self) -> &'a [u8] {
+        self.0.get_bin(DnsRrKey::DS_DIGEST).unwrap_or(&[])
+    }
+}
+
+impl fmt::Debug for DsRecord<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DsRecord")
+            .field("name", &self.name())
+            .field("ttl", &self.ttl())
+            .field("key_tag", &self.key_tag())
+            .field("algorithm", &self.algorithm())
+            .field("digest_type", &self.digest_type())
+            .field("digest_len", &self.digest().len())
+            .finish()
+    }
+}
+
+/// Typed view of an [`SSHFP`](DnsRecordType::SSHFP) record.
+#[derive(Copy, Clone)]
+pub struct SshfpRecord<'a>(&'a DnsRr);
+
+impl<'a> SshfpRecord<'a> {
+    common_accessors!(SshfpRecord);
+
+    /// Algorithm ([`SSHFP_ALGORITHM`](DnsRrKey::SSHFP_ALGORITHM)).
+    pub fn algorithm(self) -> u8 {
+        self.0.get_u8(DnsRrKey::SSHFP_ALGORITHM)
+    }
+
+    /// Fingerprint type ([`SSHFP_FP_TYPE`](DnsRrKey::SSHFP_FP_TYPE)).
+    pub fn fp_type(self) -> u8 {
+        self.0.get_u8(DnsRrKey::SSHFP_FP_TYPE)
+    }
+
+    /// Fingerprint ([`SSHFP_FINGERPRINT`](DnsRrKey::SSHFP_FINGERPRINT)).
+    pub fn fingerprint(self) -> &'a [u8] {
+        self.0.get_bin(DnsRrKey::SSHFP_FINGERPRINT).unwrap_or(&[])
+    }
+}
+
+impl fmt::Debug for SshfpRecord<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SshfpRecord")
+            .field("name", &self.name())
+            .field("ttl", &self.ttl())
+            .field("algorithm", &self.algorithm())
+            .field("fp_type", &self.fp_type())
+            .field("fingerprint_len", &self.fingerprint().len())
+            .finish()
+    }
+}
+
+/// Typed view of an [`RRSIG`](DnsRecordType::RRSIG) record.
+#[derive(Copy, Clone)]
+pub struct RrsigRecord<'a>(&'a DnsRr);
+
+impl<'a> RrsigRecord<'a> {
+    common_accessors!(RrsigRecord);
+
+    /// Type covered ([`RRSIG_TYPE_COVERED`](DnsRrKey::RRSIG_TYPE_COVERED)).
+    pub fn type_covered(self) -> u16 {
+        self.0.get_u16(DnsRrKey::RRSIG_TYPE_COVERED)
+    }
+
+    /// Algorithm ([`RRSIG_ALGORITHM`](DnsRrKey::RRSIG_ALGORITHM)).
+    pub fn algorithm(self) -> u8 {
+        self.0.get_u8(DnsRrKey::RRSIG_ALGORITHM)
+    }
+
+    /// Number of labels ([`RRSIG_LABELS`](DnsRrKey::RRSIG_LABELS)).
+    pub fn labels(self) -> u8 {
+        self.0.get_u8(DnsRrKey::RRSIG_LABELS)
+    }
+
+    /// Original TTL ([`RRSIG_ORIGINAL_TTL`](DnsRrKey::RRSIG_ORIGINAL_TTL)).
+    pub fn original_ttl(self) -> u32 {
+        self.0.get_u32(DnsRrKey::RRSIG_ORIGINAL_TTL)
+    }
+
+    /// Signature expiration time
+    /// ([`RRSIG_EXPIRATION`](DnsRrKey::RRSIG_EXPIRATION)).
+    pub fn expiration(self) -> u32 {
+        self.0.get_u32(DnsRrKey::RRSIG_EXPIRATION)
+    }
+
+    /// Signature inception time
+    /// ([`RRSIG_INCEPTION`](DnsRrKey::RRSIG_INCEPTION)).
+    pub fn inception(self) -> u32 {
+        self.0.get_u32(DnsRrKey::RRSIG_INCEPTION)
+    }
+
+    /// Key tag ([`RRSIG_KEY_TAG`](DnsRrKey::RRSIG_KEY_TAG)).
+    pub fn key_tag(self) -> u16 {
+        self.0.get_u16(DnsRrKey::RRSIG_KEY_TAG)
+    }
+
+    /// Signer's name ([`RRSIG_SIGNERS_NAME`](DnsRrKey::RRSIG_SIGNERS_NAME)).
+    pub fn signers_name(self) -> &'a str {
+        self.0.get_str(DnsRrKey::RRSIG_SIGNERS_NAME).unwrap_or("")
+    }
+
+    /// Signature data ([`RRSIG_SIGNATURE`](DnsRrKey::RRSIG_SIGNATURE)).
+    pub fn signature(self) -> &'a [u8] {
+        self.0.get_bin(DnsRrKey::RRSIG_SIGNATURE).unwrap_or(&[])
+    }
+}
+
+impl fmt::Debug for RrsigRecord<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RrsigRecord")
+            .field("name", &self.name())
+            .field("ttl", &self.ttl())
+            .field("type_covered", &self.type_covered())
+            .field("algorithm", &self.algorithm())
+            .field("labels", &self.labels())
+            .field("original_ttl", &self.original_ttl())
+            .field("expiration", &self.expiration())
+            .field("inception", &self.inception())
+            .field("key_tag", &self.key_tag())
+            .field("signers_name", &self.signers_name())
+            .field("signature_len", &self.signature().len())
+            .finish()
+    }
+}
+
+/// Typed view of an [`NSEC`](DnsRecordType::NSEC) record.
+#[derive(Copy, Clone)]
+pub struct NsecRecord<'a>(&'a DnsRr);
+
+impl<'a> NsecRecord<'a> {
+    common_accessors!(NsecRecord);
+
+    /// Next domain name ([`NSEC_NEXT_DOMAIN`](DnsRrKey::NSEC_NEXT_DOMAIN)).
+    pub fn next_domain(self) -> &'a str {
+        self.0.get_str(DnsRrKey::NSEC_NEXT_DOMAIN).unwrap_or("")
+    }
+
+    /// Type bit maps ([`NSEC_TYPE_BIT_MAPS`](DnsRrKey::NSEC_TYPE_BIT_MAPS)).
+    pub fn type_bit_maps(self) -> &'a [u8] {
+        self.0.get_bin(DnsRrKey::NSEC_TYPE_BIT_MAPS).unwrap_or(&[])
+    }
+}
+
+impl fmt::Debug for NsecRecord<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("NsecRecord")
+            .field("name", &self.name())
+            .field("ttl", &self.ttl())
+            .field("next_domain", &self.next_domain())
+            .field("type_bit_maps_len", &self.type_bit_maps().len())
+            .finish()
+    }
+}
+
+/// Typed view of a [`DNSKEY`](DnsRecordType::DNSKEY) record.
+#[derive(Copy, Clone)]
+pub struct DnskeyRecord<'a>(&'a DnsRr);
+
+impl<'a> DnskeyRecord<'a> {
+    common_accessors!(DnskeyRecord);
+
+    /// Flags ([`DNSKEY_FLAGS`](DnsRrKey::DNSKEY_FLAGS)).
+    pub fn flags(self) -> u16 {
+        self.0.get_u16(DnsRrKey::DNSKEY_FLAGS)
+    }
+
+    /// Protocol ([`DNSKEY_PROTOCOL`](DnsRrKey::DNSKEY_PROTOCOL)).
+    pub fn protocol(self) -> u8 {
+        self.0.get_u8(DnsRrKey::DNSKEY_PROTOCOL)
+    }
+
+    /// Algorithm ([`DNSKEY_ALGORITHM`](DnsRrKey::DNSKEY_ALGORITHM)).
+    pub fn algorithm(self) -> u8 {
+        self.0.get_u8(DnsRrKey::DNSKEY_ALGORITHM)
+    }
+
+    /// Public key ([`DNSKEY_PUBLIC_KEY`](DnsRrKey::DNSKEY_PUBLIC_KEY)).
+    pub fn public_key(self) -> &'a [u8] {
+        self.0.get_bin(DnsRrKey::DNSKEY_PUBLIC_KEY).unwrap_or(&[])
+    }
+}
+
+impl fmt::Debug for DnskeyRecord<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("DnskeyRecord")
+            .field("name", &self.name())
+            .field("ttl", &self.ttl())
+            .field("flags", &self.flags())
+            .field("protocol", &self.protocol())
+            .field("algorithm", &self.algorithm())
+            .field("public_key_len", &self.public_key().len())
+            .finish()
+    }
+}
+
+/// Typed view of an [`NSEC3`](DnsRecordType::NSEC3) record.
+#[derive(Copy, Clone)]
+pub struct Nsec3Record<'a>(&'a DnsRr);
+
+impl<'a> Nsec3Record<'a> {
+    common_accessors!(Nsec3Record);
+
+    /// Hash algorithm
+    /// ([`NSEC3_HASH_ALGORITHM`](DnsRrKey::NSEC3_HASH_ALGORITHM)).
+    pub fn hash_algorithm(self) -> u8 {
+        self.0.get_u8(DnsRrKey::NSEC3_HASH_ALGORITHM)
+    }
+
+    /// Flags ([`NSEC3_FLAGS`](DnsRrKey::NSEC3_FLAGS)).
+    pub fn flags(self) -> u8 {
+        self.0.get_u8(DnsRrKey::NSEC3_FLAGS)
+    }
+
+    /// Iterations ([`NSEC3_ITERATIONS`](DnsRrKey::NSEC3_ITERATIONS)).
+    pub fn iterations(self) -> u16 {
+        self.0.get_u16(DnsRrKey::NSEC3_ITERATIONS)
+    }
+
+    /// Salt ([`NSEC3_SALT`](DnsRrKey::NSEC3_SALT)).
+    pub fn salt(self) -> &'a [u8] {
+        self.0.get_bin(DnsRrKey::NSEC3_SALT).unwrap_or(&[])
+    }
+
+    /// Next hashed owner name
+    /// ([`NSEC3_NEXT_HASHED_OWNER`](DnsRrKey::NSEC3_NEXT_HASHED_OWNER)).
+    pub fn next_hashed_owner(self) -> &'a [u8] {
+        self.0
+            .get_bin(DnsRrKey::NSEC3_NEXT_HASHED_OWNER)
+            .unwrap_or(&[])
+    }
+
+    /// Type bit maps
+    /// ([`NSEC3_TYPE_BIT_MAPS`](DnsRrKey::NSEC3_TYPE_BIT_MAPS)).
+    pub fn type_bit_maps(self) -> &'a [u8] {
+        self.0.get_bin(DnsRrKey::NSEC3_TYPE_BIT_MAPS).unwrap_or(&[])
+    }
+}
+
+impl fmt::Debug for Nsec3Record<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Nsec3Record")
+            .field("name", &self.name())
+            .field("ttl", &self.ttl())
+            .field("hash_algorithm", &self.hash_algorithm())
+            .field("flags", &self.flags())
+            .field("iterations", &self.iterations())
+            .field("salt_len", &self.salt().len())
+            .field("next_hashed_owner_len", &self.next_hashed_owner().len())
+            .field("type_bit_maps_len", &self.type_bit_maps().len())
+            .finish()
+    }
+}
+
+/// Typed view of an [`NSEC3PARAM`](DnsRecordType::NSEC3PARAM) record.
+#[derive(Copy, Clone)]
+pub struct Nsec3ParamRecord<'a>(&'a DnsRr);
+
+impl<'a> Nsec3ParamRecord<'a> {
+    common_accessors!(Nsec3ParamRecord);
+
+    /// Hash algorithm
+    /// ([`NSEC3PARAM_HASH_ALGORITHM`](DnsRrKey::NSEC3PARAM_HASH_ALGORITHM)).
+    pub fn hash_algorithm(self) -> u8 {
+        self.0.get_u8(DnsRrKey::NSEC3PARAM_HASH_ALGORITHM)
+    }
+
+    /// Flags ([`NSEC3PARAM_FLAGS`](DnsRrKey::NSEC3PARAM_FLAGS)).
+    pub fn flags(self) -> u8 {
+        self.0.get_u8(DnsRrKey::NSEC3PARAM_FLAGS)
+    }
+
+    /// Iterations ([`NSEC3PARAM_ITERATIONS`](DnsRrKey::NSEC3PARAM_ITERATIONS)).
+    pub fn iterations(self) -> u16 {
+        self.0.get_u16(DnsRrKey::NSEC3PARAM_ITERATIONS)
+    }
+
+    /// Salt ([`NSEC3PARAM_SALT`](DnsRrKey::NSEC3PARAM_SALT)).
+    pub fn salt(self) -> &'a [u8] {
+        self.0.get_bin(DnsRrKey::NSEC3PARAM_SALT).unwrap_or(&[])
+    }
+}
+
+impl fmt::Debug for Nsec3ParamRecord<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Nsec3ParamRecord")
+            .field("name", &self.name())
+            .field("ttl", &self.ttl())
+            .field("hash_algorithm", &self.hash_algorithm())
+            .field("flags", &self.flags())
+            .field("iterations", &self.iterations())
+            .field("salt_len", &self.salt().len())
+            .finish()
+    }
+}
+
 /// Typed view of a [`URI`](DnsRecordType::URI) record.
 #[derive(Copy, Clone)]
 pub struct UriRecord<'a>(&'a DnsRr);
@@ -923,6 +1242,20 @@ pub enum TypedRr<'a> {
     Opt(OptRecord<'a>),
     /// DANE TLSA record.
     Tlsa(TlsaRecord<'a>),
+    /// Delegation signer record.
+    Ds(DsRecord<'a>),
+    /// SSH fingerprint record.
+    Sshfp(SshfpRecord<'a>),
+    /// DNSSEC signature record.
+    Rrsig(RrsigRecord<'a>),
+    /// Next secure record.
+    Nsec(NsecRecord<'a>),
+    /// DNS public key record.
+    Dnskey(DnskeyRecord<'a>),
+    /// NSEC3 record.
+    Nsec3(Nsec3Record<'a>),
+    /// NSEC3PARAM record.
+    Nsec3Param(Nsec3ParamRecord<'a>),
     /// Service binding record.
     Svcb(SvcbRecord<'a>),
     /// HTTPS service binding record.
@@ -1029,6 +1362,48 @@ impl DnsRr {
         (self.rr_type() == DnsRecordType::TLSA).then(|| TlsaRecord::new(self))
     }
 
+    /// Returns a typed [`DsRecord`] view if this record is of type
+    /// [`DS`](DnsRecordType::DS).
+    pub fn as_ds(&self) -> Option<DsRecord<'_>> {
+        (self.rr_type() == DnsRecordType::DS).then(|| DsRecord::new(self))
+    }
+
+    /// Returns a typed [`SshfpRecord`] view if this record is of type
+    /// [`SSHFP`](DnsRecordType::SSHFP).
+    pub fn as_sshfp(&self) -> Option<SshfpRecord<'_>> {
+        (self.rr_type() == DnsRecordType::SSHFP).then(|| SshfpRecord::new(self))
+    }
+
+    /// Returns a typed [`RrsigRecord`] view if this record is of type
+    /// [`RRSIG`](DnsRecordType::RRSIG).
+    pub fn as_rrsig(&self) -> Option<RrsigRecord<'_>> {
+        (self.rr_type() == DnsRecordType::RRSIG).then(|| RrsigRecord::new(self))
+    }
+
+    /// Returns a typed [`NsecRecord`] view if this record is of type
+    /// [`NSEC`](DnsRecordType::NSEC).
+    pub fn as_nsec(&self) -> Option<NsecRecord<'_>> {
+        (self.rr_type() == DnsRecordType::NSEC).then(|| NsecRecord::new(self))
+    }
+
+    /// Returns a typed [`DnskeyRecord`] view if this record is of type
+    /// [`DNSKEY`](DnsRecordType::DNSKEY).
+    pub fn as_dnskey(&self) -> Option<DnskeyRecord<'_>> {
+        (self.rr_type() == DnsRecordType::DNSKEY).then(|| DnskeyRecord::new(self))
+    }
+
+    /// Returns a typed [`Nsec3Record`] view if this record is of type
+    /// [`NSEC3`](DnsRecordType::NSEC3).
+    pub fn as_nsec3(&self) -> Option<Nsec3Record<'_>> {
+        (self.rr_type() == DnsRecordType::NSEC3).then(|| Nsec3Record::new(self))
+    }
+
+    /// Returns a typed [`Nsec3ParamRecord`] view if this record is of type
+    /// [`NSEC3PARAM`](DnsRecordType::NSEC3PARAM).
+    pub fn as_nsec3param(&self) -> Option<Nsec3ParamRecord<'_>> {
+        (self.rr_type() == DnsRecordType::NSEC3PARAM).then(|| Nsec3ParamRecord::new(self))
+    }
+
     /// Returns a typed [`SvcbRecord`] view if this record is of type
     /// [`SVCB`](DnsRecordType::SVCB).
     pub fn as_svcb(&self) -> Option<SvcbRecord<'_>> {
@@ -1077,6 +1452,13 @@ impl DnsRr {
             DnsRecordType::NAPTR => TypedRr::Naptr(NaptrRecord::new(self)),
             DnsRecordType::OPT => TypedRr::Opt(OptRecord::new(self)),
             DnsRecordType::TLSA => TypedRr::Tlsa(TlsaRecord::new(self)),
+            DnsRecordType::DS => TypedRr::Ds(DsRecord::new(self)),
+            DnsRecordType::SSHFP => TypedRr::Sshfp(SshfpRecord::new(self)),
+            DnsRecordType::RRSIG => TypedRr::Rrsig(RrsigRecord::new(self)),
+            DnsRecordType::NSEC => TypedRr::Nsec(NsecRecord::new(self)),
+            DnsRecordType::DNSKEY => TypedRr::Dnskey(DnskeyRecord::new(self)),
+            DnsRecordType::NSEC3 => TypedRr::Nsec3(Nsec3Record::new(self)),
+            DnsRecordType::NSEC3PARAM => TypedRr::Nsec3Param(Nsec3ParamRecord::new(self)),
             DnsRecordType::SVCB => TypedRr::Svcb(SvcbRecord::new(self)),
             DnsRecordType::HTTPS => TypedRr::Https(HttpsRecord::new(self)),
             DnsRecordType::URI => TypedRr::Uri(UriRecord::new(self)),
@@ -1617,6 +1999,151 @@ mod tests {
         assert!(matches!(first_rr(&rec).as_typed(), TypedRr::RawRr(_)));
     }
 
+    #[cfg(cares1_35)]
+    #[test]
+    fn ds_full_accessors_and_debug() {
+        let rec = build(DnsRecordType::DS, |rr| {
+            rr.set_u16(DnsRrKey::DS_KEY_TAG, 12345).unwrap();
+            rr.set_u8(DnsRrKey::DS_ALGORITHM, 8).unwrap();
+            rr.set_u8(DnsRrKey::DS_DIGEST_TYPE, 2).unwrap();
+            rr.set_bin(DnsRrKey::DS_DIGEST, &[0xab; 32]).unwrap();
+        });
+        let d = first_rr(&rec).as_ds().expect("as_ds");
+        assert_eq!(d.key_tag(), 12345);
+        assert_eq!(d.algorithm(), 8);
+        assert_eq!(d.digest_type(), 2);
+        assert_eq!(d.digest(), &[0xab; 32][..]);
+        assert!(format!("{d:?}").contains("DsRecord"));
+        assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Ds(_)));
+    }
+
+    #[cfg(cares1_35)]
+    #[test]
+    fn sshfp_full_accessors_and_debug() {
+        let rec = build(DnsRecordType::SSHFP, |rr| {
+            rr.set_u8(DnsRrKey::SSHFP_ALGORITHM, 4).unwrap();
+            rr.set_u8(DnsRrKey::SSHFP_FP_TYPE, 2).unwrap();
+            rr.set_bin(DnsRrKey::SSHFP_FINGERPRINT, &[0xcd; 32])
+                .unwrap();
+        });
+        let s = first_rr(&rec).as_sshfp().expect("as_sshfp");
+        assert_eq!(s.algorithm(), 4);
+        assert_eq!(s.fp_type(), 2);
+        assert_eq!(s.fingerprint(), &[0xcd; 32][..]);
+        assert!(format!("{s:?}").contains("SshfpRecord"));
+        assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Sshfp(_)));
+    }
+
+    #[cfg(cares1_35)]
+    #[test]
+    fn rrsig_full_accessors_and_debug() {
+        let rec = build(DnsRecordType::RRSIG, |rr| {
+            rr.set_u16(DnsRrKey::RRSIG_TYPE_COVERED, 1).unwrap();
+            rr.set_u8(DnsRrKey::RRSIG_ALGORITHM, 8).unwrap();
+            rr.set_u8(DnsRrKey::RRSIG_LABELS, 2).unwrap();
+            rr.set_u32(DnsRrKey::RRSIG_ORIGINAL_TTL, 3600).unwrap();
+            rr.set_u32(DnsRrKey::RRSIG_EXPIRATION, 4_000_000_000)
+                .unwrap();
+            rr.set_u32(DnsRrKey::RRSIG_INCEPTION, 1_000_000_000)
+                .unwrap();
+            rr.set_u16(DnsRrKey::RRSIG_KEY_TAG, 54321).unwrap();
+            rr.set_str(DnsRrKey::RRSIG_SIGNERS_NAME, "example.com")
+                .unwrap();
+            rr.set_bin(DnsRrKey::RRSIG_SIGNATURE, b"\x01\x02\x03\x04")
+                .unwrap();
+        });
+        let r = first_rr(&rec).as_rrsig().expect("as_rrsig");
+        assert_eq!(r.type_covered(), 1);
+        assert_eq!(r.algorithm(), 8);
+        assert_eq!(r.labels(), 2);
+        assert_eq!(r.original_ttl(), 3600);
+        assert_eq!(r.expiration(), 4_000_000_000);
+        assert_eq!(r.inception(), 1_000_000_000);
+        assert_eq!(r.key_tag(), 54321);
+        assert_eq!(r.signers_name(), "example.com");
+        assert_eq!(r.signature(), &b"\x01\x02\x03\x04"[..]);
+        assert!(format!("{r:?}").contains("RrsigRecord"));
+        assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Rrsig(_)));
+    }
+
+    #[cfg(cares1_35)]
+    #[test]
+    fn nsec_full_accessors_and_debug() {
+        let rec = build(DnsRecordType::NSEC, |rr| {
+            rr.set_str(DnsRrKey::NSEC_NEXT_DOMAIN, "next.example.com")
+                .unwrap();
+            rr.set_bin(DnsRrKey::NSEC_TYPE_BIT_MAPS, &[0x00, 0x01, 0x40])
+                .unwrap();
+        });
+        let n = first_rr(&rec).as_nsec().expect("as_nsec");
+        assert_eq!(n.next_domain(), "next.example.com");
+        assert_eq!(n.type_bit_maps(), &[0x00, 0x01, 0x40][..]);
+        assert!(format!("{n:?}").contains("NsecRecord"));
+        assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Nsec(_)));
+    }
+
+    #[cfg(cares1_35)]
+    #[test]
+    fn dnskey_full_accessors_and_debug() {
+        let rec = build(DnsRecordType::DNSKEY, |rr| {
+            rr.set_u16(DnsRrKey::DNSKEY_FLAGS, 0x0101).unwrap();
+            rr.set_u8(DnsRrKey::DNSKEY_PROTOCOL, 3).unwrap();
+            rr.set_u8(DnsRrKey::DNSKEY_ALGORITHM, 8).unwrap();
+            rr.set_bin(DnsRrKey::DNSKEY_PUBLIC_KEY, &[0xef; 64])
+                .unwrap();
+        });
+        let d = first_rr(&rec).as_dnskey().expect("as_dnskey");
+        assert_eq!(d.flags(), 0x0101);
+        assert_eq!(d.protocol(), 3);
+        assert_eq!(d.algorithm(), 8);
+        assert_eq!(d.public_key(), &[0xef; 64][..]);
+        assert!(format!("{d:?}").contains("DnskeyRecord"));
+        assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Dnskey(_)));
+    }
+
+    #[cfg(cares1_35)]
+    #[test]
+    fn nsec3_full_accessors_and_debug() {
+        let rec = build(DnsRecordType::NSEC3, |rr| {
+            rr.set_u8(DnsRrKey::NSEC3_HASH_ALGORITHM, 1).unwrap();
+            rr.set_u8(DnsRrKey::NSEC3_FLAGS, 0).unwrap();
+            rr.set_u16(DnsRrKey::NSEC3_ITERATIONS, 10).unwrap();
+            rr.set_bin(DnsRrKey::NSEC3_SALT, b"\xaa\xbb\xcc\xdd")
+                .unwrap();
+            rr.set_bin(DnsRrKey::NSEC3_NEXT_HASHED_OWNER, &[0x11; 20])
+                .unwrap();
+            rr.set_bin(DnsRrKey::NSEC3_TYPE_BIT_MAPS, &[0x00, 0x01, 0x40])
+                .unwrap();
+        });
+        let n = first_rr(&rec).as_nsec3().expect("as_nsec3");
+        assert_eq!(n.hash_algorithm(), 1);
+        assert_eq!(n.flags(), 0);
+        assert_eq!(n.iterations(), 10);
+        assert_eq!(n.salt(), &b"\xaa\xbb\xcc\xdd"[..]);
+        assert_eq!(n.next_hashed_owner(), &[0x11; 20][..]);
+        assert_eq!(n.type_bit_maps(), &[0x00, 0x01, 0x40][..]);
+        assert!(format!("{n:?}").contains("Nsec3Record"));
+        assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Nsec3(_)));
+    }
+
+    #[cfg(cares1_35)]
+    #[test]
+    fn nsec3param_full_accessors_and_debug() {
+        let rec = build(DnsRecordType::NSEC3PARAM, |rr| {
+            rr.set_u8(DnsRrKey::NSEC3PARAM_HASH_ALGORITHM, 1).unwrap();
+            rr.set_u8(DnsRrKey::NSEC3PARAM_FLAGS, 0).unwrap();
+            rr.set_u16(DnsRrKey::NSEC3PARAM_ITERATIONS, 5).unwrap();
+            rr.set_bin(DnsRrKey::NSEC3PARAM_SALT, b"\x12\x34").unwrap();
+        });
+        let n = first_rr(&rec).as_nsec3param().expect("as_nsec3param");
+        assert_eq!(n.hash_algorithm(), 1);
+        assert_eq!(n.flags(), 0);
+        assert_eq!(n.iterations(), 5);
+        assert_eq!(n.salt(), &b"\x12\x34"[..]);
+        assert!(format!("{n:?}").contains("Nsec3ParamRecord"));
+        assert!(matches!(first_rr(&rec).as_typed(), TypedRr::Nsec3Param(_)));
+    }
+
     #[test]
     fn debug_impls_for_all_simple_wrappers() {
         // Cover Debug for the wrappers whose dedicated tests above don't
@@ -1654,5 +2181,12 @@ mod tests {
         assert!(rr.as_uri().is_none());
         assert!(rr.as_caa().is_none());
         assert!(rr.as_raw_rr().is_none());
+        assert!(rr.as_ds().is_none());
+        assert!(rr.as_sshfp().is_none());
+        assert!(rr.as_rrsig().is_none());
+        assert!(rr.as_nsec().is_none());
+        assert!(rr.as_dnskey().is_none());
+        assert!(rr.as_nsec3().is_none());
+        assert!(rr.as_nsec3param().is_none());
     }
 }

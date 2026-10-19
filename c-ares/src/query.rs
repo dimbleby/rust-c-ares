@@ -9,7 +9,7 @@ pub(crate) unsafe extern "C" fn raw_query_callback<F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,
-    abuf: *const c_uchar,
+    abuf: *mut c_uchar,
     alen: c_int,
 ) where
     F: FnOnce(Result<&[u8]>) + Send + 'static,
@@ -28,7 +28,7 @@ pub(crate) unsafe extern "C" fn query_callback<R, F>(
     arg: *mut c_void,
     status: c_int,
     _timeouts: c_int,
-    abuf: *const c_uchar,
+    abuf: *mut c_uchar,
     alen: c_int,
 ) where
     R: QueryRecord,

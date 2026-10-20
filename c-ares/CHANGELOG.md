@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- set_query_cache_max_ttl now accepts a `Duration`
+
 ## 13.1.0 (20 October 2026)
 
 - c-ares 1.34.9

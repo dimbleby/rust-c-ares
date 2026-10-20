@@ -1,4 +1,4 @@
-use core::ffi::c_int;
+use core::ffi::{c_int, c_uint};
 use std::ffi::CString;
 use std::fmt;
 use std::mem;
@@ -287,12 +287,12 @@ impl Options {
     /// Enable the built-in query cache.  Will cache queries based on the returned TTL in the DNS
     /// message.  Only fully successful and NXDOMAIN query results will be cached.
     ///
-    /// The provided value is the maximum number of seconds a query result may be cached; this will
-    /// override a larger TTL in the response message. This must be a non-zero value otherwise the
-    /// cache will be disabled.
+    /// The provided duration caps the TTL in the response message. Fractional seconds are
+    /// discarded; a duration below one second disables the cache.
     #[cfg(cares1_23)]
-    pub fn set_query_cache_max_ttl(&mut self, qcache_max_ttl: u32) -> &mut Self {
-        self.ares_options.qcache_max_ttl = qcache_max_ttl;
+    pub fn set_query_cache_max_ttl(&mut self, max_ttl: Duration) -> &mut Self {
+        self.ares_options.qcache_max_ttl =
+            c_uint::try_from(max_ttl.as_secs()).unwrap_or(c_uint::MAX);
         self.optmask |= c_ares_sys::ARES_OPT_QUERY_CACHE;
         self
     }
@@ -461,7 +461,7 @@ mod tests {
     #[test]
     fn options_set_query_cache_max_ttl() {
         let mut options = Options::new();
-        options.set_query_cache_max_ttl(3600);
+        options.set_query_cache_max_ttl(Duration::from_hours(1));
     }
 
     #[cfg(cares1_29)]

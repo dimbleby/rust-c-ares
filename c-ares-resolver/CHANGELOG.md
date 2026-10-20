@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 12.1.0 (20 October 2026)
+
+- c-ares 1.34.9
+
 ## 12.0.0 (6 July 2026)
 
 - c-ares 1.34.7

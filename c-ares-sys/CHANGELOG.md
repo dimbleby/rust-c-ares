@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 13.0.0 (20 October 2026)
+
+- c-ares 1.34.9
+  - breaking because of change in mutability of some parameters
+
 ## 12.0.2 (20 July 2026)
 
 - fix vendored cross-compilation for macOS and Windows

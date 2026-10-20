@@ -1,6 +1,7 @@
 use std::fmt;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use crate::error::Error;
 use crate::eventloop::{EventLoop, EventLoopStopper};
@@ -167,12 +168,11 @@ impl Options {
     /// Enable the built-in query cache.  Will cache queries based on the returned TTL in the DNS
     /// message.  Only fully successful and NXDOMAIN query results will be cached.
     ///
-    /// The provided value is the maximum number of seconds a query result may be cached; this will
-    /// override a larger TTL in the response message. This must be a non-zero value otherwise the
-    /// cache will be disabled.
+    /// The provided duration caps the TTL in the response message. Fractional seconds are
+    /// discarded; a duration below one second disables the cache.
     #[cfg(cares1_23)]
-    pub fn set_query_cache_max_ttl(&mut self, qcache_max_ttl: u32) -> &mut Self {
-        self.inner.set_query_cache_max_ttl(qcache_max_ttl);
+    pub fn set_query_cache_max_ttl(&mut self, max_ttl: Duration) -> &mut Self {
+        self.inner.set_query_cache_max_ttl(max_ttl);
         self
     }
 
@@ -916,7 +916,7 @@ mod tests {
     #[cfg(cares1_23)]
     fn options_set_query_cache_max_ttl() {
         let mut options = Options::new();
-        let result = options.set_query_cache_max_ttl(3600);
+        let result = options.set_query_cache_max_ttl(Duration::from_hours(1));
         assert!(std::ptr::eq(result, &raw const options));
     }
 

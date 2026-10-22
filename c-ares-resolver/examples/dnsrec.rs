@@ -156,6 +156,73 @@ mod inner {
                     o.option_count(),
                 );
             }
+            TypedRr::Ds(d) => {
+                println!(
+                    "      DS key_tag={} algorithm={} digest_type={} digest_len={}",
+                    d.key_tag(),
+                    d.algorithm(),
+                    d.digest_type(),
+                    d.digest().len(),
+                );
+            }
+            TypedRr::Sshfp(s) => {
+                println!(
+                    "      SSHFP algorithm={} fp_type={} fingerprint_len={}",
+                    s.algorithm(),
+                    s.fp_type(),
+                    s.fingerprint().len(),
+                );
+            }
+            TypedRr::Rrsig(r) => {
+                println!(
+                    "      RRSIG type_covered={} algorithm={} labels={} original_ttl={} expiration={} inception={} key_tag={} signers_name={:?} signature_len={}",
+                    r.type_covered(),
+                    r.algorithm(),
+                    r.labels(),
+                    r.original_ttl(),
+                    r.expiration(),
+                    r.inception(),
+                    r.key_tag(),
+                    r.signers_name(),
+                    r.signature().len(),
+                );
+            }
+            TypedRr::Nsec(n) => {
+                println!(
+                    "      NSEC next_domain={:?} type_bit_maps_len={}",
+                    n.next_domain(),
+                    n.type_bit_maps().len(),
+                );
+            }
+            TypedRr::Dnskey(d) => {
+                println!(
+                    "      DNSKEY flags={:#06x} protocol={} algorithm={} public_key_len={}",
+                    d.flags(),
+                    d.protocol(),
+                    d.algorithm(),
+                    d.public_key().len(),
+                );
+            }
+            TypedRr::Nsec3(n) => {
+                println!(
+                    "      NSEC3 hash_algorithm={} flags={:#04x} iterations={} salt_len={} next_hashed_owner_len={} type_bit_maps_len={}",
+                    n.hash_algorithm(),
+                    n.flags(),
+                    n.iterations(),
+                    n.salt().len(),
+                    n.next_hashed_owner().len(),
+                    n.type_bit_maps().len(),
+                );
+            }
+            TypedRr::Nsec3Param(n) => {
+                println!(
+                    "      NSEC3PARAM hash_algorithm={} flags={:#04x} iterations={} salt_len={}",
+                    n.hash_algorithm(),
+                    n.flags(),
+                    n.iterations(),
+                    n.salt().len(),
+                );
+            }
             TypedRr::RawRr(r) => {
                 println!(
                     "      RAW_RR raw_type={} data_len={}",

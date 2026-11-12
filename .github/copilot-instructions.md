@@ -41,6 +41,12 @@ Checkout must include submodules (`git clone --recurse-submodules` or `git submo
 - **CI does not use `--features vendored`** — CI tests against the system `libcares`, so version-gated code may not be exercised there. Always test locally with `--features vendored`.
 - **Shared workspace dependencies** — `c-types` and `itertools` are declared in the root `Cargo.toml` under `[workspace.dependencies]` and referenced with `workspace = true` in each crate's `Cargo.toml`.
 
+## GitHub Actions
+
+Use full version tags in workflows and run `gh actions-lock` after changing
+actions. Commit `.github/workflows/actions.lock`; do not edit it by hand.
+Verify with `gh actions-lock --verify`.
+
 ## Architecture
 
 This is a Rust workspace with three crates forming a layered FFI wrapper around the [c-ares](https://c-ares.org/) C library:

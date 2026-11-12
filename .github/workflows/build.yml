@@ -18,6 +18,25 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  actions-lock:
+    name: Verify action lockfile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install actions-lock
+        run: gh extension install github/gh-actions-lock --pin v0.4.1
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Verify action lockfile
+        run: gh actions-lock --verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   test:
     name: Test
     runs-on: ${{ matrix.os }}
@@ -61,7 +80,7 @@ jobs:
             rust: stable
             target: x86_64-pc-windows-msvc
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
           submodules: true
@@ -115,7 +134,7 @@ jobs:
           - windows-latest
           - macos-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
           submodules: true
@@ -130,14 +149,14 @@ jobs:
     name: Coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
           submodules: true
       - name: Install Rust
         run: rustup update stable --no-self-update && rustup default stable
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
+        uses: taiki-e/install-action@v2.87.29
         with:
           tool: cargo-llvm-cov
       - name: Generate coverage report

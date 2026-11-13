@@ -1,5 +1,8 @@
 use std::path::PathBuf;
 
+#[cfg(feature = "vendored")]
+use {pkg_config as _, vcpkg as _};
+
 #[cfg(feature = "maybe-vendored")]
 mod vendored;
 

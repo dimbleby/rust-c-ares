@@ -24,7 +24,7 @@ features = ["vendored"]
 
 [build-dependencies]
 cc = "1.0.61"
-fs_extra = "1.3"
+fs_extra = { version = "1.3", optional = true }
 pkg-config = "0.3.9"
 vcpkg = "0.2.8"
 cmake = { version = "0.1", optional = true }
@@ -38,6 +38,6 @@ jni-sys = "0.4"
 
 [features]
 default = ["maybe-vendored"]
-maybe-vendored = []
+maybe-vendored = ["dep:fs_extra"]
 vendored = ["maybe-vendored"]
 build-cmake = ["cmake"]

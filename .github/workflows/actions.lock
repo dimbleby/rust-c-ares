@@ -5,7 +5,7 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/build.yml':
         - 'actions/checkout@v7.0.1'
-        - 'taiki-e/install-action@v2.87.29'
+        - 'taiki-e/install-action@v2.90.4'
     '.github/workflows/release.yml':
         - 'actions/checkout@v7.0.1'
         - 'rust-lang/crates-io-auth-action@v1.0.6'
@@ -20,8 +20,8 @@ dependencies:
         commit: 'sha1-3268eb413133e2960fa4ae0e963ca76380c54cd9'
         owner_id: 5430905
         repo_id: 1008931044
-    'taiki-e/install-action@v2.87.29':
-        ref: 'v2.87.29'
-        commit: 'sha1-8cca0918f8471c33515202b73f56ab27f2bed283'
+    'taiki-e/install-action@v2.90.4':
+        ref: 'v2.90.4'
+        commit: 'sha1-4a76afe23f9e08d2d9550fb56e556444e8611d21'
         owner_id: 43724913
         repo_id: 442947557

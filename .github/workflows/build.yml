@@ -156,7 +156,7 @@ jobs:
       - name: Install Rust
         run: rustup update stable --no-self-update && rustup default stable
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@v2.87.29
+        uses: taiki-e/install-action@v2.90.4
         with:
           tool: cargo-llvm-cov
       - name: Generate coverage report
